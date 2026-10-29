@@ -63,6 +63,7 @@ import { BrowseItemFilters } from "./BrowseItemFilters";
 import { useUserFavorites } from "@/hooks/useUserFavorites";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { favoriteCatalogItems } from "@/utils/items/favorites";
+import { useSearchTracking } from "@/hooks/useSearchTracking";
 import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 
 type TradeSide = "offering" | "requesting";
@@ -408,6 +409,18 @@ export default function TradeItemPickerV2({
     validValueSorts,
     favoriteIds,
   ]);
+
+  useSearchTracking(
+    "trade_picker",
+    searchQuery,
+    useRemoteCatalog
+      ? catalog.data?.total
+      : useCatalogApi &&
+          favoritesSelected &&
+          (favoritesLoading || favoritesError)
+        ? undefined
+        : filteredItems.length,
+  );
 
   const totalPages = useRemoteCatalog
     ? Math.max(1, catalog.data?.total_pages ?? 1)

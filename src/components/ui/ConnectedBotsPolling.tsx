@@ -1,5 +1,7 @@
 "use client";
 
+import { trackWebEvent } from "@/utils/analytics/web";
+
 import { useState } from "react";
 import { useBotsPollingQuery } from "@/hooks/useBotsPollingQuery";
 import {
@@ -558,6 +560,9 @@ function BotStatusCard({
                     data-rybbit-prop-tracker="Connected_Bots"
                     data-rybbit-prop-term={displayName}
                     onClick={() => {
+                      trackWebEvent("server_join_click", {
+                        source: "connected_bots",
+                      });
                       setIsJoining(true);
                       const joiningToastId = toast.loading("Joining server...");
                       window.setTimeout(() => {

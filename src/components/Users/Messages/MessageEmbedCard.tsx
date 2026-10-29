@@ -18,6 +18,7 @@ import {
   type MessageEmbedMetadata,
 } from "@/utils/messages/invites";
 import type { Message } from "@/utils/messages/types";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { SUPPORTER_CONFETTI_COLORS } from "@/utils/ui/supporterCelebration";
 
 function VipServerJoinAction({ serverId }: { serverId: number }) {
@@ -56,7 +57,14 @@ function VipServerJoinAction({ serverId }: { serverId: number }) {
     );
   return (
     <Button asChild size="sm">
-      <a href={link} target="_blank" rel="noopener noreferrer">
+      <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() =>
+          trackWebEvent("server_join_click", { source: "vip_invite" })
+        }
+      >
         <Icon icon="heroicons:arrow-top-right-on-square" className="h-4 w-4" />
         Join Server
       </a>
@@ -180,6 +188,7 @@ export function MessageEmbedCard({
               disabled={isJoining}
               onClick={() => {
                 if (joinTimeoutRef.current !== null) return;
+                trackWebEvent("server_join_click", { source: "game_invite" });
                 setIsJoining(true);
                 joinTimeoutRef.current = window.setTimeout(() => {
                   joinTimeoutRef.current = null;

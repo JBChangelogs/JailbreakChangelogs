@@ -10,6 +10,7 @@ import {
   type CSSProperties,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { trackWebEvent } from "@/utils/analytics/web";
 import AirdropList from "@/components/RobberyTracker/AirdropList";
 import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { useExperimentAccess } from "@/hooks/useExperimentAccess";
@@ -276,6 +277,7 @@ function RobberyTrackerContent() {
 
   const handleJoin = useCallback(
     (report: TrackerJoinReport) => {
+      trackWebEvent("server_join_click", { source: "tracker" });
       reportJoin(report);
       setRecentJoin({
         id: crypto.randomUUID(),

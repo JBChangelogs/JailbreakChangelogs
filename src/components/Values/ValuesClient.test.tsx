@@ -137,6 +137,8 @@ function harness(startPage = 1) {
               appliedMaxValue: 50_000_000,
             }),
           };
+        if (name === "@/hooks/useSearchTracking")
+          return { useSearchTracking: () => {} };
         if (name === "@/hooks/useItemSortGroups")
           return { useItemSortGroups: () => [] };
         if (name === "./valuesFilterOptions")

@@ -1,5 +1,7 @@
 "use client";
 
+import { trackWebEvent } from "@/utils/analytics/web";
+
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TradeItem } from "@/types/trading";
@@ -713,6 +715,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     } else {
       setRequestingItems((prev) => [...prev, itemWithInstance]);
     }
+    trackWebEvent("trade_item_add", {
+      side,
+      method: "click",
+      source: itemsInputMode === "inventory" ? "inventory" : "catalog",
+    });
     return true;
   };
 

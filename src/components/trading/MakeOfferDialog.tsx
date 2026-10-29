@@ -312,6 +312,15 @@ export function MakeOfferDialog({
 
     if (side === "offering") setOfferingItems((prev) => [...prev, item]);
     else setRequestingItems((prev) => [...prev, item]);
+    trackWebEvent("trade_item_add", {
+      side,
+      method: "click",
+      source: isCustomTradeItem(item)
+        ? "custom"
+        : itemsInputMode === "inventory"
+          ? "inventory"
+          : "catalog",
+    });
     return true;
   };
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { trackWebEvent } from "@/utils/analytics/web";
+
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import React from "react";
@@ -190,6 +192,9 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                 <Button asChild variant="default" size="sm">
                   <a
                     href={server.link}
+                    onClick={() =>
+                      trackWebEvent("server_join_click", { source: "profile" })
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >

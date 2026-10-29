@@ -591,6 +591,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const handleAddItem = (
     item: TradeItem,
     side: "offering" | "requesting",
+    method: "click" | "drag" = "click",
   ): boolean => {
     const currentItems = side === "offering" ? offeringItems : requestingItems;
     const itemIdentifier = getTradeItemIdentifier(item);
@@ -614,6 +615,15 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       saveItemsToLocalStorage(offeringItems, newRequestingItems, tradeNote);
       syncItemsToPreference(offeringItems, newRequestingItems);
     }
+    trackWebEvent("trade_item_add", {
+      side,
+      method,
+      source: isCustomTradeItem(item)
+        ? "custom"
+        : isInventoryMode
+          ? "inventory"
+          : "catalog",
+    });
     return true;
   };
 
@@ -651,7 +661,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
 
     if (side) {
-      handleAddItem(item, side);
+      handleAddItem(item, side, "drag");
     }
   };
 

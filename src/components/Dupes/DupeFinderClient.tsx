@@ -46,9 +46,15 @@ export default function DupeFinderClient({
   useEffect(() => {
     if (!robloxId || externalIsLoading || (!initialData && !error)) return;
     const failed = Boolean(error) && !isUserFound;
-    const key = `${robloxId}:${failed}:${resultCount}`;
+    const queryLength = (originalSearchTerm || robloxId).trim().length;
+    const key = `${robloxId}:${queryLength}:${failed}:${resultCount}`;
     if (reportedResult.current === key) return;
     reportedResult.current = key;
+    trackWebEvent("search", {
+      surface: "dupefinder",
+      query_len: queryLength,
+      results: failed ? 0 : resultCount,
+    });
     if (failed) {
       trackWebEvent("dupe_search_failed", { code: "lookup_failed" });
     } else {
@@ -61,6 +67,7 @@ export default function DupeFinderClient({
     isUserFound,
     externalIsLoading,
     resultCount,
+    originalSearchTerm,
   ]);
 
   // Fetch user info for the error/empty states

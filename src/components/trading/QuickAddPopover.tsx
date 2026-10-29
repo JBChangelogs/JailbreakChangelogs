@@ -34,6 +34,7 @@ import {
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 import { usePartialItemFields } from "@/hooks/usePartialItems";
+import { useSearchTracking } from "@/hooks/useSearchTracking";
 import { TRADE_ITEM_FIELDS } from "@/utils/api/fetchTradeItemsByIds";
 
 interface QuickAddPopoverProps {
@@ -116,6 +117,12 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
       getDemand: (item) => item.demand,
     });
   }, [visibleItems, searchQuery, filterSort]);
+
+  useSearchTracking(
+    "trade_picker",
+    open ? searchQuery : "",
+    useCatalogApi && !catalog.data ? undefined : results.length,
+  );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({

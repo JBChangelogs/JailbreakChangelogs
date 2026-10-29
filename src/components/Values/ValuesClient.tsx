@@ -38,6 +38,7 @@ import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
 import { filterOptions, getServerFilters } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
+import { useSearchTracking } from "@/hooks/useSearchTracking";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 import RelatedValuePages from "./RelatedValuePages";
 import LatestItemUpdate, { LatestItemUpdateSkeleton } from "./LatestItemUpdate";
@@ -369,6 +370,17 @@ export default function ValuesClient() {
       ? favoriteWindow.size
       : Math.max(1, page) * PAGE_SIZE;
   const data = catalogQuery.data?.pages.at(-1);
+  useSearchTracking(
+    "values",
+    searchQuery,
+    favoritesSelected
+      ? favoritesQuery.isPending || favoritesQuery.isError
+        ? undefined
+        : matchingFavorites.length
+      : catalogQuery.isSuccess
+        ? data?.total
+        : undefined,
+  );
   useEffect(() => {
     if (page < 1) {
       void setSearchParams({ page: null });

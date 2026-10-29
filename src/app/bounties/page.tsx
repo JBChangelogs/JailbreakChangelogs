@@ -1,5 +1,6 @@
 "use client";
 
+import { trackWebEvent } from "@/utils/analytics/web";
 import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
 
 import {
@@ -254,6 +255,7 @@ function BountyTrackerContent() {
   } = useRobberyTrackerBountiesWebSocket(true, user?.id);
 
   const handleJoin = (report: TrackerJoinReport) => {
+    trackWebEvent("server_join_click", { source: "tracker" });
     reportJoin(report);
     setRecentJoin({
       id: crypto.randomUUID(),

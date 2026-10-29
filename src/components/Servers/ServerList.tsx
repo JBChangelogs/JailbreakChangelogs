@@ -1,5 +1,7 @@
 "use client";
 
+import { trackWebEvent } from "@/utils/analytics/web";
+
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { parseSortGroups } from "@/utils/api/sortGroups";
 import React from "react";
@@ -788,6 +790,11 @@ const ServerList: React.FC = () => {
                 >
                   <a
                     href={server.link}
+                    onClick={() =>
+                      trackWebEvent("server_join_click", {
+                        source: "server_list",
+                      })
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >

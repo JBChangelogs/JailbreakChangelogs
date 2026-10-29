@@ -171,6 +171,11 @@ export default function DupeSearchInput({
       if (resolvedId) {
         router.push(`/dupes/${input}`);
       } else {
+        trackWebEvent("search", {
+          surface: "dupefinder",
+          query_len: input.trim().length,
+          results: 0,
+        });
         trackWebEvent("dupe_search_failed", { code: "user_not_found" });
         setIsSearching(false);
         const truncated =
@@ -180,6 +185,11 @@ export default function DupeSearchInput({
         setSearchError(msg);
       }
     } catch (err) {
+      trackWebEvent("search", {
+        surface: "dupefinder",
+        query_len: input.trim().length,
+        results: 0,
+      });
       trackWebEvent("dupe_search_failed", {
         code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
       });

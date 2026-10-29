@@ -33,6 +33,7 @@ test("received cards join valid games and VIP servers, handle missing servers, a
   let timeoutMs = 0;
   let cleared = false;
   const navigations: string[] = [];
+  const events: unknown[] = [];
   const exports = {} as { MessageEmbedCard: (props: unknown) => Node };
   const jsx = (type: unknown, props: Record<string, unknown>): Node =>
     typeof type === "function" ? type(props) : { type, props };
@@ -94,6 +95,11 @@ test("received cards join valid games and VIP servers, handle missing servers, a
           };
         if (name === "next/image")
           return { default: "image", __esModule: true };
+        if (name === "@/utils/analytics/web")
+          return {
+            trackWebEvent: (name: string, props: unknown) =>
+              events.push({ name, props }),
+          };
         if (name === "@/utils/messages/invites")
           return {
             buildRobloxGameLink,
@@ -160,6 +166,13 @@ test("received cards join valid games and VIP servers, handle missing servers, a
   expect(render(vip).find((node) => node.type === "a")?.props.href).toBe(
     server!.link,
   );
+  (
+    render(vip).find((node) => node.type === "a")!.props.onClick as () => void
+  )();
+  expect(events).toEqual([
+    { name: "server_join_click", props: { source: "vip_invite" } },
+  ]);
+  events.length = 0;
   server = null;
   expect(
     render(vip).some(
@@ -215,6 +228,9 @@ test("received cards join valid games and VIP servers, handle missing servers, a
   click();
   click();
   expect(navigations).toEqual([buildRobloxGameLink(game)]);
+  expect(events).toEqual([
+    { name: "server_join_click", props: { source: "game_invite" } },
+  ]);
   const joining = render(game).find((node) => node.type === "button")!;
   expect(joining.props.disabled).toBe(true);
   expect(joining.props.children as unknown[]).toContain("Joining...");

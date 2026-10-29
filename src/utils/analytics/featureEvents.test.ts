@@ -164,6 +164,7 @@ test("result events count empty results as success and suppress duplicate effect
     for (const failed of [false, true]) {
       const app = setupScope({
         robloxId: "123",
+        originalSearchTerm: "private username",
         initialData: null,
         error: "private",
         isUserFound: !failed,
@@ -189,6 +190,14 @@ test("result events count empty results as success and suppress duplicate effect
       effect();
       effect();
       expect(app.events).toEqual([
+        ...(feature === "dupe"
+          ? [
+              {
+                name: "search",
+                props: { surface: "dupefinder", query_len: 16, results: 0 },
+              },
+            ]
+          : []),
         {
           name: `${feature}_search_${failed ? "failed" : "result"}`,
           props: failed ? { code: "lookup_failed" } : { result_count: 0 },
@@ -357,3 +366,86 @@ test("inventory requests report disabled scanning and missing users", () => {
     expect(connections).toBe(code ? 0 : 1);
   }
 });
+
+test("item additions report app fields in each shared handler and ignore rejected additions", () => {
+  for (const file of [
+    "components/Values/Calculator/CalculatorForm.tsx",
+    "components/trading/TradeAdForm.tsx",
+    "components/trading/MakeOfferDialog.tsx",
+  ]) {
+    for (const inventory of [false, true]) {
+      const additionScope = {
+        itemsInputMode: inventory ? "inventory" : "values",
+        isInventoryMode: inventory,
+        localSyncPendingRef: { current: false },
+        localEditRevisionRef: { current: 0 },
+        offeringItems: [],
+        requestingItems: [],
+        setOfferingItems: () => {},
+        setRequestingItems: () => {},
+        getTradeItemIdentifier: () => "id",
+        isCustomTradeItem: () => false,
+        customTradeTypeSet: new Set(),
+        tradeNote: "private note",
+        saveItemsToLocalStorage: () => {},
+        syncItemsToPreference: () => {},
+      };
+      const app = setupScope(additionScope);
+      const add = loadCallback(file, "handleAddItem", app.scope);
+      expect(add({ id: 123, name: "private item" }, "requesting")).toBe(true);
+      expect(app.events).toEqual([
+        {
+          name: "trade_item_add",
+          props: {
+            side: "requesting",
+            method: "click",
+            source: inventory ? "inventory" : "catalog",
+          },
+        },
+      ]);
+      if (file.includes("CalculatorForm")) continue;
+      const rejected = setupScope({
+        ...additionScope,
+        isCustomTradeItem: () => true,
+        customTradeTypeSet: new Set(["id"]),
+        hasCustomOnSide: () => true,
+      });
+      expect(
+        loadCallback(file, "handleAddItem", rejected.scope)({}, "offering"),
+      ).toBe(false);
+      expect(rejected.events).toEqual([]);
+      const custom = setupScope({
+        ...additionScope,
+        isCustomTradeItem: () => true,
+      });
+      loadCallback(file, "handleAddItem", custom.scope)({}, "offering");
+      expect(custom.events[0].props?.source).toBe("custom");
+      if (file.includes("TradeAdForm")) {
+        add({}, "offering", "drag");
+        expect(app.events[1].props?.method).toBe("drag");
+      }
+    }
+  }
+});
+
+for (const tracker of ["robberies", "bounties"]) {
+  test(`${tracker} joins report once in the shared handler`, () => {
+    const reports: unknown[] = [];
+    const app = setupScope({
+      reportJoin: (report: unknown) => reports.push(report),
+      setRecentJoin: () => {},
+      crypto: { randomUUID: () => "uuid" },
+    });
+    const report = {
+      server_id: "private server",
+      tracker_type: "robbery",
+      marker_name: "Bank",
+      display_name: "Bank",
+    };
+    loadCallback(`app/${tracker}/page.tsx`, "handleJoin", app.scope)(report);
+    expect(reports).toEqual([report]);
+    expect(app.events).toEqual([
+      { name: "server_join_click", props: { source: "tracker" } },
+    ]);
+  });
+}
