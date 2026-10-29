@@ -20,6 +20,8 @@ import type { CommentData } from "@/utils/api/api";
 import type { ChangelogCommentsProps } from "./commentTypes";
 import { isCommentIdentityHidden } from "./commentUtils";
 
+const AUTO_LOAD_PAGES = 3;
+
 export default function ChangelogComments(props: ChangelogCommentsProps) {
   const state = useCommentState(props);
   return (
@@ -43,6 +45,7 @@ function CommentsLayout() {
     type,
     totalComments,
     hasMore,
+    loadedPageCount,
     isFetchingMore,
     loadMoreError,
     loadMore,
@@ -64,6 +67,8 @@ function CommentsLayout() {
   } = useCommentsContext();
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  // Long threads stop auto-loading so the rest of the page stays reachable.
+  const autoLoad = loadedPageCount < AUTO_LOAD_PAGES;
   const commentsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +76,7 @@ function CommentsLayout() {
     if (
       !target ||
       !hasMore ||
+      !autoLoad ||
       isFetchingMore ||
       loadMoreError ||
       typeof IntersectionObserver === "undefined"
@@ -84,7 +90,7 @@ function CommentsLayout() {
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [hasMore, isFetchingMore, loadMoreError, loadMore]);
+  }, [hasMore, autoLoad, isFetchingMore, loadMoreError, loadMore]);
 
   useEffect(() => {
     const header = document.querySelector("#comments-header");
@@ -213,7 +219,15 @@ function CommentsLayout() {
                 aria-live="polite"
               >
                 {/* Placeholders keep a fast scroll from landing on the footer mid-load */}
-                {hasMore && !loadMoreError && <CommentSkeletonList count={6} />}
+                {hasMore &&
+                  !loadMoreError &&
+                  (autoLoad || isFetchingMore ? (
+                    <CommentSkeletonList count={6} />
+                  ) : (
+                    <div className="mt-3 flex justify-center">
+                      <Button onClick={loadMore}>Load more comments</Button>
+                    </div>
+                  ))}
                 {loadMoreError && (
                   <div className="mt-3 flex flex-col items-center gap-3">
                     <p className="text-secondary-text text-sm">

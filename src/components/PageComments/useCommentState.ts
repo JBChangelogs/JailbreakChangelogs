@@ -1834,6 +1834,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     reactionBan,
     totalComments,
     hasMore,
+    loadedPageCount: loadedPages.length,
     isFetchingMore,
     loadMoreError,
     loadMore,
