@@ -35,7 +35,7 @@ const displayName = (user: FriendUser) =>
     : user.username;
 
 /** Avatar and names (opening their card), with `children` on the right. */
-function FriendRow({
+export function FriendRow({
   user,
   detail,
   children,
@@ -88,7 +88,7 @@ function FriendRow({
   );
 }
 
-function EmptyState({ icon, text }: { icon: string; text: string }) {
+export function EmptyState({ icon, text }: { icon: string; text: string }) {
   return (
     <div className="text-secondary-text flex flex-col items-center gap-2 py-10 text-center text-sm">
       <Icon icon={icon} className="text-tertiary-text h-10 w-10" />

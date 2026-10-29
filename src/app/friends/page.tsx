@@ -1,5 +1,6 @@
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import type { Metadata } from "next";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { FriendsPage } from "@/components/Users/Friends";
 
 export const metadata: Metadata = withDiscordEmbed(
@@ -13,7 +14,8 @@ export const metadata: Metadata = withDiscordEmbed(
 
 export default function Page() {
   return (
-    <main className="container mx-auto min-h-screen px-4 py-6">
+    <main className="container mx-auto min-h-screen px-4 pb-6">
+      <Breadcrumb containerClassName="py-4" />
       <FriendsPage />
     </main>
   );

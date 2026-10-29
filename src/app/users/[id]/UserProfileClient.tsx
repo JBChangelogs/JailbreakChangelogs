@@ -22,7 +22,6 @@ import { Banner } from "@/components/Profile/Banner";
 import { ProfileBackground } from "@/components/Profile/ProfileBackground";
 import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
-import dynamic from "next/dynamic";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
@@ -59,19 +58,6 @@ import ProfileIdentityBar from "@/components/Profile/ProfileIdentityBar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { profileSocialQueryOptions } from "@/utils/api/profileSocialQueries";
 import type { ProfileDataResult } from "@/services/profileDataService";
-const FollowersModal = dynamic(
-  () => import("@/components/Users/FollowersModal"),
-  {
-    ssr: false,
-  },
-);
-
-const FollowingModal = dynamic(
-  () => import("@/components/Users/FollowingModal"),
-  {
-    ssr: false,
-  },
-);
 import type { UserFlag } from "@/types/auth";
 
 const log = createLogger("UI");
@@ -149,8 +135,6 @@ export default function UserProfileClient({
   const bio = profileData?.bio ?? null;
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
   const [isBlockingAction, setIsBlockingAction] = useState(false);
-  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
-  const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
   const [isReportDescriptionOpen, setIsReportDescriptionOpen] = useState(false);
   const [reportDescriptionReason, setReportDescriptionReason] = useState("");
   const [isSubmittingDescriptionReport, setIsSubmittingDescriptionReport] =
@@ -910,32 +894,30 @@ export default function UserProfileClient({
                     <div className="col-span-2 flex flex-col items-start gap-3 md:mt-2">
                       {/* Follower/Following Counts */}
                       <div className="flex flex-wrap items-center gap-6">
-                        <button
-                          onClick={() =>
-                            followerCount > 0 && setIsFollowersModalOpen(true)
-                          }
-                          className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followerCount > 0 ? "cursor-pointer" : "cursor-default"}`}
+                        <Link
+                          href={`/users/${user.id}/followers`}
+                          prefetch={false}
+                          className="group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4"
                         >
                           <span
-                            className={`text-primary-text text-sm font-semibold tabular-nums ${followerCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            className={`text-primary-text group-hover:text-link-hover text-sm font-semibold tabular-nums transition-colors`}
                           >
                             {followerCount}
                           </span>{" "}
                           {followerCount === 1 ? "follower" : "followers"}
-                        </button>
-                        <button
-                          onClick={() =>
-                            followingCount > 0 && setIsFollowingModalOpen(true)
-                          }
-                          className={`group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4 ${followingCount > 0 ? "cursor-pointer" : "cursor-default"}`}
+                        </Link>
+                        <Link
+                          href={`/users/${user.id}/following`}
+                          prefetch={false}
+                          className="group text-secondary-text focus-visible:outline-border-focus inline-flex items-baseline gap-2 rounded-sm text-sm focus-visible:outline-2 focus-visible:outline-offset-4"
                         >
                           <span
-                            className={`text-primary-text text-sm font-semibold tabular-nums ${followingCount > 0 ? "group-hover:text-link-hover transition-colors" : ""}`}
+                            className={`text-primary-text group-hover:text-link-hover text-sm font-semibold tabular-nums transition-colors`}
                           >
                             {followingCount}
                           </span>{" "}
                           following
-                        </button>
+                        </Link>
                         <MutualFriendsCount userId={user.id} />
                       </div>
                     </div>
@@ -1300,46 +1282,6 @@ export default function UserProfileClient({
           />
         </div>
       </div>
-      <FollowersModal
-        isOpen={isFollowersModalOpen}
-        onClose={() => setIsFollowersModalOpen(false)}
-        userId={user.id}
-        isOwnProfile={user.id === currentUserId}
-        currentUserId={currentUserId}
-        onFollowChange={(type) => {
-          onProfileDataChange((data) => ({
-            ...data,
-            followingCount: Math.max(
-              0,
-              data.followingCount + (type === "add" ? 1 : -1),
-            ),
-          }));
-        }}
-        onCountUpdate={(count) => {
-          onProfileDataChange((data) => ({ ...data, followerCount: count }));
-        }}
-        userData={user}
-      />
-      <FollowingModal
-        isOpen={isFollowingModalOpen}
-        onClose={() => setIsFollowingModalOpen(false)}
-        userId={user.id}
-        isOwnProfile={user.id === currentUserId}
-        currentUserId={currentUserId}
-        onFollowChange={(isFollowing) => {
-          onProfileDataChange((data) => ({
-            ...data,
-            followingCount: Math.max(
-              0,
-              data.followingCount + (isFollowing ? 1 : -1),
-            ),
-          }));
-        }}
-        onCountUpdate={(count) => {
-          onProfileDataChange((data) => ({ ...data, followingCount: count }));
-        }}
-        userData={user}
-      />
       <ConfirmDialog
         isOpen={isReportUserOpen}
         onClose={() => {

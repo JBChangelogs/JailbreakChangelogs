@@ -49,9 +49,9 @@ export default function Breadcrumb({
   const pathname = usePathname();
   const wrapperClassName = containerClassName ?? "container mx-auto px-4 py-4";
 
-  // Check if we're on a user profile page
+  // Check if we're on a user profile page (or one of its subpages)
   const isUserProfilePage =
-    pathname.startsWith("/users/") && pathname.split("/").length === 3;
+    pathname.startsWith("/users/") && pathname.split("/").length >= 3;
   const userId = isUserProfilePage ? pathname.split("/")[2] : null;
 
   // Derive username directly from userData during render
