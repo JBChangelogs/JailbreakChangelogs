@@ -21,7 +21,7 @@ export function useExperimentAccess(
   );
   const access = useQuery({
     queryKey: ["experiment-access", userId, overrides],
-    enabled: enabled && Boolean(userId),
+    enabled,
     queryFn: async ({ signal }) => {
       const { url, headers } = buildApiFetchRequest(
         process.env.NEXT_PUBLIC_API_URL,
@@ -40,9 +40,6 @@ export function useExperimentAccess(
     retry: false,
   });
   return (
-    enabled &&
-    Boolean(userId) &&
-    !access.isError &&
-    access.data?.[experimentKey] === "treatment"
+    enabled && !access.isError && access.data?.[experimentKey] === "treatment"
   );
 }

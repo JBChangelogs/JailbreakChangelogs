@@ -519,7 +519,8 @@ export default function Header({
   const searchEnabled = useExperimentAccess(
     "global_search",
     userData?.id,
-    isDesktop && showAuth,
+    // Guests too: the API can give them a logged_out_variant.
+    isDesktop && mounted && !isLoading,
   );
   useEffect(() => {
     if (!searchEnabled) {

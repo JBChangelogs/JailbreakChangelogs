@@ -4,7 +4,7 @@ import { runInNewContext } from "node:vm";
 import { ModuleKind, ScriptTarget, transpileModule } from "typescript";
 import { parseExperimentsResponse } from "@/utils/api/experiments";
 
-test("experiment gates require treatment, isolate accounts and overrides, and deny guests and failures", async () => {
+test("experiment gates require treatment, isolate accounts and overrides, check guests, and deny failures", async () => {
   type Options = {
     enabled: boolean;
     queryKey: unknown[];
@@ -87,11 +87,15 @@ test("experiment gates require treatment, isolate accounts and overrides, and de
   data = { airdrop_tracker: "control" };
   expect(allowed("airdrop_tracker", "123", true)).toBe(false);
   expect(allowed("airdrop_tracker", undefined, true)).toBe(false);
+  data = { airdrop_tracker: "treatment" };
+  expect(allowed("airdrop_tracker", undefined, true)).toBe(true);
+  data = { airdrop_tracker: "control" };
   expect(allowed("airdrop_tracker", "123", false)).toBe(false);
   allowed("global_search", "123", true);
   expect(options.queryKey).toEqual(["experiment-access", "123", ""]);
-  expect(allowed("global_search", undefined, true)).toBe(false);
-  expect(options.enabled).toBe(false);
+  allowed("global_search", undefined, true);
+  expect(options.enabled).toBe(true);
+  expect(options.queryKey).toEqual(["experiment-access", undefined, ""]);
   expect(allowed("global_search", "123", false)).toBe(false);
   expect(options.enabled).toBe(false);
   overrides = "global_search=control";
