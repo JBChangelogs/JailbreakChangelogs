@@ -18,6 +18,7 @@ export type OmniItem = {
   type: string;
   cash_value: string | null;
   season?: number | null;
+  level?: number | string | null;
   /** Changelogs that mention it, newest first (or `changelog_ids`, older API). */
   changelogs?: OmniChangelogLink[];
   changelog_ids?: number[];

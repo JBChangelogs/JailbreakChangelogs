@@ -15,7 +15,11 @@ import {
   formatSettingName,
 } from "@/config/settings";
 
-export type SearchCatalogItem = PartialItem & { cash_value: string | null };
+export type SearchCatalogItem = PartialItem & {
+  cash_value: string | null;
+  season?: number | null;
+  level?: number | string | null;
+};
 
 export const GLOBAL_SEARCH_GROUP_LIMIT = 5;
 
@@ -404,6 +408,8 @@ function toResult(result: OmniResult, group: string): GlobalSearchResult[] {
             name: result.name,
             type: result.type,
             cash_value: result.cash_value,
+            season: result.season,
+            level: result.level,
           },
           ...changelogShortcuts([
             ["Latest changelog", latestChangelog(result)],

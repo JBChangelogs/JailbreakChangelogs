@@ -4,6 +4,7 @@ import {
   getGlobalCheckQuery,
   getGlobalUserQuery,
   parseSearchFilter,
+  type GlobalSearchResult,
 } from "@/utils/ui/globalSearch";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -27,10 +28,11 @@ function setupSearch() {
   const events: string[] = [];
   const clicks: string[] = [];
   const input = { focus: () => focuses++ };
-  const results = [0, 1, 2].map((id) => ({
+  const results: GlobalSearchResult[] = [0, 1, 2].map((id) => ({
     group: "Pages",
     href: `/page-${id}`,
     title: `Page ${id}`,
+    description: "",
   }));
   const query = { data: [], isPending: false, isError: false };
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
@@ -87,6 +89,15 @@ function setupSearch() {
           };
         if (name === "@/utils/api/omniSearch")
           return { SearchRateLimitError: class extends Error {} };
+        if (name === "@/utils/items/categoryIcons")
+          return {
+            CategoryIconBadge: "CategoryIconBadge",
+            getCategoryColor: () => "#c82c2c",
+          };
+        if (name === "@/utils/ui/images")
+          return { getItemImagePath: () => "/item.webp" };
+        if (name === "@/utils/trading/values")
+          return { formatFullValue: () => "N/A" };
         if (name === "@tanstack/react-query")
           return {
             useQueryClient: () => ({ invalidateQueries: () => {} }),
@@ -218,6 +229,46 @@ function textContent(value: unknown): string {
     return textContent((value as Node).props.children);
   return String(value);
 }
+
+test("item search rows pass unlock metadata and show the item type icon", () => {
+  const search = setupSearch();
+  search.results.splice(0, search.results.length, {
+    group: "Items",
+    title: "Torpedo",
+    description: "Vehicle · Season 2",
+    item: {
+      id: 1,
+      name: "Torpedo",
+      type: "Vehicle",
+      cash_value: null,
+      season: 2,
+      level: "2%",
+    },
+  });
+  const nodes: Node[] = [];
+  const visit = (value: unknown) => {
+    if (Array.isArray(value)) return value.forEach(visit);
+    if (!value || typeof value !== "object") return;
+    const node = value as Node;
+    nodes.push(node);
+    visit(node.props.children);
+  };
+  visit(search.render());
+  expect(
+    nodes.find((node) => node.type === "ItemUnlockBadges")?.props,
+  ).toMatchObject({
+    season: 2,
+    level: "2%",
+    className: "",
+  });
+  expect(
+    nodes.find((node) => node.type === "CategoryIconBadge")?.props,
+  ).toMatchObject({
+    type: "Vehicle",
+    preferItemType: true,
+    withContainer: false,
+  });
+});
 
 test("bare @ shows account guidance even while unrelated catalogs load or fail", () => {
   const search = setupSearch();

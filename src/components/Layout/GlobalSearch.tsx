@@ -63,6 +63,11 @@ import {
   type OmniTheme,
 } from "@/utils/api/omniSearch";
 import { getItemHref } from "@/components/Values/ValuesSearchSuggestions";
+import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+} from "@/utils/items/categoryIcons";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 import { formatFullValue } from "@/utils/trading/values";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -882,8 +887,36 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                   </div>
                                 )}
                               </div>
+                              {result.item && (
+                                <div className="mt-1 flex flex-wrap items-center gap-1">
+                                  <span
+                                    className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium"
+                                    style={{
+                                      borderColor: getCategoryColor(
+                                        result.item.type,
+                                      ),
+                                      backgroundColor: `${getCategoryColor(result.item.type)}22`,
+                                    }}
+                                  >
+                                    <CategoryIconBadge
+                                      type={result.item.type}
+                                      isLimited={false}
+                                      isSeasonal={false}
+                                      preferItemType
+                                      withContainer={false}
+                                      className="h-3 w-3"
+                                    />
+                                    {result.item.type}
+                                  </span>
+                                  <ItemUnlockBadges
+                                    season={result.item.season}
+                                    level={result.item.level}
+                                    className=""
+                                  />
+                                </div>
+                              )}
                               <span
-                                className={`text-secondary-text block truncate text-xs ${result.description || result.snippet ? "" : "hidden"}`}
+                                className={`text-secondary-text block truncate text-xs ${!result.item && (result.description || result.snippet) ? "" : "hidden"}`}
                               >
                                 {result.snippet
                                   ? splitQueryMatches(

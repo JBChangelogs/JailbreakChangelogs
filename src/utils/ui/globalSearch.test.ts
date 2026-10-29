@@ -282,6 +282,7 @@ test("season links show on items and changelogs", () => {
           type: "Vehicle",
           cash_value: null,
           season: 2,
+          level: "2%",
         },
       ],
     },
@@ -317,6 +318,7 @@ test("season links show on items and changelogs", () => {
     },
   ]);
   expect(item.description).toBe("Vehicle · Season 2");
+  expect(item.item).toMatchObject({ season: 2, level: "2%" });
   expect(launch.description).toBe("Game update 300 · Launched Season 20");
   expect(during.description).toBe("Game update 301 · Season 20");
   expect(before.description).toBe("Game update 1");
