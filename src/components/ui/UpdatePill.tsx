@@ -41,13 +41,26 @@ export function UpdatePill({
         ...(left !== null && { left }),
       }}
     >
-      <button
-        type="button"
-        onClick={onClick}
-        className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
-      >
-        {children}
-      </button>
+      <UpdatePillButton onClick={onClick}>{children}</UpdatePillButton>
     </div>
+  );
+}
+
+/** The pill itself, for placing inside another element instead of fixed. */
+export function UpdatePillButton({
+  onClick,
+  children,
+}: {
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
+    >
+      {children}
+    </button>
   );
 }

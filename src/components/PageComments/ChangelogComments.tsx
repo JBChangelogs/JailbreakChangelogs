@@ -11,7 +11,7 @@ import { CommentItem } from "./CommentItem";
 import { Icon } from "../ui/IconWrapper";
 import { CommentSkeletonList } from "./CommentSkeleton";
 import { Button } from "@/components/ui/button";
-import { UpdatePill } from "@/components/ui/UpdatePill";
+import { UpdatePill, UpdatePillButton } from "@/components/ui/UpdatePill";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import ReportCommentModal from "./ReportCommentModal";
@@ -34,6 +34,7 @@ export default function ChangelogComments(props: ChangelogCommentsProps) {
 function CommentsLayout() {
   const {
     containerBgClass,
+    pinnedTitle,
     rateLimitUntil,
     rateLimitLabel,
     reactionRateLimitUntil,
@@ -95,7 +96,7 @@ function CommentsLayout() {
   }, [hasMore, autoLoad, isFetchingMore, loadMoreError, loadMore]);
 
   useEffect(() => {
-    const header = document.querySelector("#comments-header");
+    const header = document.querySelector("#comments-top");
     if (!newCommentCount || !header) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) setNewCommentCount(0);
@@ -103,6 +104,22 @@ function CommentsLayout() {
     observer.observe(header);
     return () => observer.disconnect();
   }, [newCommentCount, setNewCommentCount]);
+
+  const scrollToTop = () =>
+    document
+      .querySelector("#comments-top")
+      ?.scrollIntoView({ behavior: "smooth" });
+  const pillLabel = newCommentCount > 0 && (
+    <>
+      <Icon
+        icon="material-symbols:arrow-upward-rounded"
+        className="h-4 w-4"
+        inline
+      />
+      <NumberFlow translate="no" value={newCommentCount} />
+      {newCommentCount === 1 ? "new comment" : "new comments"}
+    </>
+  );
 
   const reportingComment = reportingCommentId
     ? (filteredComments.find((c) => c.id === reportingCommentId) ??
@@ -123,8 +140,18 @@ function CommentsLayout() {
         ref={commentsRef}
         className={`border-border-card ${containerBgClass} rounded-lg border p-2 sm:p-3`}
       >
+        {/* Not the title: it's sticky, so it never scrolls out of view */}
+        <div id="comments-top" className="scroll-mt-(--header-height)" />
         <div className="flex flex-col gap-4">
-          <CommentHeader />
+          <CommentHeader
+            pill={
+              pillLabel && (
+                <UpdatePillButton onClick={scrollToTop}>
+                  {pillLabel}
+                </UpdatePillButton>
+              )
+            }
+          />
 
           {/* Rate Limit / Ban Banners */}
           <RateLimitBanner
@@ -255,23 +282,12 @@ function CommentsLayout() {
         </div>
       </div>
 
-      {newCommentCount > 0 && (
-        <UpdatePill
-          centerOn={commentsRef}
-          onClick={() =>
-            document
-              .querySelector("#comments-header")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
-        >
-          <Icon
-            icon="material-symbols:arrow-upward-rounded"
-            className="h-4 w-4"
-            inline
-          />
-          <NumberFlow translate="no" value={newCommentCount} />
-          {newCommentCount === 1 ? "new comment" : "new comments"}
-        </UpdatePill>
+      {pillLabel && pinnedTitle && (
+        <div className="hidden xl:block">
+          <UpdatePill centerOn={commentsRef} onClick={scrollToTop}>
+            {pillLabel}
+          </UpdatePill>
+        </div>
       )}
 
       {/* Report Comment Modal */}

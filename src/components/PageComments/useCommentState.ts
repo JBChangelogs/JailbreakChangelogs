@@ -492,7 +492,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
             : p,
         ),
       );
-      const header = document.querySelector("#comments-header");
+      const header = document.querySelector("#comments-top");
       if (header && header.getBoundingClientRect().bottom < 0)
         setNewCommentCount((count) => count + 1);
     },
@@ -1757,7 +1757,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     clearCommentHash();
     setFocusedThread(null);
     document
-      .querySelector("#comments-header")
+      .querySelector("#comments-top")
       ?.scrollIntoView({ behavior: "smooth" });
   };
 

@@ -2,7 +2,7 @@
 
 import NumberFlow from "@number-flow/react";
 import { Icon } from "../ui/IconWrapper";
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,7 @@ import {
 import { getSortLabel } from "@/utils/api/sortGroups";
 import { useCommentsContext } from "./CommentsContext";
 
-export function CommentHeader() {
+export function CommentHeader({ pill }: { pill?: ReactNode }) {
   const {
     totalComments,
     type,
@@ -31,33 +31,43 @@ export function CommentHeader() {
 
   return (
     <>
-      <h2
-        id="comments-header"
-        className={`text-primary-text ${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 min-w-0 px-2 py-2 text-lg font-bold tracking-tight sm:-mx-3 sm:px-3 sm:text-xl ${pinnedTitle ? "xl:static" : ""}`}
+      <div
+        className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 px-2 py-2 sm:-mx-3 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
       >
-        <span>
-          <NumberFlow translate="no" value={totalComments} />{" "}
-          {totalComments === 1 ? "Comment for" : "Comments for"}
-        </span>{" "}
-        <span>
-          {type === "changelog" ? (
-            `Changelog ${changelogId}: ${changelogTitle}`
-          ) : type === "season" ? (
-            `Season ${changelogId}: ${changelogTitle}`
-          ) : type === "tradev2" ? (
-            `Trade #${changelogId}`
-          ) : type === "inventory" || type === "user" ? (
-            changelogTitle
-          ) : type === "vsuggestion" ? (
-            changelogTitle
-          ) : (
-            <>
-              <span>{changelogTitle} </span>
-              <span className="text-secondary-text">({itemType})</span>
-            </>
-          )}
-        </span>
-      </h2>
+        <h2 className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl">
+          <span>
+            <NumberFlow translate="no" value={totalComments} />{" "}
+            {totalComments === 1 ? "Comment for" : "Comments for"}
+          </span>{" "}
+          <span>
+            {type === "changelog" ? (
+              `Changelog ${changelogId}: ${changelogTitle}`
+            ) : type === "season" ? (
+              `Season ${changelogId}: ${changelogTitle}`
+            ) : type === "tradev2" ? (
+              `Trade #${changelogId}`
+            ) : type === "inventory" || type === "user" ? (
+              changelogTitle
+            ) : type === "vsuggestion" ? (
+              changelogTitle
+            ) : (
+              <>
+                <span>{changelogTitle} </span>
+                <span className="text-secondary-text">({itemType})</span>
+              </>
+            )}
+          </span>
+        </h2>
+        {/* Rides along under the stuck title. Where the title isn't sticky,
+          ChangelogComments shows the fixed pill instead. */}
+        {pill && (
+          <div
+            className={`absolute top-full left-1/2 mt-3 -translate-x-1/2 ${pinnedTitle ? "xl:hidden" : ""}`}
+          >
+            {pill}
+          </div>
+        )}
+      </div>
       {/* -mt-5 offsets the title's padding and the parent's gap-4 */}
       <div className="-mt-5">
         {/* Disclaimer */}
