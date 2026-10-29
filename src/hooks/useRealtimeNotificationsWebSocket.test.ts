@@ -15,7 +15,11 @@ function setupRealtime(
 ) {
   const effects: (() => (() => void) | void)[] = [];
   const toasts: { title: string; options: ToastOptions }[] = [];
-  const desktop: { title: string; target: { internalPath: string } }[] = [];
+  const desktop: {
+    title: string;
+    body: string;
+    target: { internalPath: string };
+  }[] = [];
   const errors: unknown[] = [];
   const events: { type: string }[] = [];
   const destinations: string[] = [];
@@ -223,6 +227,47 @@ const group = {
   },
 };
 
+test.each([
+  [true, dm],
+  [true, group],
+  [false, dm],
+  [false, group],
+] as const)(
+  "incoming message alerts use server text without sender lookups (active: %s, event: %j)",
+  async (active, payload) => {
+    for (const body of [
+      "hey @_frankish and @Unknown User",
+      "",
+      'renamed the group to "x"',
+    ]) {
+      const realtime = setupRealtime({ active });
+      const title =
+        payload === dm ? "piotrekk5372" : "piotrekk5372 (Trading Pals)";
+      try {
+        await realtime.receive({
+          ...payload,
+          data: {
+            ...payload.data,
+            notification: { title, body },
+          },
+        });
+        expect(realtime.lookups()).toBe(0);
+        if (active) {
+          expect(realtime.toasts).toHaveLength(1);
+          expect(realtime.toasts[0].title).toBe(`New message from ${title}`);
+          expect(realtime.toasts[0].options.description).toBe(body);
+        } else {
+          expect(realtime.desktop).toHaveLength(1);
+          expect(realtime.desktop[0].title).toBe(`New message from ${title}`);
+          expect(realtime.desktop[0].body).toBe(body);
+        }
+      } finally {
+        realtime.cleanup();
+      }
+    }
+  },
+);
+
 test("DM and group message toasts and desktop alerts use sender names and keep chat links", async () => {
   for (const active of [true, false]) {
     const realtime = setupRealtime({ active });
@@ -230,8 +275,12 @@ test("DM and group message toasts and desktop alerts use sender names and keep c
       await realtime.receive(dm);
       await realtime.receive(group);
       const titles = ["Message from Sencha", "Sencha in a group chat"];
+      expect(realtime.lookups()).toBe(2);
       if (active) {
         expect(realtime.toasts.map((toast) => toast.title)).toEqual(titles);
+        expect(
+          realtime.toasts.map((toast) => toast.options.description),
+        ).toEqual(["Hello", "Hello group"]);
         expect(realtime.desktop).toEqual([]);
         for (const toast of realtime.toasts) toast.options.action.onClick();
         expect(realtime.destinations).toEqual([
@@ -242,6 +291,9 @@ test("DM and group message toasts and desktop alerts use sender names and keep c
         expect(
           realtime.desktop.map((notification) => notification.title),
         ).toEqual(titles);
+        expect(
+          realtime.desktop.map((notification) => notification.body),
+        ).toEqual(["Hello", "Hello group"]);
         expect(
           realtime.desktop.map(
             (notification) => notification.target.internalPath,

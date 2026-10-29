@@ -92,6 +92,7 @@ interface RealtimeDmMessageData {
   user_id?: string | number;
   recipient_id?: string | number;
   content?: string;
+  notification?: { title: string; body: string };
   metadata?: unknown | null;
   status?: "Online" | "Offline";
   reader_id?: string | number;
@@ -844,6 +845,16 @@ export function useRealtimeNotificationsWebSocket(
             }
 
             if (payload.data && typeof payload.data === "object") {
+              const notification = (payload.data as RealtimeDmMessageData)
+                .notification;
+              const notificationTitle =
+                typeof notification?.title === "string"
+                  ? `New message from ${notification.title}`
+                  : undefined;
+              const notificationBody =
+                typeof notification?.body === "string"
+                  ? notification.body
+                  : undefined;
               // Group chats get their own event, so DM listeners never take
               // a group's typing or messages for a DM's.
               const groupData = payload.data as Record<string, unknown>;
@@ -874,8 +885,9 @@ export function useRealtimeNotificationsWebSocket(
                   playMessageSound();
                   const rawSenderId = groupData.sender_id ?? groupData.user_id;
                   const senderName =
-                    typeof rawSenderId === "string" ||
-                    typeof rawSenderId === "number"
+                    notificationTitle === undefined &&
+                    (typeof rawSenderId === "string" ||
+                      typeof rawSenderId === "number")
                       ? await resolveMessageSenderName(
                           queryClient,
                           String(rawSenderId),
@@ -894,10 +906,13 @@ export function useRealtimeNotificationsWebSocket(
                     )
                   )
                     return;
-                  const title = senderName
-                    ? `${senderName} in a group chat`
-                    : "New group message";
+                  const title =
+                    notificationTitle ??
+                    (senderName
+                      ? `${senderName} in a group chat`
+                      : "New group message");
                   const body =
+                    notificationBody ??
                     toNotificationBody(groupData.content, queryClient) ??
                     "Check your messages.";
                   const tag = `realtime-group:${String(groupData.id)}`;
@@ -1051,19 +1066,20 @@ export function useRealtimeNotificationsWebSocket(
 
                 if (payload.action === "message_received") {
                   playMessageSound();
-                  const senderName = await resolveMessageSenderName(
-                    queryClient,
-                    senderId,
-                  );
+                  const senderName =
+                    notificationTitle === undefined
+                      ? await resolveMessageSenderName(queryClient, senderId)
+                      : null;
                   const isCurrent = () =>
                     !unmounted &&
                     wsRef.current === ws &&
                     messageReadVersions.get(path) === readVersion;
                   if (!isCurrent()) return;
-                  const title = senderName
-                    ? `Message from ${senderName}`
-                    : "New message";
+                  const title =
+                    notificationTitle ??
+                    (senderName ? `Message from ${senderName}` : "New message");
                   const messagePreview =
+                    notificationBody ??
                     toNotificationBody(dmData.content, queryClient) ??
                     "Check your messages.";
                   showDesktopNotificationUnlessAppConnected(
