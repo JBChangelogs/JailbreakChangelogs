@@ -46,7 +46,6 @@ import {
   convertUrlsToLinksHTML,
   processMentions,
   sanitizeHTML,
-  isCommentIdentityHidden,
 } from "./commentUtils";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useCommentsContext } from "./CommentsContext";
@@ -171,14 +170,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     }
   }, [editingCommentId, comment.id, comment.content, comment.replies]);
 
-  const isIdentityHidden = (userId: string) => {
-    return isCommentIdentityHidden(
-      userId,
-      userData[userId]?.settings,
-      currentUserId,
-    );
-  };
-
   const copyCommentLink = async (commentId: number) => {
     const url = new URL(window.location.href);
     url.searchParams.delete("commentsPage");
@@ -213,10 +204,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
         "Unknown User"
       : userData[comment.user_id]?.username || comment.author || "Unknown User";
 
-  // Hide identity if show_recent_comments is off
-  // and the viewer is not the comment author
-  const hideRecent = isIdentityHidden(comment.user_id);
-
   // Truncation logic for long comments
   const isExpanded = expandedComments.has(comment.id);
   const MAX_VISIBLE_LINES = 5;
@@ -245,13 +232,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
       ? (comment.replies?.find((r) => r.id === replyingToReplyId) ?? null)
       : null;
   const replyTargetName = replyTarget
-    ? isIdentityHidden(replyTarget.user_id)
-      ? "Hidden User"
-      : isRobloxContext
-        ? userData[replyTarget.user_id]?.roblox_display_name ||
-          userData[replyTarget.user_id]?.roblox_username ||
-          replyTarget.author
-        : userData[replyTarget.user_id]?.username || replyTarget.author
+    ? isRobloxContext
+      ? userData[replyTarget.user_id]?.roblox_display_name ||
+        userData[replyTarget.user_id]?.roblox_username ||
+        replyTarget.author
+      : userData[replyTarget.user_id]?.username || replyTarget.author
     : null;
 
   const replyForm =
@@ -441,60 +426,42 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
         <ContextMenuTrigger asChild>
           <div className="comment-link-surface flex gap-2 rounded-lg px-2 py-2 sm:gap-3">
             <div className="flex w-10 shrink-0 items-start pt-1.5">
-              {hideRecent ? (
-                <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
-                  <svg
-                    className="text-secondary-text h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                </div>
-              ) : (
-                <div
-                  className={`${
-                    userData[comment.user_id]?.premiumtype === 3
-                      ? "rounded-[25%]"
-                      : "rounded-full"
-                  }`}
-                >
-                  <UserProfilePopover
-                    user={
-                      userData[comment.user_id] ?? {
-                        id: comment.user_id,
-                        username: displayName,
-                      }
+              <div
+                className={`${
+                  userData[comment.user_id]?.premiumtype === 3
+                    ? "rounded-[25%]"
+                    : "rounded-full"
+                }`}
+              >
+                <UserProfilePopover
+                  user={
+                    userData[comment.user_id] ?? {
+                      id: comment.user_id,
+                      username: displayName,
                     }
+                  }
+                >
+                  <button
+                    type="button"
+                    className="block cursor-pointer"
+                    aria-label={`View ${displayName}'s profile card`}
                   >
-                    <button
-                      type="button"
-                      className="block cursor-pointer"
-                      aria-label={`View ${displayName}'s profile card`}
-                    >
-                      <UserAvatar
-                        userId={comment.user_id}
-                        avatarHash={userData[comment.user_id]?.avatar}
-                        username={displayName}
-                        forceAvatarUrl={robloxAvatarUrl}
-                        size={10}
-                        cdnSize={512}
-                        custom_avatar={userData[comment.user_id]?.custom_avatar}
-                        showBadge={false}
-                        settings={userData[comment.user_id]?.settings}
-                        premiumType={userData[comment.user_id]?.premiumtype}
-                        bgClassName="bg-tertiary-bg"
-                      />
-                    </button>
-                  </UserProfilePopover>
-                </div>
-              )}
+                    <UserAvatar
+                      userId={comment.user_id}
+                      avatarHash={userData[comment.user_id]?.avatar}
+                      username={displayName}
+                      forceAvatarUrl={robloxAvatarUrl}
+                      size={10}
+                      cdnSize={512}
+                      custom_avatar={userData[comment.user_id]?.custom_avatar}
+                      showBadge={false}
+                      settings={userData[comment.user_id]?.settings}
+                      premiumType={userData[comment.user_id]?.premiumtype}
+                      bgClassName="bg-tertiary-bg"
+                    />
+                  </button>
+                </UserProfilePopover>
+              </div>
             </div>
 
             {/*
@@ -507,78 +474,68 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                 <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
                   <div className="flex min-w-0 flex-col">
                     <div className="flex flex-wrap items-center gap-2">
-                      {hideRecent ? (
-                        <span className="text-primary-text text-sm font-semibold">
-                          Hidden User
-                        </span>
-                      ) : (
-                        <>
-                          <CommentAuthorName
-                            userId={comment.user_id}
-                            name={displayName}
-                            user={userData[comment.user_id]}
-                            className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
-                          />
+                      <>
+                        <CommentAuthorName
+                          userId={comment.user_id}
+                          name={displayName}
+                          user={userData[comment.user_id]}
+                          className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
+                        />
 
-                          {/* TODO: priority/description are arbitrary until comments API's
+                        {/* TODO: priority/description are arbitrary until comments API's
                           _attach_flags joins feature_flags for index/description */}
-                          <UserBadges
-                            usernumber={
-                              userData[comment.user_id]?.usernumber ?? 0
-                            }
-                            premiumType={userData[comment.user_id]?.premiumtype}
-                            flags={userData[comment.user_id]?.flags}
-                            size="sm"
-                            noContainer
-                            limit={1}
-                          />
+                        <UserBadges
+                          usernumber={
+                            userData[comment.user_id]?.usernumber ?? 0
+                          }
+                          premiumType={userData[comment.user_id]?.premiumtype}
+                          flags={userData[comment.user_id]?.flags}
+                          size="sm"
+                          noContainer
+                          limit={1}
+                        />
 
-                          {type === "tradev2" &&
-                            trade &&
-                            comment.user_id === trade.author && (
-                              <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium">
-                                OP
-                              </span>
-                            )}
-                          {((type === "user" &&
-                            comment.user_id === String(changelogId)) ||
-                            (type === "vsuggestion" &&
-                              suggestion &&
-                              comment.user_id === suggestion.suggester)) && (
-                            <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                              {type === "user" ? "Profile owner" : "OP"}
+                        {type === "tradev2" &&
+                          trade &&
+                          comment.user_id === trade.author && (
+                            <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium">
+                              OP
                             </span>
                           )}
-                          {type === "vsuggestion" &&
-                            suggestion?.upvoterIds?.includes(
-                              comment.user_id,
-                            ) && (
-                              <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                <Icon
-                                  icon="material-symbols:thumb-up-rounded"
-                                  className="h-3 w-3"
-                                />
-                                <span className="hidden sm:inline">
-                                  Upvoted
-                                </span>
+                        {((type === "user" &&
+                          comment.user_id === String(changelogId)) ||
+                          (type === "vsuggestion" &&
+                            suggestion &&
+                            comment.user_id === suggestion.suggester)) && (
+                          <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                            {type === "user" ? "Profile owner" : "OP"}
+                          </span>
+                        )}
+                        {type === "vsuggestion" &&
+                          suggestion?.upvoterIds?.includes(comment.user_id) && (
+                            <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                              <Icon
+                                icon="material-symbols:thumb-up-rounded"
+                                className="h-3 w-3"
+                              />
+                              <span className="hidden sm:inline">Upvoted</span>
+                            </span>
+                          )}
+                        {type === "vsuggestion" &&
+                          suggestion?.downvoterIds?.includes(
+                            comment.user_id,
+                          ) && (
+                            <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                              <Icon
+                                icon="material-symbols:thumb-down-rounded"
+                                className="h-3 w-3"
+                              />
+                              <span className="hidden sm:inline">
+                                Downvoted
                               </span>
-                            )}
-                          {type === "vsuggestion" &&
-                            suggestion?.downvoterIds?.includes(
-                              comment.user_id,
-                            ) && (
-                              <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                <Icon
-                                  icon="material-symbols:thumb-down-rounded"
-                                  className="h-3 w-3"
-                                />
-                                <span className="hidden sm:inline">
-                                  Downvoted
-                                </span>
-                              </span>
-                            )}
-                        </>
-                      )}
+                            </span>
+                          )}
+                      </>
                     </div>
 
                     <CommentTimestamp
@@ -1081,7 +1038,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               ).map((reply) => {
                 const replyUser = userData[reply.user_id];
                 const isUnknownReplyUser = !reply.user_id;
-                const replyHideRecent = isIdentityHidden(reply.user_id);
                 const replyDisplayName = isUnknownReplyUser
                   ? "Unknown User"
                   : isRobloxContext
@@ -1100,17 +1056,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   ? (comment.replies?.find((r) => r.id === replyToTargetId) ??
                     null)
                   : null;
-                const replyToTargetHidden =
-                  !!replyToTarget && isIdentityHidden(replyToTarget.user_id);
                 const replyToTargetName = replyToTarget
-                  ? replyToTargetHidden
-                    ? "Hidden User"
-                    : isRobloxContext
-                      ? userData[replyToTarget.user_id]?.roblox_display_name ||
-                        userData[replyToTarget.user_id]?.roblox_username ||
-                        replyToTarget.author
-                      : userData[replyToTarget.user_id]?.username ||
-                        replyToTarget.author
+                  ? isRobloxContext
+                    ? userData[replyToTarget.user_id]?.roblox_display_name ||
+                      userData[replyToTarget.user_id]?.roblox_username ||
+                      replyToTarget.author
+                    : userData[replyToTarget.user_id]?.username ||
+                      replyToTarget.author
                   : null;
 
                 return (
@@ -1123,189 +1075,152 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                         >
                           {/* Reply avatar */}
                           <div className="flex w-8 shrink-0 items-start pt-1">
-                            {replyHideRecent ? (
-                              <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-8 w-8 items-center justify-center rounded-full border ring-1">
-                                <svg
-                                  className="text-secondary-text h-4 w-4"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                  />
-                                </svg>
-                              </div>
-                            ) : (
-                              <div
-                                className={
-                                  replyUser?.premiumtype === 3
-                                    ? "rounded-[25%]"
-                                    : "rounded-full"
-                                }
-                              >
-                                <UserAvatar
-                                  userId={reply.user_id}
-                                  avatarHash={replyUser?.avatar ?? null}
-                                  username={replyDisplayName}
-                                  forceAvatarUrl={replyRobloxAvatarUrl}
-                                  size={8}
-                                  cdnSize={256}
-                                  custom_avatar={replyUser?.custom_avatar}
-                                  showBadge={false}
-                                  settings={replyUser?.settings}
-                                  premiumType={replyUser?.premiumtype}
-                                  bgClassName="bg-tertiary-bg"
-                                />
-                              </div>
-                            )}
+                            <div
+                              className={
+                                replyUser?.premiumtype === 3
+                                  ? "rounded-[25%]"
+                                  : "rounded-full"
+                              }
+                            >
+                              <UserAvatar
+                                userId={reply.user_id}
+                                avatarHash={replyUser?.avatar ?? null}
+                                username={replyDisplayName}
+                                forceAvatarUrl={replyRobloxAvatarUrl}
+                                size={8}
+                                cdnSize={256}
+                                custom_avatar={replyUser?.custom_avatar}
+                                showBadge={false}
+                                settings={replyUser?.settings}
+                                premiumType={replyUser?.premiumtype}
+                                bgClassName="bg-tertiary-bg"
+                              />
+                            </div>
                           </div>
 
                           {/* Reply content */}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2 pb-1">
                               <div className="flex min-w-0 flex-col">
-                                {replyHideRecent ? (
-                                  <span className="text-primary-text text-sm font-semibold">
-                                    Hidden User
-                                  </span>
-                                ) : (
-                                  <>
-                                    <div className="flex flex-wrap items-center gap-1.5">
-                                      <div className="flex flex-wrap items-center gap-1">
-                                        <CommentAuthorName
-                                          userId={reply.user_id}
-                                          name={replyDisplayName}
-                                          user={replyUser}
-                                          className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                        />
-                                        {/* TODO: see priority/description TODO above */}
-                                        <UserBadges
-                                          usernumber={
-                                            replyUser?.usernumber ?? 0
-                                          }
-                                          premiumType={replyUser?.premiumtype}
-                                          flags={replyUser?.flags}
-                                          size="sm"
-                                          noContainer
-                                          limit={1}
-                                        />
-                                        {((type === "user" &&
+                                <>
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <div className="flex flex-wrap items-center gap-1">
+                                      <CommentAuthorName
+                                        userId={reply.user_id}
+                                        name={replyDisplayName}
+                                        user={replyUser}
+                                        className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                      />
+                                      {/* TODO: see priority/description TODO above */}
+                                      <UserBadges
+                                        usernumber={replyUser?.usernumber ?? 0}
+                                        premiumType={replyUser?.premiumtype}
+                                        flags={replyUser?.flags}
+                                        size="sm"
+                                        noContainer
+                                        limit={1}
+                                      />
+                                      {((type === "user" &&
+                                        reply.user_id ===
+                                          String(changelogId)) ||
+                                        (type === "vsuggestion" &&
+                                          suggestion &&
                                           reply.user_id ===
-                                            String(changelogId)) ||
-                                          (type === "vsuggestion" &&
-                                            suggestion &&
-                                            reply.user_id ===
-                                              suggestion.suggester)) && (
-                                          <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                                            {type === "user"
-                                              ? "Profile owner"
-                                              : "OP"}
+                                            suggestion.suggester)) && (
+                                        <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                                          {type === "user"
+                                            ? "Profile owner"
+                                            : "OP"}
+                                        </span>
+                                      )}
+                                      {type === "vsuggestion" &&
+                                        suggestion?.upvoterIds?.includes(
+                                          reply.user_id,
+                                        ) && (
+                                          <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                            <Icon
+                                              icon="material-symbols:thumb-up-rounded"
+                                              className="h-3 w-3"
+                                            />
+                                            <span className="hidden sm:inline">
+                                              Upvoted
+                                            </span>
                                           </span>
                                         )}
-                                        {type === "vsuggestion" &&
-                                          suggestion?.upvoterIds?.includes(
-                                            reply.user_id,
-                                          ) && (
-                                            <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                              <Icon
-                                                icon="material-symbols:thumb-up-rounded"
-                                                className="h-3 w-3"
-                                              />
-                                              <span className="hidden sm:inline">
-                                                Upvoted
-                                              </span>
-                                            </span>
-                                          )}
-                                        {type === "vsuggestion" &&
-                                          suggestion?.downvoterIds?.includes(
-                                            reply.user_id,
-                                          ) && (
-                                            <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                              <Icon
-                                                icon="material-symbols:thumb-down-rounded"
-                                                className="h-3 w-3"
-                                              />
-                                              <span className="hidden sm:inline">
-                                                Downvoted
-                                              </span>
-                                            </span>
-                                          )}
-                                        {replyToTargetName && replyToTarget && (
-                                          <>
+                                      {type === "vsuggestion" &&
+                                        suggestion?.downvoterIds?.includes(
+                                          reply.user_id,
+                                        ) && (
+                                          <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
                                             <Icon
-                                              icon="material-symbols:arrow-right"
-                                              className="text-secondary-text h-4 w-4 shrink-0"
+                                              icon="material-symbols:thumb-down-rounded"
+                                              className="h-3 w-3"
                                             />
-                                            {replyToTargetHidden ? (
-                                              <span className="text-secondary-text text-sm font-semibold">
-                                                Hidden User
-                                              </span>
-                                            ) : (
-                                              <CommentAuthorName
-                                                userId={replyToTarget.user_id}
-                                                name={replyToTargetName}
-                                                user={
-                                                  userData[
-                                                    replyToTarget.user_id
-                                                  ]
-                                                }
-                                                className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                              />
-                                            )}
-                                            {!replyToTargetHidden &&
-                                              ((type === "user" &&
-                                                replyToTarget.user_id ===
-                                                  String(changelogId)) ||
-                                                (type === "vsuggestion" &&
-                                                  suggestion &&
-                                                  replyToTarget.user_id ===
-                                                    suggestion.suggester)) && (
-                                                <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                                                  {type === "user"
-                                                    ? "Profile owner"
-                                                    : "OP"}
-                                                </span>
-                                              )}
-                                            {!replyToTargetHidden &&
-                                              type === "vsuggestion" &&
-                                              suggestion?.upvoterIds?.includes(
-                                                replyToTarget.user_id,
-                                              ) && (
-                                                <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                                  <Icon
-                                                    icon="material-symbols:thumb-up-rounded"
-                                                    className="h-3 w-3"
-                                                  />
-                                                  <span className="hidden sm:inline">
-                                                    Upvoted
-                                                  </span>
-                                                </span>
-                                              )}
-                                            {!replyToTargetHidden &&
-                                              type === "vsuggestion" &&
-                                              suggestion?.downvoterIds?.includes(
-                                                replyToTarget.user_id,
-                                              ) && (
-                                                <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
-                                                  <Icon
-                                                    icon="material-symbols:thumb-down-rounded"
-                                                    className="h-3 w-3"
-                                                  />
-                                                  <span className="hidden sm:inline">
-                                                    Downvoted
-                                                  </span>
-                                                </span>
-                                              )}
-                                          </>
+                                            <span className="hidden sm:inline">
+                                              Downvoted
+                                            </span>
+                                          </span>
                                         )}
-                                      </div>
+                                      {replyToTargetName && replyToTarget && (
+                                        <>
+                                          <Icon
+                                            icon="material-symbols:arrow-right"
+                                            className="text-secondary-text h-4 w-4 shrink-0"
+                                          />
+                                          <CommentAuthorName
+                                            userId={replyToTarget.user_id}
+                                            name={replyToTargetName}
+                                            user={
+                                              userData[replyToTarget.user_id]
+                                            }
+                                            className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                          />
+                                          {((type === "user" &&
+                                            replyToTarget.user_id ===
+                                              String(changelogId)) ||
+                                            (type === "vsuggestion" &&
+                                              suggestion &&
+                                              replyToTarget.user_id ===
+                                                suggestion.suggester)) && (
+                                            <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                                              {type === "user"
+                                                ? "Profile owner"
+                                                : "OP"}
+                                            </span>
+                                          )}
+                                          {type === "vsuggestion" &&
+                                            suggestion?.upvoterIds?.includes(
+                                              replyToTarget.user_id,
+                                            ) && (
+                                              <span className="text-button-success inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                                <Icon
+                                                  icon="material-symbols:thumb-up-rounded"
+                                                  className="h-3 w-3"
+                                                />
+                                                <span className="hidden sm:inline">
+                                                  Upvoted
+                                                </span>
+                                              </span>
+                                            )}
+                                          {type === "vsuggestion" &&
+                                            suggestion?.downvoterIds?.includes(
+                                              replyToTarget.user_id,
+                                            ) && (
+                                              <span className="text-button-danger inline-flex items-center gap-0.5 text-[10px] leading-none font-medium">
+                                                <Icon
+                                                  icon="material-symbols:thumb-down-rounded"
+                                                  className="h-3 w-3"
+                                                />
+                                                <span className="hidden sm:inline">
+                                                  Downvoted
+                                                </span>
+                                              </span>
+                                            )}
+                                        </>
+                                      )}
                                     </div>
-                                  </>
-                                )}
+                                  </div>
+                                </>
                                 <CommentTimestamp
                                   date={reply.date}
                                   editedAt={reply.edited_at}

@@ -5,17 +5,6 @@ import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import type { CommentData } from "@/utils/api/api";
 import type { CommentApiErrorData } from "./commentTypes";
-import type { UserData } from "@/types/auth";
-
-export const isCommentIdentityHidden = (
-  userId: string,
-  settings: UserData["settings"] | undefined,
-  currentUserId: string | null,
-): boolean =>
-  !!userId &&
-  // Missing settings means user data didn't load, so stay hidden.
-  (!settings || settings.show_recent_comments === false) &&
-  currentUserId !== userId;
 
 /**
  * Checks if a comment is still within its 1-hour edit window.

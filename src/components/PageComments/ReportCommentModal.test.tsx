@@ -2,9 +2,8 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
-import { isCommentIdentityHidden } from "./commentUtils";
 
-test("report previews use the lock avatar for hidden authors and preserve public avatars", () => {
+test("report previews always show the comment author", () => {
   const settings = { show_recent_comments: true };
   const state = {
     filteredComments: [
@@ -54,7 +53,6 @@ test("report previews use the lock avatar for hidden authors and preserve public
               useRef: () => ({ current: null }),
               useEffect: () => {},
             };
-          if (name === "./commentUtils") return { isCommentIdentityHidden };
           if (name === "./CommentsContext")
             return {
               CommentsContext: { Provider: "Provider" },
@@ -85,28 +83,18 @@ test("report previews use the lock avatar for hidden authors and preserve public
     return { props, nodes: nodes(modal({ ...props, reportReason: "" })) };
   };
   expect(preview().nodes.some((node) => node.type === "UserAvatar")).toBe(true);
-  for (const hiddenSettings of [
+  for (const targetSettings of [
     { ...settings, show_recent_comments: false },
     undefined,
   ]) {
-    state.userData.target.settings = hiddenSettings;
+    state.userData.target.settings = targetSettings;
     for (const type of ["changelog", "inventory", "vsuggestion"]) {
       state.type = type;
       const result = preview();
-      expect(result.props.commentOwner).toBe("Hidden User");
+      expect(result.props.commentOwner).not.toBe("Hidden User");
       expect(result.nodes.some((node) => node.type === "UserAvatar")).toBe(
-        false,
+        true,
       );
-      expect(
-        result.nodes.some(
-          (node) => node.props.icon === "heroicons:lock-closed",
-        ),
-      ).toBe(true);
-      expect(JSON.stringify(result.nodes)).not.toContain("discord-avatar");
-      expect(JSON.stringify(result.nodes)).not.toContain("custom-avatar");
-      expect(JSON.stringify(result.nodes)).not.toContain("roblox-avatar");
     }
   }
-  state.currentUserId = "target";
-  expect(preview().nodes.some((node) => node.type === "UserAvatar")).toBe(true);
 });

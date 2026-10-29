@@ -32,7 +32,7 @@ test("profile comment preview shows unique recent public commenters and scrolls 
     userData: Object.fromEntries(
       ["old", "new", "hidden", "other", "owner"].map((id) => [
         id,
-        { username: id, settings: { hidden: id === "hidden" } },
+        { username: id, settings: { show_recent_comments: id !== "hidden" } },
       ]),
     ),
     totalComments: 4,
@@ -65,13 +65,6 @@ test("profile comment preview shows unique recent public commenters and scrolls 
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name.endsWith("CommentsContext"))
           return { useCommentsContext: () => state };
-        if (name.endsWith("commentUtils"))
-          return {
-            isCommentIdentityHidden: (
-              _id: string,
-              settings: { hidden: boolean },
-            ) => settings.hidden,
-          };
         if (name.endsWith("avatar")) return { UserAvatar: "UserAvatar" };
         if (name.endsWith("tooltip"))
           return {
@@ -102,12 +95,12 @@ test("profile comment preview shows unique recent public commenters and scrolls 
     nodes(rendered)
       .filter((node) => node.type === "UserAvatar")
       .map((node) => node.props.userId),
-  ).toEqual(["new", "other", "old"]);
+  ).toEqual(["hidden", "new", "other", "old"]);
   expect(
     nodes(rendered)
       .filter((node) => node.type === "TooltipContent")
       .map((node) => node.props.children),
-  ).toEqual(["new", "other", "old"]);
+  ).toEqual(["hidden", "new", "other", "old"]);
   (rendered.props.onClick as () => void)();
   expect(focused).toBe(true);
   expect(scrolled).toEqual({ behavior: "smooth", block: "start" });
@@ -117,14 +110,14 @@ test("profile comment preview shows unique recent public commenters and scrolls 
 
   state.comments.push(comment("fourth", "2"), comment("fifth", "0"));
   Object.assign(state.userData, {
-    fourth: { username: "fourth", settings: { hidden: false } },
-    fifth: { username: "fifth", settings: { hidden: false } },
+    fourth: { username: "fourth" },
+    fifth: { username: "fifth" },
   });
   expect(
     nodes(exports.default())
       .filter((node) => node.type === "UserAvatar")
       .map((node) => node.props.userId),
-  ).toEqual(["new", "other", "fourth", "old"]);
+  ).toEqual(["hidden", "new", "other", "fourth"]);
 
   state.totalComments = 0;
   state.comments = [];

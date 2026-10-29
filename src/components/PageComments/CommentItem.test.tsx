@@ -2,9 +2,8 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
-import { isCommentIdentityHidden } from "./commentUtils";
 
-test("reply privacy and copied comment links preserve the target and discussion", async () => {
+test("comment authors stay visible and copied comment links preserve the target and discussion", async () => {
   const settings = { show_recent_comments: true };
   const target = {
     id: 2,
@@ -98,7 +97,6 @@ test("reply privacy and copied comment links preserve the target and discussion"
             convertUrlsToLinksHTML: (value: string) => value,
             processMentions: (value: string) => value,
             sanitizeHTML: (value: string) => value,
-            isCommentIdentityHidden,
           };
         if (name === "sonner")
           return {
@@ -117,32 +115,17 @@ test("reply privacy and copied comment links preserve the target and discussion"
   expect(render()).toContain("/users/target");
   expect(render()).toContain("Target name");
 
-  for (const hiddenSettings of [
+  for (const targetSettings of [
     { ...settings, show_recent_comments: false },
     undefined,
   ]) {
-    context.userData.target.settings = hiddenSettings;
+    context.userData.target.settings = targetSettings;
     for (const type of ["changelog", "inventory", "tradev2", "vsuggestion"]) {
       context.type = type;
       const output = render();
-      expect(output).not.toContain("/users/target");
-      expect(output).not.toContain("Target name");
-      expect(output).not.toContain("Old target name");
-      expect(output).not.toContain("Roblox target");
-      expect(output).not.toContain('"children":"OP"');
-      expect(output).not.toContain('"children":"Upvoted"');
-      expect(output).not.toContain(
-        '"user":' + JSON.stringify(context.userData.target),
-      );
-      expect(output).toContain("Hidden User");
-      expect(output).toContain('"icon":"material-symbols:arrow-right"');
-      expect(output).toContain(
-        '"type":"span","props":{"className":"text-secondary-text text-sm font-semibold","children":"Hidden User"}',
-      );
+      expect(output).toContain("/users/target");
+      expect(output).not.toContain("Hidden User");
       expect(output).toContain("Target message");
-      expect(output).toContain(
-        '"type":"CommentTimestamp","props":{"date":"1700000000","editedAt":"1700001000","commentId":2}',
-      );
     }
   }
   context.currentUserId = "target";

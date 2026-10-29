@@ -1,7 +1,6 @@
 "use client";
 
 import { useCommentsContext } from "@/components/PageComments/CommentsContext";
-import { isCommentIdentityHidden } from "@/components/PageComments/commentUtils";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,
@@ -15,7 +14,6 @@ export default function ProfileCommentsPreview() {
     comments,
     changelogId,
     userData,
-    currentUserId,
     totalComments,
     isRefreshingComments,
     profileCommentsDisabled,
@@ -31,13 +29,7 @@ export default function ProfileCommentsPreview() {
         .sort((a, b) => Number(b.date) - Number(a.date))
         .filter(
           (comment) =>
-            comment.user_id &&
-            comment.user_id !== String(changelogId) &&
-            !isCommentIdentityHidden(
-              comment.user_id,
-              userData[comment.user_id]?.settings,
-              currentUserId,
-            ),
+            comment.user_id && comment.user_id !== String(changelogId),
         )
         .map((comment) => comment.user_id),
     ),
