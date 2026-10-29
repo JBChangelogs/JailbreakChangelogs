@@ -34,6 +34,7 @@ export function TradeSideActions({
           disabled={!hasItems || isSharing}
           title="Copy a share link that expires in 6 hours"
         >
+          <Icon icon="heroicons:share-solid" />
           {isSharing ? "Sharing..." : "Share"}
         </Button>
       )}
