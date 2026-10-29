@@ -56,15 +56,14 @@ export default function LatestReleaseDialogClient({
   const { disabled, preferencesSynced, setDisabled } = useWhatsNewPreference();
 
   useEffect(() => {
-    setOpen(false);
-    setPreview(null);
-    setDismissed(false);
     if (isLoading || disabled === null) return;
-    if (isAuthenticated && (!preferencesSynced || disabled)) return;
+    const hide = () => {
+      setOpen(false);
+      setPreview(null);
+    };
+    if (isAuthenticated && (!preferencesSynced || disabled)) return hide();
 
-    if (pathname === "/access-denied") {
-      return;
-    }
+    if (pathname === "/access-denied") return hide();
 
     if (
       pathname === "/dev/changelogs" ||
@@ -76,11 +75,14 @@ export default function LatestReleaseDialogClient({
       ) {
         safeLocalStorage.setItem(LAST_SEEN_RELEASE_KEY, release.slug);
       }
-      return;
+      return hide();
     }
 
     if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === release.slug)
-      return;
+      return hide();
+
+    // Already showing: keep it across route changes instead of refetching.
+    if (preview) return;
 
     const controller = new AbortController();
     fetch("/api/dev/changelogs/latest", { signal: controller.signal })
@@ -103,6 +105,7 @@ export default function LatestReleaseDialogClient({
     isLoading,
     pathname,
     preferencesSynced,
+    preview,
     release.slug,
   ]);
 
