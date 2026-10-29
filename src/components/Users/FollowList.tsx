@@ -196,8 +196,8 @@ export function FollowList({ userId, kind }: { userId: string; kind: Kind }) {
             </div>
           ) : hidden(kind) ? (
             <EmptyState
-              icon="heroicons:eye-slash"
-              text={`This user has hidden their ${kind}.`}
+              icon="heroicons:lock-closed"
+              text={`This user has chosen to keep their ${kind} private.`}
             />
           ) : listQuery.isError ? (
             <div className="flex flex-col items-center gap-3 py-10 text-sm">
