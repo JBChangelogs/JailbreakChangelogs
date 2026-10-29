@@ -50,7 +50,7 @@ export function FriendRow({
         <Link
           href={`/users/${user.id}`}
           prefetch={false}
-          className="group flex min-w-0 flex-1 items-center gap-3"
+          className="group flex min-w-0 items-center gap-3"
         >
           <UserAvatar
             userId={user.id}
@@ -83,7 +83,7 @@ export function FriendRow({
           </div>
         </Link>
       </UserProfilePopover>
-      {children && <div className="shrink-0">{children}</div>}
+      {children && <div className="ml-auto shrink-0">{children}</div>}
     </div>
   );
 }
