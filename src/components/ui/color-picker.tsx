@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   Popover,
   PopoverContent,
@@ -28,16 +30,28 @@ const clamp = (n: number) => Math.min(1, Math.max(0, n));
 export function ColorPicker({
   value,
   onChange,
+  onReset,
   compact = false,
 }: {
   value: string;
   onChange: (hex: string) => void;
+  onReset?: () => void;
   compact?: boolean;
 }) {
   // Kept as HSV so the hue survives when the color is gray or black.
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(value));
   const [hexText, setHexText] = useState(value.slice(1));
+  const [previousValue, setPreviousValue] = useState(value);
   const areaRef = useRef<HTMLDivElement>(null);
+
+  if (value !== previousValue) {
+    setPreviousValue(value);
+    // Preserve hue during picking; synchronize when a reset changes the value.
+    if (value.toLowerCase() !== hsvToHex(hsv)) {
+      setHsv(hexToHsv(value));
+      setHexText(value.slice(1));
+    }
+  }
 
   const update = (next: Hsv) => {
     setHsv(next);
@@ -167,6 +181,23 @@ export function ColorPicker({
           />
         </div>
       </label>
+      {onReset && (
+        <div className="border-border-card flex justify-end border-t pt-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="xs"
+            className="border-border-card border"
+            onClick={() => {
+              setHexText(value.slice(1));
+              onReset();
+            }}
+          >
+            <Icon icon="lucide:rotate-ccw" aria-hidden="true" />
+            Reset to original
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -177,11 +208,13 @@ export function ColorSwatch({
   value,
   onChange,
   canOpen,
+  onReset,
 }: {
   label: string;
   value: string;
   onChange: (hex: string) => void;
   canOpen: () => boolean;
+  onReset?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -201,7 +234,7 @@ export function ColorSwatch({
       </PopoverTrigger>
       {/* Above dialogs (z-10000), like dropdown menus, so it works inside one. */}
       <PopoverContent align="start" className="z-[10001] w-64 p-3">
-        <ColorPicker value={value} onChange={onChange} />
+        <ColorPicker value={value} onChange={onChange} onReset={onReset} />
       </PopoverContent>
     </Popover>
   );

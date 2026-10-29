@@ -25,16 +25,17 @@ function editor({
   active = false,
   fail = false,
   collapsed = true,
+  vars = {
+    "--color-primary-bg": "#111111",
+    "--color-secondary-bg": "#222222",
+  } as Record<string, string>,
 } = {}) {
   const saved: UserTheme = {
     id: 1,
     share_code: "K7QM4XRP",
     label: "Mine",
     scheme: "dark",
-    vars: {
-      "--color-primary-bg": "#111111",
-      "--color-secondary-bg": "#222222",
-    },
+    vars,
     logo_filter: null,
   };
   const states: unknown[] = [];
@@ -199,10 +200,16 @@ for (const mobile of [true, false]) {
         .length;
     const initialCount = gridCount();
     expect(bubble().props.open).toBe(false);
+    expect(
+      view.render().find((node) => node.props.onPick)!.props.hideTooltips,
+    ).toBe(false);
     pick(["--unknown"]);
     expect(bubble().props.open).toBe(false);
     pick(["--color-primary-bg", "--color-secondary-bg", "--unknown"]);
     expect(bubble().props.open).toBe(true);
+    expect(
+      view.render().find((node) => node.props.onPick)!.props.hideTooltips,
+    ).toBe(true);
     expect(control().props.colorKey).toBe("--color-primary-bg");
     const anchor = view.render().find((node) => node.type === "PopoverAnchor")!;
     const virtual = (
@@ -227,8 +234,7 @@ for (const mobile of [true, false]) {
       .render()
       .find(
         (node) =>
-          node.type === "Tabs" &&
-          node.props.radio &&
+          node.type === "DropdownMenuRadioGroup" &&
           node.props.value === "--color-primary-bg",
       )!;
     expect(
@@ -236,7 +242,7 @@ for (const mobile of [true, false]) {
         .render()
         .filter(
           (node) =>
-            node.type === "TabsTrigger" &&
+            node.type === "DropdownMenuRadioItem" &&
             [
               "--color-primary-bg",
               "--color-secondary-bg",
@@ -279,13 +285,71 @@ for (const mobile of [true, false]) {
     expect(control().props.colorKey).toBe("--color-secondary-bg");
     expect(outside(false)).toBe(false);
     expect(bubble().props.open).toBe(false);
+    expect(
+      view.render().find((node) => node.props.onPick)!.props.hideTooltips,
+    ).toBe(false);
     pick(["--color-primary-bg"]);
     (bubble().props.onOpenChange as (open: boolean) => void)(false);
     expect(bubble().props.open).toBe(false);
     pick(["--color-primary-bg"]);
     expect(control().props.value).toBe("#abcdef");
+    (control().props.onReset as () => void)();
+    expect(control().props.value).toBe("#111111");
+    expect(
+      (control().props.vars as Record<string, string>)["--color-secondary-bg"],
+    ).toBe("#222222");
   });
 }
+
+for (const original of [
+  "rgb(255 165 0 / 50%)",
+  "linear-gradient(to right, #ffa500, #ff0000)",
+  "var(--color-secondary-bg)",
+]) {
+  test(`reset restores the exact original ${original} without reverting other colors`, async () => {
+    const view = editor({
+      existing: true,
+      collapsed: false,
+      vars: {
+        "--color-primary-bg": original,
+        "--color-secondary-bg": "#222222",
+      },
+    });
+    const color = (key: string) =>
+      view.render().find((node) => node.props.colorKey === key)!.props;
+    (color("--color-primary-bg").onChange as (value: string) => void)(
+      "#abcdef",
+    );
+    (color("--color-secondary-bg").onChange as (value: string) => void)(
+      "#123456",
+    );
+    (color("--color-primary-bg").onReset as () => void)();
+    expect(color("--color-primary-bg").value).toBe(original);
+    expect(color("--color-secondary-bg").value).toBe("#123456");
+    await view.save();
+    (color("--color-secondary-bg").onChange as (value: string) => void)(
+      "#abcdef",
+    );
+    (color("--color-secondary-bg").onReset as () => void)();
+    expect(color("--color-secondary-bg").value).toBe("#123456");
+  });
+}
+
+test("resetting a main color leaves its saved hover color unchanged", () => {
+  const view = editor({
+    collapsed: false,
+    vars: {
+      "--color-link": "#123456",
+      "--color-link-hover": "#abcdef",
+    },
+  });
+  const link = () =>
+    view.render().find((node) => node.props.colorKey === "--color-link")!.props;
+  (link().onReset as () => void)();
+  expect((link().vars as Record<string, string>)["--color-link-hover"]).toBe(
+    "#abcdef",
+  );
+});
 
 test("saving a new desktop theme asks before applying and Not now leaves it inactive", async () => {
   const view = editor();

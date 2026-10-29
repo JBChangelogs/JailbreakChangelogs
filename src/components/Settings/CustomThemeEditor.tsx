@@ -121,12 +121,14 @@ function ThemeColor({
   value,
   vars,
   onChange,
+  onReset,
   inline = false,
 }: {
   colorKey: string;
   value: string;
   vars: Record<string, string>;
   onChange: (value: string) => void;
+  onReset: () => void;
   inline?: boolean;
 }) {
   // var(--color-x) values show the color they point to.
@@ -142,7 +144,10 @@ function ThemeColor({
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(next.slice(i, i + 2), 16));
     onChange(`rgb(${r} ${g} ${b} / ${Math.round(alpha * 100)}%)`);
   };
-  if (inline) return <ColorPicker value={hex} onChange={change} compact />;
+  if (inline)
+    return (
+      <ColorPicker value={hex} onChange={change} onReset={onReset} compact />
+    );
   return (
     <div id={`theme-color-${colorKey}`} className="flex [&>button]:w-full">
       <ColorSwatch
@@ -150,6 +155,7 @@ function ThemeColor({
         value={hex}
         canOpen={() => true}
         onChange={change}
+        onReset={onReset}
       />
     </div>
   );
@@ -249,6 +255,9 @@ export default function CustomThemeEditor({
   const baselineRef = useRef<string | null>(null);
   if (baselineRef.current === null && snapshot) baselineRef.current = snapshot;
   const dirty = snapshot !== baselineRef.current;
+  const originalVars: Record<string, string> = baselineRef.current
+    ? (JSON.parse(baselineRef.current) as CustomThemeInput).vars
+    : {};
   const update = (change: Partial<CustomThemeInput>) =>
     current && setDraft({ ...current, ...change });
 
@@ -307,16 +316,13 @@ export default function CustomThemeEditor({
       !!theme?.logo_filter &&
       theme.logo_filter === matchLogoFilter(buttonHex(theme.vars)),
   );
-  const setColor = (key: string, value: string) => {
+  const setColor = (key: string, value: string, reset = false) => {
     if (!current) return;
     const vars = { ...current.vars, [key]: value };
     // Hover, active and focus colors follow their main color unless they
     // were changed since the editor opened or last saved.
-    const saved = baselineRef.current
-      ? (JSON.parse(baselineRef.current) as CustomThemeInput).vars
-      : {};
-    for (const [dep, linked] of FOLLOWS[key] ?? []) {
-      if (dep in vars && vars[dep] === saved[dep]) vars[dep] = linked;
+    for (const [dep, linked] of (reset ? [] : FOLLOWS[key]) ?? []) {
+      if (dep in vars && vars[dep] === originalVars[dep]) vars[dep] = linked;
     }
     update(
       matchLogo
@@ -679,33 +685,39 @@ export default function CustomThemeEditor({
                     {colorName(floatingColor)}
                   </span>
                 ) : (
-                  <Tabs
-                    value={floatingColor}
-                    onValueChange={setFloatingColor}
-                    radio
-                    className="min-w-0 flex-1"
-                  >
-                    <TabsList
-                      aria-label="Selected element colors"
-                      className="w-full min-w-0"
-                    >
-                      {floatingColors?.map((key) => (
-                        <TabsTrigger
-                          key={key}
-                          value={key}
-                          className="px-2 text-xs"
-                        >
-                          {colorName(key)}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="xs"
+                        aria-label="Selected element colors"
+                        className="border-border-card h-auto! min-w-0 flex-1 justify-between border py-1.5! text-left whitespace-normal"
+                      >
+                        <span className="min-w-0">
+                          {colorName(floatingColor)}
+                        </span>
+                        <Icon icon="lucide:chevron-down" aria-hidden="true" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="z-[10002]">
+                      <DropdownMenuRadioGroup
+                        value={floatingColor}
+                        onValueChange={setFloatingColor}
+                      >
+                        {floatingColors?.map((key) => (
+                          <DropdownMenuRadioItem key={key} value={key}>
+                            {colorName(key)}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="xs"
                   aria-label="Close color picker"
-                  className="shrink-0"
+                  className="size-7! shrink-0 p-0!"
                   onClick={() => setFloatingColors(null)}
                 >
                   <Icon icon="lucide:x" aria-hidden="true" />
@@ -719,6 +731,9 @@ export default function CustomThemeEditor({
                   vars={current.vars}
                   inline
                   onChange={(value) => setColor(floatingColor, value)}
+                  onReset={() =>
+                    setColor(floatingColor, originalVars[floatingColor], true)
+                  }
                 />
               )}
             </PopoverContent>
@@ -1065,6 +1080,7 @@ export default function CustomThemeEditor({
                           value={current.vars[key]}
                           vars={current.vars}
                           onChange={(value) => setColor(key, value)}
+                          onReset={() => setColor(key, originalVars[key], true)}
                         />
                       ))}
                     </div>
@@ -1379,6 +1395,9 @@ export default function CustomThemeEditor({
                   scheme={current.scheme}
                   logoFilter={current.logo_filter}
                   onPick={pickColors}
+                  hideTooltips={
+                    floatingColors !== null && !bottomPanel.collapsed
+                  }
                 />
               </details>
             </div>

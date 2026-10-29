@@ -63,12 +63,14 @@ export default function CustomThemePreview({
   scheme,
   logoFilter,
   onPick,
+  hideTooltips = false,
   className,
 }: {
   vars: Record<string, string>;
   scheme: "dark" | "light";
   logoFilter: string | null;
   onPick?: (keys: string[], element: Element) => void;
+  hideTooltips?: boolean;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -91,6 +93,7 @@ export default function CustomThemePreview({
   // One site tooltip for the whole preview: its anchor is moved over
   // whatever is hovered, instead of wrapping every sample in a Tooltip.
   const showTip = (event: React.MouseEvent) => {
+    if (hideTooltips) return setTip(null);
     const hit = keysAt(event.target);
     const root = rootRef.current;
     if (!hit || !root) return setTip(null);
@@ -113,6 +116,7 @@ export default function CustomThemePreview({
       onMouseOver={showTip}
       onMouseLeave={() => setTip(null)}
       onClick={(event) => {
+        setTip(null);
         const hit = keysAt(event.target);
         if (hit && onPick) onPick(hit.keys, hit.el);
       }}
@@ -575,7 +579,7 @@ export default function CustomThemePreview({
         </div>
       </div>
 
-      {tip && (
+      {tip && !hideTooltips && (
         // Keyed by position so the tooltip re-anchors to each new element.
         <Tooltip key={`${tip.left},${tip.top}`} open>
           <TooltipTrigger asChild>

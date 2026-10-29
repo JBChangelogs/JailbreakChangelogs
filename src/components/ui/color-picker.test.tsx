@@ -8,7 +8,7 @@ interface Node {
   type: string;
   props: {
     children?: unknown;
-    value?: string;
+    value?: string | number;
     maxLength?: number;
     className?: string;
     "aria-label"?: string;
@@ -64,16 +64,24 @@ test("hex input keeps a fixed prefix while clearing, typing, pasting and picking
           };
         if (name === "@/utils/ui/accentColor") return { hexToHsv, hsvToHex };
         if (name === "@/components/ui/popover") return {};
+        if (name === "@/components/ui/button") return { Button: "Button" };
+        if (name === "@/components/ui/IconWrapper") return { Icon: "Icon" };
         throw new Error(`Unexpected import: ${name}`);
       },
     },
   );
-  const render = (compact = false) => {
+  let value = "#5865f2";
+  const render = (compact = false, reset = false) => {
     cursor = 0;
     return nodes(
       exports.ColorPicker({
-        value: "#5865f2",
+        value,
         onChange: (hex: string) => changes.push(hex),
+        onReset: reset
+          ? () => {
+              value = "#5865f2";
+            }
+          : undefined,
         compact,
       }),
     );
@@ -128,4 +136,25 @@ test("hex input keeps a fixed prefix while clearing, typing, pasting and picking
   )!;
   compactHex.props.onChange?.({ target: { value: "123456" } });
   expect(changes.at(-1)).toBe("#123456");
+
+  expect(render().some((node) => node.type === "Button")).toBe(false);
+  value = "#123456";
+  render();
+  const reset = render(true, true).find((node) => node.type === "Button")!;
+  expect(reset.props.children).toContain("Reset to original");
+  reset.props.onClick?.();
+  render();
+  const restored = render();
+  expect(
+    restored.find((node) => node.props["aria-label"] === "Hex color")!.props
+      .value,
+  ).toBe("5865f2");
+  expect(
+    restored.find((node) => node.props["aria-label"] === "Hue")!.props.value,
+  ).toBe(Math.round(hexToHsv("#5865f2").h));
+  input().props.onChange?.({ target: { value: "abc" } });
+  render(true, true)
+    .find((node) => node.type === "Button")!
+    .props.onClick?.();
+  expect(input().props.value).toBe("5865f2");
 });
