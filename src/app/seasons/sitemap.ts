@@ -14,24 +14,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
       changeFrequency: "weekly",
     },
-    {
-      url: `${BASE_URL}/seasons/will-i-make-it`,
-      lastModified: new Date().toISOString(),
-      priority: 0.6,
-      changeFrequency: "weekly",
-    },
-    {
-      url: `${BASE_URL}/seasons/contracts`,
-      lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: "daily",
-    },
-    {
-      url: `${BASE_URL}/seasons/leaderboard`,
-      lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: "daily",
-    },
   ];
 
   const dynamicSeasonEntries = data

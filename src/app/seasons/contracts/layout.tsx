@@ -2,12 +2,14 @@ import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
 const pageMetadata: Metadata = {
-  title: "Weekly Contracts",
-  description: "Check the latest weekly contracts for Roblox Jailbreak.",
+  title: "Weekly Contracts Unavailable",
+  description:
+    "Jailbreak seasons are paused until further notice. Weekly season contracts are unavailable. Browse past seasons and their rewards.",
   alternates: { canonical: "/seasons/contracts" },
   openGraph: {
-    title: "Weekly Contracts | Jailbreak Seasons",
-    description: "Check the latest weekly contracts for Roblox Jailbreak.",
+    title: "Weekly Contracts Unavailable | Jailbreak Seasons",
+    description:
+      "Jailbreak seasons are paused until further notice. Weekly season contracts are unavailable. Browse past seasons and their rewards.",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
@@ -22,8 +24,9 @@ const pageMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Weekly Contracts | Jailbreak Seasons",
-    description: "Check the latest weekly contracts for Roblox Jailbreak.",
+    title: "Weekly Contracts Unavailable | Jailbreak Seasons",
+    description:
+      "Jailbreak seasons are paused until further notice. Weekly season contracts are unavailable. Browse past seasons and their rewards.",
     images: [
       "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
     ],

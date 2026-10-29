@@ -3,16 +3,16 @@ import { Metadata } from "next";
 
 const pageMetadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
-  title: "Will I Make It to Level 10?",
+  title: "Season XP Calculator Unavailable",
   description:
-    "Calculate your chances of reaching level 10 in the current Jailbreak season. Track your XP progress and see if you'll make it to the top rewards!",
+    "Jailbreak seasons are paused until further notice. The XP calculator is unavailable without an active season. Browse past seasons and their rewards.",
   alternates: {
     canonical: "/seasons/will-i-make-it",
   },
   openGraph: {
-    title: "Will I Make It to Level 10? | Jailbreak Seasons Calculator",
+    title: "Season XP Calculator Unavailable | Jailbreak Seasons Calculator",
     description:
-      "Calculate your chances of reaching level 10 in the current Jailbreak season. Track your XP progress and see if you'll make it to the top rewards!",
+      "Jailbreak seasons are paused until further notice. The XP calculator is unavailable without an active season. Browse past seasons and their rewards.",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
@@ -27,9 +27,9 @@ const pageMetadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Will I Make It to Level 10? | Jailbreak Seasons Calculator",
+    title: "Season XP Calculator Unavailable | Jailbreak Seasons Calculator",
     description:
-      "Calculate your chances of reaching level 10 in the current Jailbreak season. Track your XP progress and see if you'll make it to the top rewards!",
+      "Jailbreak seasons are paused until further notice. The XP calculator is unavailable without an active season. Browse past seasons and their rewards.",
     images: [
       "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
     ],

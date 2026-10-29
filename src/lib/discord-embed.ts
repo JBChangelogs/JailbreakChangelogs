@@ -13,9 +13,6 @@ const EMBED_LINKS = {
   changelogs: ["Changelogs", "/changelogs"],
   timeline: ["Update Timeline", "/changelogs/timeline"],
   seasons: ["Seasons", "/seasons"],
-  contracts: ["Weekly Contracts", "/seasons/contracts"],
-  leaderboard: ["Season Leaderboard", "/seasons/leaderboard"],
-  progression: ["Will I Make It?", "/seasons/will-i-make-it"],
   servers: ["Private Servers", "/servers"],
   robberies: ["Robbery Tracker", "/robberies"],
   bounties: ["Bounty Tracker", "/bounties"],
@@ -31,7 +28,7 @@ const BUTTON_GROUPS: [string[], (keyof typeof EMBED_LINKS)[]][] = [
     ["values", "calculator", "inventories"],
   ],
   [["changelogs"], ["changelogs", "timeline", "seasons"]],
-  [["seasons"], ["seasons", "contracts", "leaderboard", "progression"]],
+  [["seasons"], ["seasons"]],
   [
     ["inventories", "dupes", "og"],
     ["inventories", "dupes", "og", "values"],

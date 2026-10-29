@@ -46,26 +46,6 @@ export const navigationSections: NavigationSection[] = [
         title: "Browse Seasons",
         description: "Explore all game seasons and rewards",
       },
-      {
-        href: "/seasons/leaderboard",
-        icon: "material-symbols:leaderboard-rounded",
-        title: "Season Leaderboard",
-        description: "See top-ranked players this season",
-      },
-      {
-        href: "/seasons/contracts",
-        icon: "material-symbols:task-alt-rounded",
-        title: "Weekly Contracts",
-        description:
-          "Check this week's contracts and plan ahead without launching the game",
-      },
-      {
-        href: "/seasons/will-i-make-it",
-        icon: "material-symbols:trending-up-rounded",
-        title: "Will I Make It",
-        description:
-          "Enter your level and XP to see if you'll hit level 10 before the season ends",
-      },
     ],
   },
   {

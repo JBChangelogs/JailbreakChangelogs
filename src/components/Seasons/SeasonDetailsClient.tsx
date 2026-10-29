@@ -24,7 +24,6 @@ import {
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { Season, Reward, CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
@@ -206,26 +205,8 @@ export default function SeasonDetailsClient({
               {season.description}
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {isLatest ? (
-                <>
-                  <Button asChild size="sm">
-                    <Link href="/seasons/will-i-make-it">
-                      <Icon icon="heroicons:calculator" inline={true} />
-                      XP Calculator
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm" variant="secondary">
-                    <Link href="/seasons/contracts">
-                      <Icon
-                        icon="heroicons:clipboard-document-list"
-                        inline={true}
-                      />
-                      Weekly Contracts
-                    </Link>
-                  </Button>
-                </>
-              ) : (
+            {!isLatest && (
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   type="button"
                   size="sm"
@@ -234,8 +215,8 @@ export default function SeasonDetailsClient({
                   <Icon icon="heroicons:arrow-uturn-right" inline={true} />
                   Go to Latest Season
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
           {/* Nitro: video-nc unit should sit above the fold */}
           <NitroInlineVideoPlayer

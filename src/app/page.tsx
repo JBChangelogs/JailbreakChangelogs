@@ -99,20 +99,7 @@ const platformGroups = [
         href: "/seasons",
         icon: "mdi:trophy",
         title: "Seasons & Rewards",
-        description: "See season rewards, contracts, and your progress tools.",
-      },
-      {
-        href: "/seasons/leaderboard",
-        icon: "mdi:podium",
-        title: "Season Leaderboard",
-        description: "See where you rank on the current season leaderboard.",
-      },
-      {
-        href: "/seasons/will-i-make-it",
-        icon: "mdi:calculator",
-        title: "Will I Make It?",
-        description:
-          "Calculate whether you can hit your target season level before the season ends.",
+        description: "Browse past seasons and their rewards.",
       },
     ],
   },

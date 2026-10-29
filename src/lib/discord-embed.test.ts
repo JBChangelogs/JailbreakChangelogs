@@ -43,16 +43,7 @@ test("each section links to related tools without repeating the current page", (
       "/changelogs/123",
       ["Changelogs", "Update Timeline", "Seasons", "Join Discord"],
     ],
-    [
-      "/seasons/30",
-      [
-        "Seasons",
-        "Weekly Contracts",
-        "Season Leaderboard",
-        "Will I Make It?",
-        "Join Discord",
-      ],
-    ],
+    ["/seasons/30", ["Seasons", "Join Discord"]],
     [
       "/inventories",
       ["Dupe Finder", "OG Finder", "Item Values", "Join Discord"],

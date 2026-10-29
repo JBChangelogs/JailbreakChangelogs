@@ -4,16 +4,16 @@ import type { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   const metadata: Metadata = {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
-    title: "Season Leaderboard",
+    title: "Season Leaderboard Unavailable",
     description:
-      "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the season",
+      "Jailbreak seasons are paused until further notice. Live season rankings are unavailable. Browse past seasons and their rewards.",
     alternates: {
       canonical: "/seasons/leaderboard",
     },
     openGraph: {
-      title: "Season Leaderboard - Jailbreak Changelogs",
+      title: "Season Leaderboard Unavailable - Jailbreak Changelogs",
       description:
-        "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
+        "Jailbreak seasons are paused until further notice. Live season rankings are unavailable. Browse past seasons and their rewards.",
       images: [
         {
           url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
@@ -28,9 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Season Leaderboard - Jailbreak Changelogs",
+      title: "Season Leaderboard Unavailable - Jailbreak Changelogs",
       description:
-        "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
+        "Jailbreak seasons are paused until further notice. Live season rankings are unavailable. Browse past seasons and their rewards.",
       images: [
         "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
       ],
