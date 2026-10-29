@@ -122,6 +122,7 @@ function ThemeColor({
   vars,
   onChange,
   onReset,
+  canReset,
   inline = false,
 }: {
   colorKey: string;
@@ -129,6 +130,7 @@ function ThemeColor({
   vars: Record<string, string>;
   onChange: (value: string) => void;
   onReset: () => void;
+  canReset: boolean;
   inline?: boolean;
 }) {
   // var(--color-x) values show the color they point to.
@@ -146,7 +148,13 @@ function ThemeColor({
   };
   if (inline)
     return (
-      <ColorPicker value={hex} onChange={change} onReset={onReset} compact />
+      <ColorPicker
+        value={hex}
+        onChange={change}
+        onReset={onReset}
+        canReset={canReset}
+        compact
+      />
     );
   return (
     <div id={`theme-color-${colorKey}`} className="flex [&>button]:w-full">
@@ -156,6 +164,7 @@ function ThemeColor({
         canOpen={() => true}
         onChange={change}
         onReset={onReset}
+        canReset={canReset}
       />
     </div>
   );
@@ -735,6 +744,9 @@ export default function CustomThemeEditor({
                   vars={current.vars}
                   inline
                   onChange={(value) => setColor(floatingColor, value)}
+                  canReset={
+                    current.vars[floatingColor] !== originalVars[floatingColor]
+                  }
                   onReset={() =>
                     setColor(floatingColor, originalVars[floatingColor], true)
                   }
@@ -1084,6 +1096,7 @@ export default function CustomThemeEditor({
                           value={current.vars[key]}
                           vars={current.vars}
                           onChange={(value) => setColor(key, value)}
+                          canReset={current.vars[key] !== originalVars[key]}
                           onReset={() => setColor(key, originalVars[key], true)}
                         />
                       ))}

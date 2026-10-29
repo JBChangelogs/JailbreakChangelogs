@@ -31,11 +31,13 @@ export function ColorPicker({
   value,
   onChange,
   onReset,
+  canReset = true,
   compact = false,
 }: {
   value: string;
   onChange: (hex: string) => void;
   onReset?: () => void;
+  canReset?: boolean;
   compact?: boolean;
 }) {
   // Kept as HSV so the hue survives when the color is gray or black.
@@ -188,6 +190,7 @@ export function ColorPicker({
             variant="secondary"
             size="xs"
             className="border-border-card border"
+            disabled={!canReset}
             onClick={() => {
               setHexText(value.slice(1));
               onReset();
@@ -209,12 +212,14 @@ export function ColorSwatch({
   onChange,
   canOpen,
   onReset,
+  canReset = true,
 }: {
   label: string;
   value: string;
   onChange: (hex: string) => void;
   canOpen: () => boolean;
   onReset?: () => void;
+  canReset?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -234,7 +239,12 @@ export function ColorSwatch({
       </PopoverTrigger>
       {/* Above dialogs (z-10000), like dropdown menus, so it works inside one. */}
       <PopoverContent align="start" className="z-[10001] w-64 p-3">
-        <ColorPicker value={value} onChange={onChange} onReset={onReset} />
+        <ColorPicker
+          value={value}
+          onChange={onChange}
+          onReset={onReset}
+          canReset={canReset}
+        />
       </PopoverContent>
     </Popover>
   );

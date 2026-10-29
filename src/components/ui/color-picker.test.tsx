@@ -9,6 +9,7 @@ interface Node {
   props: {
     children?: unknown;
     value?: string | number;
+    disabled?: boolean;
     maxLength?: number;
     className?: string;
     "aria-label"?: string;
@@ -71,11 +72,12 @@ test("hex input keeps a fixed prefix while clearing, typing, pasting and picking
     },
   );
   let value = "#5865f2";
-  const render = (compact = false, reset = false) => {
+  const render = (compact = false, reset = false, canReset = true) => {
     cursor = 0;
     return nodes(
       exports.ColorPicker({
         value,
+        canReset,
         onChange: (hex: string) => changes.push(hex),
         onReset: reset
           ? () => {
@@ -142,6 +144,11 @@ test("hex input keeps a fixed prefix while clearing, typing, pasting and picking
   render();
   const reset = render(true, true).find((node) => node.type === "Button")!;
   expect(reset.props.children).toContain("Reset to original");
+  expect(reset.props.disabled).toBe(false);
+  expect(
+    render(true, true, false).find((node) => node.type === "Button")!.props
+      .disabled,
+  ).toBe(true);
   reset.props.onClick?.();
   render();
   const restored = render();

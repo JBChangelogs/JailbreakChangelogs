@@ -213,6 +213,7 @@ for (const mobile of [true, false]) {
       view.render().find((node) => node.props.onPick)!.props.hideTooltips,
     ).toBe(true);
     expect(control().props.colorKey).toBe("--color-primary-bg");
+    expect(control().props.canReset).toBe(false);
     const anchor = view.render().find((node) => node.type === "PopoverAnchor")!;
     const virtual = (
       anchor.props.virtualRef as {
@@ -232,6 +233,7 @@ for (const mobile of [true, false]) {
 
     (control().props.onChange as (value: string) => void)("#abcdef");
     expect(control().props.value).toBe("#abcdef");
+    expect(control().props.canReset).toBe(true);
     const colors = view
       .render()
       .find(
@@ -297,6 +299,7 @@ for (const mobile of [true, false]) {
     expect(control().props.value).toBe("#abcdef");
     (control().props.onReset as () => void)();
     expect(control().props.value).toBe("#111111");
+    expect(control().props.canReset).toBe(false);
     expect(
       (control().props.vars as Record<string, string>)["--color-secondary-bg"],
     ).toBe("#222222");
@@ -337,7 +340,7 @@ for (const original of [
   });
 }
 
-test("resetting a main color leaves its saved hover color unchanged", () => {
+test("an unchanged main color disables reset and leaves its saved hover color unchanged", () => {
   const view = editor({
     collapsed: false,
     vars: {
@@ -347,7 +350,7 @@ test("resetting a main color leaves its saved hover color unchanged", () => {
   });
   const link = () =>
     view.render().find((node) => node.props.colorKey === "--color-link")!.props;
-  (link().onReset as () => void)();
+  expect(link().canReset).toBe(false);
   expect((link().vars as Record<string, string>)["--color-link-hover"]).toBe(
     "#abcdef",
   );
