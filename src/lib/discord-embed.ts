@@ -69,7 +69,12 @@ function httpUrl(value: string): boolean {
 
 function buttons(url: string, robloxId?: string) {
   const path = new URL(url).pathname.replace(/\/$/, "");
-  const isUserProfile = /^\/users\/[^/]+$/.test(path);
+  // Profiles and their follow lists link the user's own inventory.
+  const profile = path.match(/^\/users\/([^/]+)(?:\/(followers|following))?$/);
+  const isUserProfile = Boolean(profile);
+  // A follow list links its sibling list instead of user search.
+  const otherList =
+    profile?.[2] && (profile[2] === "followers" ? "following" : "followers");
   const linkedRobloxId =
     typeof robloxId === "string" && /^[1-9]\d*$/.test(robloxId)
       ? robloxId
@@ -90,6 +95,14 @@ function buttons(url: string, robloxId?: string) {
         ],
     )
     .filter(([, route]) => route !== path)
+    .map(([label, route]): [string, string] =>
+      otherList && route === "/users"
+        ? [
+            otherList === "followers" ? "Followers" : "Following",
+            `/users/${profile[1]}/${otherList}`,
+          ]
+        : [label, route],
+    )
     .map(([label, route]) => [
       label,
       `${SITE_URL}${isUserProfile && route === "/inventories" ? `/inventories/${linkedRobloxId}` : route}`,

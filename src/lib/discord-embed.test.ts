@@ -59,6 +59,8 @@ test("each section links to related tools without repeating the current page", (
     ],
     ["/robberies/", ["Private Servers", "Bounty Tracker", "Join Discord"]],
     ["/users/123", ["User Search", "Item Values", "Join Discord"]],
+    ["/users/123/followers", ["Following", "Item Values", "Join Discord"]],
+    ["/users/123/following", ["Followers", "Item Values", "Join Discord"]],
     ["/supporting", ["Testimonials", "Meet the Team", "Join Discord"]],
   ] as const) {
     const url = `https://jailbreakchangelogs.com${path}`;
@@ -80,18 +82,19 @@ test("each section links to related tools without repeating the current page", (
 });
 
 test("profile inventory buttons require a linked Roblox ID and link to its inventory", async () => {
-  for (const robloxId of [
-    undefined,
-    "",
-    "None",
-    "0",
-    "../123",
-    "123?tab=trades",
-    "456789",
-  ]) {
+  for (const [robloxId, path] of [
+    [undefined, "/users/123/"],
+    ["", "/users/123/"],
+    ["None", "/users/123/"],
+    ["0", "/users/123/"],
+    ["../123", "/users/123/"],
+    ["123?tab=trades", "/users/123/"],
+    ["456789", "/users/123/"],
+    ["456789", "/users/123/followers"],
+  ] as const) {
     const metadata = withDiscordEmbed(
       { title: "User Profile" },
-      "/users/123/",
+      path,
       undefined,
       { robloxId },
     );
