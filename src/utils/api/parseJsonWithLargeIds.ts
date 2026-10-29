@@ -3,7 +3,7 @@ export function parseJsonWithLargeIds(raw: string): unknown {
   // fields and in id lists (e.g. a group's member_ids).
   const normalized = raw
     .replace(
-      /"(id|parent_id|reply_to_id|user_id|recipient_id|sender_id|receiver_id|group_id|owner_id|new_owner_id)"\s*:\s*(\d{16,})/g,
+      /"(id|item_id|parent_id|reply_to_id|user_id|recipient_id|sender_id|receiver_id|group_id|owner_id|new_owner_id)"\s*:\s*(\d{16,})/g,
       '"$1":"$2"',
     )
     .replace(

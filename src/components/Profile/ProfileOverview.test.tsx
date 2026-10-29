@@ -78,6 +78,18 @@ test("overview previews and legacy section links preserve account and owner rest
   const render = (overrides = {}) =>
     nodes(exports.default({ user, currentUserId: "789", ...overrides }));
   const overview = render();
+  const commentsIndex = overview.findIndex(
+    (node) => node.props.id === "comments",
+  );
+  expect(commentsIndex).toBeGreaterThan(
+    overview.findIndex((node) => node.type === "AboutTab"),
+  );
+  expect(commentsIndex).toBeGreaterThan(
+    overview.findIndex((node) => node.type === "FavoritesTab"),
+  );
+  const profileComments = overview.find((node) => node.props.type === "user");
+  expect(profileComments?.props.changelogId).toBe(user.id);
+
   const menuButton = overview.find(
     (node) => node.props["aria-controls"] === "profile-section-links",
   );
@@ -104,6 +116,18 @@ test("overview previews and legacy section links preserve account and owner rest
   expect(String(selected)).toBe("favorites");
   expect(menuOpen).toBe(false);
 
+  expect(commentsIndex).toBeGreaterThan(
+    overview.findIndex((node) => node.type === "CommentsTab"),
+  );
+  section = "profile-comments";
+  const discussion = render();
+  expect(discussion.some((node) => node.props.id === "comments")).toBe(true);
+  expect(discussion.some((node) => node.type === "CommentsTab")).toBe(false);
+  expect(discussion.some((node) => node.type === "FavoritesTab")).toBe(false);
+  section = "comments";
+  const activity = render();
+  expect(activity.some((node) => node.type === "CommentsTab")).toBe(true);
+  expect(activity.some((node) => node.props.id === "comments")).toBe(false);
   section = "inventory";
   expect(
     render().find((node) => node.type === "ProfileInventoryTab")?.props.active,

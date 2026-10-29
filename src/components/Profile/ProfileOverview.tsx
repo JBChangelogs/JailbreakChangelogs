@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
+import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import FavoritesTab from "./FavoritesTab";
 import TradeAdsProfileTab from "./TradeAdsProfileTab";
 import ProfileInventoryTab from "./ProfileInventoryTab";
@@ -81,8 +82,13 @@ export default function ProfileOverview({
     { id: "", label: "Overview", icon: "heroicons:squares-2x2" },
     { id: "favorites", label: "Favorites", icon: "heroicons:heart" },
     {
+      id: "profile-comments",
+      label: "Profile comments",
+      icon: "heroicons:chat-bubble-left",
+    },
+    {
       id: "comments",
-      label: "Comments",
+      label: "Recent comments",
       icon: "heroicons:chat-bubble-left-right",
     },
     ...(hasRobloxConnection
@@ -252,6 +258,21 @@ export default function ProfileOverview({
               active={section.id === "inventory"}
             />
           </div>
+        )}
+        {(isOverview || section.id === "profile-comments") && (
+          <section
+            id="comments"
+            className="scroll-mt-24"
+            aria-label="Profile comments"
+          >
+            <ChangelogComments
+              key={user.id}
+              changelogId={user.id}
+              changelogTitle={`${user.username}'s profile`}
+              type="user"
+              allowProfileComments={user.settings_v2?.allow_profile_comments}
+            />
+          </section>
         )}
       </div>
     </div>

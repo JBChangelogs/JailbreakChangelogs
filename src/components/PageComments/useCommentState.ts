@@ -1076,7 +1076,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
   useEffect(() => {
     const hash = window.location.hash;
     if (
-      !/^#comment-[1-9][0-9]*$/.test(hash) ||
+      !(
+        /^#comment-[1-9][0-9]*$/.test(hash) ||
+        (type === "user" && hash === "#comments")
+      ) ||
       scrolledCommentHash.current === hash
     )
       return;
@@ -1086,6 +1089,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
     if (!target) return;
     const frame = requestAnimationFrame(() => {
       target.scrollIntoView({ behavior: "smooth", block: "center" });
+      scrolledCommentHash.current = hash;
+      if (hash === "#comments") return;
       const surface = target.querySelector(".comment-link-surface") ?? target;
       surface.classList.add("comment-link-highlight");
       const path = window.location.pathname;
@@ -1100,10 +1105,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
           window.history.replaceState(null, "", path + search);
         }
       }, 10_000);
-      scrolledCommentHash.current = hash;
     });
     return () => cancelAnimationFrame(frame);
-  }, [comments, commentsReady]);
+  }, [comments, commentsReady, type]);
 
   // Server broadcasts name the changed comments, so only those threads update.
   // Older broadcasts without updates refresh the list before loading more,
@@ -1151,7 +1155,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
    * Optimistically updates the UI before confirming with a silent refresh.
    */
   const handleSubmitComment = async (content: string): Promise<boolean> => {
-    if (!isLoggedIn || !content.trim() || isSubmittingComment) return false;
+    if (
+      !isLoggedIn ||
+      !content.trim() ||
+      isSubmittingComment ||
+      profileCommentsDisabled
+    )
+      return false;
 
     const apiContent = prepareCommentContentForApi(content);
     const displayContent = prepareCommentDisplayContent(content);
@@ -1244,7 +1254,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         author: user?.username || "You",
         content: displayContent,
         date: Math.floor(Date.now() / 1000).toString(),
-        item_id: Number(changelogId),
+        item_id: type === "user" ? String(changelogId) : Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
         user_id: currentUserId || "",
         edited_at: null,
@@ -1537,7 +1547,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     parentId: number,
     content: string,
   ): Promise<boolean> => {
-    if (!isLoggedIn || !content.trim() || isSubmittingComment) return false;
+    if (
+      !isLoggedIn ||
+      !content.trim() ||
+      isSubmittingComment ||
+      profileCommentsDisabled
+    )
+      return false;
 
     const apiContent = prepareCommentContentForApi(content);
     const displayContent = prepareCommentDisplayContent(content);
@@ -1628,7 +1644,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         author: user?.username || "You",
         content: displayContent,
         date: Math.floor(Date.now() / 1000).toString(),
-        item_id: Number(changelogId),
+        item_id: type === "user" ? String(changelogId) : Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
         user_id: currentUserId || "",
         edited_at: null,
@@ -1775,7 +1791,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
     reactionRateLimitUntil !== null && Date.now() < reactionRateLimitUntil;
   const isPostRateLimited =
     rateLimitUntil !== null && Date.now() < rateLimitUntil;
-  const isBlocked = isPostRateLimited || !!commentBan;
+  const isProfileOwner =
+    type === "user" && currentUserId === String(changelogId);
+  const profileCommentsDisabled =
+    type === "user" && props.allowProfileComments === false && !isProfileOwner;
+  const isBlocked =
+    isPostRateLimited || !!commentBan || profileCommentsDisabled;
 
   const containerBgClass =
     type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
@@ -1788,13 +1809,17 @@ export function useCommentState(props: ChangelogCommentsProps) {
     ) ?? false;
 
   const canDeleteAnyComment =
-    (user as UserData | null)?.flags?.some(
+    isProfileOwner ||
+    ((user as UserData | null)?.flags?.some(
       (f) =>
         (f.flag === "is_owner" || f.flag === "website_moderator") &&
         f.enabled === true,
-    ) ?? false;
+    ) ??
+      false);
 
   return {
+    profileCommentsDisabled,
+    isProfileOwner,
     changelogId,
     changelogTitle,
     type,

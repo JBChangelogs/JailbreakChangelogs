@@ -30,6 +30,7 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
             useState: (initial: unknown) => [initial, () => {}],
             useEffect: () => {},
           };
+        if (name === "@/utils/ui/avatar") return { UserAvatar: "UserAvatar" };
         if (name === "next/link") return { default: "Link" };
         if (name === "next/image") return { default: "Image" };
         if (name === "@/utils/items/categoryIcons")
@@ -67,6 +68,45 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
     reply_to_id: null,
     changelogDetails: { title: "Update" },
   };
+  const profileLinks = nodes(
+    exports.default({
+      ...props,
+      item_type: "user",
+      item_id: "123456789012345678",
+    }),
+  ).filter((node) => node.type === "Link");
+  expect(profileLinks.map((node) => node.props.href)).toEqual([
+    "/users/123456789012345678#comment-42",
+    "/users/123456789012345678#comment-42",
+  ]);
+  const owner = {
+    id: "123456789012345678",
+    username: "Profile owner name",
+    avatar: "hash",
+    custom_avatar: "custom.webp",
+    settings_v2: { custom_avatar: true },
+  };
+  const profileCard = nodes(
+    exports.default({
+      ...props,
+      item_type: "user",
+      item_id: owner.id,
+      profileOwner: owner,
+    }),
+  );
+  expect(
+    profileCard.some(
+      (node) => node.props.children === "Profile owner name's profile",
+    ),
+  ).toBe(true);
+  const avatar = profileCard.find((node) => node.type === "UserAvatar");
+  expect(avatar?.props).toMatchObject({
+    userId: owner.id,
+    username: owner.username,
+    avatarHash: "hash",
+    custom_avatar: "custom.webp",
+    settings: { custom_avatar: true },
+  });
   const normal = nodes(exports.default(props));
   expect(
     normal.some((node) =>
@@ -106,6 +146,7 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
     ["vsuggestion", "/items/suggestions/5?tab=discussion#comment-42"],
     ["value_suggestion", "/items/suggestions/5?tab=discussion#comment-42"],
     ["season", "/seasons/5#comment-42"],
+    ["user", "/users/5#comment-42"],
   ]) {
     const destinations = nodes(
       exports.default({

@@ -2,6 +2,7 @@
 export interface UserSettings {
   profile_public: boolean;
   show_recent_comments: boolean;
+  allow_profile_comments?: boolean;
   hide_following: boolean;
   hide_followers: boolean;
   hide_favorites: boolean;

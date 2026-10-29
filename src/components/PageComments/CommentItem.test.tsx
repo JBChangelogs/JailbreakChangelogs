@@ -35,8 +35,11 @@ test("reply privacy and copied comment links preserve the target and discussion"
     },
     currentUserId: "viewer",
     type: "changelog",
+    changelogId: "root",
     suggestion: { suggester: "target", upvoterIds: ["target"] },
     isLoggedIn: true,
+    canDeleteAnyComment: false,
+    isProfileOwner: false,
     replyingToId: 1,
     replyingToReplyId: 2,
     expandedComments: new Set(),
@@ -167,6 +170,7 @@ test("reply privacy and copied comment links preserve the target and discussion"
     "inventory",
     "tradev2",
     "vsuggestion",
+    "user",
   ]) {
     context.type = type;
     const actions = copyActions(exports.CommentItem({ comment }));
@@ -186,14 +190,33 @@ test("reply privacy and copied comment links preserve the target and discussion"
       expect(link.searchParams.has("commentsPage")).toBe(false);
       expect(link.searchParams.has("commentsSort")).toBe(false);
       expect(link.searchParams.get("tab")).toBe(
-        type === "vsuggestion"
-          ? "discussion"
-          : ["item", "inventory", "tradev2"].includes(type)
-            ? "comments"
-            : null,
+        type === "user"
+          ? "profile-comments"
+          : type === "vsuggestion"
+            ? "discussion"
+            : ["item", "inventory", "tradev2"].includes(type)
+              ? "comments"
+              : null,
       );
     }
   }
+  context.type = "user";
+  expect(render()).toContain('"children":"Profile owner"');
+  context.changelogId = "sender";
+  expect(render()).toContain('"children":"Profile owner"');
+  context.changelogId = "target";
+  expect((render().match(/"children":"Profile owner"/g) ?? []).length).toBe(2);
+  context.changelogId = "visitor";
+  expect(render()).not.toContain('"children":"Profile owner"');
+  context.canDeleteAnyComment = true;
+  context.isProfileOwner = true;
+  const ownerMenu = render();
+  expect(ownerMenu).toContain("Delete Comment");
+  expect(ownerMenu).not.toContain("(Moderator)");
+  context.canDeleteAnyComment = false;
+  expect((ownerMenu.match(/Delete Comment/g) ?? []).length).toBeGreaterThan(
+    (render().match(/Delete Comment/g) ?? []).length,
+  );
   context.isLoggedIn = false;
   const guestActions = copyActions(exports.CommentItem({ comment }));
   expect(guestActions).toHaveLength(3);

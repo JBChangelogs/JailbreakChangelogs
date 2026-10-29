@@ -44,7 +44,7 @@ export function CommentHeader() {
             `Season ${changelogId}: ${changelogTitle}`
           ) : type === "tradev2" ? (
             `Trade #${changelogId}`
-          ) : type === "inventory" ? (
+          ) : type === "inventory" || type === "user" ? (
             changelogTitle
           ) : type === "vsuggestion" ? (
             changelogTitle

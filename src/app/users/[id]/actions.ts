@@ -49,7 +49,7 @@ export async function fetchFavoritesData(userId: string, signal?: AbortSignal) {
 }
 
 export async function fetchCommentDetails(
-  comments: Array<{ item_type: string; item_id: number }>,
+  comments: Array<{ item_type: string; item_id: number | string }>,
 ) {
   try {
     const itemIds = [
@@ -64,7 +64,8 @@ export async function fetchCommentDetails(
               type !== "tradev2" &&
               type !== "vsuggestion" &&
               type !== "value_suggestion" &&
-              type !== "inventory"
+              type !== "inventory" &&
+              type !== "user"
             );
           })
           .map((c) => c.item_id.toString()),

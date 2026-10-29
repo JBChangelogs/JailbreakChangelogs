@@ -21,6 +21,7 @@ import Twemoji from "react-twemoji";
 
 export function CommentForm() {
   const {
+    profileCommentsDisabled,
     isLoggedIn,
     isBlocked,
     isCommentFormExpanded,
@@ -74,6 +75,14 @@ export function CommentForm() {
       setNewComment("");
     }
   };
+
+  if (profileCommentsDisabled) {
+    return (
+      <p className="text-secondary-text text-sm">
+        Profile comments are disabled.
+      </p>
+    );
+  }
 
   return (
     <form id="new-comment-form" onSubmit={handleFormSubmit}>

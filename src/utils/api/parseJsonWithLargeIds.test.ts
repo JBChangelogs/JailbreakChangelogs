@@ -19,6 +19,19 @@ describe("API JSON with large IDs", () => {
     });
   });
 
+  test("preserves profile comment targets while keeping ordinary item IDs numeric", () => {
+    expect(
+      parseJsonWithLargeIds(
+        '{"items":[{"item_type":"user","item_id":1019539798383398912},{"item_type":"season","item_id":33}]}',
+      ),
+    ).toEqual({
+      items: [
+        { item_type: "user", item_id: "1019539798383398912" },
+        { item_type: "season", item_id: 33 },
+      ],
+    });
+  });
+
   test("preserving numeric IDs does not change quoted IDs or unrelated response data", () => {
     expect(
       parseJsonWithLargeIds(

@@ -86,6 +86,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     isLoggedIn,
     isClient,
     type,
+    changelogId,
     trade,
     suggestion,
     editingCommentId,
@@ -117,6 +118,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     setBreakdownTab,
     getStableReactionOrder,
     canDeleteAnyComment,
+    isProfileOwner,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
 
@@ -182,7 +184,8 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     const url = new URL(window.location.href);
     url.searchParams.delete("commentsPage");
     url.searchParams.delete("commentsSort");
-    if (type === "vsuggestion") url.searchParams.set("tab", "discussion");
+    if (type === "user") url.searchParams.set("tab", "profile-comments");
+    else if (type === "vsuggestion") url.searchParams.set("tab", "discussion");
     else if (isRobloxContext || type === "item")
       url.searchParams.set("tab", "comments");
     url.hash = `comment-${commentId}`;
@@ -531,7 +534,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             limit={1}
                           />
 
-                          {/* OP badge for trade ad authors and value suggestion submitters */}
                           {type === "tradev2" &&
                             trade &&
                             comment.user_id === trade.author && (
@@ -539,13 +541,15 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 OP
                               </span>
                             )}
-                          {type === "vsuggestion" &&
-                            suggestion &&
-                            comment.user_id === suggestion.suggester && (
-                              <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                                OP
-                              </span>
-                            )}
+                          {((type === "user" &&
+                            comment.user_id === String(changelogId)) ||
+                            (type === "vsuggestion" &&
+                              suggestion &&
+                              comment.user_id === suggestion.suggester)) && (
+                            <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                              {type === "user" ? "Profile owner" : "OP"}
+                            </span>
+                          )}
                           {type === "vsuggestion" &&
                             suggestion?.upvoterIds?.includes(
                               comment.user_id,
@@ -766,7 +770,9 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                   icon="heroicons-outline:trash"
                                   className="mr-2 h-4 w-4"
                                 />
-                                Delete Comment (Moderator)
+                                {isProfileOwner
+                                  ? "Delete Comment"
+                                  : "Delete Comment (Moderator)"}
                               </DropdownMenuItem>
                             )}
                           </>
@@ -1058,7 +1064,9 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                         icon="heroicons-outline:trash"
                         className="h-4 w-4"
                       />
-                      Delete Comment (Moderator)
+                      {isProfileOwner
+                        ? "Delete Comment"
+                        : "Delete Comment (Moderator)"}
                     </ContextMenuItem>
                   )}
                 </>
@@ -1190,14 +1198,19 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           noContainer
                                           limit={1}
                                         />
-                                        {type === "vsuggestion" &&
-                                          suggestion &&
+                                        {((type === "user" &&
                                           reply.user_id ===
-                                            suggestion.suggester && (
-                                            <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                                              OP
-                                            </span>
-                                          )}
+                                            String(changelogId)) ||
+                                          (type === "vsuggestion" &&
+                                            suggestion &&
+                                            reply.user_id ===
+                                              suggestion.suggester)) && (
+                                          <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                                            {type === "user"
+                                              ? "Profile owner"
+                                              : "OP"}
+                                          </span>
+                                        )}
                                         {type === "vsuggestion" &&
                                           suggestion?.upvoterIds?.includes(
                                             reply.user_id,
@@ -1249,12 +1262,17 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                               />
                                             )}
                                             {!replyToTargetHidden &&
-                                              type === "vsuggestion" &&
-                                              suggestion &&
-                                              replyToTarget.user_id ===
-                                                suggestion.suggester && (
+                                              ((type === "user" &&
+                                                replyToTarget.user_id ===
+                                                  String(changelogId)) ||
+                                                (type === "vsuggestion" &&
+                                                  suggestion &&
+                                                  replyToTarget.user_id ===
+                                                    suggestion.suggester)) && (
                                                 <span className="from-button-info to-button-info-hover text-card-tag-text border-button-info/30 inline-flex items-center rounded-lg border bg-linear-to-r px-1.5 py-0.5 text-[10px] leading-none font-medium">
-                                                  OP
+                                                  {type === "user"
+                                                    ? "Profile owner"
+                                                    : "OP"}
                                                 </span>
                                               )}
                                             {!replyToTargetHidden &&
@@ -1506,7 +1524,9 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                                 icon="heroicons-outline:trash"
                                                 className="mr-2 h-4 w-4"
                                               />
-                                              Delete (Moderator)
+                                              {isProfileOwner
+                                                ? "Delete"
+                                                : "Delete (Moderator)"}
                                             </DropdownMenuItem>
                                           )}
                                         </>
@@ -1737,7 +1757,9 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       icon="heroicons-outline:trash"
                                       className="h-4 w-4"
                                     />
-                                    Delete Comment (Moderator)
+                                    {isProfileOwner
+                                      ? "Delete Comment"
+                                      : "Delete Comment (Moderator)"}
                                   </ContextMenuItem>
                                 )}
                               </>

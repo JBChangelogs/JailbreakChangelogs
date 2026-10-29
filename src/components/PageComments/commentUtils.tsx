@@ -161,6 +161,19 @@ export const handleCommentApiError = (
   data: CommentApiErrorData | null | undefined,
   defaultMessage: string,
 ) => {
+  const profileErrors: Record<string, string> = {
+    user_not_found: "This profile no longer exists.",
+    comments_disabled: "The profile owner has turned profile comments off.",
+    blocked:
+      "You cannot comment because you or the profile owner has blocked the other.",
+  };
+  if (data?.error && profileErrors[data.error]) {
+    toast.error(formatErrorTitle(data.error), {
+      description: data.message || profileErrors[data.error],
+    });
+    return true;
+  }
+
   if (data?.error === "profanity_detected") {
     const flagged = data.flagged || [];
     const message =

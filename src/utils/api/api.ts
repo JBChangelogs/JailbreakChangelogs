@@ -1364,7 +1364,7 @@ export interface CommentData {
   id: number;
   content: string;
   date: string;
-  item_id: number;
+  item_id: number | string;
   item_type: string;
   edited_at: string | null;
   parent_id?: number | null;

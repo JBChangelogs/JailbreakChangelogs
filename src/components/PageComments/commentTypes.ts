@@ -13,8 +13,10 @@ export interface ChangelogCommentsProps {
     | "item"
     | "tradev2"
     | "inventory"
-    | "vsuggestion";
+    | "vsuggestion"
+    | "user";
   itemType?: string;
+  allowProfileComments?: boolean;
   trade?: {
     author: string;
   };

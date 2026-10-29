@@ -3,6 +3,7 @@ import { QueryClient, queryOptions } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
+import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import type { changelogTimelineQueryOptions } from "@/hooks/useChangelogTimeline";
 
@@ -13,13 +14,24 @@ test("profile comments reuse one timeline request for over ten distinct changelo
     id: i + 1,
     title: `Update ${i + 1}`,
   }));
-  const comments = changelogs.map(({ id }) => ({
+  const comments: {
+    id: number;
+    item_id: number | string;
+    item_type: string;
+  }[] = changelogs.map(({ id }) => ({
     id,
     item_id: id,
     item_type: "changelog",
   }));
   const queries: {
-    queryFn: () => Promise<{ changelogs: Record<string, unknown> }>;
+    queryKey: unknown[];
+    enabled?: boolean;
+    queryFn: (context?: { signal: AbortSignal }) => Promise<
+      {
+        comments: { item_id: string }[];
+        changelogs: Record<string, unknown>;
+      } & Record<string, { username?: string }>
+    >;
   }[] = [];
   const timeline = {} as {
     changelogTimelineQueryOptions: typeof changelogTimelineQueryOptions;
@@ -27,6 +39,16 @@ test("profile comments reuse one timeline request for over ten distinct changelo
   const component = {} as { default: (props: unknown) => unknown };
   const fetch = async (url: string, options: RequestInit) => {
     calls.push({ url: String(url), options });
+    if (String(url).includes("/v2/users/batch")) {
+      return new Response(
+        '[{"id":123456789012345678,"username":"Owner one","avatar":"hash"},{"id":987654321098765432,"username":"Owner two","avatar":null}]',
+      );
+    }
+    if (String(url).includes("/comments?page=")) {
+      return new Response(
+        '{"items":[{"id":42,"item_type":"user","item_id":123456789012345678,"user":{"id":"author","username":"Author"}}],"total":1,"total_pages":1}',
+      );
+    }
     expect(String(url)).toBe("https://api.example.com/v2/changelogs");
     return Response.json(changelogs);
   };
@@ -45,6 +67,7 @@ test("profile comments reuse one timeline request for over ten distinct changelo
       {
         exports,
         fetch,
+        URLSearchParams,
         require: (name: string) => {
           if (name === "nuqs")
             return {
@@ -81,6 +104,8 @@ test("profile comments reuse one timeline request for over ten distinct changelo
             };
           if (name === "@/utils/api/api")
             return { PUBLIC_API_URL: "https://api.example.com" };
+          if (name === "@/utils/api/parseJsonWithLargeIds")
+            return { parseJsonWithLargeIds };
           if (name === "@/utils/api/apiDevToken")
             return { buildApiFetchRequest };
           if (name === "@/hooks/useChangelogTimeline") return timeline;
@@ -95,14 +120,44 @@ test("profile comments reuse one timeline request for over ten distinct changelo
   }
   try {
     component.default({ userId: "123" });
-    const details = await queries[1]!.queryFn();
+    expect(queries[1]!.enabled).toBe(false);
+    const details = await queries[2]!.queryFn();
     expect(Object.keys(details.changelogs)).toHaveLength(12);
     expect(details.changelogs["12"]).toEqual(changelogs[11]);
-    await queries[1]!.queryFn();
+    await queries[2]!.queryFn();
     await client.fetchQuery(timeline.changelogTimelineQueryOptions());
     expect(calls).toHaveLength(1);
     expect(calls[0]!.options.credentials).toBe("include");
     expect(calls[0]!.options.signal).toBeInstanceOf(AbortSignal);
+    comments.splice(
+      0,
+      comments.length,
+      { id: 1, item_id: "123456789012345678", item_type: "user" },
+      { id: 2, item_id: "123456789012345678", item_type: "user" },
+      { id: 3, item_id: "987654321098765432", item_type: "user" },
+    );
+    queries.length = 0;
+    component.default({ userId: "123" });
+    expect(queries[1]!.enabled).toBe(true);
+    const parsedComments = await queries[0]!.queryFn({
+      signal: new AbortController().signal,
+    });
+    expect(parsedComments.comments[0]!.item_id).toBe("123456789012345678");
+    const owners = await queries[1]!.queryFn({
+      signal: new AbortController().signal,
+    });
+    expect(owners["123456789012345678"].username).toBe("Owner one");
+    expect(owners["987654321098765432"].username).toBe("Owner two");
+    const batchCalls = calls.filter((call) =>
+      call.url.includes("/v2/users/batch"),
+    );
+    expect(batchCalls).toHaveLength(1);
+    const params = new URL(batchCalls[0]!.url).searchParams;
+    expect(params.get("ids")).toBe("123456789012345678,987654321098765432");
+    expect(params.get("fields")).toBe(
+      "id,username,avatar,custom_avatar,premiumtype,settings_v2",
+    );
+    expect(batchCalls[0]!.options.credentials).toBe("include");
   } finally {
     client.clear();
   }

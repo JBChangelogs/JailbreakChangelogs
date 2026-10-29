@@ -32,6 +32,12 @@ import {
   IMAGE_PATHS,
 } from "@/utils/ui/images";
 import { ItemDetails } from "@/types";
+import type { UserData } from "@/types/auth";
+
+export type ProfileCommentUser = Pick<
+  UserData,
+  "id" | "username" | "avatar" | "custom_avatar" | "premiumtype" | "settings_v2"
+>;
 import { getCategoryColor } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -60,7 +66,7 @@ interface CommentProps {
   author: string;
   content: string;
   date: string;
-  item_id: number;
+  item_id: number | string;
   item_type: string;
   user_id: string;
   edited_at: number | null;
@@ -76,6 +82,7 @@ interface CommentProps {
   itemDetails?: unknown;
   seasonDetails?: unknown;
   tradeDetails?: unknown;
+  profileOwner?: ProfileCommentUser;
   isLoading?: boolean;
 }
 
@@ -231,6 +238,7 @@ export default function Comment({
   changelogDetails: propChangelogDetails,
   itemDetails: propItemDetails,
   seasonDetails: propSeasonDetails,
+  profileOwner,
   isLoading: propIsLoading,
 }: CommentProps) {
   const { twemojiEnabled } = useTwemoji();
@@ -252,9 +260,11 @@ export default function Comment({
     item_type.toLowerCase(),
   )
     ? "Item Suggestion"
-    : item_type.toLowerCase() === "tradev2"
-      ? "Trade Ad"
-      : item_type.charAt(0).toUpperCase() + item_type.slice(1);
+    : item_type.toLowerCase() === "user"
+      ? "Profile"
+      : item_type.toLowerCase() === "tradev2"
+        ? "Trade Ad"
+        : item_type.charAt(0).toUpperCase() + item_type.slice(1);
 
   const hasReactions = reactions && reactions.length > 0;
   const top5 = reactions ? reactions.slice(0, 5) : [];
@@ -312,6 +322,23 @@ export default function Comment({
   };
 
   const renderThumbnail = () => {
+    if (item_type.toLowerCase() === "user" && profileOwner) {
+      return (
+        <div className="shrink-0">
+          <UserAvatar
+            userId={profileOwner.id}
+            username={profileOwner.username}
+            avatarHash={profileOwner.avatar ?? null}
+            custom_avatar={profileOwner.custom_avatar}
+            settings={profileOwner.settings_v2}
+            premiumType={profileOwner.premiumtype}
+            size={12}
+            showBadge={false}
+          />
+        </div>
+      );
+    }
+
     if (item_type.toLowerCase() === "changelog") {
       return (
         <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
@@ -491,6 +518,11 @@ export default function Comment({
       return `Item Suggestion #${item_id}`;
     }
 
+    if (item_type.toLowerCase() === "user")
+      return profileOwner
+        ? `${profileOwner.username}'s profile`
+        : `Profile #${item_id}`;
+
     if (itemDetails?.name) {
       return itemDetails.name;
     }
@@ -521,21 +553,23 @@ export default function Comment({
   };
 
   const contextHref =
-    item_type.toLowerCase() === "changelog"
-      ? `/changelogs/${item_id}`
-      : item_type.toLowerCase() === "season"
-        ? `/seasons/${item_id}`
-        : item_type.toLowerCase() === "tradev2"
-          ? `/trading/ad/${item_id}?tab=comments`
-          : item_type.toLowerCase() === "inventory"
-            ? `/inventories/${item_id}?tab=comments`
-            : ["vsuggestion", "value_suggestion"].includes(
-                  item_type.toLowerCase(),
-                )
-              ? `/items/suggestions/${item_id}?tab=discussion`
-              : itemDetails?.name
-                ? `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails.name)}?tab=comments`
-                : null;
+    item_type.toLowerCase() === "user"
+      ? `/users/${item_id}`
+      : item_type.toLowerCase() === "changelog"
+        ? `/changelogs/${item_id}`
+        : item_type.toLowerCase() === "season"
+          ? `/seasons/${item_id}`
+          : item_type.toLowerCase() === "tradev2"
+            ? `/trading/ad/${item_id}?tab=comments`
+            : item_type.toLowerCase() === "inventory"
+              ? `/inventories/${item_id}?tab=comments`
+              : ["vsuggestion", "value_suggestion"].includes(
+                    item_type.toLowerCase(),
+                  )
+                ? `/items/suggestions/${item_id}?tab=discussion`
+                : itemDetails?.name
+                  ? `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails.name)}?tab=comments`
+                  : null;
   const threadHref = contextHref ? `${contextHref}#comment-${id}` : null;
   const context = (
     <>

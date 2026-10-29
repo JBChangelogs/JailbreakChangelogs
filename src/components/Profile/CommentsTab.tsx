@@ -11,9 +11,10 @@ const log = createLogger("UI");
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
-import Comment from "../ProfileComments/Comments";
+import Comment, { type ProfileCommentUser } from "../ProfileComments/Comments";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 import { PUBLIC_API_URL } from "@/utils/api/api";
+import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { changelogTimelineQueryOptions } from "@/hooks/useChangelogTimeline";
 
@@ -35,7 +36,7 @@ interface CommentData {
   author: string;
   content: string;
   date: string;
-  item_id: number;
+  item_id: number | string;
   item_type: string;
   user_id: string;
   edited_at: number | null;
@@ -193,7 +194,11 @@ export default function CommentsTab({
       if (!response.ok) {
         throw new Error(`Failed to fetch comments (${response.status})`);
       }
-      const data = await response.json();
+      const data = parseJsonWithLargeIds(await response.text()) as {
+        items?: unknown;
+        total_pages?: number;
+        total?: number;
+      };
       const items = Array.isArray(data?.items) ? data.items : [];
       return {
         comments: items.map(
@@ -201,7 +206,7 @@ export default function CommentsTab({
             id: number;
             content: string;
             date: string;
-            item_id: number;
+            item_id: number | string;
             item_type: string;
             edited_at: number | null;
             parent_id?: number | null;
@@ -242,6 +247,46 @@ export default function CommentsTab({
   const visibleComments = preview
     ? profileComments.slice(0, 3)
     : profileComments;
+  const profileOwnerIds = [
+    ...new Set(
+      visibleComments
+        .filter((comment) => comment.item_type.toLowerCase() === "user")
+        .map((comment) => String(comment.item_id)),
+    ),
+  ].sort();
+  const profileOwnersQuery = useQuery({
+    queryKey: ["profile-comment-owners", currentUserId, profileOwnerIds],
+    enabled: !shouldHideComments && profileOwnerIds.length > 0,
+    queryFn: async ({
+      signal,
+    }): Promise<Record<string, ProfileCommentUser>> => {
+      const params = new URLSearchParams({
+        ids: profileOwnerIds.join(","),
+        fields: "id,username,avatar,custom_avatar,premiumtype,settings_v2",
+      });
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/batch?${params}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok)
+        throw new Error("Failed to fetch profile comment owners");
+      const users = parseJsonWithLargeIds(
+        await response.text(),
+      ) as ProfileCommentUser[];
+      if (!Array.isArray(users))
+        throw new Error("Invalid profile comment owners response");
+      return Object.fromEntries(users.map((user) => [user.id, user]));
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
   const commentsNeedingDetails = visibleComments.filter(
     (comment) => !sharedItemDetails[comment.item_id.toString()],
   );
@@ -403,6 +448,9 @@ export default function CommentsTab({
                     <Comment
                       key={comment.id}
                       {...comment}
+                      profileOwner={
+                        profileOwnersQuery.data?.[String(comment.item_id)]
+                      }
                       replyToComment={(() => {
                         const targetId =
                           comment.reply_to_id ?? comment.parent_id;

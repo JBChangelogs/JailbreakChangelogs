@@ -12,6 +12,10 @@ test("comment links show only their thread, and the list merges loaded pages", a
   const paramUpdates: Record<string, string | number | null>[] = [];
   let timer: () => Promise<void>;
   let lookupStatus = 200;
+  let authUser: {
+    id: string;
+    flags?: { flag: string; enabled: boolean }[];
+  } | null = null;
   const listeners = new Map<string, (event: unknown) => void>();
   let scrolls = 0;
   const initialComments: unknown[] = [];
@@ -40,6 +44,10 @@ test("comment links show only their thread, and the list merges loaded pages", a
     search: "?tab=comments",
   };
   type State = {
+    isProfileOwner: boolean;
+    canDeleteAnyComment: boolean;
+    profileCommentsDisabled: boolean;
+    isBlocked: boolean;
     comments: { id: number }[];
     totalComments: number;
     focusedThread: { page: number; commentId: number } | null;
@@ -65,7 +73,7 @@ test("comment links show only their thread, and the list merges loaded pages", a
       document: {
         querySelector: () => null,
         querySelectorAll: (selector: string) =>
-          selector === "#comment-42"
+          selector === "#comment-42" || selector === "#comments"
             ? [
                 {
                   getClientRects: () => [true],
@@ -176,7 +184,13 @@ test("comment links show only their thread, and the list merges loaded pages", a
             }),
           };
         if (name === "@/contexts/AuthContext")
-          return { useAuthContext: () => ({ user: null, bans: {} }) };
+          return {
+            useAuthContext: () => ({
+              user: authUser,
+              isAuthenticated: !!authUser,
+              bans: {},
+            }),
+          };
         if (name === "@/hooks/useSupporterModal")
           return { useSupporterModal: () => ({}) };
         if (name === "@/hooks/useEmojiStringMap")
@@ -203,8 +217,9 @@ test("comment links show only their thread, and the list merges loaded pages", a
     },
   );
   const props = {
-    changelogId: 5,
+    changelogId: 5 as string | number,
     type: "changelog",
+    allowProfileComments: true,
     changelogTitle: "Update",
     initialComments,
   };
@@ -338,4 +353,37 @@ test("comment links show only their thread, and the list merges loaded pages", a
   expect(paramUpdates.at(-1)).toEqual({ commentsSort: "oldest" });
   expect(historyOptions.at(-1)).toEqual({ history: "push" });
   expect(new URLSearchParams(location.search).get("tab")).toBe("comments");
+
+  props.type = "user";
+  props.changelogId = "123456789012345678";
+  props.allowProfileComments = false;
+  expect(render().profileCommentsDisabled).toBe(true);
+  expect(render().canDeleteAnyComment).toBe(false);
+  authUser = { id: String(props.changelogId) };
+  render();
+  effects.find((entry) => entry.deps.includes(authUser))!.callback();
+  expect(render().isProfileOwner).toBe(true);
+  expect(render().canDeleteAnyComment).toBe(true);
+  expect(render().profileCommentsDisabled).toBe(false);
+  expect(render().isBlocked).toBe(false);
+  authUser = { id: "visitor" };
+  render();
+  effects.find((entry) => entry.deps.includes(authUser))!.callback();
+  expect(render().canDeleteAnyComment).toBe(false);
+  expect(render().profileCommentsDisabled).toBe(true);
+  props.allowProfileComments = true;
+  expect(render().profileCommentsDisabled).toBe(false);
+  authUser = {
+    id: "moderator",
+    flags: [{ flag: "website_moderator", enabled: true }],
+  };
+  expect(render().canDeleteAnyComment).toBe(true);
+  location.hash = "#comments";
+  render();
+  const previousScrolls = scrolls;
+  effects
+    .find((entry) => entry.deps.length === 3 && entry.deps[2] === "user")!
+    .callback();
+  expect(scrolls).toBe(previousScrolls + 1);
+  expect(location.hash).toBe("#comments");
 });
