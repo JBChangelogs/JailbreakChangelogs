@@ -1809,13 +1809,11 @@ export function useCommentState(props: ChangelogCommentsProps) {
     ) ?? false;
 
   const canDeleteAnyComment =
-    isProfileOwner ||
-    ((user as UserData | null)?.flags?.some(
+    (user as UserData | null)?.flags?.some(
       (f) =>
         (f.flag === "is_owner" || f.flag === "website_moderator") &&
         f.enabled === true,
-    ) ??
-      false);
+    ) ?? false;
 
   return {
     profileCommentsDisabled,

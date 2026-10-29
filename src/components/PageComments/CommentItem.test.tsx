@@ -39,7 +39,6 @@ test("reply privacy and copied comment links preserve the target and discussion"
     suggestion: { suggester: "target", upvoterIds: ["target"] },
     isLoggedIn: true,
     canDeleteAnyComment: false,
-    isProfileOwner: false,
     replyingToId: 1,
     replyingToReplyId: 2,
     expandedComments: new Set(),
@@ -208,14 +207,17 @@ test("reply privacy and copied comment links preserve the target and discussion"
   expect((render().match(/"children":"Profile owner"/g) ?? []).length).toBe(2);
   context.changelogId = "visitor";
   expect(render()).not.toContain('"children":"Profile owner"');
-  context.canDeleteAnyComment = true;
-  context.isProfileOwner = true;
-  const ownerMenu = render();
-  expect(ownerMenu).toContain("Delete Comment");
-  expect(ownerMenu).not.toContain("(Moderator)");
+  context.changelogId = "root";
+  context.currentUserId = "root";
   context.canDeleteAnyComment = false;
-  expect((ownerMenu.match(/Delete Comment/g) ?? []).length).toBeGreaterThan(
-    (render().match(/Delete Comment/g) ?? []).length,
+  const ownerMenu = render();
+  expect((ownerMenu.match(/Delete Comment/g) ?? []).length).toBe(2);
+  expect(ownerMenu).not.toContain("(Moderator)");
+  context.canDeleteAnyComment = true;
+  const moderatorMenu = render();
+  expect(moderatorMenu).toContain("(Moderator)");
+  expect((moderatorMenu.match(/Delete Comment/g) ?? []).length).toBeGreaterThan(
+    2,
   );
   context.isLoggedIn = false;
   const guestActions = copyActions(exports.CommentItem({ comment }));

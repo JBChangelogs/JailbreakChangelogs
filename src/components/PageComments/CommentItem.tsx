@@ -118,7 +118,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     setBreakdownTab,
     getStableReactionOrder,
     canDeleteAnyComment,
-    isProfileOwner,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
 
@@ -770,9 +769,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                   icon="heroicons-outline:trash"
                                   className="mr-2 h-4 w-4"
                                 />
-                                {isProfileOwner
-                                  ? "Delete Comment"
-                                  : "Delete Comment (Moderator)"}
+                                Delete Comment (Moderator)
                               </DropdownMenuItem>
                             )}
                           </>
@@ -1064,9 +1061,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                         icon="heroicons-outline:trash"
                         className="h-4 w-4"
                       />
-                      {isProfileOwner
-                        ? "Delete Comment"
-                        : "Delete Comment (Moderator)"}
+                      Delete Comment (Moderator)
                     </ContextMenuItem>
                   )}
                 </>
@@ -1524,9 +1519,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                                 icon="heroicons-outline:trash"
                                                 className="mr-2 h-4 w-4"
                                               />
-                                              {isProfileOwner
-                                                ? "Delete"
-                                                : "Delete (Moderator)"}
+                                              Delete (Moderator)
                                             </DropdownMenuItem>
                                           )}
                                         </>
@@ -1757,9 +1750,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       icon="heroicons-outline:trash"
                                       className="h-4 w-4"
                                     />
-                                    {isProfileOwner
-                                      ? "Delete Comment"
-                                      : "Delete Comment (Moderator)"}
+                                    Delete Comment (Moderator)
                                   </ContextMenuItem>
                                 )}
                               </>

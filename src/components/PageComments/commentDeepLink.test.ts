@@ -363,7 +363,7 @@ test("comment links show only their thread, and the list merges loaded pages", a
   render();
   effects.find((entry) => entry.deps.includes(authUser))!.callback();
   expect(render().isProfileOwner).toBe(true);
-  expect(render().canDeleteAnyComment).toBe(true);
+  expect(render().canDeleteAnyComment).toBe(false);
   expect(render().profileCommentsDisabled).toBe(false);
   expect(render().isBlocked).toBe(false);
   authUser = { id: "visitor" };
@@ -378,6 +378,13 @@ test("comment links show only their thread, and the list merges loaded pages", a
     flags: [{ flag: "website_moderator", enabled: true }],
   };
   expect(render().canDeleteAnyComment).toBe(true);
+  authUser = {
+    id: String(props.changelogId),
+    flags: [{ flag: "is_owner", enabled: true }],
+  };
+  expect(render().canDeleteAnyComment).toBe(true);
+  authUser.flags![0]!.enabled = false;
+  expect(render().canDeleteAnyComment).toBe(false);
   location.hash = "#comments";
   render();
   const previousScrolls = scrolls;
