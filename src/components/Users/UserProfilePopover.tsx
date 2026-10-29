@@ -16,6 +16,7 @@ import { UserBadges } from "@/components/Profile/UserBadges";
 import { getProfileBanner } from "@/components/Profile/Banner";
 import { useSafeAuthContext } from "@/contexts/AuthContext";
 import { useFriendship } from "@/hooks/useFriendship";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import type { UserFlag } from "@/types/auth";
 import { accentCardTheme, userCardAccent } from "@/utils/ui/accentColor";
@@ -230,6 +231,7 @@ export function UserProfilePopover({
   const currentUser = auth?.user;
   const isAuthenticated = auth?.isAuthenticated ?? false;
   const [open, setOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 639px)");
   const userId = String(user.id ?? "");
 
   const full = useQuery({
@@ -301,11 +303,11 @@ export function UserProfilePopover({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        side="right"
+        side={isMobile ? "bottom" : "right"}
         align="start"
         sideOffset={12}
         collisionPadding={12}
-        className="relative isolate z-[10001] w-80 overflow-hidden rounded-2xl p-0"
+        className="relative isolate z-[10001] max-h-(--radix-popover-content-available-height) w-80 max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto rounded-2xl p-0"
         data-accent-cards={accent?.style}
         style={accent ? accentCardTheme(accent) : undefined}
         onOpenAutoFocus={(e) => e.preventDefault()}

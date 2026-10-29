@@ -17,6 +17,7 @@ function nodes(value: unknown): Node[] {
 
 test("profile cards intercept plain clicks, preserve modified links, and stack above dialogs", async () => {
   let open = false;
+  let isMobile = false;
   let query: {
     enabled: boolean;
     staleTime: number;
@@ -65,6 +66,8 @@ test("profile cards intercept plain clicks, preserve modified links, and stack a
           };
         if (name.endsWith("AuthContext"))
           return { useSafeAuthContext: () => null };
+        if (name.endsWith("useMediaQuery"))
+          return { useMediaQuery: () => isMobile };
         if (name.endsWith("accentColor")) return { userCardAccent: () => null };
         if (name.endsWith("/utils"))
           return {
@@ -138,6 +141,18 @@ test("profile cards intercept plain clicks, preserve modified links, and stack a
 
   const content = nodes(tree).find((node) => node.type === "PopoverContent")!;
   expect(content.props.className).toContain("z-[10001]");
+  expect(content.props.side).toBe("right");
+  isMobile = true;
+  const mobileContent = nodes(render()).find(
+    (node) => node.type === "PopoverContent",
+  )!;
+  expect(mobileContent.props.side).toBe("bottom");
+  expect(mobileContent.props.collisionPadding).toBe(12);
+  expect(mobileContent.props.className).toContain("max-w-[calc(100vw-24px)]");
+  expect(mobileContent.props.className).toContain(
+    "max-h-(--radix-popover-content-available-height)",
+  );
+  expect(mobileContent.props.className).toContain("overflow-y-auto");
   const dialog = readFileSync(
     new URL("../ui/dialog.tsx", import.meta.url),
     "utf8",
