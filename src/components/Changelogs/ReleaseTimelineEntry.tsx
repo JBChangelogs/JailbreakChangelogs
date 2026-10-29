@@ -91,6 +91,7 @@ export function ReleaseTimelineEntry({
               content={entry.content}
               version={entry.version}
               summary={false}
+              showCommitHashes
             />
             {entry.htmlUrl && (
               <a

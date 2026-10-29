@@ -13,7 +13,11 @@ export interface ChangelogSection {
   count: number;
 }
 
-export function parseChangelogSections(content: string, version: string) {
+export function parseChangelogSections(
+  content: string,
+  version: string,
+  showCommitHashes = false,
+) {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(content);
   omitRepeatedReleaseHeading(version)(tree);
   const definitions = tree.children
@@ -55,13 +59,17 @@ export function parseChangelogSections(content: string, version: string) {
     }
     const nodes = node.type === "list" ? node.children : [node];
     for (const block of nodes) {
-      let markdown = content
-        .slice(block.position?.start.offset, block.position?.end.offset)
-        .replace(
+      let markdown = content.slice(
+        block.position?.start.offset,
+        block.position?.end.offset,
+      );
+      if (!showCommitHashes) {
+        markdown = markdown.replace(
           /\s*\(\[[0-9a-f]{7,40}\]\(https?:\/\/[^\s)]+\/commit\/[^\s)]+\)\)/gi,
           "",
-        )
-        .trim();
+        );
+      }
+      markdown = markdown.trim();
       const isChange = block.type === "listItem";
       const commitPrefix = isChange
         ? markdown.match(

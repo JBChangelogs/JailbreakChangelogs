@@ -170,12 +170,14 @@ export default function ReleaseChanges({
   content,
   version,
   summary = true,
+  showCommitHashes = false,
 }: {
   content: string;
   version: string;
   summary?: boolean;
+  showCommitHashes?: boolean;
 }) {
-  const sections = parseChangelogSections(content, version);
+  const sections = parseChangelogSections(content, version, showCommitHashes);
   return (
     <div className="space-y-6">
       {summary && sections.some((section) => section.count > 0) && (

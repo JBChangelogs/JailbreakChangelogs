@@ -34,3 +34,29 @@ test("collapsed timeline entries show counts without rendering release bodies", 
   expect(html).toContain('id="release-1.0.0"');
   expect(html).not.toContain("Fix the picker");
 });
+
+test("timeline changes retain linked commit hashes while modal changes hide them", () => {
+  const commitUrl = "https://github.com/example/repo/commit/abcdef0123456789";
+  const content = `### Bug Fixes\n* Fix the picker ([abcdef0](${commitUrl}))`;
+  const html = renderToStaticMarkup(
+    <ReleaseTimelineEntry
+      entry={{
+        slug: "1.0.0",
+        version: "1.0.0",
+        date: "2026-10-05",
+        content,
+      }}
+      latest
+      initiallyOpen
+    />,
+  );
+  expect(html).toContain(`href="${commitUrl}"`);
+  expect(html).toContain('target="_blank" rel="noopener noreferrer"');
+  expect(html).toMatch(/\(<a [^>]+>abcdef0<\/a>\)/);
+
+  const modalHtml = renderToStaticMarkup(
+    <ReleaseChanges content={content} version="1.0.0" />,
+  );
+  expect(modalHtml).toContain("Fix the picker");
+  expect(modalHtml).not.toContain("abcdef0");
+});
