@@ -41,7 +41,7 @@ const BUTTON_GROUPS: [string[], (keyof typeof EMBED_LINKS)[]][] = [
     ["servers", "robberies", "bounties"],
   ],
   [
-    ["users", "settings", "messages", "reports"],
+    ["users", "friends", "settings", "messages", "reports"],
     ["users", "values", "inventories"],
   ],
   [

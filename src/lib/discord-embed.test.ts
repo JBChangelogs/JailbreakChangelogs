@@ -59,6 +59,10 @@ test("each section links to related tools without repeating the current page", (
     ],
     ["/robberies/", ["Private Servers", "Bounty Tracker", "Join Discord"]],
     ["/users/123", ["User Search", "Item Values", "Join Discord"]],
+    [
+      "/friends",
+      ["User Search", "Item Values", "Inventory Checker", "Join Discord"],
+    ],
     ["/users/123/followers", ["Following", "Item Values", "Join Discord"]],
     ["/users/123/following", ["Followers", "Item Values", "Join Discord"]],
     ["/supporting", ["Testimonials", "Meet the Team", "Join Discord"]],
