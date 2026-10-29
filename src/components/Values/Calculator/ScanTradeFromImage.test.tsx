@@ -13,6 +13,7 @@ function setup({
   invalidJson = false,
   configured = true,
   rybbitThrows = false,
+  elapsed = 0,
 } = {}) {
   const events: Array<{ name: string; props: Record<string, unknown> }> = [];
   const rybbit: unknown[][] = [];
@@ -23,6 +24,7 @@ function setup({
     event: Event,
   ) => Promise<void> | void;
   let scan!: (file: File, source: string) => Promise<void>;
+  let now = 100;
   const jsx = () => null;
   const exports = {} as typeof import("./ScanTradeFromImage");
   runInNewContext(
@@ -39,7 +41,7 @@ function setup({
       exports,
       Event,
       FormData,
-      performance: { now: () => 100 },
+      performance: { now: () => now++ },
       process: {
         env: {
           NEXT_PUBLIC_SCANNING_API_URL: configured
@@ -56,6 +58,7 @@ function setup({
         },
       },
       fetch: async () => {
+        now += elapsed;
         if (networkError) throw new Error("offline");
         return {
           ok: status < 400,
@@ -122,12 +125,21 @@ function setup({
   };
 }
 
-test("successful scans report counts and duration alongside the unchanged Rybbit event", async () => {
-  const app = setup();
+test("successful uploads use the app scan fields and exclude request time from parse_ms", async () => {
+  const app = setup({ elapsed: 5000 });
   await app.scan();
   expect(app.results).toHaveLength(1);
   expect(app.events).toEqual([
-    { name: "trade_scan", props: { offering: 1, requesting: 2, parse_ms: 0 } },
+    {
+      name: "trade_scan",
+      props: {
+        mode: "upload",
+        scope: "area",
+        offering: 1,
+        requesting: 2,
+        parse_ms: 1,
+      },
+    },
   ]);
   expect(app.rybbit).toEqual([
     ["Trade Image Scanned", { fileType: "png", source: "picker" }],
@@ -142,14 +154,13 @@ for (const [code, options] of [
   ["rate_limited", { data: [{ message: "Slow down" }, 429] }],
   ["http_500", { status: 500 }],
   ["api_error", { data: { message: "Failed" } }],
-  ["no_items", { data: { offering: [], requesting: [] } }],
   ["not_configured", { configured: false }],
 ] as const) {
   test(`scan failure reports ${code} once`, async () => {
     const app = setup(options);
     await app.scan();
     expect(app.events).toEqual([
-      { name: "trade_scan_failed", props: { code } },
+      { name: "trade_scan_failed", props: { mode: "upload", code } },
     ]);
     expect(app.results).toHaveLength(0);
   });
@@ -160,10 +171,16 @@ test("invalid files and dropzone rejections report failure codes", async () => {
   await app.scan(new File(["text"], "trade.txt", { type: "text/plain" }));
   await app.scan(new File(["image"], "trade.gif", { type: "image/gif" }));
   app.reject();
-  expect(app.events.map((event) => event.props.code)).toEqual([
-    "not_image",
-    "unsupported_type",
-    "file-invalid-type",
+  expect(app.events).toEqual([
+    { name: "trade_scan_failed", props: { mode: "upload", code: "not_image" } },
+    {
+      name: "trade_scan_failed",
+      props: { mode: "upload", code: "unsupported_type" },
+    },
+    {
+      name: "trade_scan_failed",
+      props: { mode: "upload", code: "file-invalid-type" },
+    },
   ]);
 });
 
@@ -172,4 +189,23 @@ test("a Rybbit exception cannot turn a successful scan into a failure", async ()
   await app.scan();
   expect(app.events.map((event) => event.name)).toEqual(["trade_scan"]);
   expect(app.results).toHaveLength(1);
+});
+
+test("empty scans report zero counts like the app without applying items", async () => {
+  const app = setup({ data: { offering: [], requesting: [] } });
+  await app.scan();
+  expect(app.events).toEqual([
+    {
+      name: "trade_scan",
+      props: {
+        mode: "upload",
+        scope: "area",
+        offering: 0,
+        requesting: 0,
+        parse_ms: 1,
+      },
+    },
+  ]);
+  expect(app.results).toHaveLength(0);
+  expect(app.rybbit).toHaveLength(0);
 });

@@ -101,7 +101,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
   const scanFile = useCallback(
     async (file: File, source: "drag" | "paste" | "picker") => {
       if (!file.type.startsWith("image/")) {
-        trackWebEvent("trade_scan_failed", { code: "not_image" });
+        trackWebEvent("trade_scan_failed", {
+          mode: "upload",
+          code: "not_image",
+        });
         const message = "Please upload an image file.";
         setLastErrorMessage(message);
         toast.error(message);
@@ -109,7 +112,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       }
 
       if (!isSupportedImage(file)) {
-        trackWebEvent("trade_scan_failed", { code: "unsupported_type" });
+        trackWebEvent("trade_scan_failed", {
+          mode: "upload",
+          code: "unsupported_type",
+        });
         const message = "Unsupported image type. Please upload a PNG or JPG.";
         setLastErrorMessage(message);
         toast.error(message);
@@ -118,7 +124,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
 
       const baseUrl = process.env.NEXT_PUBLIC_SCANNING_API_URL;
       if (!baseUrl) {
-        trackWebEvent("trade_scan_failed", { code: "not_configured" });
+        trackWebEvent("trade_scan_failed", {
+          mode: "upload",
+          code: "not_configured",
+        });
         const message = "API is not configured (NEXT_PUBLIC_API_URL missing).";
         setLastErrorMessage(message);
         toast.error(message);
@@ -130,7 +139,6 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       setLastErrorMessage(null);
 
       const toastId = toast.loading("Scanning trade screenshot...");
-      const startedAt = performance.now();
       let failureCode = "network_error";
       try {
         const formData = new FormData();
@@ -155,7 +163,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           (embeddedStatus !== null && embeddedStatus >= 400)
         ) {
           if (effectiveStatus === 429) {
-            trackWebEvent("trade_scan_failed", { code: "rate_limited" });
+            trackWebEvent("trade_scan_failed", {
+              mode: "upload",
+              code: "rate_limited",
+            });
             const message =
               "Too many scans — please wait a moment and try again.";
             setLastErrorMessage(message);
@@ -184,6 +195,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           throw new Error("Unexpected scan response");
         }
 
+        const parseStartedAt = performance.now();
         const offering = Array.isArray((data as ScanTradeResponse).offering)
           ? (data as ScanTradeResponse).offering
           : [];
@@ -191,8 +203,16 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           ? (data as ScanTradeResponse).requesting
           : [];
 
+        // The upload API exposes parsed items, without raw detections or OCR timings.
+        trackWebEvent("trade_scan", {
+          mode: "upload",
+          scope: "area",
+          offering: offering.length,
+          requesting: requesting.length,
+          parse_ms: Math.round(performance.now() - parseStartedAt),
+        });
+
         if (offering.length === 0 && requesting.length === 0) {
-          trackWebEvent("trade_scan_failed", { code: "no_items" });
           const message = "No trade items were found in that image.";
           setLastErrorMessage(message);
           toast.error(message, { id: toastId });
@@ -203,11 +223,6 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         onScanSuccess({ offering, requesting });
         setLastErrorMessage(null);
         toast.success("Trade screenshot scanned.", { id: toastId });
-        trackWebEvent("trade_scan", {
-          offering: offering.length,
-          requesting: requesting.length,
-          parse_ms: Math.round(performance.now() - startedAt),
-        });
         try {
           window.rybbit?.event("Trade Image Scanned", {
             fileType: file.type.replace("image/", "") || "unknown",
@@ -215,7 +230,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           });
         } catch {}
       } catch (error) {
-        trackWebEvent("trade_scan_failed", { code: failureCode });
+        trackWebEvent("trade_scan_failed", {
+          mode: "upload",
+          code: failureCode,
+        });
         log.error("Scan trade image failed", error);
         const message =
           error instanceof Error ? error.message : "Failed to scan image";
@@ -243,6 +261,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       onDrop: (acceptedFiles, rejected, event) => {
         if (rejected.length > 0) {
           trackWebEvent("trade_scan_failed", {
+            mode: "upload",
             code: rejected[0].errors[0]?.code ?? "file_rejected",
           });
         }
