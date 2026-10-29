@@ -161,6 +161,14 @@ export function useCommentState(props: ChangelogCommentsProps) {
       }
     >
   >(new Map());
+  // Comments with a reaction still debouncing or in flight. Realtime syncs skip
+  // their threads, or server state from before the request would undo the click.
+  const reactingComments = useRef(new Map<number, number>());
+  const holdReaction = (id: number, delta: 1 | -1) => {
+    const count = (reactingComments.current.get(id) ?? 0) + delta;
+    if (count > 0) reactingComments.current.set(id, count);
+    else reactingComments.current.delete(id);
+  };
   const commentBan = bans["communication"] ?? null;
   const reactionBan = bans["reactions"] ?? null;
 
@@ -386,9 +394,18 @@ export function useCommentState(props: ChangelogCommentsProps) {
   );
   const syncThread = useCallback(
     async (threadId: number) => {
-      if (!commentsRef.current.some((c) => c.id === threadId)) return;
+      const isReacting = () => {
+        const thread = commentsRef.current.find((c) => c.id === threadId);
+        return (
+          !thread ||
+          [thread, ...(thread.replies ?? [])].some((c) =>
+            reactingComments.current.has(c.id),
+          )
+        );
+      };
+      if (isReacting()) return;
       const result = await fetchThread(threadId).catch(() => undefined);
-      if (result === undefined) return;
+      if (result === undefined || isReacting()) return;
       updateLoadedPages((pages) =>
         pages.map((p, i) => ({
           ...p,
@@ -627,6 +644,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       const key = `${commentId}:${emoji}`;
       const existing = pendingDebounces.current.get(key);
+      if (!existing) holdReaction(commentId, 1);
 
       // Capture server truth on the first click of a spam sequence
       let initialUserReacted = existing?.initialUserReacted;
@@ -734,7 +752,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
         pendingDebounces.current.delete(key);
 
         // Even number of clicks = net no-op, UI already back to server state
-        if (clickCount % 2 === 0) return;
+        if (clickCount % 2 === 0) {
+          holdReaction(commentId, -1);
+          return;
+        }
 
         // Odd clicks = one net toggle, send the API call
         try {
@@ -799,6 +820,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
         } catch {
           setComments(applyToggle);
           toast.error("Failed to react");
+        } finally {
+          holdReaction(commentId, -1);
         }
       }, 500);
 
