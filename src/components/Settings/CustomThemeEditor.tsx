@@ -321,8 +321,12 @@ export default function CustomThemeEditor({
     const vars = { ...current.vars, [key]: value };
     // Hover, active and focus colors follow their main color unless they
     // were changed since the editor opened or last saved.
-    for (const [dep, linked] of (reset ? [] : FOLLOWS[key]) ?? []) {
-      if (dep in vars && vars[dep] === originalVars[dep]) vars[dep] = linked;
+    for (const [dep, linked] of FOLLOWS[key] ?? []) {
+      if (reset) {
+        if (vars[dep] === linked) vars[dep] = originalVars[dep];
+      } else if (dep in vars && vars[dep] === originalVars[dep]) {
+        vars[dep] = linked;
+      }
     }
     update(
       matchLogo

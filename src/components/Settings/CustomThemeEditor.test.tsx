@@ -42,6 +42,7 @@ function editor({
   let cursor = 0;
   const applied: UserTheme[] = [];
   const savedEvents: UserTheme[] = [];
+  const closedEvents: string[] = [];
   const requests: string[] = [];
   const errors: string[] = [];
   const scrolls: string[] = [];
@@ -151,7 +152,7 @@ function editor({
       exports.default({
         theme: existing ? saved : undefined,
         open: true,
-        onClose: () => {},
+        onClose: (reason: string) => closedEvents.push(reason),
         onSaved: (theme: UserTheme) => savedEvents.push(theme),
       }),
     );
@@ -169,6 +170,7 @@ function editor({
     saved,
     applied,
     savedEvents,
+    closedEvents,
     requests,
     errors,
     prompt,
@@ -350,6 +352,49 @@ test("resetting a main color leaves its saved hover color unchanged", () => {
     "#abcdef",
   );
 });
+
+for (const independentEdit of [false, true]) {
+  test(`reset restores automatic color changes and ${independentEdit ? "keeps a separate edit dirty" : "closes without a discard prompt"}`, () => {
+    const view = editor({
+      collapsed: false,
+      vars: {
+        "--color-button-info": "#123456",
+        "--color-button-info-hover": "#345678",
+        "--color-button-info-active": "#456789",
+        "--color-border-focus": "#56789a",
+      },
+    });
+    const color = () =>
+      view
+        .render()
+        .find((node) => node.props.colorKey === "--color-button-info")!.props;
+    (color().onChange as (value: string) => void)("#abcdef");
+    if (independentEdit) {
+      const preview = view.render().find((node) => node.props.onPick)!;
+      (preview.props.onPick as (keys: string[], element: Element) => void)(
+        ["--color-button-info-hover"],
+        { getBoundingClientRect: () => ({}) } as Element,
+      );
+      const control = view.render().find((node) => node.props.inline)!;
+      (control.props.onChange as (value: string) => void)("#fedcba");
+    }
+    (color().onReset as () => void)();
+    const vars = color().vars as Record<string, string>;
+    expect(vars["--color-button-info-hover"]).toBe(
+      independentEdit ? "#fedcba" : "#345678",
+    );
+    expect(vars["--color-button-info-active"]).toBe("#456789");
+    expect(vars["--color-border-focus"]).toBe("#56789a");
+    (
+      view.render().find((node) => node.type === "Sheet")!.props
+        .onOpenChange as (open: boolean) => void
+    )(false);
+    expect(view.closedEvents).toEqual(independentEdit ? [] : ["cancelled"]);
+    expect(
+      view.render().find((node) => node.type === "Dialog")!.props.open,
+    ).toBe(independentEdit);
+  });
+}
 
 test("saving a new desktop theme asks before applying and Not now leaves it inactive", async () => {
   const view = editor();
