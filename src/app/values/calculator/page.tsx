@@ -2,6 +2,7 @@ import { CalculatorClient } from "./CalculatorClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import { Suspense } from "react";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
@@ -20,7 +21,9 @@ export default function CalculatorPage() {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8">
         <Breadcrumb />
         <CalculatorDescription />
-        <CalculatorClient initialItems={[]} />
+        <Suspense fallback={<p role="status">Loading calculator...</p>}>
+          <CalculatorClient initialItems={[]} />
+        </Suspense>
       </main>
     </>
   );

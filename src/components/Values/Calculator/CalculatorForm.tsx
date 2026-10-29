@@ -45,11 +45,13 @@ import { TradeSummaryBar } from "./TradeSummaryBar";
 import { TradeSidePanel } from "./TradeSidePanel";
 import { ScanTradeFromImage } from "./ScanTradeFromImage";
 import { toast } from "sonner";
+import { createCalculatorShare, loadCalculatorShare } from "./calculatorShare";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 
 interface CalculatorFormProps {
+  shareCode?: string | null;
   initialItems?: TradeItem[];
   itemsInputMode?: "picker" | "inventory";
   onItemsInputModeChange?: (mode: "picker" | "inventory") => void;
@@ -59,6 +61,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   initialItems = [],
   itemsInputMode = "picker",
   onItemsInputModeChange,
+  shareCode,
 }) => {
   const {
     user,
@@ -75,6 +78,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   >("offering");
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [isLoadingShare, setIsLoadingShare] = useState(Boolean(shareCode));
+  const [shareError, setShareError] = useState<string | null>(null);
 
   const favoritesQuery = useUserFavorites(user?.id);
   const favoriteIds =
@@ -102,6 +108,73 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const calculatorStorageKey = `calculatorItems:${user?.id ?? "guest"}`;
   const previousCalculatorStorageKeyRef = useRef(calculatorStorageKey);
   const skipNextCalculatorPersistRef = useRef(false);
+  const handledShareRef = useRef(false);
+
+  useEffect(() => {
+    if (!shareCode) {
+      setIsLoadingShare(false);
+      return;
+    }
+    const controller = new AbortController();
+    if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);
+    localSyncPendingRef.current = false;
+    restoreCandidateRevisionRef.current += 1;
+    localEditRevisionRef.current += 1;
+    restoreSessionRef.current = "ready";
+    setShowRestoreModal(false);
+    setIsLoadingShare(true);
+    setShareError(null);
+    void loadCalculatorShare(shareCode, controller.signal)
+      .then(({ offering, requesting }) => {
+        if (controller.signal.aborted) return;
+        setOfferingItems(offering);
+        setRequestingItems(requesting);
+        toast.success("Shared trade loaded");
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unable to load this shared calculator.";
+        setShareError(message);
+        toast.error(message);
+      })
+      .finally(() => {
+        if (controller.signal.aborted) return;
+        setIsLoadingShare(false);
+        handledShareRef.current = true;
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("share") === shareCode) {
+          url.searchParams.delete("share");
+          window.history.replaceState(
+            null,
+            "",
+            `${url.pathname}${url.search}${url.hash}`,
+          );
+        }
+      });
+    return () => controller.abort();
+  }, [shareCode, calculatorStorageKey]);
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      const code = await createCalculatorShare(offeringItems, requestingItems);
+      const link = new URL("/values/calculator", window.location.origin);
+      link.searchParams.set("share", code);
+      await navigator.clipboard.writeText(link.toString());
+      toast.success("Share link copied! It expires in 6 hours.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Unable to copy the share link. Please try again.",
+      );
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   useEffect(() => {
     if (safeLocalStorage.getItem(calculatorStorageKey) !== null) return;
@@ -320,6 +393,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
    * existing handleRestoreItems path needs no changes.
    */
   useEffect(() => {
+    if (shareCode || handledShareRef.current) return;
     let cancelled = false;
     const candidateRevision = restoreCandidateRevisionRef.current;
     const hydrateCompact = async (
@@ -412,7 +486,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calculatorStorageKey, initialItems]);
+  }, [calculatorStorageKey, initialItems, shareCode]);
 
   /**
    * Persist current selections to localStorage so users can resume later.
@@ -498,6 +572,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   // Live sync: silently apply calculator_items preference from other devices
   useEffect(() => {
+    if (shareCode) return;
     let cancelled = false;
     const handlePreference = async (e: Event) => {
       const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
@@ -641,7 +716,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         handlePreferenceDeleted,
       );
     };
-  }, [calculatorStorageKey, initialItems]);
+  }, [calculatorStorageKey, initialItems, shareCode]);
 
   const handleRestoreItems = () => {
     const saved = safeGetJSON(calculatorStorageKey, {
@@ -842,7 +917,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     itemsInputMode === "picker" ? initialItems : inventoryItems;
 
   return (
-    <div className="space-y-6">
+    <fieldset disabled={isLoadingShare} className="min-w-0 space-y-6">
+      {isLoadingShare && <p role="status">Loading shared calculator...</p>}
+      {shareError && (
+        <p role="alert" className="text-secondary-text">
+          {shareError}
+        </p>
+      )}
       {/* Restore Modal */}
       <ConfirmDialog
         isOpen={showRestoreModal}
@@ -876,6 +957,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           hasItems={offeringItems.length > 0 || requestingItems.length > 0}
           onSwapSides={handleSwapSides}
           onClearSides={handleClearSides}
+          onShare={handleShare}
+          isSharing={isSharing}
         />
 
         {/* Trade Panels */}
@@ -1090,6 +1173,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 };

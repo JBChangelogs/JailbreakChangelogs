@@ -11,10 +11,14 @@ export function TradeSideActions({
   hasItems,
   onSwapSides,
   onClearSides,
+  onShare,
+  isSharing = false,
 }: {
   hasItems: boolean;
   onSwapSides: () => void;
   onClearSides: (event?: React.MouseEvent) => void;
+  onShare?: () => void;
+  isSharing?: boolean;
 }) {
   return (
     <div
@@ -22,6 +26,17 @@ export function TradeSideActions({
       aria-label="Actions for both trade sides"
       className="flex flex-wrap items-center justify-center gap-2"
     >
+      {onShare && (
+        <Button
+          type="button"
+          size="sm"
+          onClick={onShare}
+          disabled={!hasItems || isSharing}
+          title="Copy a share link that expires in 6 hours"
+        >
+          {isSharing ? "Sharing..." : "Share"}
+        </Button>
+      )}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
