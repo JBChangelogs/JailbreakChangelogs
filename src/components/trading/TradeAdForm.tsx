@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
@@ -748,6 +749,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
 
     if (errors.length > 0) {
+      trackWebEvent("trade_ad_failed", { code: "invalid_items" });
       errors.forEach((error) => toast.error(error));
       const availableItemsGrid = document.querySelector(
         '[data-component="available-items-grid"]',
@@ -763,15 +765,20 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
     // Validate trade ad duration
     if (!checkTradeAdDuration(expirationHours!, userData?.premiumtype || 0)) {
+      trackWebEvent("trade_ad_failed", { code: "invalid_duration" });
       return;
     }
 
     if (!isAuthenticated) {
+      trackWebEvent("trade_ad_failed", { code: "login_required" });
       toast.info("You must be logged in to create a trade ad");
       return;
     }
 
     let creatingToastId: string | number | null = null;
+    const startedAt = performance.now();
+    let outcomeRecorded = false;
+    let failureCode = "request_failed";
 
     try {
       setSubmitting(true);
@@ -779,6 +786,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!baseUrl) {
+        failureCode = "not_configured";
         throw new Error("Trade API is not configured");
       }
 
@@ -804,6 +812,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         body: JSON.stringify(createPayload),
         cache: "no-store",
         credentials: "include",
+      });
+      outcomeRecorded = true;
+      trackWebEvent(response.ok ? "trade_ad_posted" : "trade_ad_failed", {
+        offering: offeringItems.length,
+        requesting: requestingItems.length,
+        duration_ms: Math.round(performance.now() - startedAt),
+        ...(response.ok ? {} : { code: `http_${response.status}` }),
       });
       let responseMessage: string | null = null;
       let responseErrorCode: string | null = null;
@@ -926,6 +941,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         trackEvent("Trade Offer Posted");
       }
     } catch (err) {
+      if (!outcomeRecorded) {
+        trackWebEvent("trade_ad_failed", { code: failureCode });
+      }
       log.error("Error with trade ad:", err);
       const errorMessage =
         err instanceof Error && err.message

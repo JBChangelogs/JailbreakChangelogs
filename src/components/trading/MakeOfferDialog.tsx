@@ -45,6 +45,7 @@ import {
 } from "@/utils/api/userInventoryQuery";
 import { InventoryLoadErrorNotice } from "@/components/Inventory/InventoryLoadErrorNotice";
 import { createLogger } from "@/services/logger";
+import { trackWebEvent } from "@/utils/analytics/web";
 
 const log = createLogger("UI");
 
@@ -463,15 +464,29 @@ export function MakeOfferDialog({
         : "loaded";
 
   const sendExactOffer = async () => {
+    const startedAt = performance.now();
+    let offerSent = false;
     try {
       setSubmitting(true);
       await createTradeOffer(trade.id);
+      offerSent = true;
+      trackWebEvent("trade_offer_sent", {
+        type: "quick",
+        duration_ms: Math.round(performance.now() - startedAt),
+      });
       toast.success("Offer sent");
       window.rybbit?.event("Trade Offer Sent", { type: "quick" });
       onOfferSent?.();
       resetForm();
       onClose();
     } catch (err) {
+      if (!offerSent) {
+        trackWebEvent("trade_offer_failed", {
+          type: "quick",
+          code:
+            err instanceof RateLimitError ? "rate_limited" : "request_failed",
+        });
+      }
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
         toast.error("You're sending offers too fast. Please wait.");
@@ -487,6 +502,8 @@ export function MakeOfferDialog({
   };
 
   const sendCustomOffer = async () => {
+    const startedAt = performance.now();
+    let offerSent = false;
     const payload: CreateTradeOfferPayload = {};
 
     const trimmedNote = note.trim();
@@ -517,6 +534,14 @@ export function MakeOfferDialog({
         !!payload.note || !!payload.offering || !!payload.requesting;
       if (shouldSendPayload) await createTradeOffer(trade.id, payload);
       else await createTradeOffer(trade.id);
+      offerSent = true;
+      trackWebEvent("trade_offer_sent", {
+        type: "custom",
+        duration_ms: Math.round(performance.now() - startedAt),
+        offering_modified: !!payload.offering,
+        requesting_modified: !!payload.requesting,
+        note_added: !!payload.note,
+      });
       toast.success("Offer sent");
       window.rybbit?.event("Trade Offer Sent", {
         type: "custom",
@@ -528,6 +553,13 @@ export function MakeOfferDialog({
       resetForm();
       onClose();
     } catch (err) {
+      if (!offerSent) {
+        trackWebEvent("trade_offer_failed", {
+          type: "custom",
+          code:
+            err instanceof RateLimitError ? "rate_limited" : "request_failed",
+        });
+      }
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
         toast.error("You're sending offers too fast. Please wait.");

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api/api";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { trackWebEvent } from "@/utils/analytics/web";
 
 interface SearchFormProps {
   searchId: string;
@@ -57,6 +58,9 @@ export default function SearchForm({
     const input = searchId.trim();
     if (!input) return;
 
+    trackWebEvent("inventory_search", {
+      input_type: /^\d+$/.test(input) ? "id" : "username",
+    });
     trackEvent("Inventory Search", { searchTerm: input });
     setSearchError(null);
     setIsSearching(true);
@@ -71,6 +75,7 @@ export default function SearchForm({
       if (resolvedId) {
         router.push(`/inventories/${input}`);
       } else {
+        trackWebEvent("inventory_search_failed", { code: "user_not_found" });
         setIsSearching(false);
         const truncated =
           input.length > 50 ? `${input.substring(0, 47)}...` : input;
@@ -79,6 +84,9 @@ export default function SearchForm({
         setSearchError(msg);
       }
     } catch (err) {
+      trackWebEvent("inventory_search_failed", {
+        code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
+      });
       setIsSearching(false);
       const msg =
         err instanceof MaxStreamsError

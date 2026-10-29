@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserEmptyStateCard } from "@/components/ui/UserEmptyStateCard";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -39,6 +41,28 @@ export default function DupeFinderClient({
   items = [],
   originalSearchTerm,
 }: DupeFinderClientProps) {
+  const reportedResult = useRef<string | null>(null);
+  const resultCount = initialData?.length ?? 0;
+  useEffect(() => {
+    if (!robloxId || externalIsLoading || (!initialData && !error)) return;
+    const failed = Boolean(error) && !isUserFound;
+    const key = `${robloxId}:${failed}:${resultCount}`;
+    if (reportedResult.current === key) return;
+    reportedResult.current = key;
+    if (failed) {
+      trackWebEvent("dupe_search_failed", { code: "lookup_failed" });
+    } else {
+      trackWebEvent("dupe_search_result", { result_count: resultCount });
+    }
+  }, [
+    robloxId,
+    initialData,
+    error,
+    isUserFound,
+    externalIsLoading,
+    resultCount,
+  ]);
+
   // Fetch user info for the error/empty states
   const { robloxUsers: batchedUsers } = useBatchUserData(
     error && !initialData && robloxId ? [robloxId] : [],

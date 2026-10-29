@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api/api";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
@@ -69,6 +70,20 @@ export default function OGFinderResults({
   items = [],
   originalSearchTerm,
 }: OGFinderResultsProps) {
+  const reportedResult = useRef<string | null>(null);
+  const resultCount = initialData?.results.length ?? 0;
+  useEffect(() => {
+    if (!initialData && !error) return;
+    const key = `${robloxId}:${Boolean(error)}:${resultCount}`;
+    if (reportedResult.current === key) return;
+    reportedResult.current = key;
+    if (error) {
+      trackWebEvent("og_search_failed", { code: "lookup_failed" });
+    } else {
+      trackWebEvent("og_search_result", { result_count: resultCount });
+    }
+  }, [robloxId, initialData, error, resultCount]);
+
   const router = useRouter();
   const { getId: getRobloxId } = useUsernameToId();
 
@@ -165,6 +180,9 @@ export default function OGFinderResults({
     const input = searchValue.trim();
     if (!input) return;
 
+    trackWebEvent("og_search", {
+      input_type: /^\d+$/.test(input) ? "id" : "username",
+    });
     trackEvent("OG Search", { searchTerm: input });
 
     setSearchError(null);
@@ -182,6 +200,7 @@ export default function OGFinderResults({
       if (resolvedId) {
         router.push(`/og/${input}`);
       } else {
+        trackWebEvent("og_search_failed", { code: "user_not_found" });
         setIsLoading(false);
         const truncated =
           input.length > 50 ? `${input.substring(0, 47)}...` : input;
@@ -190,6 +209,9 @@ export default function OGFinderResults({
         setSearchError(msg);
       }
     } catch (err) {
+      trackWebEvent("og_search_failed", {
+        code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
+      });
       setIsLoading(false);
       const msg =
         err instanceof MaxStreamsError

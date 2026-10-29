@@ -4,6 +4,7 @@ import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { RobloxUser } from "@/types";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -67,6 +68,9 @@ export default function OGFinderClient({
     const input = searchId.trim();
     if (!input) return;
 
+    trackWebEvent("og_search", {
+      input_type: /^\d+$/.test(input) ? "id" : "username",
+    });
     trackEvent("OG Search", { searchTerm: input });
 
     setIsSearching(true);

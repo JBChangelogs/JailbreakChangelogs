@@ -6,6 +6,7 @@ import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { toast } from "sonner";
@@ -133,6 +134,7 @@ export default function DupeSearchInput({
   }, []);
 
   const goToOwner = (owner: DupeOwnerSearchResult) => {
+    trackWebEvent("dupe_search", { input_type: "suggestion" });
     trackEvent("Dupe Search Suggestion Select", {
       searchTerm: searchId.trim(),
       selectedId: owner.id,
@@ -149,6 +151,9 @@ export default function DupeSearchInput({
   const performSearch = async (input: string) => {
     if (!input) return;
 
+    trackWebEvent("dupe_search", {
+      input_type: /^\d+$/.test(input) ? "id" : "username",
+    });
     setIsSuggestionsOpen(false);
     trackEvent("Dupe Search", { searchTerm: input });
     setSearchError(null);
@@ -166,6 +171,7 @@ export default function DupeSearchInput({
       if (resolvedId) {
         router.push(`/dupes/${input}`);
       } else {
+        trackWebEvent("dupe_search_failed", { code: "user_not_found" });
         setIsSearching(false);
         const truncated =
           input.length > 50 ? `${input.substring(0, 47)}...` : input;
@@ -174,6 +180,9 @@ export default function DupeSearchInput({
         setSearchError(msg);
       }
     } catch (err) {
+      trackWebEvent("dupe_search_failed", {
+        code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
+      });
       setIsSearching(false);
       const msg =
         err instanceof MaxStreamsError

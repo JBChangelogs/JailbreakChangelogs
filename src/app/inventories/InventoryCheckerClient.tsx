@@ -23,6 +23,7 @@ import React from "react";
 
 import { ENABLE_WS_SCAN, INVENTORY_API_URL } from "@/utils/api/api";
 import { trackEvent } from "@/utils/analytics/rybbit";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -203,6 +204,27 @@ export default function InventoryCheckerClient({
   const isInventoryNotFoundError = Boolean(
     error?.includes("Inventory not found for this user."),
   );
+  const reportedResult = useRef<string | null>(null);
+  const resultCount = initialData?.data.length ?? 0;
+  useEffect(() => {
+    if (!robloxId || externalIsLoading || (!initialData && !error)) return;
+    const failed = Boolean(error) && !isInventoryNotFoundError;
+    const key = `${robloxId}:${failed}:${resultCount}`;
+    if (reportedResult.current === key) return;
+    reportedResult.current = key;
+    if (failed) {
+      trackWebEvent("inventory_search_failed", { code: "lookup_failed" });
+    } else {
+      trackWebEvent("inventory_search_result", { result_count: resultCount });
+    }
+  }, [
+    robloxId,
+    initialData,
+    error,
+    isInventoryNotFoundError,
+    externalIsLoading,
+    resultCount,
+  ]);
 
   // Use refreshed data if available, otherwise use initial data
   const currentData = initialData;

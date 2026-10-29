@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api/api";
 import type { ScanPhase } from "@/utils/notifications/scanProgressMessage";
 import { createLogger } from "@/services/logger";
+import { trackWebEvent } from "@/utils/analytics/web";
 
 const log = createLogger("SCAN");
 
@@ -60,6 +61,32 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const scanningLongWaitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef<number>(0);
   const connectRef = useRef<(() => void) | null>(null);
+  const scanStartedAtRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (
+      scanStartedAtRef.current === null ||
+      (status !== "completed" && status !== "error")
+    )
+      return;
+    const duration_ms = Math.round(
+      performance.now() - scanStartedAtRef.current,
+    );
+    scanStartedAtRef.current = null;
+    if (status === "error") {
+      trackWebEvent("inventory_scan_failed", {
+        code: phase ?? "error",
+        duration_ms,
+      });
+    } else {
+      trackWebEvent(
+        phase === "queued"
+          ? "inventory_scan_queued"
+          : "inventory_scan_completed",
+        { duration_ms },
+      );
+    }
+  }, [status, phase]);
 
   const connectionQualityRef = useRef<{
     messagesReceived: number;
@@ -413,7 +440,9 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
   const startScan = useCallback(
     (token?: string) => {
+      trackWebEvent("inventory_scan_requested");
       if (!userId) {
+        trackWebEvent("inventory_scan_failed", { code: "missing_user" });
         setError("No user ID provided");
         setStatus("error");
         setPhase("error");
@@ -421,6 +450,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       }
 
       if (!ENABLE_WS_SCAN) {
+        trackWebEvent("inventory_scan_failed", { code: "disabled" });
         setError("Inventory scanning is temporarily disabled");
         setStatus("error");
         setPhase("error");
@@ -433,12 +463,14 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
         setTurnstileToken(token);
       }
 
+      scanStartedAtRef.current = performance.now();
       connect();
     },
     [userId, connect],
   );
 
   const stopScan = useCallback(() => {
+    scanStartedAtRef.current = null;
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
