@@ -32,7 +32,7 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
   return (
     <>
       <div
-        className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 px-2 py-2 sm:-mx-3 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
+        className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
       >
         <h2 className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl">
           <span>
@@ -68,8 +68,7 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
           </div>
         )}
       </div>
-      {/* -mt-5 offsets the title's padding and the parent's gap-4 */}
-      <div className="-mt-5">
+      <div className="-mt-2">
         {/* Disclaimer */}
         <p className="text-secondary-text flex items-start gap-1 text-xs">
           <Icon
