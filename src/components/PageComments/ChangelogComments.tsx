@@ -86,7 +86,7 @@ function CommentsLayout() {
       ([entry]) => {
         if (entry.isIntersecting) loadMore();
       },
-      { rootMargin: "1500px" },
+      { rootMargin: "400px" },
     );
     observer.observe(target);
     return () => observer.disconnect();
