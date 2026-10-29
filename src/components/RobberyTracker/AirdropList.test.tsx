@@ -181,7 +181,7 @@ test("airdrop cards show synced server joins and follow roster updates", () => {
   expect(render()).not.toContain("/users/123");
 });
 
-test("airdrop Join reports the server before opening Roblox, and requires a server ID", () => {
+test("airdrop joins report before opening Roblox and map opens track their location", () => {
   type Node = { type: unknown; props: Record<string, unknown> };
   const nodes = (value: unknown): Node[] => {
     if (Array.isArray(value)) return value.flatMap(nodes);
@@ -190,6 +190,7 @@ test("airdrop Join reports the server before opening Roblox, and requires a serv
     return [node, ...nodes(node.props.children)];
   };
   const actions: unknown[] = [];
+  const events: unknown[] = [];
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: (props: object) => Node };
   runInNewContext(
@@ -227,6 +228,11 @@ test("airdrop Join reports the server before opening Roblox, and requires a serv
           return { useServerRegions: () => ({}) };
         if (name === "@/hooks/useSharedTimer")
           return { useOptimizedRealTimeRelativeDate: () => "" };
+        if (name === "@/utils/analytics/web")
+          return {
+            trackWebEvent: (name: string, props: unknown) =>
+              events.push({ name, props }),
+          };
         if (name === "sonner") return { toast: { loading: () => 1 } };
         if (name === "./deepLink")
           return {
@@ -250,6 +256,19 @@ test("airdrop Join reports the server before opening Roblox, and requires a serv
         onJoin: (report: TrackerJoinReport) => actions.push(report),
       }),
     );
+  expect(events).toEqual([]);
+  for (const airdrop of [hard, easy]) {
+    const map = render(airdrop).find(
+      (node) => node.props["data-rybbit-event"] === "View Airdrop Map",
+    )!;
+    (map.props.onClick as () => void)();
+  }
+  expect(events).toEqual(
+    [hard, easy].map((airdrop) => ({
+      name: "airdrop_map_open",
+      props: { location: airdrop.location },
+    })),
+  );
   const join = render(hard).find(
     (node) => node.props["data-rybbit-prop-tracker"] === "Airdrop_Tracker",
   )!;

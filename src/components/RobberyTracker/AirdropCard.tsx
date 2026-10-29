@@ -16,6 +16,7 @@ import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { INVENTORY_API_URL } from "@/utils/api/api";
+import { trackWebEvent } from "@/utils/analytics/web";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
@@ -301,6 +302,9 @@ export default function AirdropCard({
               <Button
                 size="sm"
                 onClick={() => {
+                  trackWebEvent("airdrop_map_open", {
+                    location: airdrop.location,
+                  });
                   setIsMapImageLoading(true);
                   setIsMapModalOpen(true);
                 }}
