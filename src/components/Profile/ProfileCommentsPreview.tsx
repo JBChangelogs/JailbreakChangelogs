@@ -21,6 +21,8 @@ export default function ProfileCommentsPreview() {
     profileCommentsDisabled,
     isProfileOwner,
   } = useCommentsContext();
+  if (profileCommentsDisabled && totalComments === 0) return null;
+
   // shortcut: preview uses loaded comments; fetch newest separately if recency across all sorts is needed.
   const recentCommenterIds = [
     ...new Set(
@@ -68,11 +70,9 @@ export default function ProfileCommentsPreview() {
         </span>
         {!isRefreshingComments && totalComments === 0 && (
           <span className="text-secondary-text mt-1 block text-sm">
-            {profileCommentsDisabled
-              ? "Comments are turned off"
-              : isProfileOwner
-                ? "No comments on your profile yet"
-                : "Be the first to comment"}
+            {isProfileOwner
+              ? "No comments on your profile yet"
+              : "Be the first to comment"}
           </span>
         )}
       </span>

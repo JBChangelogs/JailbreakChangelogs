@@ -146,11 +146,10 @@ test("profile comment preview shows unique recent public commenters and scrolls 
   ).toBe(false);
   state.isProfileOwner = false;
   state.profileCommentsDisabled = true;
-  expect(
-    nodes(exports.default()).some(
-      (node) => node.props.children === "Comments are turned off",
-    ),
-  ).toBe(true);
+  expect(exports.default()).toBeNull();
+  state.totalComments = 1;
+  expect(exports.default()).not.toBeNull();
+  state.totalComments = 0;
   state.isRefreshingComments = true;
   expect(
     nodes(exports.default()).some(

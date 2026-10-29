@@ -47,6 +47,7 @@ function CommentsLayout() {
     commentBan,
     reactionBan,
     isRefreshingComments,
+    profileCommentsDisabled,
     filteredComments,
     currentComments,
     type,
@@ -174,7 +175,9 @@ function CommentsLayout() {
           {reactionBan && <BanBanner ban={reactionBan} className="px-3 py-2" />}
 
           {/* New Comment Form */}
-          <CommentForm />
+          {(!profileCommentsDisabled || filteredComments.length > 0) && (
+            <CommentForm />
+          )}
 
           {/* Comments List */}
           {isRefreshingComments ? (
@@ -191,24 +194,32 @@ function CommentsLayout() {
                 </div>
               </div>
               <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
-                No comments yet
+                {profileCommentsDisabled
+                  ? "Profile comments are disabled"
+                  : "No comments yet"}
               </h3>
               <p className="text-secondary-text max-w-md text-sm leading-relaxed sm:text-base">
-                Be the first to share your thoughts on this{" "}
-                {type === "changelog"
-                  ? "changelog"
-                  : type === "season"
-                    ? "season"
-                    : type === "tradev2"
-                      ? "trade ad"
-                      : type === "inventory"
-                        ? "inventory"
-                        : type === "user"
-                          ? "profile"
-                          : type === "vsuggestion"
-                            ? "suggestion"
-                            : "item"}
-                !
+                {profileCommentsDisabled ? (
+                  "This user has turned off comments on their profile."
+                ) : (
+                  <>
+                    Be the first to share your thoughts on this{" "}
+                    {type === "changelog"
+                      ? "changelog"
+                      : type === "season"
+                        ? "season"
+                        : type === "tradev2"
+                          ? "trade ad"
+                          : type === "inventory"
+                            ? "inventory"
+                            : type === "user"
+                              ? "profile"
+                              : type === "vsuggestion"
+                                ? "suggestion"
+                                : "item"}
+                    !
+                  </>
+                )}
               </p>
             </div>
           ) : (
