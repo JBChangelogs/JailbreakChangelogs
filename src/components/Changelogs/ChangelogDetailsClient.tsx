@@ -297,7 +297,7 @@ export default function ChangelogDetailsClient({
 
         <section className="border-border-card mb-8 flex flex-col gap-6 border-b pb-6 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1">
-            <div className="mb-5 flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <ChangelogSearchInput
                 className="w-full sm:flex-1"
                 searchQuery={searchQuery}
@@ -312,37 +312,6 @@ export default function ChangelogDetailsClient({
                 onChangelogSelect={handleChangelogSelect}
               />
             </div>
-
-            <h1 className="page-heading">
-              <span className="text-secondary-text flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
-                Changelog #{changelog.id}
-                {isLatest && (
-                  <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded-md px-2 text-xs leading-none font-bold normal-case">
-                    Latest
-                  </span>
-                )}
-              </span>
-              {changelog.title}
-            </h1>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              {!isLatest && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => handleChangelogSelect(latestId.toString())}
-                >
-                  <Icon icon="heroicons:arrow-uturn-right" inline={true} />
-                  Go to Latest Update
-                </Button>
-              )}
-              <Button asChild size="sm" variant="secondary">
-                <Link href="/changelogs/timeline">
-                  <Icon icon="heroicons:clock" inline={true} />
-                  View Timeline
-                </Link>
-              </Button>
-            </div>
           </div>
           {/* Nitro: video-nc unit should sit above the fold */}
           <NitroInlineVideoPlayer
@@ -352,6 +321,40 @@ export default function ChangelogDetailsClient({
         </section>
 
         <ChangelogContent
+          heading={
+            <>
+              <h1 className="page-heading">
+                <span className="text-secondary-text flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
+                  Changelog #{changelog.id}
+                  {isLatest && (
+                    <span className="bg-status-success text-button-success-text inline-flex h-5 items-center rounded-md px-2 text-xs leading-none font-bold normal-case">
+                      Latest
+                    </span>
+                  )}
+                </span>
+                {changelog.title}
+              </h1>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {!isLatest && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => handleChangelogSelect(latestId.toString())}
+                  >
+                    <Icon icon="heroicons:arrow-uturn-right" inline={true} />
+                    Go to Latest Update
+                  </Button>
+                )}
+                <Button asChild size="sm" variant="secondary">
+                  <Link href="/changelogs/timeline">
+                    <Icon icon="heroicons:clock" inline={true} />
+                    View Timeline
+                  </Link>
+                </Button>
+              </div>
+            </>
+          }
           title={changelog.title}
           sections={changelog.sections}
           imageUrl={changelog.image_url}

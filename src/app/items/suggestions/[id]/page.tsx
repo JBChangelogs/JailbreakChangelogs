@@ -1762,7 +1762,7 @@ export default function ValueSuggestionDetailPage() {
                           Discussion
                         </TabsTrigger>
                       </TabsList>
-                      <div className="relative overflow-x-hidden">
+                      <div className="relative overflow-x-clip">
                         <AnimatePresence
                           mode="popLayout"
                           initial={false}

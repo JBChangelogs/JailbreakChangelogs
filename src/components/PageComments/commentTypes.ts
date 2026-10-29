@@ -16,6 +16,7 @@ export interface ChangelogCommentsProps {
     | "vsuggestion"
     | "user";
   itemType?: string;
+  pinnedTitle?: boolean;
   allowProfileComments?: boolean;
   trade?: {
     author: string;

@@ -3,7 +3,9 @@
 import { createContext, useContext } from "react";
 import type { useCommentState } from "./useCommentState";
 
-export type CommentsContextValue = ReturnType<typeof useCommentState>;
+export type CommentsContextValue = ReturnType<typeof useCommentState> & {
+  pinnedTitle?: boolean;
+};
 
 export const CommentsContext = createContext<CommentsContextValue | null>(null);
 

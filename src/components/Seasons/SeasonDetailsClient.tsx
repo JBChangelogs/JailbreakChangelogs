@@ -258,8 +258,8 @@ export default function SeasonDetailsClient({
             ref={stickyColumnRef}
             className={`xl:col-span-8 xl:col-start-1 xl:row-span-2 xl:row-start-1 ${STICKY_COLUMN_CLASS}`}
           >
-            <h2 className="text-primary-text mb-4 text-2xl font-bold tracking-tight">
-              Rewards
+            <h2 className="text-primary-text bg-primary-bg top-(--header-height) z-10 mb-4 text-2xl font-bold tracking-tight xl:sticky xl:py-4">
+              Season {season.season} Rewards
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
               {imageRewards.map((reward, index) => (
@@ -327,6 +327,7 @@ export default function SeasonDetailsClient({
               type="season"
               initialComments={initialComments}
               initialUserMap={initialUserMap}
+              pinnedTitle
             />
           </div>
         </div>

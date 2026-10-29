@@ -685,7 +685,8 @@ export default function ItemDetailsClient({
 
             <ItemDetailsTabs value={activeTab} onChange={handleTabChange} />
 
-            <div className="relative overflow-x-hidden">
+            {/* clip, not hidden: hidden breaks the sticky comments title */}
+            <div className="relative overflow-x-clip">
               <AnimatePresence
                 mode="popLayout"
                 initial={false}

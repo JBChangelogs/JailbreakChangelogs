@@ -1,7 +1,7 @@
 "use client";
 
 import NumberFlow from "@number-flow/react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CommentsContext } from "./CommentsContext";
 import { useCommentState } from "./useCommentState";
 import { useCommentsContext } from "./CommentsContext";
@@ -20,12 +20,12 @@ import type { CommentData } from "@/utils/api/api";
 import type { ChangelogCommentsProps } from "./commentTypes";
 import { isCommentIdentityHidden } from "./commentUtils";
 
-const AUTO_LOAD_PAGES = 3;
-
 export default function ChangelogComments(props: ChangelogCommentsProps) {
   const state = useCommentState(props);
   return (
-    <CommentsContext.Provider value={state}>
+    <CommentsContext.Provider
+      value={{ ...state, pinnedTitle: props.pinnedTitle }}
+    >
       <CommentsLayout />
     </CommentsContext.Provider>
   );
@@ -43,9 +43,9 @@ function CommentsLayout() {
     filteredComments,
     currentComments,
     type,
+    changelogId,
     totalComments,
     hasMore,
-    loadedPageCount,
     isFetchingMore,
     loadMoreError,
     loadMore,
@@ -67,8 +67,10 @@ function CommentsLayout() {
   } = useCommentsContext();
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  // Long threads stop auto-loading so the rest of the page stays reachable.
-  const autoLoad = loadedPageCount < AUTO_LOAD_PAGES;
+  // Infinite scroll starts after the first "Load more" click, per page.
+  const pageKey = `${type}:${changelogId}`;
+  const [autoLoadFor, setAutoLoadFor] = useState<string | null>(null);
+  const autoLoad = autoLoadFor === pageKey;
   const commentsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -227,7 +229,14 @@ function CommentsLayout() {
                     <CommentSkeletonList count={6} />
                   ) : (
                     <div className="mt-3 flex justify-center">
-                      <Button onClick={loadMore}>Load more comments</Button>
+                      <Button
+                        onClick={() => {
+                          setAutoLoadFor(pageKey);
+                          loadMore();
+                        }}
+                      >
+                        Load more comments
+                      </Button>
                     </div>
                   ))}
                 {loadMoreError && (
