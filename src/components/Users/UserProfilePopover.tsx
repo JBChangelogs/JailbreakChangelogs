@@ -287,12 +287,18 @@ export function UserProfilePopover({
     <Popover modal open={open} onOpenChange={(o) => !o && setOpen(false)}>
       <PopoverTrigger
         asChild
-        onClick={(e) => {
-          e.stopPropagation();
-          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-          // Stops the wrapped link navigating; that also skips Radix's own
-          // toggle, so toggle here.
+        onClickCapture={(e) => {
+          if (
+            e.metaKey ||
+            e.ctrlKey ||
+            e.shiftKey ||
+            e.altKey ||
+            e.button !== 0
+          )
+            return;
+          // Intercept before link handlers and the document's navigation loader.
           e.preventDefault();
+          e.stopPropagation();
           setOpen((o) => !o);
         }}
       >
@@ -303,7 +309,7 @@ export function UserProfilePopover({
         align="start"
         sideOffset={12}
         collisionPadding={12}
-        className="relative isolate w-80 overflow-hidden rounded-2xl p-0"
+        className="relative isolate z-[10001] w-80 overflow-hidden rounded-2xl p-0"
         data-accent-cards={accent?.style}
         style={accent ? accentCardTheme(accent) : undefined}
         onOpenAutoFocus={(e) => e.preventDefault()}

@@ -268,7 +268,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                           <Link
                             href={`/users/${user.id}`}
                             prefetch={false}
-                            className="block flex-1"
+                            className="block min-w-0"
                           >
                             <div className="flex items-center space-x-1.5 sm:space-x-3">
                               <UserAvatar
