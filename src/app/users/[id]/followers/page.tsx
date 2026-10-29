@@ -1,10 +1,13 @@
-import type { Metadata } from "next";
 import { FollowList } from "@/components/Users/FollowList";
+import { followListMetadata } from "../followMetadata";
 
-export const metadata: Metadata = {
-  title: { absolute: "Followers | Jailbreak Changelogs" },
-  robots: { index: false },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  return followListMetadata((await params).id, "followers");
+}
 
 export default async function Page({
   params,
