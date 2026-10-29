@@ -849,7 +849,12 @@ export function useRealtimeNotificationsWebSocket(
                 .notification;
               const notificationTitle =
                 typeof notification?.title === "string"
-                  ? `New message from ${notification.title}`
+                  ? payload.action === "group_message_received"
+                    ? notification.title.replace(
+                        /^(.+?) \((.*)\)$/s,
+                        "$1 in $2",
+                      )
+                    : `New message from ${notification.title}`
                   : undefined;
               const notificationBody =
                 typeof notification?.body === "string"

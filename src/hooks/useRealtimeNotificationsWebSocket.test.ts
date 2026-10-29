@@ -242,7 +242,13 @@ test.each([
     ]) {
       const realtime = setupRealtime({ active });
       const title =
-        payload === dm ? "piotrekk5372" : "piotrekk5372 (Trading Pals)";
+        payload === dm
+          ? "piotrekk5372"
+          : "piotrekk5372 (Trading Pals (friends))";
+      const expectedTitle =
+        payload === dm
+          ? "New message from piotrekk5372"
+          : "piotrekk5372 in Trading Pals (friends)";
       try {
         await realtime.receive({
           ...payload,
@@ -254,11 +260,11 @@ test.each([
         expect(realtime.lookups()).toBe(0);
         if (active) {
           expect(realtime.toasts).toHaveLength(1);
-          expect(realtime.toasts[0].title).toBe(`New message from ${title}`);
+          expect(realtime.toasts[0].title).toBe(expectedTitle);
           expect(realtime.toasts[0].options.description).toBe(body);
         } else {
           expect(realtime.desktop).toHaveLength(1);
-          expect(realtime.desktop[0].title).toBe(`New message from ${title}`);
+          expect(realtime.desktop[0].title).toBe(expectedTitle);
           expect(realtime.desktop[0].body).toBe(body);
         }
       } finally {
