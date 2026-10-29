@@ -2,6 +2,8 @@
 
 import NumberFlow from "@number-flow/react";
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import ProfileCommentsPreview from "@/components/Profile/ProfileCommentsPreview";
 import { CommentsContext } from "./CommentsContext";
 import { useCommentState } from "./useCommentState";
 import { useCommentsContext } from "./CommentsContext";
@@ -20,12 +22,16 @@ import type { CommentData } from "@/utils/api/api";
 import type { ChangelogCommentsProps } from "./commentTypes";
 import { isCommentIdentityHidden } from "./commentUtils";
 
-export default function ChangelogComments(props: ChangelogCommentsProps) {
+export default function ChangelogComments(
+  props: ChangelogCommentsProps & { previewContainer?: HTMLElement | null },
+) {
   const state = useCommentState(props);
   return (
     <CommentsContext.Provider
       value={{ ...state, pinnedTitle: props.pinnedTitle }}
     >
+      {props.previewContainer &&
+        createPortal(<ProfileCommentsPreview />, props.previewContainer)}
       <CommentsLayout />
     </CommentsContext.Provider>
   );

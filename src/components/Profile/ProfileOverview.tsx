@@ -67,6 +67,8 @@ export default function ProfileOverview({
   );
   const overviewRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [commentsPreviewContainer, setCommentsPreviewContainer] =
+    useState<HTMLDivElement | null>(null);
   if (!user) return null;
 
   const isOwnProfile = currentUserId === user.id;
@@ -211,6 +213,7 @@ export default function ProfileOverview({
             onBioUpdate={onBioUpdate}
           />
         )}
+        {isOverview && <div ref={setCommentsPreviewContainer} />}
         {(isOverview || section.id === "favorites") && (
           <FavoritesTab
             key={isOverview ? "favorites-preview" : "favorites-full"}
@@ -262,7 +265,8 @@ export default function ProfileOverview({
         {(isOverview || section.id === "profile-comments") && (
           <section
             id="comments"
-            className="scroll-mt-24"
+            tabIndex={-1}
+            className="scroll-mt-[calc(var(--header-height)+5rem)]"
             aria-label="Profile comments"
           >
             <ChangelogComments
@@ -271,6 +275,7 @@ export default function ProfileOverview({
               changelogTitle={`${user.username}'s profile`}
               type="user"
               allowProfileComments={user.settings_v2?.allow_profile_comments}
+              previewContainer={isOverview ? commentsPreviewContainer : null}
             />
           </section>
         )}
