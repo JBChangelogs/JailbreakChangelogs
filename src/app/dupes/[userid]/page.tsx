@@ -79,7 +79,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         <div className="mb-6">
           <RelatedInventoryPages current="dupes" />
         </div>
-        <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
+        <div className="bg-button-info/10 border-button-info text-primary-text mb-6 rounded-lg border p-4 text-sm">
           If you believe an item is incorrectly flagged, you can report the
           false dupe after reviewing its ownership histories. Choose
           &quot;Comparison&quot; on the card to open the histories in a new tab,

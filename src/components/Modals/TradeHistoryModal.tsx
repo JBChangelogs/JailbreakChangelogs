@@ -199,7 +199,7 @@ export default function TradeHistoryModal({
           </div>
 
           {item.id && (pathname?.startsWith("/dupes") || isDupeTab) && (
-            <div className="bg-button-info/10 border-border-card mx-0 mt-4 mb-2 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:flex-row">
+            <div className="bg-button-info/10 border-button-info mx-0 mt-4 mb-2 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:flex-row">
               <div className="flex items-start gap-2">
                 <div className="text-sm">
                   <p className="text-primary-text font-semibold">

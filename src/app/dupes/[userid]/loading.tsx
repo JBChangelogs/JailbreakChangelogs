@@ -12,7 +12,7 @@ export default function Loading() {
       </div>
 
       {/* Experimental Feature Banner */}
-      <div className="border-border-card bg-button-info/10 mb-6 rounded-lg border p-4 shadow-sm">
+      <div className="border-button-info bg-button-info/10 mb-6 rounded-lg border p-4 shadow-sm">
         <div className="animate-pulse space-y-2">
           <div className="bg-quaternary-bg/70 h-4 w-full rounded"></div>
           <div className="bg-quaternary-bg/70 h-4 w-3/4 rounded"></div>

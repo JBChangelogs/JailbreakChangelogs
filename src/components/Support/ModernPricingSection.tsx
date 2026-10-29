@@ -441,7 +441,7 @@ export default function ModernPricingSection() {
         {/* Important Information Section */}
         <div
           id="important-information"
-          className="bg-button-info/10 border-border-card mt-12 scroll-mt-24 rounded-lg border p-6"
+          className="bg-button-info/10 border-button-info mt-12 scroll-mt-24 rounded-lg border p-6"
         >
           <h3 className="text-primary-text mb-6 text-lg font-semibold">
             Important Information

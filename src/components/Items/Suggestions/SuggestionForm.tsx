@@ -470,7 +470,7 @@ export function SuggestionForm({
           <>
             {/* Auto-calc banner for HyperShift reference items (587, 713) */}
             {isAutoCalcItem && (
-              <div className="bg-button-info/10 border-border-card flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+              <div className="bg-button-info/10 border-button-info flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
                 <span className="text-primary-text">
                   Cash Value and Duped Value for this item are automatically
                   calculated as the sum of the values of all Level{" "}
