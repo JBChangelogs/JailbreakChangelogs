@@ -13,7 +13,8 @@ export const isCommentIdentityHidden = (
   currentUserId: string | null,
 ): boolean =>
   !!userId &&
-  (!settings?.show_recent_comments || !settings?.profile_public) &&
+  // Missing settings means user data didn't load, so stay hidden.
+  (!settings || settings.show_recent_comments === false) &&
   currentUserId !== userId;
 
 /**

@@ -751,58 +751,6 @@ export default function UserProfileClient({
 
   if (errorCode && !user) {
     if (authLoading) return null;
-    const hasPrivateProfilePrefix =
-      !!errorState && errorState.startsWith("PRIVATE_PROFILE:");
-    const isPrivateProfileError =
-      errorCode === 403 &&
-      (hasPrivateProfilePrefix ||
-        (!!errorState &&
-          errorState.toLowerCase().includes("profile is private")));
-    const privateProfileMessage = hasPrivateProfilePrefix
-      ? errorState.replace("PRIVATE_PROFILE:", "").trim()
-      : errorState;
-
-    // Render dedicated private-profile UI for private profile errors.
-    if (isPrivateProfileError) {
-      return (
-        <main className="min-h-screen pb-8">
-          <div className="container mx-auto max-w-7xl">
-            <Breadcrumb />
-            <div className="border-border-card bg-secondary-bg mx-3 overflow-hidden rounded-lg border shadow-md sm:mx-0">
-              <div className="flex min-h-[65vh] items-center justify-center p-8">
-                <div className="flex flex-col items-center justify-center space-y-6">
-                  <div className="w-full max-w-md rounded-lg p-6 text-center">
-                    <div className="mb-4 flex items-center justify-center space-x-3">
-                      <svg
-                        className="text-primary-text h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                        />
-                      </svg>
-                      <h2 className="text-primary-text text-lg font-semibold">
-                        Private Profile
-                      </h2>
-                    </div>
-                    <p className="text-secondary-text">
-                      {privateProfileMessage ||
-                        "This user has chosen to keep their profile private"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      );
-    }
-
     // Handle 403 and 404 errors by calling notFound() to trigger the custom not-found page
     if (errorCode === 403 || errorCode === 404) {
       notFound();
@@ -822,77 +770,6 @@ export default function UserProfileClient({
   // Shown only when the owner switched it on; never gated on supporter tier.
   const hasVisibleBackground =
     user.settings_v2?.custom_background === true && !!user.custom_background;
-
-  if (user.settings_v2?.profile_public === false && currentUserId !== user.id) {
-    return (
-      <main
-        className="relative isolate min-h-screen pb-8"
-        data-accent-cards={accent?.style}
-        style={accent ? accentCardTheme(accent) : undefined}
-      >
-        {hasVisibleBackground && user.custom_background && (
-          <ProfileBackground src={user.custom_background} />
-        )}
-        <div className="container mx-auto max-w-7xl">
-          <Breadcrumb userData={user} />
-          <div className="border-border-card bg-secondary-bg mx-3 overflow-hidden rounded-2xl border sm:mx-0">
-            <div className="px-5 py-6 sm:px-6 md:p-8">
-              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
-                <div className="shrink-0">
-                  <UserAvatar
-                    userId={user.id}
-                    avatarHash={user.avatar}
-                    username={user.username}
-                    size={38}
-                    custom_avatar={user.custom_avatar}
-                    className={cn(
-                      "[&>div]:size-24! [&>div]:min-h-24! [&>div]:min-w-24! md:[&>div]:size-38! md:[&>div]:min-h-38! md:[&>div]:min-w-38!",
-                      user.premiumtype === 3 && "[&>div]:rounded-2xl!",
-                    )}
-                    showBadge={false}
-                    settings={user.settings_v2}
-                    premiumType={user.premiumtype}
-                  />
-                </div>
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <h1 className="text-primary-text min-w-0 text-3xl font-bold tracking-tight wrap-anywhere md:text-4xl">
-                      {user.global_name && user.global_name !== "None"
-                        ? user.global_name
-                        : user.username}
-                    </h1>
-                    <UserBadges
-                      usernumber={user.usernumber}
-                      premiumType={user.premiumtype}
-                      flags={user.flags}
-                      size="md"
-                      noContainer
-                      className="max-w-full flex-wrap justify-start"
-                      primary_guild={user.primary_guild}
-                    />
-                  </div>
-                  <p className="text-secondary-text text-sm wrap-anywhere">
-                    @{user.username}
-                  </p>
-                </div>
-              </div>
-              <div className="border-border-card mt-6 border-t pt-8 pb-2 text-center md:mt-8 md:py-10">
-                <div className="bg-tertiary-bg text-secondary-text mx-auto mb-4 flex size-12 items-center justify-center rounded-full">
-                  <Icon icon="heroicons:lock-closed" className="size-6" />
-                </div>
-                <h2 className="text-primary-text text-lg font-semibold">
-                  Private Profile
-                </h2>
-                <p className="text-secondary-text mt-2 text-sm">
-                  This user has chosen to keep their profile private
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   const profileActionButtonClassName =
     "md:h-10! md:gap-2! md:px-5! md:text-base! md:[&_svg]:size-5!";

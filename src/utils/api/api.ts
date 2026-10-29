@@ -103,11 +103,7 @@ function canonicalItemType(type: string): string {
 
 const USER_BANNED_FALLBACK_MESSAGE =
   "This user is banned from Jailbreak Changelogs.";
-const USER_PRIVATE_PROFILE_FALLBACK_MESSAGE = "This user's profile is private.";
-const USER_ACCESS_ERROR_PREFIXES = [
-  "PRIVATE_PROFILE:",
-  "BANNED_USER:",
-] as const;
+const USER_ACCESS_ERROR_PREFIXES = ["BANNED_USER:"] as const;
 
 function getErrorMessageFromResponse(data: unknown, fallback: string): string {
   if (typeof data === "string" && data.trim()) {
@@ -188,46 +184,6 @@ export async function getResponseErrorMessage(
   return fallback;
 }
 
-function isPrivateProfileResponse(
-  data: unknown,
-  errorMessage: string,
-): boolean {
-  if (
-    typeof errorMessage === "string" &&
-    errorMessage.toLowerCase().includes("profile is private")
-  ) {
-    return true;
-  }
-
-  try {
-    const raw = JSON.stringify(data).toLowerCase();
-    return raw.includes("profile is private");
-  } catch {
-    return false;
-  }
-}
-
-function getPrivateProfileMessage(data: unknown, errorMessage: string): string {
-  if (
-    typeof errorMessage === "string" &&
-    errorMessage.toLowerCase().includes("profile is private")
-  ) {
-    return errorMessage;
-  }
-
-  try {
-    const raw = JSON.stringify(data);
-    const privatePattern = /this user(?:'s)? profile is private\.?/i;
-    if (privatePattern.test(raw)) {
-      return "This user's profile is private.";
-    }
-  } catch {
-    // Ignore JSON stringify failures and use fallback below.
-  }
-
-  return USER_PRIVATE_PROFILE_FALLBACK_MESSAGE;
-}
-
 function hasMessagePrefix(
   error: unknown,
   prefixes: readonly string[],
@@ -243,11 +199,6 @@ function throwUserAccessErrorFrom403(data: unknown): never {
     data,
     USER_BANNED_FALLBACK_MESSAGE,
   );
-
-  if (isPrivateProfileResponse(data, errorMessage)) {
-    const privateMessage = getPrivateProfileMessage(data, errorMessage);
-    throw new Error(`PRIVATE_PROFILE: ${privateMessage}`);
-  }
 
   throw new Error(`BANNED_USER: ${errorMessage}`);
 }
@@ -573,7 +524,7 @@ export async function fetchUserByRobloxId(
 
     return data;
   } catch (error) {
-    // Only log non-404/non-private errors as those are expected in some flows.
+    // Only log non-404/non-banned errors as those are expected in some flows.
     if (
       error instanceof Error &&
       !error.message.includes("404") &&
@@ -582,7 +533,7 @@ export async function fetchUserByRobloxId(
       log.error("Error fetching user by Roblox ID", error);
     }
 
-    // Re-throw PRIVATE_PROFILE/BANNED_USER errors so calling code can handle them
+    // Re-throw BANNED_USER errors so calling code can handle them
     if (
       error &&
       typeof error === "object" &&
@@ -1322,7 +1273,6 @@ export interface CommentAuthor {
   premiumtype: number;
   usernumber: number;
   settings: {
-    profile_public: boolean;
     show_recent_comments: boolean;
     hide_following: boolean;
     hide_followers: boolean;
@@ -1347,7 +1297,6 @@ export interface ReactionUser {
   premiumtype?: number;
   settings?: {
     custom_avatar?: boolean;
-    profile_public?: boolean;
     show_recent_comments?: boolean;
     [key: string]: unknown;
   } | null;

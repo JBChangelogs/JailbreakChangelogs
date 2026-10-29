@@ -47,7 +47,6 @@ export interface SuggestionLimits {
 interface UserSettings {
   custom_avatar?: boolean;
   hide_presence?: boolean | number;
-  profile_public?: boolean | number;
   custom_banner?: boolean;
   dms_allowed?: boolean | number;
   allow_gifting?: boolean;

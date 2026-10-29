@@ -28,7 +28,6 @@ const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
 /** Settings as the various user endpoints send them (some use 0/1). */
 type LooseSettings = Partial<
   Record<
-    | "profile_public"
     | "hide_presence"
     | "custom_avatar"
     | "custom_banner"
@@ -184,15 +183,15 @@ function Description({ text }: { text: string }) {
 
 function PopoverBanner({
   user,
-  isPrivate,
+  hidePersonal,
 }: {
   user: FullProfile;
-  isPrivate: boolean;
+  hidePersonal: boolean;
 }) {
   const { primary, fallback } = getProfileBanner({
     userId: user.id,
-    banner: isPrivate ? null : user.banner,
-    customBanner: isPrivate ? null : user.custom_banner,
+    banner: hidePersonal ? null : user.banner,
+    customBanner: hidePersonal ? null : user.custom_banner,
     settings: (user.settings_v2 ?? user.settings ?? undefined) as never,
     premiumType: user.premiumtype,
     size: 600,
@@ -256,12 +255,9 @@ export function UserProfilePopover({
     : { ...user, id: userId };
   const settings = profile.settings_v2 ?? profile.settings ?? undefined;
   const isOwn = currentUser?.id === userId;
-  const isPrivate =
-    (settings?.profile_public === false || settings?.profile_public === 0) &&
-    !isOwn;
-  // Only the full profile says whether it's private, so presence and their
-  // own banner wait for it; the page's user may carry both.
-  const hidePersonal = isPrivate || !full.data;
+  // Presence and their own banner wait for the full profile; the page's user
+  // may carry both.
+  const hidePersonal = !full.data;
   const showPresence = !hidePersonal && !settings?.hide_presence;
   const username = profile.username ?? `User #${userId.slice(-6)}`;
   // Their profile's look, as on /users/{id}: the background behind the whole
@@ -335,7 +331,7 @@ export function UserProfilePopover({
           <PopoverBanner
             key={`${profile.id}:${profile.custom_banner ?? profile.banner}:${hidePersonal}`}
             user={profile}
-            isPrivate={hidePersonal}
+            hidePersonal={hidePersonal}
           />
           <div className="relative px-4">
             {/* Overlaps the banner with a ring cut out in the card's colour. */}
@@ -399,36 +395,28 @@ export function UserProfilePopover({
                 />
               </div>
             )}
-            {isPrivate ? (
-              <p className="text-secondary-text mt-3 text-xs italic">
-                Profile is private
-              </p>
-            ) : (
-              <>
-                {full.data?.description && (
-                  <Description text={full.data.description} />
-                )}
-                {profile.usernumber != null && profile.created_at && (
-                  <div className="mt-3">
-                    <p className="text-secondary-text text-xs font-bold">
-                      Member Since
-                    </p>
-                    <p className="text-primary-text/90 mt-0.5 text-sm">
-                      {new Date(
-                        Number(profile.created_at) * 1000,
-                      ).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                      <span className="text-tertiary-text">
-                        {" "}
-                        · Member #{profile.usernumber}
-                      </span>
-                    </p>
-                  </div>
-                )}
-              </>
+            {full.data?.description && (
+              <Description text={full.data.description} />
+            )}
+            {profile.usernumber != null && profile.created_at && (
+              <div className="mt-3">
+                <p className="text-secondary-text text-xs font-bold">
+                  Member Since
+                </p>
+                <p className="text-primary-text/90 mt-0.5 text-sm">
+                  {new Date(
+                    Number(profile.created_at) * 1000,
+                  ).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  <span className="text-tertiary-text">
+                    {" "}
+                    · Member #{profile.usernumber}
+                  </span>
+                </p>
+              </div>
             )}
             {full.isError && (
               <p className="text-quaternary-text mt-3 text-xs">

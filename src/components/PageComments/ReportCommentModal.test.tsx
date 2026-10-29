@@ -5,7 +5,7 @@ import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import { isCommentIdentityHidden } from "./commentUtils";
 
 test("report previews use the lock avatar for hidden authors and preserve public avatars", () => {
-  const settings = { profile_public: true, show_recent_comments: true };
+  const settings = { show_recent_comments: true };
   const state = {
     filteredComments: [
       {
@@ -87,8 +87,6 @@ test("report previews use the lock avatar for hidden authors and preserve public
   expect(preview().nodes.some((node) => node.type === "UserAvatar")).toBe(true);
   for (const hiddenSettings of [
     { ...settings, show_recent_comments: false },
-    { ...settings, profile_public: false },
-    {},
     undefined,
   ]) {
     state.userData.target.settings = hiddenSettings;

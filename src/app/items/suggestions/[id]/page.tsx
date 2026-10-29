@@ -87,7 +87,6 @@ const ItemValueChart = dynamic(
 interface UserSettings {
   custom_avatar?: boolean;
   hide_presence?: boolean;
-  profile_public?: boolean | number;
   custom_banner?: boolean;
   dms_allowed?: boolean | number;
   allow_gifting?: boolean;

@@ -105,15 +105,7 @@ export class UserDataService {
     if (includeUserConnection && finalUserIds.length > 0) {
       fetchPromises.push(
         fetchUserByRobloxId(finalUserIds[0]).catch((error) => {
-          if (
-            !(error instanceof Error) ||
-            !error.message.startsWith("PRIVATE_PROFILE:")
-          ) {
-            log.error(
-              `[${context}] Failed to fetch user connection data`,
-              error,
-            );
-          }
+          log.error(`[${context}] Failed to fetch user connection data`, error);
           return null;
         }),
       );

@@ -33,30 +33,15 @@ export default function UserProfileLoader({ userId }: { userId: string }) {
   if (profileQuery.isPending) return <UserProfileLoading />;
 
   const message = profileQuery.error?.message;
-  const isPrivateOwner =
-    message?.startsWith("PRIVATE_PROFILE:") && currentUser?.id === userId;
   const code = message?.startsWith("NOT_FOUND:")
     ? 404
-    : message?.startsWith("PRIVATE_PROFILE:") ||
-        message?.startsWith("BANNED_USER:")
+    : message?.startsWith("BANNED_USER:")
       ? 403
       : 500;
 
   const profileData =
     profileQuery.isError && (code === 403 || code === 404)
-      ? isPrivateOwner && currentUser
-        ? {
-            user: {
-              ...currentUser,
-              banner: currentUser.banner ?? undefined,
-              custom_banner: currentUser.custom_banner ?? undefined,
-            },
-            followerCount: 0,
-            followingCount: 0,
-            bio: null,
-            bioLastUpdated: null,
-          }
-        : undefined
+      ? undefined
       : profileQuery.data;
 
   return (

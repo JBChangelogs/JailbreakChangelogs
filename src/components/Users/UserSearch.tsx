@@ -10,7 +10,6 @@ import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { UserData } from "@/types/auth";
 import DiscordUserCard from "@/components/Users/DiscordUserCard";
 import { fetchPaginatedUsers, searchUsers } from "@/utils/api/api";
-import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -28,7 +27,6 @@ function InlineSpinner() {
 }
 
 export default function UserSearch() {
-  const { user } = useAuthContext();
   const [
     { query: queryFromUrl, page: pageFromUrl, seed: seedFromUrl },
     setParams,
@@ -43,7 +41,6 @@ export default function UserSearch() {
   const pushedQueryRef = useRef(queryFromUrl);
   const usersPerPage = 30;
 
-  const currentUserId = user?.id ?? null;
   const trimmedQuery = queryFromUrl.trim();
   const usersQuery = useQuery({
     queryKey: ["users", "directory", trimmedQuery, pageFromUrl, seedFromUrl],
@@ -261,7 +258,6 @@ export default function UserSearch() {
                   user={user}
                   disableBadgeTooltips={true}
                   badgeLimit={3}
-                  currentUserId={currentUserId}
                 />
               </Link>
             );

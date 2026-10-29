@@ -213,7 +213,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
         "Unknown User"
       : userData[comment.user_id]?.username || comment.author || "Unknown User";
 
-  // Hide identity if show_recent_comments or profile_public is falsy
+  // Hide identity if show_recent_comments is off
   // and the viewer is not the comment author
   const hideRecent = isIdentityHidden(comment.user_id);
 

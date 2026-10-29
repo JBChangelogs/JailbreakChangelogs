@@ -5,7 +5,7 @@ import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import { isCommentIdentityHidden } from "./commentUtils";
 
 test("reply privacy and copied comment links preserve the target and discussion", async () => {
-  const settings = { profile_public: true, show_recent_comments: true };
+  const settings = { show_recent_comments: true };
   const target = {
     id: 2,
     user_id: "target",
@@ -119,8 +119,6 @@ test("reply privacy and copied comment links preserve the target and discussion"
 
   for (const hiddenSettings of [
     { ...settings, show_recent_comments: false },
-    { ...settings, profile_public: false },
-    {},
     undefined,
   ]) {
     context.userData.target.settings = hiddenSettings;

@@ -47,3 +47,27 @@ test("profile posting errors explain the failure without a server message", () =
   );
   expect(errors.at(-1)?.description).toBe("Server explanation");
 });
+
+test("comment identity stays visible when the privacy setting is missing", () => {
+  const exports = {} as {
+    isCommentIdentityHidden: (
+      userId: string,
+      settings: Record<string, boolean> | undefined,
+      currentUserId: string | null,
+    ) => boolean;
+  };
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./commentUtils.tsx", import.meta.url), "utf8"),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    { exports, require: () => ({}) },
+  );
+  const hidden = exports.isCommentIdentityHidden;
+  expect(hidden("1", undefined, "2")).toBe(true);
+  expect(hidden("1", {}, "2")).toBe(false);
+  expect(hidden("1", { show_recent_comments: false }, "2")).toBe(true);
+  expect(hidden("1", { show_recent_comments: false }, "1")).toBe(false);
+});

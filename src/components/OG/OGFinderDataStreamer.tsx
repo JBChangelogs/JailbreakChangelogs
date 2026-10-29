@@ -158,12 +158,7 @@ async function OGFinderDataFetcher({
       return {};
     }),
     fetchUserByRobloxId(actualRobloxId, verificationHeaders).catch((error) => {
-      if (
-        !(error instanceof Error) ||
-        !error.message.startsWith("PRIVATE_PROFILE:")
-      ) {
-        log.error("Failed to fetch user connection data:", error);
-      }
+      log.error("Failed to fetch user connection data:", error);
       return null;
     }),
   ]);

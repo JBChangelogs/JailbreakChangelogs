@@ -16,7 +16,6 @@ import {
   type UserPresence,
   type UserFlag,
 } from "@/types/auth";
-import { Icon } from "@/components/ui/IconWrapper";
 
 interface DiscordUserCardProps {
   user: {
@@ -45,20 +44,14 @@ interface DiscordUserCardProps {
   };
   disableBadgeTooltips?: boolean;
   badgeLimit?: number;
-  currentUserId?: string | null;
 }
 
 export default function DiscordUserCard({
   user,
   disableBadgeTooltips = false,
   badgeLimit,
-  currentUserId,
 }: DiscordUserCardProps) {
-  // Match the hover tooltip: private profiles only show name and avatar.
-  const isPrivate =
-    user.settings_v2?.profile_public === false && currentUserId !== user.id;
-  const presence =
-    isPrivate || user.settings_v2?.hide_presence ? undefined : user.presence;
+  const presence = user.settings_v2?.hide_presence ? undefined : user.presence;
   const joined = Number(user.created_at);
   const [bannerFailed, setBannerFailed] = useState(false);
   const { primary, fallback } = getProfileBanner({
@@ -69,7 +62,7 @@ export default function DiscordUserCard({
     premiumType: user.premiumtype,
     size: 1024,
   });
-  const bannerSrc = primary && !bannerFailed && !isPrivate ? primary : fallback;
+  const bannerSrc = primary && !bannerFailed ? primary : fallback;
 
   return (
     <div className="flex h-full flex-col">
@@ -141,7 +134,7 @@ export default function DiscordUserCard({
         <p className="text-secondary-text truncate text-sm">@{user.username}</p>
         {/* Always rendered so every card has the same height. */}
         <p className="text-secondary-text mt-3 mb-3 flex h-5 min-w-0 items-center gap-1.5 text-sm">
-          {isPrivate ? null : user.roblox_username ? (
+          {user.roblox_username ? (
             <>
               <RobloxIcon className="size-3.5 shrink-0" />
               <span className="text-primary-text truncate">
@@ -160,26 +153,15 @@ export default function DiscordUserCard({
           )}
         </p>
         <div className="border-border-card text-secondary-text mt-auto flex items-center gap-2 border-t pt-3 text-xs">
-          {isPrivate ? (
-            <>
-              <Icon
-                icon="lucide:lock"
-                aria-hidden="true"
-                className="size-3.5"
-              />
-              <span>Private profile</span>
-            </>
-          ) : (
-            <>
-              <span>Member #{user.usernumber.toLocaleString("en-US")}</span>
-              {joined > 0 && (
-                <>
-                  <span aria-hidden="true">·</span>
-                  <span>Joined {formatMonthDayYear(joined)}</span>
-                </>
-              )}
-            </>
-          )}
+          <>
+            <span>Member #{user.usernumber.toLocaleString("en-US")}</span>
+            {joined > 0 && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>Joined {formatMonthDayYear(joined)}</span>
+              </>
+            )}
+          </>
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 /** Settings embedded in comment user data and returned as settings_v2 from /users/get */
 export interface UserSettings {
-  profile_public: boolean;
   show_recent_comments: boolean;
   allow_profile_comments?: boolean;
   hide_following: boolean;

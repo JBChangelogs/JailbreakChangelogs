@@ -84,7 +84,6 @@ test("client loader defers requests to its query and preserves loading, data, an
   expect(exports.default({ userId }).props.profileData).toEqual(data);
 
   for (const [message, code] of [
-    ["PRIVATE_PROFILE: Private", 403],
     ["BANNED_USER: Banned", 403],
     ["NOT_FOUND: Missing", 404],
   ] as const) {
@@ -132,23 +131,7 @@ test("client loader defers requests to its query and preserves loading, data, an
   expect(refreshed.key).toBe(initial.key);
   expect(refreshed.props.profileData).toEqual(updated);
 
-  currentUser = { ...user, banner: null };
-  queryResult = { isError: true, error: new Error("PRIVATE_PROFILE: Private") };
-  const ownPrivateProfile = exports.default({ userId });
-  expect(ownPrivateProfile.props.profileData).toMatchObject({ user });
-  expect(ownPrivateProfile.props.error).toBeUndefined();
-  queryClient.clear();
-  ownPrivateProfile.props.onProfileDataChange((current) => ({
-    ...current,
-    user: { ...current.user, avatar: "Uploaded" },
-  }));
-  expect(
-    queryClient.getQueryData(["user-profile", userId, userId]),
-  ).toMatchObject({
-    user: { id: userId, avatar: "Uploaded" },
-  });
   currentUser = null;
-  expect(exports.default({ userId }).props.profileData).toBeUndefined();
   expect(queryOptions!.queryKey).toEqual(["user-profile", userId, null]);
   queryClient.clear();
 });

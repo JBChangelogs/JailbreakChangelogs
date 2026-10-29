@@ -83,7 +83,6 @@ test("client profile requests use the public base and preserve access errors", a
   expect(fetchMock.mock.calls[0]![1]?.credentials).toBe("include");
 
   for (const [status, body, prefix] of [
-    [403, { message: "This profile is private" }, "PRIVATE_PROFILE:"],
     [403, { message: "This user is banned" }, "BANNED_USER:"],
     [404, {}, "NOT_FOUND:"],
     [422, {}, "NOT_FOUND:"],

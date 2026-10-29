@@ -100,15 +100,7 @@ async function InventoryDataFetcher({
             actualRobloxId,
             await getServerVerificationHeaders(),
           ).catch((connectionError) => {
-            if (
-              !(connectionError instanceof Error) ||
-              !connectionError.message.startsWith("PRIVATE_PROFILE:")
-            ) {
-              log.error(
-                "Failed to fetch user connection data",
-                connectionError,
-              );
-            }
+            log.error("Failed to fetch user connection data", connectionError);
             return null;
           })
         : null;
