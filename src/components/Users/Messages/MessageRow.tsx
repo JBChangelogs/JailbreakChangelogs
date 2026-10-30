@@ -337,7 +337,8 @@ export function MessageRow({
     const [icon, tone] =
       groupEvent.type === "group_renamed"
         ? ["heroicons:pencil", "text-tertiary-text"]
-        : groupEvent.type === "members_added"
+        : groupEvent.type === "members_added" ||
+            groupEvent.type === "member_joined"
           ? [
               "heroicons:arrow-right",
               "text-[color-mix(in_srgb,var(--color-status-success)_70%,black)]",

@@ -4,6 +4,7 @@ import { asId } from "@/utils/messages/parsing";
 export type GroupEvent =
   | { type: "group_renamed"; oldName: string; newName: string }
   | { type: "members_added"; userIds: string[] }
+  | { type: "member_joined"; userId: string }
   | { type: "member_removed"; userId: string }
   | { type: "member_left"; userId: string; newOwnerId: string | null };
 
@@ -26,10 +27,11 @@ export function parseGroupEvent(
       return Array.isArray(metadata.user_ids)
         ? { type: "members_added", userIds: metadata.user_ids.map(asId) }
         : null;
+    case "member_joined":
     case "member_removed":
       return metadata.user_id == null
         ? null
-        : { type: "member_removed", userId: asId(metadata.user_id) };
+        : { type: metadata.type, userId: asId(metadata.user_id) };
     case "member_left":
       return metadata.user_id == null
         ? null
@@ -51,6 +53,7 @@ export function groupEventUserIds(event: GroupEvent): string[] {
   switch (event.type) {
     case "members_added":
       return event.userIds;
+    case "member_joined":
     case "member_removed":
       return [event.userId];
     case "member_left":
@@ -102,6 +105,8 @@ export function describeGroupEvent(
         ]),
         " to the group.",
       ];
+    case "member_joined":
+      return [person(event.userId), " joined the group via invite link."];
     case "member_removed":
       return [
         person(senderId),

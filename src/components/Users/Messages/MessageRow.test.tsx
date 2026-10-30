@@ -8,6 +8,7 @@ import * as parsing from "@/utils/messages/parsing";
 import * as sorting from "@/utils/messages/sorting";
 import * as invites from "@/utils/messages/invites";
 import * as mentions from "@/utils/messages/mentions";
+import * as groupEvents from "@/utils/messages/groupEvents";
 import type { ComponentProps } from "react";
 import type { MessageRow } from "./MessageRow";
 
@@ -82,6 +83,7 @@ function harness(mobile: boolean) {
     "@/utils/messages/sorting": sorting,
     "@/utils/messages/invites": invites,
     "@/utils/messages/mentions": mentions,
+    "@/utils/messages/groupEvents": groupEvents,
     "@/hooks/useFrequentEmojis": {
       useFrequentEmojis: () => ["👍", "👎", "❤️", "😂"],
     },
@@ -155,6 +157,19 @@ function harness(mobile: boolean) {
     unmount: () => cleanups.forEach((cleanup) => cleanup()),
   };
 }
+
+test("invite joins render as a system line with a profile link and green join arrow", () => {
+  const h = harness(false);
+  h.props.message.metadata = { type: "member_joined", user_id: "them" };
+  h.props.usersById = new Map([["them", h.props.selectedUser!]]);
+  const tree = h.render();
+  expect(
+    tree.find((node) => node.props.href === "/users/them")?.props.children,
+  ).toBe("Them");
+  const icon = tree.find((node) => node.props.icon === "heroicons:arrow-right");
+  expect(icon?.props.className).toContain("--color-status-success");
+  expect(tree.some((node) => node.type === "Sheet")).toBe(false);
+});
 
 test("mobile holds reveal actions without opening the sheet; scrolling and unmount cancel it", () => {
   const h = harness(true);

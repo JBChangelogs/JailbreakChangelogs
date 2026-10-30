@@ -19,6 +19,18 @@ const line = (metadata: Record<string, unknown>, senderId = "1") => {
   return text(describeGroupEvent(event, senderId, (id) => names[id]));
 };
 
+test("invite joins name the joining member and load their profile", () => {
+  const event = parseGroupEvent({ type: "member_joined", user_id: 2 });
+  expect(event).toEqual({ type: "member_joined", userId: "2" });
+  expect(groupEventUserIds(event!)).toEqual(["2"]);
+  expect(describeGroupEvent(event!, "1", (id) => names[id])).toEqual([
+    { strong: "Sam", userId: "2" },
+    " joined the group via invite link.",
+  ]);
+  expect(parseGroupEvent({ type: "member_joined" })).toBeNull();
+  expect(parseGroupEvent({ type: "member_joined", user_id: null })).toBeNull();
+});
+
 test("each group event reads as a sentence", () => {
   expect(
     line({ type: "group_renamed", old_name: "Old", new_name: "Crew" }),
