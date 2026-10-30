@@ -259,12 +259,12 @@ const ImageUploadDialog = ({
   const handleCropChange = (position: Point) => {
     const editor = cropperRef.current;
     const cropSize = editor?.state.cropSize;
-    if (imageType !== "banner" || !editor || !cropSize) {
+    if (isAvatar || !editor || !cropSize) {
       setCrop(position);
       return;
     }
 
-    // Bound banners to the visible outline, rather than the larger export crop.
+    // Bound positioning to the visible outline, rather than the larger export crop.
     const { width, height } = editor.mediaSize;
     const radians = ((editor.props.rotation ?? 0) * Math.PI) / 180;
     const sin = Math.abs(Math.sin(radians));
@@ -281,9 +281,13 @@ const ImageUploadDialog = ({
         (cropSize.height * visibleHeight) / 100) /
         2,
     );
+    const centerY =
+      imageType === "background"
+        ? (cropSize.height * (visibleHeight / 100 - 1)) / 2
+        : 0;
     setCrop({
       x: maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, position.x)),
-      y: maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, position.y)),
+      y: Math.max(centerY - maxY, Math.min(centerY + maxY, position.y)),
     });
   };
 
@@ -462,7 +466,7 @@ const ImageUploadDialog = ({
                   zoom={zoom}
                   rotation={rotation}
                   aspect={config.aspect}
-                  restrictPosition={imageType !== "banner"}
+                  restrictPosition={isAvatar}
                   classes={
                     visibleAspectRatio
                       ? { cropAreaClassName: "profile-upload-crop" }
@@ -507,8 +511,7 @@ const ImageUploadDialog = ({
                 ? "3:1 crop (up to 1500 × 500 px)"
                 : "16:9 crop (up to 1920 × 1080 px)"}
               ; other screen sizes may show a different crop.
-              {imageType === "banner" &&
-                " Drag within the outline to position your banner; transparent edges outside it may appear on other screen sizes."}
+              {` Drag within the outline to position your ${label}; transparent edges outside it may appear on other screen sizes.`}
             </p>
           )}
           <div className="my-5 flex items-center gap-3">

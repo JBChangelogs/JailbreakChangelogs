@@ -196,7 +196,7 @@ test("image uploads validate files and preview banner and background display cro
       const cropperProps = edited.find(
         (node) => node.type === "lazy-cropper",
       )!.props;
-      expect(cropperProps.restrictPosition).toBe(type !== "Banner");
+      expect(cropperProps.restrictPosition).toBe(type === "Avatar");
       if (type === "Banner") {
         // A 3:1 image must retain its vertical offset at the initial zoom.
         const cropper = new Cropper({
@@ -242,6 +242,64 @@ test("image uploads validate files and preview banner and background display cro
         (cropperProps.ref as { current: Cropper }).current = cropper;
         drag({ x: 300, y: 125 });
         expect(updates.get(4)).toEqual({ x: 0, y: 25 });
+      }
+      if (type === "Background") {
+        const cropper = new Cropper({
+          ...Cropper.defaultProps,
+          ...(cropperProps as unknown as CropperProps),
+        });
+        cropper.mediaSize = {
+          width: 640,
+          height: 360,
+          naturalWidth: 3840,
+          naturalHeight: 2160,
+        };
+        cropper.state = {
+          ...cropper.state,
+          cropSize: { width: 640, height: 360 },
+        };
+        (cropperProps.ref as { current: Cropper }).current = cropper;
+        const drag = cropperProps.onCropChange as (position: {
+          x: number;
+          y: number;
+        }) => void;
+        expect(cropper.props.zoom).toBe(1);
+        if (backgroundRatio === 32 / 9) {
+          // The top-aligned outline permits moving up, but not down or sideways.
+          drag({ x: 500, y: 500 });
+          expect(updates.get(4)).toEqual({ x: 0, y: 0 });
+          drag({ x: -500, y: -500 });
+          expect(updates.get(4)).toEqual({ x: 0, y: -180 });
+          drag({ x: 20, y: -40 });
+          expect(updates.get(4)).toEqual({ x: 0, y: -40 });
+          const moved = new Cropper({
+            ...cropper.props,
+            crop: { x: 0, y: -180 },
+          });
+          moved.mediaSize = cropper.mediaSize;
+          moved.state = cropper.state;
+          expect(moved.getCropData()?.croppedAreaPixels).toEqual({
+            x: 0,
+            y: 1080,
+            width: 3840,
+            height: 2160,
+          });
+          const zoomed = new Cropper({ ...cropper.props, zoom: 2 });
+          zoomed.mediaSize = cropper.mediaSize;
+          zoomed.state = cropper.state;
+          (cropperProps.ref as { current: Cropper }).current = zoomed;
+          drag({ x: 500, y: 500 });
+          expect(updates.get(4)).toEqual({ x: 320, y: 180 });
+          (cropperProps.ref as { current: Cropper }).current = cropper;
+          drag({ x: 320, y: 180 });
+          expect(updates.get(4)).toEqual({ x: 0, y: 0 });
+        } else {
+          // A narrow screen has spare width instead of spare height.
+          drag({ x: 500, y: 500 });
+          expect(updates.get(4)).toEqual({ x: 160, y: 0 });
+          drag({ x: -500, y: -500 });
+          expect(updates.get(4)).toEqual({ x: -160, y: 0 });
+        }
       }
       return (
         cropperProps.style as {
