@@ -217,7 +217,7 @@ function CommentsLayout() {
             </div>
           ) : (
             <div className="flex flex-col">
-              {focusedThread && (
+              {focusedThread && totalComments > filteredComments.length && (
                 <button
                   type="button"
                   onClick={showAllComments}

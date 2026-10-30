@@ -15,15 +15,7 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children)];
 }
 
-test("disabled empty profiles explain why comments are unavailable in the empty state", () => {
-  const state = {
-    type: "user",
-    profileCommentsDisabled: true,
-    filteredComments: [] as { id: number }[],
-    currentComments: [],
-    userData: {},
-    modalState: {},
-  };
+function renderComments(state: object) {
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: (props: object) => Node };
   runInNewContext(
@@ -59,13 +51,25 @@ test("disabled empty profiles explain why comments are unavailable in the empty 
       },
     },
   );
-  const render = () => {
+  return () => {
     const provider = exports.default({});
     const layout = (provider.props.children as Node[]).find(
       (child) => child && typeof child.type === "function",
     )!;
     return nodes((layout.type as () => Node)());
   };
+}
+
+test("disabled empty profiles explain why comments are unavailable in the empty state", () => {
+  const state = {
+    type: "user",
+    profileCommentsDisabled: true,
+    filteredComments: [] as { id: number }[],
+    currentComments: [],
+    userData: {},
+    modalState: {},
+  };
+  const render = renderComments(state);
   const disabled = render();
   expect(disabled.some((node) => node.type === "CommentForm")).toBe(false);
   expect(
@@ -100,4 +104,33 @@ test("disabled empty profiles explain why comments are unavailable in the empty 
       (node) => node.props.children === "Profile comments are disabled",
     ),
   ).toBe(false);
+});
+
+test("focused threads only offer view all when other comments exist", () => {
+  const state = {
+    type: "inventory",
+    focusedThread: { commentId: 15402, page: 1 } as {
+      commentId: number;
+      page: number;
+    } | null,
+    totalComments: 1,
+    filteredComments: [{ id: 15402 }],
+    currentComments: [],
+    userData: {},
+    modalState: {},
+  };
+  const render = renderComments(state);
+  const hasViewAll = () =>
+    render().some(
+      (node) =>
+        node.type === "button" &&
+        Array.isArray(node.props.children) &&
+        node.props.children.includes("View all "),
+    );
+
+  expect(hasViewAll()).toBe(false);
+  state.totalComments = 2;
+  expect(hasViewAll()).toBe(true);
+  state.focusedThread = null;
+  expect(hasViewAll()).toBe(false);
 });
