@@ -129,6 +129,7 @@ const fieldLabel = (field: string) =>
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-primary-text border-yellow-500/30",
   approved: "bg-green-500/20 text-primary-text border-green-500/30",
+  accepted: "bg-green-500/20 text-primary-text border-green-500/30",
   rejected: "bg-red-500/20 text-primary-text border-red-500/30",
 };
 
@@ -536,7 +537,7 @@ export default function UserValueSuggestionsTab({
             return (
               <div
                 key={suggestion.id}
-                className="border-border-card bg-tertiary-bg relative overflow-hidden rounded-xl border"
+                className="border-border-card bg-secondary-bg relative overflow-hidden rounded-xl border"
               >
                 {/* Full-card link overlay — sits behind all interactive children */}
                 <Link
