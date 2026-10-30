@@ -109,24 +109,11 @@ html:has([role="menu"][data-side="top"])
 
 body:has(
     [data-image-lightbox],
-    [data-global-search-dialog][data-state="open"],
-    [data-whats-new-dialog][data-state="open"],
-    [data-suggestion-guidelines-dialog][data-state="open"]
+    [role="dialog"][data-state="open"],
+    [role="alertdialog"][data-state="open"]
   )
-  :is(#np-bottom-anchor, #np-bottom-anchor-close),
-body:has(
-    [data-sheet][data-state="open"],
-    [data-suggestion-guidelines-dialog][data-state="open"]
-  )
-  #np-video-player {
+  :is(#np-bottom-anchor, #np-bottom-anchor-close, #np-video-player) {
   display: none !important;
-}
-
-@media (max-width: 1024px) {
-  body:has([data-sheet][data-state="open"])
-    :is(#np-bottom-anchor, #np-bottom-anchor-close) {
-    display: none !important;
-  }
 }
 
 @theme {
