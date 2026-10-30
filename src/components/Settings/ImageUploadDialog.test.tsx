@@ -34,10 +34,7 @@ test("image uploads validate files and preview banner and background display cro
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   runInNewContext(
     transpileModule(
-      readFileSync(
-        new URL("./AvatarUploadDialog.tsx", import.meta.url),
-        "utf8",
-      ),
+      readFileSync(new URL("./ImageUploadDialog.tsx", import.meta.url), "utf8"),
       {
         compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
       },

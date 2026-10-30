@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { BackgroundUploadDialog } from "@/components/Settings/AvatarUploadDialog";
+import { BackgroundUploadDialog } from "@/components/Settings/ImageUploadDialog";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/IconWrapper";

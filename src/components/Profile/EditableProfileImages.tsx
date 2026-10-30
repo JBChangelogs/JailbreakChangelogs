@@ -3,7 +3,7 @@
 import {
   AvatarUploadDialog,
   BannerUploadDialog,
-} from "@/components/Settings/AvatarUploadDialog";
+} from "@/components/Settings/ImageUploadDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { cn } from "@/lib/utils";
 import type { UserSettingsV2 } from "@/types/auth";
