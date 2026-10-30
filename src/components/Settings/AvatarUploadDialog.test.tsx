@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+import Cropper, { type CropperProps } from "react-easy-crop";
 import { validateFile } from "@/utils/storage/fileValidation";
 
 interface Node {
@@ -192,8 +193,58 @@ test("image uploads validate files and preview banner and background display cro
             node.props["aria-label"] === "Background vertical position",
         ),
       ).toBe(false);
+      const cropperProps = edited.find(
+        (node) => node.type === "lazy-cropper",
+      )!.props;
+      expect(cropperProps.restrictPosition).toBe(type !== "Banner");
+      if (type === "Banner") {
+        // A 3:1 image must retain its vertical offset at the initial zoom.
+        const cropper = new Cropper({
+          ...Cropper.defaultProps,
+          ...(cropperProps as unknown as CropperProps),
+          crop: { x: 0, y: 25 },
+        });
+        cropper.mediaSize = {
+          width: 600,
+          height: 200,
+          naturalWidth: 3000,
+          naturalHeight: 1000,
+        };
+        cropper.state = {
+          ...cropper.state,
+          cropSize: { width: 600, height: 200 },
+        };
+        (cropperProps.ref as { current: Cropper }).current = cropper;
+        const drag = cropperProps.onCropChange as (position: {
+          x: number;
+          y: number;
+        }) => void;
+        drag({ x: 500, y: 500 });
+        expect(updates.get(4)).toEqual({ x: 0, y: 25 });
+        drag({ x: -500, y: -500 });
+        expect(updates.get(4)).toEqual({ x: 0, y: -25 });
+        drag({ x: 20, y: 10 });
+        expect(updates.get(4)).toEqual({ x: 0, y: 10 });
+        expect(cropper.props.zoom).toBe(1);
+        expect(cropper.getCropData()?.croppedAreaPixels).toEqual({
+          x: 0,
+          y: -125,
+          width: 3000,
+          height: 1000,
+        });
+        const zoomed = new Cropper({ ...cropper.props, zoom: 2 });
+        zoomed.mediaSize = cropper.mediaSize;
+        zoomed.state = cropper.state;
+        (cropperProps.ref as { current: Cropper }).current = zoomed;
+        drag({ x: 500, y: 500 });
+        expect(updates.get(4)).toEqual({ x: 300, y: 125 });
+        // Zooming back out clamps both axes to the visible outline again.
+        (cropperProps.ref as { current: Cropper }).current = cropper;
+        drag({ x: 300, y: 125 });
+        expect(updates.get(4)).toEqual({ x: 0, y: 25 });
+      }
       return (
-        edited.find((node) => node.type === "lazy-cropper")!.props.style as {
+        cropperProps.style as {
           cropAreaStyle?: Record<string, unknown>;
         }
       )?.cropAreaStyle;

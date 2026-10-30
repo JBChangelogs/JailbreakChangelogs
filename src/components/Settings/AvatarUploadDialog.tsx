@@ -8,6 +8,7 @@ import {
   type CSSProperties,
 } from "react";
 import { useDropzone } from "react-dropzone";
+import type CropperInstance from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { toast } from "sonner";
 
@@ -116,6 +117,7 @@ const ImageUploadDialog = ({
   imageType,
 }: ImageUploadDialogProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cropperRef = useRef<CropperInstance | null>(null);
   const selectedFileRef = useRef<File | null>(null);
   const selectedSourceRef = useRef<string | null>(null);
   const [uploadPhase, setUploadPhase] = useState<UploadPhase>(null);
@@ -253,6 +255,37 @@ const ImageUploadDialog = ({
     setCroppedAreaPercentages(area);
     setCroppedAreaPixels(pixels);
   }, []);
+
+  const handleCropChange = (position: Point) => {
+    const editor = cropperRef.current;
+    const cropSize = editor?.state.cropSize;
+    if (imageType !== "banner" || !editor || !cropSize) {
+      setCrop(position);
+      return;
+    }
+
+    // Bound banners to the visible outline, rather than the larger export crop.
+    const { width, height } = editor.mediaSize;
+    const radians = ((editor.props.rotation ?? 0) * Math.PI) / 180;
+    const sin = Math.abs(Math.sin(radians));
+    const cos = Math.abs(Math.cos(radians));
+    const maxX = Math.max(
+      0,
+      ((width * cos + height * sin) * editor.props.zoom -
+        (cropSize.width * visibleWidth) / 100) /
+        2,
+    );
+    const maxY = Math.max(
+      0,
+      ((height * cos + width * sin) * editor.props.zoom -
+        (cropSize.height * visibleHeight) / 100) /
+        2,
+    );
+    setCrop({
+      x: maxX === 0 ? 0 : Math.max(-maxX, Math.min(maxX, position.x)),
+      y: maxY === 0 ? 0 : Math.max(-maxY, Math.min(maxY, position.y)),
+    });
+  };
 
   const resetCrop = () => {
     setCrop({ x: 0, y: 0 });
@@ -423,11 +456,13 @@ const ImageUploadDialog = ({
                 }
               >
                 <Cropper
+                  ref={cropperRef}
                   image={selectedSource}
                   crop={crop}
                   zoom={zoom}
                   rotation={rotation}
                   aspect={config.aspect}
+                  restrictPosition={imageType !== "banner"}
                   classes={
                     visibleAspectRatio
                       ? { cropAreaClassName: "profile-upload-crop" }
@@ -450,7 +485,9 @@ const ImageUploadDialog = ({
                     isAvatar && userData.premiumtype !== 3 ? "round" : "rect"
                   }
                   showGrid={false}
-                  onCropChange={isUploading ? () => undefined : setCrop}
+                  onCropChange={
+                    isUploading ? () => undefined : handleCropChange
+                  }
                   onZoomChange={isUploading ? undefined : setZoom}
                   onRotationChange={isUploading ? undefined : setRotation}
                   onCropComplete={handleCropComplete}
@@ -470,6 +507,8 @@ const ImageUploadDialog = ({
                 ? "3:1 crop (up to 1500 × 500 px)"
                 : "16:9 crop (up to 1920 × 1080 px)"}
               ; other screen sizes may show a different crop.
+              {imageType === "banner" &&
+                " Drag within the outline to position your banner; transparent edges outside it may appear on other screen sizes."}
             </p>
           )}
           <div className="my-5 flex items-center gap-3">
