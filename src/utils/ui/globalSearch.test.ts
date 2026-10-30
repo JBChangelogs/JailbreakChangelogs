@@ -269,6 +269,42 @@ test("/v2/search groups become rows with their links and in-place actions", () =
   expect(results[5].theme?.slug).toBe("dark");
 });
 
+test("reward rows carry unlock badges and preserve other requirements", () => {
+  const results = getOmniSearchResults([
+    {
+      group: "rewards",
+      has_more: false,
+      results: ["Level 9", "Top 2%", "Top 0.5%", "Complete a challenge"].map(
+        (requirement, id) => ({
+          kind: "reward" as const,
+          id,
+          season: 24,
+          season_number: 24,
+          season_title: "Winter",
+          item: "Snow Trail Tires",
+          requirement,
+          link: "/reward.webp",
+          exclusive: "False",
+          bonus: "False",
+        }),
+      ),
+    },
+  ]);
+  expect(results.map((row) => row.reward)).toEqual([
+    { season: 24, level: "9" },
+    { season: 24, level: "2%" },
+    { season: 24, level: "0.5%" },
+    { season: 24, level: undefined },
+  ]);
+  expect(results.map((row) => row.description)).toEqual([
+    "",
+    "",
+    "",
+    "Complete a challenge",
+  ]);
+  expect(results[0].href).toBe("/seasons/24#reward-0");
+});
+
 test("season links show on items and changelogs", () => {
   const [item, launch, during, before] = getOmniSearchResults([
     {
@@ -283,6 +319,7 @@ test("season links show on items and changelogs", () => {
           cash_value: null,
           season: 2,
           level: "2%",
+          is_limited: 1,
         },
       ],
     },
@@ -318,7 +355,7 @@ test("season links show on items and changelogs", () => {
     },
   ]);
   expect(item.description).toBe("Vehicle · Season 2");
-  expect(item.item).toMatchObject({ season: 2, level: "2%" });
+  expect(item.item).toMatchObject({ season: 2, level: "2%", is_limited: 1 });
   expect(launch.description).toBe("Game update 300 · Launched Season 20");
   expect(during.description).toBe("Game update 301 · Season 20");
   expect(before.description).toBe("Game update 1");

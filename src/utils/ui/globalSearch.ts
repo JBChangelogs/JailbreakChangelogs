@@ -19,6 +19,7 @@ export type SearchCatalogItem = PartialItem & {
   cash_value: string | null;
   season?: number | null;
   level?: number | string | null;
+  is_limited?: number | null;
 };
 
 export const GLOBAL_SEARCH_GROUP_LIMIT = 5;
@@ -120,6 +121,7 @@ export type GlobalSearchResult = {
   href?: string;
   icon?: string;
   item?: SearchCatalogItem;
+  reward?: { season: number; level?: string };
   user?: UserData;
   image?: string;
   /** Opens in a new tab (a Roblox server link). */
@@ -410,6 +412,7 @@ function toResult(result: OmniResult, group: string): GlobalSearchResult[] {
             cash_value: result.cash_value,
             season: result.season,
             level: result.level,
+            is_limited: result.is_limited,
           },
           ...changelogShortcuts([
             ["Latest changelog", latestChangelog(result)],
@@ -438,17 +441,22 @@ function toResult(result: OmniResult, group: string): GlobalSearchResult[] {
           ]),
         },
       ];
-    case "reward":
+    case "reward": {
+      const level = result.requirement.match(
+        /^(?:Level\s+(\d+)|Top\s+(\d+(?:\.\d+)?%))$/i,
+      );
       return [
         {
           title: result.item,
           group,
-          description: `Season ${result.season} · ${result.requirement}`,
+          description: level ? "" : result.requirement,
+          reward: { season: result.season, level: level?.[1] ?? level?.[2] },
           href: `/seasons/${result.season}#reward-${result.id}`,
           icon: "material-symbols:layers-rounded",
           image: hasRewardImage(result) ? rewardImageUrl(result) : undefined,
         },
       ];
+    }
     case "changelog":
       return [
         {

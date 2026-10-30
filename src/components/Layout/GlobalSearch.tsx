@@ -64,6 +64,7 @@ import {
 } from "@/utils/api/omniSearch";
 import { getItemHref } from "@/components/Values/ValuesSearchSuggestions";
 import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
+import { hasSeason } from "@/utils/items/season";
 import {
   CategoryIconBadge,
   getCategoryColor,
@@ -807,7 +808,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                             }
                             onFocus={() => setHighlighted(position)}
                             onPointerMove={() => setHighlighted(position)}
-                            className={`text-primary-text focus-visible:ring-link flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-lg py-2 pr-3 pl-3 text-left focus-visible:ring-2 focus-visible:outline-none ${result.shortcuts ? (position !== activeIndex ? "pr-20" : result.shortcuts.length > 1 ? "pr-[22rem]" : "pr-56") : ""} ${position === activeIndex ? "bg-tertiary-bg" : ""}`}
+                            className={`text-primary-text focus-visible:ring-link flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-lg py-2 pr-3 pl-3 text-left focus-visible:ring-2 focus-visible:outline-none ${result.shortcuts ? (result.item || position !== activeIndex ? "pr-20" : result.shortcuts.length > 1 ? "pr-[22rem]" : "pr-56") : ""} ${position === activeIndex ? "bg-tertiary-bg" : ""}`}
                           >
                             {result.user ? (
                               <UserAvatar
@@ -823,7 +824,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                 className="shrink-0"
                               />
                             ) : result.item || result.image ? (
-                              <div className="relative h-9 w-14 shrink-0 overflow-hidden rounded-md">
+                              <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded-md">
                                 <Image
                                   src={
                                     result.item
@@ -836,7 +837,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                   }
                                   alt=""
                                   fill
-                                  sizes="56px"
+                                  sizes="80px"
                                   className="object-contain"
                                   onError={handleImageError}
                                 />
@@ -908,12 +909,39 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                     />
                                     {result.item.type}
                                   </span>
+                                  {result.item.is_limited === 1 && (
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                                      <Icon
+                                        icon="mdi:clock"
+                                        className="mr-1.5 h-3 w-3"
+                                        style={{ color: "#ffd700" }}
+                                      />
+                                      Limited
+                                    </span>
+                                  )}
+                                  {hasSeason(result.item) && (
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
+                                      <Icon
+                                        icon="noto-v1:snowflake"
+                                        className="mr-1.5 h-3 w-3"
+                                        style={{ color: "#40c0e7" }}
+                                      />
+                                      Seasonal
+                                    </span>
+                                  )}
                                   <ItemUnlockBadges
                                     season={result.item.season}
                                     level={result.item.level}
                                     className=""
                                   />
                                 </div>
+                              )}
+                              {result.reward && (
+                                <ItemUnlockBadges
+                                  season={result.reward.season}
+                                  level={result.reward.level}
+                                  className="mt-1"
+                                />
                               )}
                               <span
                                 className={`text-secondary-text block truncate text-xs ${!result.item && (result.description || result.snippet) ? "" : "hidden"}`}
@@ -952,7 +980,7 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                 </span>
                               )}
                             {result.item && (
-                              <span className="text-secondary-text shrink-0 text-sm">
+                              <span className="bg-button-info text-form-button-text inline-flex h-6 shrink-0 items-center rounded-md px-2 text-xs leading-none font-bold">
                                 {formatFullValue(result.item.cash_value)}
                               </span>
                             )}
@@ -1061,10 +1089,23 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                                     <Link
                                       href={shortcut.href!}
                                       prefetch={false}
+                                      aria-label={
+                                        result.item ? shortcut.title : undefined
+                                      }
+                                      title={
+                                        result.item ? shortcut.title : undefined
+                                      }
                                       onFocus={() => setHighlighted(position)}
                                       onClick={onClose}
                                     >
-                                      {shortcut.title}
+                                      {result.item ? (
+                                        <Icon
+                                          icon="heroicons:document-text"
+                                          className="size-4"
+                                        />
+                                      ) : (
+                                        shortcut.title
+                                      )}
                                     </Link>
                                   </Button>
                                 ),

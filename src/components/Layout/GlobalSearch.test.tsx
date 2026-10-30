@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { hasSeason } from "@/utils/items/season";
 import {
   filteredQuery,
   getGlobalCheckQuery,
@@ -98,6 +99,7 @@ function setupSearch() {
           return { getItemImagePath: () => "/item.webp" };
         if (name === "@/utils/trading/values")
           return { formatFullValue: () => "N/A" };
+        if (name === "@/utils/items/season") return { hasSeason };
         if (name === "@tanstack/react-query")
           return {
             useQueryClient: () => ({ invalidateQueries: () => {} }),
@@ -236,6 +238,7 @@ test("item search rows pass unlock metadata and show the item type icon", () => 
     group: "Items",
     title: "Torpedo",
     description: "Vehicle · Season 2",
+    shortcuts: [{ title: "Latest changelog", href: "/changelogs/1" }],
     item: {
       id: 1,
       name: "Torpedo",
@@ -243,6 +246,7 @@ test("item search rows pass unlock metadata and show the item type icon", () => 
       cash_value: null,
       season: 2,
       level: "2%",
+      is_limited: 1,
     },
   });
   const nodes: Node[] = [];
@@ -254,6 +258,25 @@ test("item search rows pass unlock metadata and show the item type icon", () => 
     visit(node.props.children);
   };
   visit(search.render());
+  const activeRow = nodes.find(
+    (node) => node.props.result === search.results[0],
+  )!;
+  expect(activeRow.props.className).toContain("pr-20");
+  expect(activeRow.props.className).not.toContain("pr-56");
+  expect(
+    nodes.find((node) => node.props["aria-label"] === "Latest changelog")?.props
+      .href,
+  ).toBe("/changelogs/1");
+  search.results.push({ title: "Other", group: "Pages", description: "" });
+  search.key("ArrowDown");
+  nodes.length = 0;
+  visit(search.render());
+  expect(
+    nodes.find((node) => node.props.result === search.results[0])?.props
+      .className,
+  ).toContain("pr-20");
+  expect(textContent(search.render())).toContain("Limited");
+  expect(textContent(search.render())).toContain("Seasonal");
   expect(
     nodes.find((node) => node.type === "ItemUnlockBadges")?.props,
   ).toMatchObject({
@@ -268,6 +291,10 @@ test("item search rows pass unlock metadata and show the item type icon", () => 
     preferItemType: true,
     withContainer: false,
   });
+  search.results[0].item!.is_limited = 0;
+  search.results[0].item!.season = null;
+  expect(textContent(search.render())).not.toContain("Limited");
+  expect(textContent(search.render())).not.toContain("Seasonal");
 });
 
 test("bare @ shows account guidance even while unrelated catalogs load or fail", () => {
