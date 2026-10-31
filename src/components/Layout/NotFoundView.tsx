@@ -30,7 +30,7 @@ export default function NotFoundView({
       <div className="container mx-auto px-6 py-12">
         {showBreadcrumb && <Breadcrumb />}
 
-        <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
+        <div className="flex min-h-[calc(100vh-8rem)] flex-col lg:flex-row lg:items-center lg:gap-12">
           <div className="w-full lg:w-1/2">
             <p className="text-secondary-text text-sm font-medium">{eyebrow}</p>
             <h1 className="text-primary-text mt-3 text-2xl font-semibold md:text-3xl">
@@ -68,9 +68,9 @@ export default function NotFoundView({
             </div>
           </div>
 
-          <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
+          <div className="relative order-first mb-6 w-full lg:order-last lg:mb-0 lg:w-1/2">
             <NotFoundIllustration
-              className="w-full max-w-lg lg:mx-auto"
+              className="w-full max-w-48 lg:mx-auto lg:max-w-lg"
               alt="404 Error Illustration"
               width={500}
               height={400}
