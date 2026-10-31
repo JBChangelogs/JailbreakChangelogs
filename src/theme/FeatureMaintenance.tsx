@@ -1,174 +1,151 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { bangers } from "@/app/fonts";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FeatureMaintenanceProps {
   featureName?: string;
   customMessage?: string;
+  siteWide?: boolean;
 }
 
 export default function FeatureMaintenance({
   featureName = "Feature",
   customMessage,
+  siteWide = false,
 }: FeatureMaintenanceProps = {}) {
   return (
-    <div
-      className="relative flex min-h-screen items-center justify-center bg-[url(/backgrounds/v2/background16.webp)] bg-cover bg-center bg-no-repeat"
-      style={{ color: "var(--color-secondary-text)" }}
-    >
-      <div className="absolute inset-0 z-1 bg-black/70" />
-
-      <div className="relative z-2 container mx-auto max-w-2xl px-4">
+    <section className="bg-primary-bg">
+      <div className="container mx-auto px-6 py-12">
         <div
-          className="flex flex-col items-center gap-4 rounded-2xl border px-8 py-8 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] backdrop-blur-xl"
-          style={{
-            borderColor: "var(--color-border-primary)",
-            backgroundColor: "var(--color-overlay-medium)",
-          }}
+          className={`${siteWide ? "min-h-[calc(100vh-6rem)]" : "min-h-[calc(100vh-8rem)]"} flex flex-col lg:flex-row lg:items-center lg:gap-12`}
         >
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
-            alt="Jailbreak Changelogs Logo"
-            width={140}
-            height={140}
-            fetchPriority="high"
-            draggable={false}
-            className="h-35 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] filter"
-          />
-
-          <Icon
-            icon="line-md:cog-filled-loop"
-            className="text-primary-text h-16 w-16"
-            inline={true}
-          />
-
-          <h1
-            className={`${bangers.className} mb-4 text-5xl`}
-            style={{ color: "var(--color-primary-text)" }}
-          >
-            {featureName}
-          </h1>
-
-          <div className="space-y-4">
-            {customMessage ? (
-              <p
-                className="text-xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-                style={{ color: "var(--color-primary-text)" }}
-              >
-                {customMessage}
-              </p>
-            ) : (
-              <>
-                <p
-                  className="text-xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-                  style={{ color: "var(--color-primary-text)" }}
-                >
-                  We&apos;re making some improvements to the {featureName}{" "}
-                  feature!
-                </p>
-
-                <p
-                  className="text-lg font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-                  style={{ color: "var(--color-primary-text)" }}
-                >
-                  This feature is temporarily unavailable while we perform
-                  maintenance.
-                </p>
-
-                <p
-                  className="text-base drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-                  style={{ color: "var(--color-secondary-text)" }}
-                >
-                  Other features of the site are still available.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div
-            className="w-full border-t pt-4"
-            style={{ borderColor: "var(--color-border-primary)" }}
-          >
-            <h3
-              className="mb-4 text-xl font-bold"
-              style={{ color: "var(--color-primary-text)" }}
-            >
-              Stay Connected
-            </h3>
-
-            <p
-              className="mb-6 text-base font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-              style={{ color: "var(--color-primary-text)" }}
-            >
-              Follow us for updates and announcements
+          <div className="w-full lg:w-1/2">
+            <p className="text-secondary-text text-sm font-medium">
+              Temporarily unavailable
             </p>
+            <h1 className="text-primary-text mt-3 text-2xl font-semibold md:text-3xl">
+              {featureName}
+            </h1>
+            <p className="text-secondary-text mt-4">
+              {customMessage ??
+                `The ${featureName} is temporarily unavailable while we perform maintenance. Please try again later.`}
+            </p>
+            {!siteWide && (
+              <p className="text-secondary-text mt-4">
+                Other features of the site are still available.
+              </p>
+            )}
 
-            <div className="mb-6 flex justify-center gap-4">
-              <a
-                href="https://x.com/JBChangelogs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"
-                aria-label="Twitter/X"
+            {siteWide ? (
+              <Button
+                variant="default"
+                size="md"
+                asChild
+                className="mt-6 w-full sm:w-auto"
               >
-                <Icon
-                  icon="simple-icons:twitter"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-              <a
-                href="https://discord.jailbreakchangelogs.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"
-                aria-label="Discord"
-              >
-                <Icon
-                  icon="ic:baseline-discord"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
-              <a
-                href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"
-                aria-label="Roblox Group"
-              >
-                <Icon
-                  icon="simple-icons:roblox"
-                  className="text-primary-text h-6 w-6"
-                  inline={true}
-                />
-              </a>
+                <a
+                  href="https://status.jailbreakchangelogs.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Check service status
+                </a>
+              </Button>
+            ) : (
+              <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => window.history.back()}
+                  className="w-full sm:w-auto"
+                >
+                  <Icon
+                    icon="heroicons-outline:arrow-left"
+                    className="h-5 w-5"
+                  />
+                  Go back
+                </Button>
+                <Button
+                  variant="default"
+                  size="md"
+                  asChild
+                  className="w-full sm:w-auto"
+                >
+                  <Link href="/">
+                    <Icon icon="heroicons-outline:home" className="h-5 w-5" />
+                    Take me home
+                  </Link>
+                </Button>
+              </div>
+            )}
+
+            <div className="border-border-card mt-8 border-t pt-6">
+              <h2 className="text-primary-text text-sm font-medium">
+                Stay connected
+              </h2>
+              <p className="text-secondary-text mt-2 text-sm">
+                Follow us for updates and announcements.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-4">
+                {[
+                  {
+                    label: "Twitter/X",
+                    href: "https://x.com/JBChangelogs",
+                    icon: "simple-icons:twitter",
+                    tooltip: "Follow us on X (Twitter)",
+                  },
+                  {
+                    label: "Discord",
+                    href: "https://discord.jailbreakchangelogs.com",
+                    icon: "ic:baseline-discord",
+                    tooltip: "Join our Discord server",
+                  },
+                  {
+                    label: "Roblox Group",
+                    href: "https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about",
+                    icon: "simple-icons:roblox",
+                    tooltip: "Join our Roblox group",
+                  },
+                ].map(({ label, href, icon, tooltip }) => (
+                  <Tooltip key={href}>
+                    <TooltipTrigger asChild>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                        className="text-secondary-text hover:text-link focus-visible:ring-button-info inline-flex items-center justify-center rounded p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <Icon icon={icon} className="h-5 w-5" />
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">{tooltip}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
             </div>
           </div>
 
-          <Link
-            href="/"
-            className="rounded-lg px-6 py-2.5 text-base font-semibold shadow-[0_4px_14px_0_rgba(0,0,0,0.25)] transition-colors duration-200"
-            style={{
-              backgroundColor: "var(--color-button-info)",
-              color: "var(--color-form-button-text)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--color-button-info-hover)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--color-button-info)";
-            }}
+          <div
+            className="order-first mb-6 flex w-full lg:order-last lg:mb-0 lg:w-1/2 lg:justify-center"
+            aria-hidden="true"
           >
-            Go Home
-          </Link>
+            <div className="text-secondary-text flex h-16 w-16 items-center justify-center lg:h-64 lg:w-64">
+              <Icon
+                icon="emojione-monotone:hammer-and-wrench"
+                className="h-16 w-16 lg:h-32 lg:w-32"
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

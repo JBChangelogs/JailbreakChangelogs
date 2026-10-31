@@ -2,8 +2,18 @@ import type { Metadata } from "next";
 import { getBooleanFlag } from "@/utils/api/runtimeFlags";
 import { isTestingDeploy } from "@/utils/deployment";
 
+const MAINTENANCE_TITLE = "Under Maintenance | Jailbreak Changelogs";
+
 // Maintenance switches are runtime flags evaluated per-request, so they can
 // be flipped from the Railway dashboard/CLI without a redeploy.
+
+function getMaintenanceFlag(name: string): boolean {
+  if (process.env.NODE_ENV === "development") {
+    const override = process.env[name.replaceAll("-", "_").toUpperCase()];
+    if (override !== undefined) return override === "true";
+  }
+  return getBooleanFlag(name);
+}
 
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
@@ -14,7 +24,7 @@ export async function checkMaintenanceMode(): Promise<{
   }
 
   return {
-    isMaintenanceMode: getBooleanFlag("maintenance-mode"),
+    isMaintenanceMode: getMaintenanceFlag("maintenance-mode"),
   };
 }
 
@@ -26,7 +36,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
     // So we'll return maintenance metadata and let the client-side component handle the bypass
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
-      title: "Under Maintenance",
+      title: { absolute: MAINTENANCE_TITLE },
       description:
         "Jailbreak Changelogs is currently under maintenance. We'll be back soon!",
       robots: {
@@ -34,7 +44,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
         follow: false,
       },
       openGraph: {
-        title: "Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "Jailbreak Changelogs is currently under maintenance. We'll be back soon!",
         type: "website",
@@ -52,7 +62,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
       },
       twitter: {
         card: "summary_large_image",
-        title: "Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "Jailbreak Changelogs is currently under maintenance. We'll be back soon!",
         images: [
@@ -69,17 +79,22 @@ export async function checkInventoryMaintenanceMode(): Promise<{
   isInventoryMaintenanceMode: boolean;
 }> {
   return {
-    isInventoryMaintenanceMode: getBooleanFlag("inventory-maintenance-mode"),
+    isInventoryMaintenanceMode: getMaintenanceFlag(
+      "inventory-maintenance-mode",
+    ),
   };
 }
 
 export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null> {
+  const globalMaintenance = await getMaintenanceMetadata();
+  if (globalMaintenance) return globalMaintenance;
+
   const { isInventoryMaintenanceMode } = await checkInventoryMaintenanceMode();
 
   if (isInventoryMaintenanceMode) {
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
-      title: "Inventory Checker - Under Maintenance",
+      title: { absolute: MAINTENANCE_TITLE },
       description:
         "The Inventory API is currently under maintenance. We'll be back soon!",
       robots: {
@@ -87,7 +102,7 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
         follow: false,
       },
       openGraph: {
-        title: "Inventory Checker - Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "The Inventory API is currently under maintenance. We'll be back soon!",
         type: "website",
@@ -105,7 +120,7 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
       },
       twitter: {
         card: "summary_large_image",
-        title: "Inventory API - Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "The Inventory API is currently under maintenance. We'll be back soon!",
         images: [
@@ -122,17 +137,20 @@ export async function checkOGFinderMaintenanceMode(): Promise<{
   isOGFinderMaintenanceMode: boolean;
 }> {
   return {
-    isOGFinderMaintenanceMode: getBooleanFlag("og-finder-maintenance-mode"),
+    isOGFinderMaintenanceMode: getMaintenanceFlag("og-finder-maintenance-mode"),
   };
 }
 
 export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null> {
+  const globalMaintenance = await getMaintenanceMetadata();
+  if (globalMaintenance) return globalMaintenance;
+
   const { isOGFinderMaintenanceMode } = await checkOGFinderMaintenanceMode();
 
   if (isOGFinderMaintenanceMode) {
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
-      title: "OG Finder - Under Maintenance",
+      title: { absolute: MAINTENANCE_TITLE },
       description:
         "The OG Finder is currently under maintenance. We'll be back soon!",
       robots: {
@@ -140,7 +158,7 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
         follow: false,
       },
       openGraph: {
-        title: "OG Finder - Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "The OG Finder is currently under maintenance. We'll be back soon!",
         type: "website",
@@ -158,7 +176,7 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
       },
       twitter: {
         card: "summary_large_image",
-        title: "OG Finder - Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "The OG Finder is currently under maintenance. We'll be back soon!",
         images: [
@@ -175,18 +193,23 @@ export async function checkDupeFinderMaintenanceMode(): Promise<{
   isDupeFinderMaintenanceMode: boolean;
 }> {
   return {
-    isDupeFinderMaintenanceMode: getBooleanFlag("dupe-finder-maintenance-mode"),
+    isDupeFinderMaintenanceMode: getMaintenanceFlag(
+      "dupe-finder-maintenance-mode",
+    ),
   };
 }
 
 export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | null> {
+  const globalMaintenance = await getMaintenanceMetadata();
+  if (globalMaintenance) return globalMaintenance;
+
   const { isDupeFinderMaintenanceMode } =
     await checkDupeFinderMaintenanceMode();
 
   if (isDupeFinderMaintenanceMode) {
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
-      title: "Dupe Finder - Under Maintenance",
+      title: { absolute: MAINTENANCE_TITLE },
       description:
         "The Dupe Finder is currently under maintenance. We'll be back soon!",
       robots: {
@@ -194,7 +217,7 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
         follow: false,
       },
       openGraph: {
-        title: "Dupe Finder - Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "The Dupe Finder is currently under maintenance. We'll be back soon!",
         type: "website",
@@ -212,7 +235,7 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
       },
       twitter: {
         card: "summary_large_image",
-        title: "Dupe Finder - Under Maintenance",
+        title: MAINTENANCE_TITLE,
         description:
           "The Dupe Finder is currently under maintenance. We'll be back soon!",
         images: [
