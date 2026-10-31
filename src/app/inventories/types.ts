@@ -83,7 +83,7 @@ export interface TradeItemDetail {
   category_title: string;
   trade_time: number;
   confidence: "confirmed" | "gap";
-  is_duplicate_branch: boolean;
+  is_duplicate: boolean;
   original_owner: string | null;
   given_by_original_owner: boolean;
   received_by_original_owner: boolean;

@@ -123,7 +123,7 @@ function TradeItems({
               <span className="text-primary-text font-medium">
                 {item.title}
               </span>
-              {item.is_duplicate_branch && <DupedBadge compact />}
+              {item.is_duplicate && <DupedBadge compact />}
               {item.given_by_original_owner && (
                 <OgBadge
                   compact

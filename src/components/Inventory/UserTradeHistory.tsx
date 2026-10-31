@@ -287,7 +287,7 @@ function TradeItem({
             )}
             {item.category_title}
           </span>
-          {item.is_duplicate_branch && <DupedBadge compact />}
+          {item.is_duplicate && <DupedBadge compact />}
           {item.given_by_original_owner && (
             <OgBadge
               compact
@@ -342,7 +342,7 @@ function TradeItem({
           />
         </TooltipTrigger>
         <TradeItemHoverTooltip
-          item={{ ...catalogItem, isDuped: item.is_duplicate_branch }}
+          item={{ ...catalogItem, isDuped: item.is_duplicate }}
         />
       </Tooltip>
       {content}
@@ -578,7 +578,7 @@ export default function UserTradeHistory({
         normalizeCatalogKey(item.title, item.category_title),
       );
       if (!catalogItem) return null;
-      if (item.is_duplicate_branch) {
+      if (item.is_duplicate) {
         const dupedValue = parseKnownValue(catalogItem.dupedValue);
         if (dupedValue !== null) return dupedValue;
       }
