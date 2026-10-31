@@ -192,7 +192,14 @@ export default function DesktopSidebar({
         </div>
       </nav>
       {/* Leave room for the browser's bottom-left link preview. */}
-      <div className="shrink-0 p-3 pb-8">
+      <div className="relative shrink-0 p-3 pb-6">
+        <div
+          aria-hidden="true"
+          className={cn(
+            "border-border-card absolute top-0 border-t",
+            isCollapsed ? "left-6 w-6" : "inset-x-3",
+          )}
+        />
         <Tooltip
           open={isCollapsed && openTooltip === "toggle"}
           onOpenChange={(open) =>
