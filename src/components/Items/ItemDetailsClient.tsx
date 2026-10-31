@@ -55,6 +55,8 @@ import {
 } from "@/utils/ui/images";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useExperimentAccess } from "@/hooks/useExperimentAccess";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
@@ -413,6 +415,12 @@ export default function ItemDetailsClient({
 }: ItemDetailsClientProps) {
   "use memo";
 
+  const { user, isAuthenticated, isLoading } = useAuthContext();
+  const dupedCopyCountsEnabled = useExperimentAccess(
+    "duped_copy_counts",
+    user?.id,
+    isAuthenticated && !isLoading,
+  );
   const [visibleLength, setVisibleLength] = useState(500);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -489,7 +497,6 @@ export default function ItemDetailsClient({
   };
 
   const currentItem = item;
-  const currentScanCount = scanCount;
   const categoryColor = useMemo(
     () => getCategoryColor(currentItem.type),
     [currentItem.type],
@@ -649,33 +656,55 @@ export default function ItemDetailsClient({
                   </div>
                 )}
 
-              {currentItem.id !== 587 && currentItem.id !== 713 && (
-                <div className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-primary-text text-sm font-medium">
-                      Scanned copies · 30 days
+              {currentItem.id !== 587 &&
+                currentItem.id !== 713 &&
+                [
+                  {
+                    label: "Scanned copies · 30 days",
+                    description:
+                      "Unique copies that have been scanned in inventories",
+                    count: scanCount?.copyCount,
+                    enabled: true,
+                  },
+                  {
+                    label: "Duped copies seen · 30 days",
+                    description:
+                      "Individual duped copies observed in inventory scans",
+                    count: scanCount?.dupedCopyCount,
+                    enabled: dupedCopyCountsEnabled,
+                  },
+                ]
+                  .filter(({ enabled }) => enabled)
+                  .map(({ label, description, count }) => (
+                    <div
+                      key={label}
+                      className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="text-primary-text text-sm font-medium">
+                          {label}
+                        </div>
+                        <div className="text-secondary-text text-xs">
+                          {description}
+                        </div>
+                      </div>
+                      <div
+                        className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
+                        aria-live="polite"
+                      >
+                        {scanCount === undefined ? (
+                          <Skeleton
+                            className="ml-auto h-6 w-16"
+                            aria-hidden="true"
+                          />
+                        ) : count == null ? (
+                          <span aria-label={`${label} unavailable`}>—</span>
+                        ) : (
+                          count.toLocaleString("en-US")
+                        )}
+                      </div>
                     </div>
-                    <div className="text-secondary-text text-xs">
-                      Unique copies that have been scanned in inventories
-                    </div>
-                  </div>
-                  <div
-                    className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
-                    aria-live="polite"
-                  >
-                    {currentScanCount === undefined ? (
-                      <Skeleton
-                        className="ml-auto h-6 w-16"
-                        aria-hidden="true"
-                      />
-                    ) : currentScanCount === null ? (
-                      <span aria-label="Scan count unavailable">—</span>
-                    ) : (
-                      currentScanCount.toLocaleString("en-US")
-                    )}
-                  </div>
-                </div>
-              )}
+                  ))}
 
               {/* Mobile Ad - shown only on smaller screens */}
               <div className="mt-4 flex justify-center xl:hidden">
