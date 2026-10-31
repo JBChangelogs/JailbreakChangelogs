@@ -10,9 +10,18 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
     top: 700,
     bottom: 740,
   };
+  let onScroll = () => {};
   const navigation = {
     clientHeight: 500,
+    scrollHeight: 1200,
     scrollTop: 0,
+    style: { maskImage: "" },
+    addEventListener: (_name: string, listener: () => void) => {
+      onScroll = listener;
+    },
+    removeEventListener: (_name: string, listener: () => void) => {
+      expect(listener).toBe(onScroll);
+    },
     getBoundingClientRect: () => ({ top: 60, bottom: 560 }),
     querySelector: () =>
       navigationUtils.getNavigationHref(pathname) && link
@@ -96,4 +105,15 @@ test("route changes reveal the active link by scrolling only the sidebar", () =>
   link = null;
   resize();
   expect(navigation.scrollTop).toBe(550);
+  expect(navigation.style.maskImage).toContain("linear-gradient");
+
+  navigation.scrollTop = 700;
+  onScroll();
+  expect(navigation.style.maskImage).toBe("none");
+  navigation.scrollTop = 0;
+  onScroll();
+  expect(navigation.style.maskImage).toContain("linear-gradient");
+  navigation.scrollHeight = 500;
+  resize();
+  expect(navigation.style.maskImage).toBe("none");
 });

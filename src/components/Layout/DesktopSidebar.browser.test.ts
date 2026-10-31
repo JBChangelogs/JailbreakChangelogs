@@ -146,10 +146,15 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
           });
           const toggle = sidebar.querySelector('button[aria-controls="desktop-sidebar-navigation"]');
           const toggleTop = toggle.getBoundingClientRect().top;
+          const toggleClearance = toggleTop - toggle.parentElement.getBoundingClientRect().top;
+          const clearances = [0, navigation.scrollHeight / 2, navigation.scrollHeight].map(scrollTop => {
+            navigation.scrollTop = scrollTop;
+            return toggle.parentElement.getBoundingClientRect().top - navigation.getBoundingClientRect().bottom;
+          });
           navigation.scrollTop = navigation.scrollHeight;
           const pinnedToggle = { top: toggleTop, afterScroll: toggle.getBoundingClientRect().top, bottom: toggle.getBoundingClientRect().bottom, sidebarBottom: sidebar.getBoundingClientRect().bottom, navigationBottom: navigation.getBoundingClientRect().bottom, scrollTop: navigation.scrollTop, scrollbarWidth: getComputedStyle(navigation).scrollbarWidth };
           navigation.scrollTop = 0;
-          const expanded = { pinnedToggle, top: sidebar.getBoundingClientRect().top, width: sidebar.getBoundingClientRect().width, icons: positions(), opacity: +getComputedStyle(label).opacity, liveLabels };
+          const expanded = { pinnedToggle, clearances, toggleClearance, top: sidebar.getBoundingClientRect().top, width: sidebar.getBoundingClientRect().width, icons: positions(), opacity: +getComputedStyle(label).opacity, liveLabels };
           root.style.setProperty('--header-height', '60px');
           const expandedMeasuredIcons = positions();
           root.dataset.desktopSidebarCollapsed = 'true';
@@ -234,6 +239,8 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       );
       expect(result.expanded.pinnedToggle.scrollbarWidth).toBe("none");
       expect(result.expanded.pinnedToggle.scrollTop).toBeGreaterThan(0);
+      expect(result.expanded.clearances).toEqual([12, 12, 12]);
+      expect(result.expanded.toggleClearance).toBe(12);
       expect(result.expanded.pinnedToggle.bottom).toBeLessThanOrEqual(
         result.expanded.pinnedToggle.sidebarBottom - 24,
       );

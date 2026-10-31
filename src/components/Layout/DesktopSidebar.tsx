@@ -54,10 +54,30 @@ export default function DesktopSidebar({
       }
     };
 
-    revealActiveLink();
-    const observer = new ResizeObserver(revealActiveLink);
+    const updateFade = () => {
+      navigation.style.maskImage =
+        navigation.scrollHeight -
+          navigation.scrollTop -
+          navigation.clientHeight >
+        1
+          ? "linear-gradient(to bottom, black calc(100% - 20px), transparent)"
+          : "none";
+    };
+    const updateLayout = () => {
+      revealActiveLink();
+      updateFade();
+    };
+
+    updateLayout();
+    navigation.addEventListener("scroll", updateFade, { passive: true });
+    const observer = new ResizeObserver(updateLayout);
     observer.observe(navigation);
-    return () => observer.disconnect();
+    if (navigation.firstElementChild)
+      observer.observe(navigation.firstElementChild);
+    return () => {
+      observer.disconnect();
+      navigation.removeEventListener("scroll", updateFade);
+    };
   }, [pathname, isCollapsed]);
 
   const linkClassName = (active: boolean) =>
@@ -102,7 +122,7 @@ export default function DesktopSidebar({
         ref={navigationRef}
         id="desktop-sidebar-navigation"
         aria-label="Main"
-        className="scrollbar-hide min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-3"
+        className="scrollbar-hide m-3 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
       >
         <div className="flex flex-col gap-4">
           {navigationSections.map((section) => (
