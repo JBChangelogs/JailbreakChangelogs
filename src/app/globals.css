@@ -2,6 +2,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
 .profile-upload-crop {
   overflow: hidden;
 }
@@ -398,10 +403,9 @@ body:has(
     ); /* Button info color with opacity */
   }
 
-  /* Ensure Inter font applies to select elements and their options */
   select,
   select option {
-    font-family: "Inter", sans-serif;
+    font-family: inherit;
   }
 
   /* Global dropdown rounding to match rounded-xl selects */
