@@ -41,7 +41,7 @@ import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { useSearchTracking } from "@/hooks/useSearchTracking";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 import RelatedValuePages from "./RelatedValuePages";
-// import LatestItemUpdate, { LatestItemUpdateSkeleton } from "./LatestItemUpdate";
+import LatestItemUpdate, { LatestItemUpdateSkeleton } from "./LatestItemUpdate";
 
 const parseFilterSorts = (
   raw: string | null,
@@ -95,8 +95,11 @@ export default function ValuesClient() {
     () => valueSortGroups.flatMap((group) => group.options),
     [valueSortGroups],
   );
-  // Restore data: latestItem / isPending: isLatestItemPending with the JSX below.
-  const { refetch: refetchLatestItem } = useQuery({
+  const {
+    data: latestItem,
+    isPending: isLatestItemPending,
+    refetch: refetchLatestItem,
+  } = useQuery({
     queryKey: ["latest-item"],
     queryFn: ({ signal }) => fetchLatestItem(signal),
     staleTime: 60_000,
@@ -515,7 +518,6 @@ export default function ValuesClient() {
             </p>
 
             <RelatedValuePages current="values" />
-            {/* TODO: restore once the backend latest-item bug is fixed
             {(latestItem || isLatestItemPending) && (
               <div className="mt-3">
                 {latestItem ? (
@@ -525,7 +527,6 @@ export default function ValuesClient() {
                 )}
               </div>
             )}
-            */}
           </div>
 
           <NitroInlineVideoPlayer
