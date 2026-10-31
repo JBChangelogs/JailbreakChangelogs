@@ -72,7 +72,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-1.5 transition-colors duration-200"
-                    aria-label="Twitter/X"
+                    aria-label="X"
                   >
                     <Icon
                       icon="bi:twitter-x"
@@ -81,7 +81,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>Follow us on X (Twitter)</TooltipContent>
+                <TooltipContent side="bottom">Follow us on X</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -99,7 +99,9 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>Join our Discord server</TooltipContent>
+                <TooltipContent side="bottom">
+                  Join our Discord server
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -117,7 +119,9 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>Join our Roblox group</TooltipContent>
+                <TooltipContent side="bottom">
+                  Join our Roblox group
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -135,7 +139,9 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>Follow us on Bluesky</TooltipContent>
+                <TooltipContent side="bottom">
+                  Follow us on Bluesky
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -151,7 +157,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Support Us</TooltipContent>
+                <TooltipContent side="bottom">Support Us</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -169,7 +175,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>View on GitHub</TooltipContent>
+                <TooltipContent side="bottom">View on GitHub</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -187,7 +193,9 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent>Subscribe on YouTube</TooltipContent>
+                <TooltipContent side="bottom">
+                  Subscribe on YouTube
+                </TooltipContent>
               </Tooltip>
             </div>
           </div>

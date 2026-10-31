@@ -67,7 +67,7 @@ test("maintenance views share styling and tools artwork with actions appropriate
     expect(html).not.toContain("cog-filled-loop");
     expect(html).toContain("https://discord.jailbreakchangelogs.com");
     expect(html).toContain("https://x.com/JBChangelogs");
-    expect(html).toContain("Follow us on X (Twitter)");
+    expect(html).toContain("Follow us on X");
     expect(html).toContain("Join our Discord server");
     expect(html).toContain("Join our Roblox group");
     expect(

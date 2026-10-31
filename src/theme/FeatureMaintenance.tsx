@@ -96,10 +96,10 @@ export default function FeatureMaintenance({
               <div className="mt-4 flex flex-wrap gap-4">
                 {[
                   {
-                    label: "Twitter/X",
+                    label: "X",
                     href: "https://x.com/JBChangelogs",
                     icon: "bi:twitter-x",
-                    tooltip: "Follow us on X (Twitter)",
+                    tooltip: "Follow us on X",
                   },
                   {
                     label: "Discord",
