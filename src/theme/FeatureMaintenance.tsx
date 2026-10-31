@@ -98,7 +98,7 @@ export default function FeatureMaintenance({
                   {
                     label: "Twitter/X",
                     href: "https://x.com/JBChangelogs",
-                    icon: "simple-icons:twitter",
+                    icon: "bi:twitter-x",
                     tooltip: "Follow us on X (Twitter)",
                   },
                   {

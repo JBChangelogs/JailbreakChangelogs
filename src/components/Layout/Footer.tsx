@@ -75,7 +75,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                     aria-label="Twitter/X"
                   >
                     <Icon
-                      icon="simple-icons:twitter"
+                      icon="bi:twitter-x"
                       className="text-primary-text h-5 w-5"
                       inline={true}
                     />

@@ -68,9 +68,9 @@ export default function NotFoundView({
             </div>
           </div>
 
-          <div className="relative order-first mb-6 w-full lg:order-last lg:mb-0 lg:w-1/2">
+          <div className="relative order-first mb-6 w-full max-w-48 lg:order-last lg:mb-0 lg:w-1/2 lg:max-w-none">
             <NotFoundIllustration
-              className="w-full max-w-48 lg:mx-auto lg:max-w-lg"
+              className="w-full max-w-lg lg:mx-auto"
               alt="404 Error Illustration"
               width={500}
               height={400}

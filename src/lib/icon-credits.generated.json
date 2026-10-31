@@ -1,6 +1,6 @@
 {
-  "lastUpdated": "October 23, 2026",
-  "contentHash": "973b7c967a981d20d1fccad4ff3d55a75b71416f2810e6c4350cc434ed531a50",
+  "lastUpdated": "October 31, 2026",
+  "contentHash": "1e1187704a186d0f53015c49dea8fa56bc3677d97d22bbff323f5965ffd4ae45",
   "credits": [
     {
       "prefix": "akar-icons",
@@ -13,6 +13,19 @@
         "title": "MIT",
         "spdx": "MIT",
         "url": "https://github.com/artcoholic/akar-icons/blob/master/LICENSE"
+      }
+    },
+    {
+      "prefix": "bi",
+      "name": "Bootstrap Icons",
+      "author": {
+        "name": "The Bootstrap Authors",
+        "url": "https://github.com/twbs/icons"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/twbs/icons/blob/main/LICENSE.md"
       }
     },
     {
