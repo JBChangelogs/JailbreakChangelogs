@@ -7,8 +7,6 @@ import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
@@ -34,11 +32,6 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         customMessage="We're experiencing technical difficulties. The Dupe Finder is temporarily unavailable. Please try again later."
       />
     );
-  }
-
-  // Check if Dupe Finder feature is enabled
-  if (!isFeatureEnabled("DUPE_FINDER")) {
-    return <ComingSoon />;
   }
 
   const { userid } = await params;

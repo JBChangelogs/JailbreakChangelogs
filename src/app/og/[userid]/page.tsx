@@ -7,8 +7,6 @@ import OGFinderDescription from "@/components/OG/OGFinderDescription";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
@@ -34,11 +32,6 @@ export default async function OGFinderUserPage({
         customMessage="We're experiencing technical difficulties. The OG Finder is temporarily unavailable. Please try again later."
       />
     );
-  }
-
-  // Check if OG Finder feature is enabled
-  if (!isFeatureEnabled("OG_FINDER")) {
-    return <ComingSoon />;
   }
 
   const { userid } = await params;

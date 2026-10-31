@@ -6,8 +6,6 @@ import InventoryCheckerClient from "../InventoryCheckerClient";
 import InventoryDataStreamer from "../InventoryDataStreamer";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
@@ -33,10 +31,6 @@ export default async function InventoryCheckerPage({
         customMessage="We're experiencing technical difficulties. The Inventory Checker is temporarily unavailable. Please try again later."
       />
     );
-  }
-
-  if (!isFeatureEnabled("INVENTORY_CALCULATOR")) {
-    return <ComingSoon />;
   }
 
   const { userid } = await params;

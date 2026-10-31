@@ -8,10 +8,8 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("INVENTORY");
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
@@ -33,10 +31,6 @@ export default async function InventoriesPage() {
         customMessage="We're experiencing technical difficulties. The Inventory Checker is temporarily unavailable. Please try again later."
       />
     );
-  }
-
-  if (!isFeatureEnabled("INVENTORY_CALCULATOR")) {
-    return <ComingSoon />;
   }
 
   return (

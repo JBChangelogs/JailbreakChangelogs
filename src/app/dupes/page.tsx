@@ -6,10 +6,8 @@ import MostDuplicatedItemsServer from "@/components/Dupes/MostDuplicatedItemsSer
 import MostDuplicatedItemsSkeleton from "@/components/Dupes/MostDuplicatedItemsSkeleton";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import ComingSoon from "@/components/ui/ComingSoon";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
 import StatsPolling, { StatsSkeleton } from "@/components/ui/StatsPolling";
-import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
@@ -30,11 +28,6 @@ export default async function DupeFinderPage() {
         customMessage="We're experiencing technical difficulties. The Dupe Finder is temporarily unavailable. Please try again later."
       />
     );
-  }
-
-  // Check if Dupe Finder feature is enabled
-  if (!isFeatureEnabled("DUPE_FINDER")) {
-    return <ComingSoon />;
   }
 
   return (
