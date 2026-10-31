@@ -6,7 +6,11 @@ import { getResponseErrorMessage } from "@/utils/api/api";
 import * as parsing from "@/utils/messages/parsing";
 import * as formatting from "@/utils/messages/formatting";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
-import type { useConversationList } from "./useConversationList";
+import type {
+  ConversationListData,
+  useConversationList,
+} from "./useConversationList";
+import { sortConversationsByLatestMessage } from "@/utils/messages/sorting";
 
 test("route user failures preserve backend messages, batch failures do not become empty conversations, and auth loading retains the route", async () => {
   type Query = {
@@ -21,6 +25,16 @@ test("route user failures preserve backend messages, batch failures do not becom
     finishLookup = resolve;
   });
   const selections: unknown[] = [];
+  let batchAvailable = false;
+  const conversationItems: Record<string, unknown>[] = [
+    {
+      id: "1",
+      sender_id: "me",
+      receiver_id: "them",
+      content: "hello",
+      created_at: 1,
+    },
+  ];
   const exports = {} as { useConversationList: typeof useConversationList };
   runInNewContext(
     transpileModule(
@@ -34,10 +48,17 @@ test("route user failures preserve backend messages, batch failures do not becom
       exports,
       fetch: async (url: string) => {
         if (url.includes("/users/batch"))
-          return new Response(
-            JSON.stringify({ message: "User lookup unavailable." }),
-            { status: 503 },
-          );
+          return batchAvailable
+            ? new Response(
+                JSON.stringify([
+                  { id: "them", username: "Them", avatar: "" },
+                  { id: "123", username: "New friend", avatar: "" },
+                ]),
+              )
+            : new Response(
+                JSON.stringify({ message: "User lookup unavailable." }),
+                { status: 503 },
+              );
         if (url.includes("/blocked-users"))
           return new Response(JSON.stringify({ detail: "Unauthorized" }), {
             status: 401,
@@ -45,15 +66,8 @@ test("route user failures preserve backend messages, batch failures do not becom
         if (url.endsWith("/conversations"))
           return new Response(
             JSON.stringify({
-              items: [
-                {
-                  id: "1",
-                  sender_id: "me",
-                  receiver_id: "them",
-                  content: "hello",
-                  created_at: 1,
-                },
-              ],
+              items: conversationItems,
+              total_conversations: conversationItems.length,
             }),
           );
         return new Response(
@@ -139,6 +153,31 @@ test("route user failures preserve backend messages, batch failures do not becom
   );
   await expect(queries.get("blocked-users")!.queryFn({})).rejects.toThrow(
     "Unauthorized",
+  );
+
+  // Friend acceptance opens a conversation before either user sends a message.
+  batchAvailable = true;
+  conversationItems.push({
+    recipient_id: "123",
+    opened_at: 1761771600,
+    message: null,
+    message_count: 0,
+    unread_count: 0,
+  });
+  const list = (await queries
+    .get("conversation-list")!
+    .queryFn({})) as ConversationListData;
+  expect(list.total).toBe(2);
+  expect(list.items.map((item) => item.user.id)).toEqual(["123", "them"]);
+  expect(list.items[0]).toMatchObject({
+    lastMessage: undefined,
+    openedAt: 1761771600000,
+    messageCount: 0,
+    unreadCount: 0,
+  });
+  expect(list.items[1].lastMessage?.content).toBe("hello");
+  expect(sortConversationsByLatestMessage([...list.items].reverse())).toEqual(
+    list.items,
   );
   effects = [];
   options.isAuthenticated = false;

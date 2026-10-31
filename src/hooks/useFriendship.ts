@@ -138,6 +138,9 @@ export function applyFriendUpdate(
   userId: string,
   status: FriendshipStatus,
 ) {
+  if (status === "friends") {
+    void queryClient.invalidateQueries({ queryKey: ["conversation-list"] });
+  }
   const requests =
     queryClient.getQueryData<FriendRequests>(FRIEND_REQUESTS_KEY);
   const friends = queryClient.getQueryData<Friend[]>(FRIENDS_KEY);

@@ -82,3 +82,22 @@ test("friend_update reuses a known profile for any status, else refetches", () =
   applyFriendUpdate(client, them, "outgoing");
   expect(status()).toBe("outgoing");
 });
+
+test("becoming friends invalidates the conversation list even without a cached profile", () => {
+  for (const known of [false, true]) {
+    const client = new QueryClient();
+    const key = ["conversation-list", "me"];
+    client.setQueryData(key, { items: [], total: 0 });
+    for (const status of ["incoming", "outgoing", "none"] as const) {
+      applyFriendUpdate(client, "42", status);
+      expect(client.getQueryState(key)?.isInvalidated).toBe(false);
+    }
+    if (known)
+      client.setQueryData(FRIEND_REQUESTS_KEY, {
+        incoming: [{ ...user("42"), created_at: 1 }],
+        outgoing: [],
+      });
+    applyFriendUpdate(client, "42", "friends");
+    expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+  }
+});

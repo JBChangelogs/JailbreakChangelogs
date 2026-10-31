@@ -19,7 +19,9 @@ export function sortConversationsByLatestMessage(
   conversations: ConversationSummary[],
 ): ConversationSummary[] {
   return [...conversations].sort(
-    (a, b) => (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),
+    (a, b) =>
+      (b.lastMessage?.createdAt ?? b.openedAt ?? 0) -
+      (a.lastMessage?.createdAt ?? a.openedAt ?? 0),
   );
 }
 

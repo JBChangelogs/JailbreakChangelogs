@@ -100,11 +100,17 @@ test("DMs and groups share one list, newest activity first", () => {
       : null,
   });
   const order = mergeConversationList(
-    [dm("old-dm", 100), dm("new-dm", 300), dm("silent-dm")],
+    [
+      dm("old-dm", 100),
+      dm("new-dm", 300),
+      dm("silent-dm"),
+      { ...dm("new-friend"), openedAt: 350 },
+    ],
     [group("busy-group", 50, 400), group("new-group", 200)],
   ).map((entry) => `${entry.kind}:${entry.id}`);
   expect(order).toEqual([
     "group:busy-group",
+    "dm:new-friend",
     "dm:new-dm",
     "group:new-group",
     "dm:old-dm",

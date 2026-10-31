@@ -72,7 +72,7 @@ export function mergeConversationList(
     ...conversations.map((conversation): ListEntry => ({
       kind: "dm",
       id: conversation.user.id,
-      at: conversation.lastMessage?.createdAt ?? 0,
+      at: conversation.lastMessage?.createdAt ?? conversation.openedAt ?? 0,
       conversation,
     })),
     ...groups.map((group): ListEntry => ({

@@ -60,6 +60,7 @@ export type OfferAcceptedMetadata = {
 export type ConversationSummary = {
   user: MessageUser;
   lastMessage?: Message;
+  openedAt?: number;
   messageCount?: number;
   unreadCount?: number;
 };

@@ -13,6 +13,7 @@ import type {
 import {
   asNumber,
   extractItems,
+  normalizeTimestamp,
   parseMessageRecord,
   toMessageUser,
 } from "@/utils/messages/parsing";
@@ -255,7 +256,8 @@ export function useConversationList({
           ? parsedTotalConversations
           : null;
 
-      const groupedConversations = new Map<string, Message>();
+      const groupedConversations = new Map<string, Message | undefined>();
+      const openedAtByUserId = new Map<string, number>();
       const messageCountByUserId = new Map<string, number>();
       const unreadCountByUserId = new Map<string, number>();
       const userHints = new Map<string, MessageUser>();
@@ -274,12 +276,21 @@ export function useConversationList({
           userHints.set(directUser.id, directUser);
         }
 
-        if (!message) continue;
-
-        const otherId =
-          message.senderId === currentUserId
+        const otherId = message
+          ? message.senderId === currentUserId
             ? message.receiverId
-            : message.senderId;
+            : message.senderId
+          : record.message === null &&
+              (typeof record.recipient_id === "string" ||
+                typeof record.recipient_id === "number")
+            ? String(record.recipient_id)
+            : null;
+        if (!otherId || otherId === currentUserId) continue;
+
+        const openedAt = asNumber(record.opened_at);
+        if (openedAt !== null) {
+          openedAtByUserId.set(otherId, normalizeTimestamp(openedAt));
+        }
 
         const recordMessageCount = record.message_count;
         if (typeof recordMessageCount === "number") {
@@ -292,8 +303,12 @@ export function useConversationList({
         }
 
         const existing = groupedConversations.get(otherId);
-        if (!existing || (message.createdAt ?? 0) > (existing.createdAt ?? 0)) {
-          groupedConversations.set(otherId, message);
+        if (
+          !groupedConversations.has(otherId) ||
+          (message &&
+            (!existing || (message.createdAt ?? 0) > (existing.createdAt ?? 0)))
+        ) {
+          groupedConversations.set(otherId, message ?? undefined);
         }
       }
 
@@ -322,13 +337,15 @@ export function useConversationList({
         summaries.push({
           user,
           lastMessage: groupedConversations.get(id),
+          openedAt: openedAtByUserId.get(id),
           messageCount: messageCountByUserId.get(id),
           unreadCount: unreadCountByUserId.get(id),
         });
       }
       summaries.sort(
         (a, b) =>
-          (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),
+          (b.lastMessage?.createdAt ?? b.openedAt ?? 0) -
+          (a.lastMessage?.createdAt ?? a.openedAt ?? 0),
       );
 
       const previous = queryClient.getQueryData<ConversationListData>([
