@@ -50,7 +50,7 @@ interface TradeHistoryModalProps {
   children?: ReactNode;
 }
 
-const TradeAvatarImage = ({ userId }: { userId: string }) => {
+export const TradeAvatarImage = ({ userId }: { userId: string }) => {
   const [avatarError, setAvatarError] = useState(false);
   return (
     <div className="bg-quaternary-bg relative h-10 w-10 overflow-hidden rounded-full">

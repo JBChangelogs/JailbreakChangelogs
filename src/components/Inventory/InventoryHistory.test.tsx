@@ -33,6 +33,9 @@ interface Node {
     onCloseAutoFocus?: (event: { preventDefault: () => void }) => void;
     ref?: { current: { focus: (options: FocusOptions) => void } | null };
     data?: { cash_value?: string | null };
+    userId?: string;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
   };
 }
 
@@ -50,6 +53,17 @@ function content(value: unknown): string {
   return typeof value === "string" || typeof value === "number"
     ? String(value)
     : "";
+}
+
+function ownerPopover(view: Node) {
+  return nodes(view).find(
+    (node) =>
+      node.type === "popover" &&
+      nodes(node).some(
+        (child) =>
+          child.type === "button" && content(child) === "Current owner",
+      ),
+  )!;
 }
 
 function setup() {
@@ -134,12 +148,16 @@ function setup() {
             PopoverTrigger: "popover-trigger",
           };
         if (id.endsWith("/TradeHistoryModal"))
-          return { default: "trade-modal" };
+          return { default: "trade-modal", TradeAvatarImage: "avatar" };
         if (id.endsWith("/useBatchUserData"))
           return {
             useBatchUserData: (ids: string[]) => {
               batchUserIds.push(ids);
-              return { robloxUsers: { "111": { displayName: "Owner One" } } };
+              return {
+                robloxUsers: {
+                  "111": { displayName: "Owner One", name: "owner_one" },
+                },
+              };
             },
           };
         if (id === "./InventoryMarketSummary")
@@ -321,9 +339,7 @@ test("owner lookup uses the exact copy and lists duplicated owners with all thre
   page.render();
   await respond(0, { as_of: 1792000000, items: [item] });
   const cardView = page.render();
-  nodes(cardView).find(
-    (node) => node.type === "button" && content(node) === "History",
-  )!.props.onClick!();
+  ownerPopover(cardView).props.onOpenChange!(true);
   const ownerNode = nodes(page.render()).find(
     (node) => typeof node.type === "function",
   )!;
@@ -362,6 +378,12 @@ test("owner lookup uses the exact copy and lists duplicated owners with all thre
   expect(content(view)).toContain("traded away since 2026-10-31 03:44:50 UTC");
   expect(content(view)).toContain("Current ownership unknown");
   expect(content(view)).toContain("Owner One");
+  expect(content(view)).toContain("@owner_one");
+  expect(
+    nodes(view)
+      .filter((node) => node.type === "avatar")
+      .map((node) => node.props.userId),
+  ).toEqual(["111", "222", "333"]);
   expect(batchUserIds.at(-1)).toEqual(["111", "222", "333"]);
 });
 
@@ -372,9 +394,7 @@ test("missing owner can be retried and a single owner links to their inventory",
   page.render();
   await respond(0, { as_of: 1792000000, items: [item] });
   const cardView = page.render();
-  nodes(cardView).find(
-    (node) => node.type === "button" && content(node) === "History",
-  )!.props.onClick!();
+  ownerPopover(cardView).props.onOpenChange!(true);
   const ownerNode = nodes(page.render()).find(
     (node) => typeof node.type === "function",
   )!;
@@ -526,4 +546,45 @@ test("date changes keep the preview mounted and restore calendar focus without s
       node.type === "button" && content(node).includes("Back to latest"),
   )!.props.onClick!();
   expect(content(page.render())).toContain("Inventory preview");
+});
+
+test("current owners open in an anchored popover independently of the history modal", async () => {
+  const { runner, requests, respond, select } = setup();
+  const page = runner();
+  select(page.render(), "2026-10-31");
+  page.render();
+  await respond(0, { as_of: 1792000000, items: [item] });
+  let view = page.render();
+  const findOwner = () => ownerPopover(view);
+  expect(findOwner().props.open).toBe(false);
+  expect(nodes(view).some((node) => typeof node.type === "function")).toBe(
+    false,
+  );
+  nodes(view).find(
+    (node) => node.type === "button" && content(node) === "History",
+  )!.props.onClick!();
+  view = page.render();
+  const modal = nodes(view).find((node) => node.type === "trade-modal")!;
+  expect(nodes(modal).some((node) => typeof node.type === "function")).toBe(
+    false,
+  );
+  modal.props.onClose!();
+  view = page.render();
+  expect(requests).toHaveLength(1);
+  findOwner().props.onOpenChange!(true);
+  view = page.render();
+  expect(findOwner().props.open).toBe(true);
+  const panel = nodes(findOwner()).find(
+    (node) => node.type === "popover-content",
+  )!;
+  expect(nodes(panel).some((node) => typeof node.type === "function")).toBe(
+    true,
+  );
+  expect(nodes(view).some((node) => node.type === "trade-modal")).toBe(false);
+  findOwner().props.onOpenChange!(false);
+  view = page.render();
+  expect(findOwner().props.open).toBe(false);
+  expect(nodes(view).some((node) => typeof node.type === "function")).toBe(
+    false,
+  );
 });

@@ -23,7 +23,9 @@ import { useCatalogValues } from "@/hooks/usePartialItems";
 import InventoryListControls from "./InventoryListControls";
 import { Pagination } from "@/components/ui/Pagination";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
-import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
+import TradeHistoryModal, {
+  TradeAvatarImage,
+} from "@/components/Modals/TradeHistoryModal";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import {
   INVENTORY_API_URL,
@@ -95,7 +97,7 @@ function CurrentOwner({ item }: { item: HistoricalInventoryItem }) {
   }, [attempt, item.item_id, item.branch_id]);
 
   return (
-    <div className="mt-3 space-y-2">
+    <div className="space-y-3">
       <h3 className="text-primary-text font-semibold">Current owner</h3>
       {loading && (
         <p role="status" className="text-secondary-text text-sm">
@@ -127,32 +129,44 @@ function CurrentOwner({ item }: { item: HistoricalInventoryItem }) {
             <p>Duplicated since this scan. Known owners of each copy:</p>
           )}
           {(data.duplicated_since ? data.owners : data.owners.slice(0, 1)).map(
-            (owner, index) => (
-              <div key={`${owner.user_id}-${index}`}>
-                <Link
-                  className="text-link hover:underline"
-                  href={`/inventories/${encodeURIComponent(owner.user_id)}`}
-                >
-                  {robloxUsers[owner.user_id]?.displayName ||
-                    robloxUsers[owner.user_id]?.name ||
-                    owner.user_id}
-                </Link>
-                <p className="text-secondary-text">
-                  {owner.still_held === false
-                    ? owner.left_at !== null
-                      ? `traded away since ${formatUtc(owner.left_at)}`
-                      : "Traded away; date unknown"
-                    : owner.still_held === true
-                      ? "Still held at their latest scan"
-                      : "Current ownership unknown"}
-                </p>
-                {owner.last_seen !== null && (
+            (owner, index) => {
+              const user = robloxUsers[owner.user_id];
+              const username = user?.name || user?.username;
+              return (
+                <div key={`${owner.user_id}-${index}`}>
+                  <Link
+                    className="group flex items-center gap-3"
+                    href={`/inventories/${encodeURIComponent(owner.user_id)}`}
+                  >
+                    <TradeAvatarImage userId={owner.user_id} />
+                    <span className="min-w-0">
+                      <span className="text-link block truncate font-semibold group-hover:underline">
+                        {user?.displayName || username || owner.user_id}
+                      </span>
+                      {username && (
+                        <span className="text-secondary-text block truncate">
+                          @{username}
+                        </span>
+                      )}
+                    </span>
+                  </Link>
                   <p className="text-secondary-text">
-                    Last seen {formatUtc(owner.last_seen)}
+                    {owner.still_held === false
+                      ? owner.left_at !== null
+                        ? `traded away since ${formatUtc(owner.left_at)}`
+                        : "Traded away; date unknown"
+                      : owner.still_held === true
+                        ? "Still held at their latest scan"
+                        : "Current ownership unknown"}
                   </p>
-                )}
-              </div>
-            ),
+                  {owner.last_seen !== null && (
+                    <p className="text-secondary-text">
+                      Last seen {formatUtc(owner.last_seen)}
+                    </p>
+                  )}
+                </div>
+              );
+            },
           )}
         </div>
       )}
@@ -182,12 +196,14 @@ export default function InventoryHistory({
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState("created-desc");
   const [page, setPage] = useState(1);
+  const [ownerPopover, setOwnerPopover] = useState<string | null>(null);
   const [historyItem, setHistoryItem] =
     useState<HistoricalInventoryItem | null>(null);
   const changeDate = (nextDate: string) => {
     setDate(nextDate);
     setResult(null);
     setHistoryItem(null);
+    setOwnerPopover(null);
     setSearchTerm("");
     setSelectedCategories([]);
     setPage(1);
@@ -430,33 +446,65 @@ export default function InventoryHistory({
                 <div className="mt-4 mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
                   {filteredItems
                     .slice((currentPage - 1) * 16, currentPage * 16)
-                    .map((item) => (
-                      <article
-                        key={`${date}-${item.item_id}-${item.branch_id}`}
-                        className="text-primary-text border-border-card bg-tertiary-bg relative flex flex-col rounded-lg border p-3"
-                      >
-                        <InventoryItemAppearance
-                          title={item.title}
-                          categoryTitle={item.category_title}
-                        />
-                        <InventoryMarketSummary
-                          data={catalogById.get(item.catalog_item_id)}
-                        />
-                        <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-                          <p className="text-secondary-text min-w-0 text-sm">
-                            Held since {formatUtc(item.held_since)}
-                          </p>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setHistoryItem(item)}
-                          >
-                            History
-                          </Button>
-                        </div>
-                      </article>
-                    ))}
+                    .map((item) => {
+                      const ownerKey = `${item.item_id}-${item.branch_id}`;
+                      const ownerExpanded = ownerPopover === ownerKey;
+                      return (
+                        <article
+                          key={`${date}-${item.item_id}-${item.branch_id}`}
+                          className="text-primary-text border-border-card bg-tertiary-bg relative flex flex-col rounded-lg border p-3"
+                        >
+                          <InventoryItemAppearance
+                            title={item.title}
+                            categoryTitle={item.category_title}
+                          />
+                          <InventoryMarketSummary
+                            data={catalogById.get(item.catalog_item_id)}
+                          />
+                          <div className="mt-auto space-y-3 pt-3">
+                            <p className="text-secondary-text text-sm">
+                              Held since {formatUtc(item.held_since)}
+                            </p>
+                            <div className="flex flex-wrap justify-end gap-2">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setHistoryItem(item)}
+                              >
+                                History
+                              </Button>
+                              <Popover
+                                open={ownerExpanded}
+                                onOpenChange={(open) =>
+                                  setOwnerPopover(open ? ownerKey : null)
+                                }
+                              >
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                  >
+                                    Current owner
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  align="end"
+                                  collisionPadding={16}
+                                  aria-label={`Current owner of ${item.title}`}
+                                  className="bg-secondary-bg max-h-[min(24rem,var(--radix-popover-content-available-height))] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
+                                >
+                                  {ownerExpanded && (
+                                    <CurrentOwner item={item} />
+                                  )}
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
                 </div>
                 {historyItem && (
                   <TradeHistoryModal
@@ -473,12 +521,6 @@ export default function InventoryHistory({
                     <p className="text-secondary-text mt-4 text-sm">
                       Held since {formatUtc(historyItem.held_since)}
                     </p>
-                    <div className="border-border-card mt-4 border-t pt-4">
-                      <CurrentOwner
-                        key={`${historyItem.item_id}-${historyItem.branch_id}`}
-                        item={historyItem}
-                      />
-                    </div>
                   </TradeHistoryModal>
                 )}
                 {pagination}
