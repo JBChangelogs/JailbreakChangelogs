@@ -151,10 +151,12 @@ export default function PrivacyPage() {
           private servers and is never sold or shared.
         </p>
         <p>
-          We use a first-party device cookie and, for logged-in users, device
-          signals to recognize devices and help detect alternate accounts and
-          abuse. This information is stored on our private servers and is never
-          sold or shared with third parties.
+          To detect accounts operated by the same person, we collect device and
+          browser characteristics (such as hardware and configuration details)
+          and a device identifier stored in a cookie, from logged-in users. This
+          data is used only for that purpose, is reviewed by staff rather than
+          used for automated decisions, and is kept for as long as your account
+          exists.
         </p>
       </LegalSection>
 
