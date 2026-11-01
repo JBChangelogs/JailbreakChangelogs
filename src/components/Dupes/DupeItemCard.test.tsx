@@ -127,7 +127,13 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   const reports: unknown[] = [];
   const props = {
     item,
-    itemData: {},
+    itemData: {
+      id: 49,
+      cash_value: "28m",
+      duped_value: "14m",
+      demand: "High",
+      trend: "Rising",
+    },
     robloxId: "999",
     getUsername: (id: string) => id,
     getUserAvatar: () => "/avatar.webp",
@@ -149,6 +155,12 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
     "Run a check or compare ownership histories to review this record.",
   );
   const elements = flatten(card);
+  expect(
+    elements.find(
+      (element) =>
+        element.type === "@/components/Inventory/InventoryMarketSummary",
+    )?.props.data,
+  ).toBe(props.itemData);
   const images = elements.filter((element) => element.type === "next/image");
   expect(images).toHaveLength(2);
   for (const image of images) {

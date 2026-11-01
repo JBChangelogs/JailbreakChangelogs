@@ -48,6 +48,7 @@ import {
 
 import { bangers } from "@/app/fonts";
 import ItemSignatures from "@/components/Items/ItemSignatures";
+import InventoryMarketSummary from "@/components/Inventory/InventoryMarketSummary";
 import {
   formatMonthDayYear,
   formatShortDateTime,
@@ -284,6 +285,8 @@ export default function DupeItemCard({
         )}
         <ItemSignatures signs={item.Sign} />
       </div>
+
+      <InventoryMarketSummary data={itemData} />
 
       <div className="flex flex-1 flex-col gap-3">
         <div className="flex min-w-0 items-center gap-2">

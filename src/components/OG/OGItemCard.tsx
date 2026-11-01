@@ -20,8 +20,6 @@ import {
   CategoryIconBadge,
 } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { formatFullValue } from "@/utils/trading/values";
-import { hasItemValue } from "@/utils/items/itemValue";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
@@ -38,6 +36,8 @@ import {
 import { bangers } from "@/app/fonts";
 import ItemSignatures from "@/components/Items/ItemSignatures";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import InventoryMarketSummary from "@/components/Inventory/InventoryMarketSummary";
+import { Button } from "@/components/ui/button";
 
 interface OGItem {
   tradePopularMetric: number;
@@ -93,42 +93,26 @@ export default function OGItemCard({
     displayedLevel,
   );
 
-  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
-    <div
-      className="border-border-card bg-tertiary-bg text-primary-text hover:shadow-card-shadow relative flex min-h-100 cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
-      onClick={() => onCardClick(item)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onCardClick(item);
-        }
-      }}
-    >
-      {/* Duplicate Indicator */}
+    <div className="border-border-card bg-tertiary-bg text-primary-text relative flex flex-col rounded-lg border p-3">
       {isDuplicate && (
         <div className="bg-button-info text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
           #{duplicateOrder}
         </div>
       )}
 
-      {/* OG Badge */}
       {isOriginalOwner && !isDuplicate && (
         <div className="bg-status-success text-button-success-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
           OG
         </div>
       )}
 
-      {/* Title */}
       <div className="mb-4 text-left">
         <h2
           className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide wrap-break-word`}
         >
           <Link
             href={`/item/${encodeURIComponent(item.categoryTitle)}/${encodeURIComponent(item.title)}`}
-            onClick={(e) => e.stopPropagation()}
             className="hover:text-link-hover transition-colors"
             prefetch={false}
           >
@@ -157,7 +141,6 @@ export default function OGItemCard({
         </div>
       </div>
 
-      {/* Item Image - Always show container for consistent layout */}
       <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-lg">
         {(itemData?.is_limited === 1 || isSeasonal) && (
           <Tooltip>
@@ -246,117 +229,53 @@ export default function OGItemCard({
         <ItemSignatures signs={item.Sign} />
       </div>
 
-      {/* Statistics */}
-      <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
-        <div>
-          <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                {item.uniqueCirculation.toLocaleString("en-US")}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              Monthly unique: {item.uniqueCirculation.toLocaleString("en-US")}
-            </TooltipContent>
-          </Tooltip>
-        </div>
+      <InventoryMarketSummary data={itemData} />
 
-        {/* Cash Value */}
-        {itemData && (
-          <div>
-            <div className="text-secondary-text text-sm">CASH VALUE</div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-primary-text cursor-help text-xl font-bold">
-                  <span className="sm:hidden">
-                    {hasItemValue(itemData.cash_value)
-                      ? itemData.cash_value
-                      : "N/A"}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatFullValue(itemData.cash_value)}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {formatFullValue(itemData.cash_value)}
-              </TooltipContent>
-            </Tooltip>
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+            {avatarError ? (
+              <DefaultAvatar name={getUsername(item.user_id)} />
+            ) : (
+              <Image
+                src={getUserAvatar(item.user_id)}
+                alt="Current owner avatar"
+                width={32}
+                height={32}
+                className="rounded-full"
+                onError={() => setAvatarError(true)}
+              />
+            )}
           </div>
-        )}
-
-        {/* Duped Value */}
-        {itemData && (
-          <div>
-            <div className="text-secondary-text text-sm">DUPED VALUE</div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-primary-text cursor-help text-xl font-bold">
-                  <span className="sm:hidden">
-                    {hasItemValue(itemData.duped_value)
-                      ? itemData.duped_value
-                      : "N/A"}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatFullValue(itemData.duped_value)}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                Duped value: {formatFullValue(itemData.duped_value)}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        )}
-
-        <div>
-          <div className="text-secondary-text text-sm">CURRENT OWNER</div>
-          <div className="text-xl font-bold">
-            <div className="flex items-center justify-center gap-2">
-              <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
-                {avatarError ? (
-                  <DefaultAvatar name={getUsername(item.user_id)} />
-                ) : (
-                  <Image
-                    src={getUserAvatar(item.user_id)}
-                    alt="Owner Avatar"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                    onError={() => {
-                      setAvatarError(true);
-                    }}
-                  />
-                )}
-              </div>
-              <a
-                href={`https://www.roblox.com/users/${item.user_id}/profile`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover min-w-0 text-center transition-colors hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="inline-flex max-w-full items-center gap-2">
-                  <span className="min-w-0 wrap-anywhere">
-                    {getUsername(item.user_id)}
-                  </span>
-                  {getHasVerifiedBadge && getHasVerifiedBadge(item.user_id) && (
-                    <VerifiedBadgeIcon className="h-4 w-4 shrink-0" />
-                  )}
-                </span>
-              </a>
-            </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-secondary-text text-xs">Current owner</p>
+            <a
+              href={`https://www.roblox.com/users/${item.user_id}/profile`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:text-link-hover flex items-center gap-1 text-sm font-medium hover:underline"
+            >
+              <span className="truncate">{getUsername(item.user_id)}</span>
+              {getHasVerifiedBadge?.(item.user_id) && (
+                <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
+              )}
+            </a>
           </div>
         </div>
-        <div>
-          <div className="text-secondary-text text-sm">LOGGED ON</div>
-          <div className="text-primary-text text-xl font-bold">
-            {formatMonthDayYear(item.logged_at)}
-          </div>
+        <div className="mt-auto flex items-center justify-between gap-3">
+          <p className="text-secondary-text min-w-0 text-sm">
+            Logged {formatMonthDayYear(item.logged_at)}
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => onCardClick(item)}
+          >
+            History
+          </Button>
         </div>
       </div>
     </div>
   );
-  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }
