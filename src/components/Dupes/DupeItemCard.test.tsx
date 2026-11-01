@@ -156,6 +156,9 @@ test("card actions check the owner and catalog ID, compare the instance, and ope
   );
   const elements = flatten(card);
   expect(
+    elements.some((element) => element.props.children === "Original owner"),
+  ).toBe(true);
+  expect(
     elements.find(
       (element) =>
         element.type === "@/components/Inventory/InventoryMarketSummary",

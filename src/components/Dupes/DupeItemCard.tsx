@@ -80,7 +80,7 @@ export default function DupeItemCard({
   duplicateNumber,
   isDuplicate = false,
   robloxId,
-  ownerLabel = "ORIGINAL OWNER",
+  ownerLabel = "Original owner",
   isDupedItem = false,
 }: DupeItemCardProps) {
   const [avatarError, setAvatarError] = useState(false);
