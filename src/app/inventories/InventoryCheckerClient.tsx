@@ -1020,7 +1020,11 @@ export default function InventoryCheckerClient({
             )}
 
           {!initialData && robloxId && /^\d+$/.test(robloxId) && (
-            <InventoryHistory key={robloxId} userId={robloxId} />
+            <InventoryHistory
+              key={robloxId}
+              userId={robloxId}
+              isOwnInventory={isOwnInventory}
+            />
           )}
 
           {/* User Stats and Inventory Items - Only show when no error and has data */}
@@ -1081,6 +1085,7 @@ export default function InventoryCheckerClient({
                     <InventoryHistory
                       key={currentData.user_id}
                       userId={currentData.user_id}
+                      isOwnInventory={isOwnInventory}
                       onDateChange={(date) =>
                         setItemSnapshot({ userId: currentData.user_id, date })
                       }

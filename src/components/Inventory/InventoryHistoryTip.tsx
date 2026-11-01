@@ -5,30 +5,34 @@ import { Popover as PopoverPrimitive } from "radix-ui";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-const SEEN_KEY = "jbcl:global-search-tip-seen";
+const SEEN_KEY = "jbcl:inventory-history-tip-seen";
 
-export default function GlobalSearchTip({
-  children,
-  searchOpen,
-  onOpenSearch,
+export default function InventoryHistoryTip({
+  anchorRef,
+  datePickerOpen,
+  onOpenDatePicker,
+  isOwnInventory,
 }: {
-  children: React.ReactElement;
-  searchOpen: boolean;
-  onOpenSearch: () => void;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+  datePickerOpen: boolean;
+  onOpenDatePicker: () => void;
+  isOwnInventory: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width: 639px)");
   const titleId = useId();
   const descriptionId = useId();
 
   useEffect(() => {
-    if (searchOpen) {
+    if (datePickerOpen) {
       safeLocalStorage.setItem(SEEN_KEY, "true");
       setOpen(false);
     } else {
       setOpen(safeLocalStorage.getItem(SEEN_KEY) !== "true");
     }
-  }, [searchOpen]);
+  }, [datePickerOpen]);
 
   const dismiss = () => {
     safeLocalStorage.setItem(SEEN_KEY, "true");
@@ -37,12 +41,13 @@ export default function GlobalSearchTip({
 
   return (
     <Popover
-      open={open && !searchOpen}
+      open={open && !datePickerOpen}
       onOpenChange={(next) => !next && dismiss()}
     >
-      <PopoverPrimitive.Anchor asChild>{children}</PopoverPrimitive.Anchor>
+      <PopoverPrimitive.Anchor virtualRef={anchorRef} />
       <PopoverContent
-        side="bottom"
+        side={isSmallScreen ? "top" : "bottom"}
+        align="end"
         sideOffset={12}
         collisionPadding={16}
         className="bg-secondary-bg w-80 p-4"
@@ -52,20 +57,25 @@ export default function GlobalSearchTip({
         onCloseAutoFocus={(event) => event.preventDefault()}
       >
         <p id={titleId} className="font-semibold">
-          Meet your new search
+          {isOwnInventory
+            ? "View your past inventories"
+            : "View past inventories"}
         </p>
         <p id={descriptionId} className="text-secondary-text mt-1 text-sm">
-          Jump straight to what you’re looking for.
+          {isOwnInventory
+            ? "Choose a date to see what you owned."
+            : "Choose a date to see what they owned."}{" "}
+          Only scans from October 31, 2026 onward are available.
         </p>
         <div className="mt-4 flex items-center gap-2">
           <Button
             size="sm"
             onClick={() => {
               dismiss();
-              onOpenSearch();
+              onOpenDatePicker();
             }}
           >
-            Try search
+            Choose a date
           </Button>
           <Button size="sm" variant="secondary" onClick={dismiss}>
             Got it

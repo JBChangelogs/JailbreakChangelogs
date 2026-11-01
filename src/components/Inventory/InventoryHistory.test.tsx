@@ -36,6 +36,9 @@ interface Node {
     userId?: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    datePickerOpen?: boolean;
+    onOpenDatePicker?: () => void;
+    anchorRef?: Node["props"]["ref"];
   };
 }
 
@@ -176,6 +179,7 @@ function setup() {
         if (id.endsWith("/itemSearch")) return { matchesTextSearch };
         if (id === "./InventoryItemsSkeleton")
           return { default: "inventory-skeleton" };
+        if (id === "./InventoryHistoryTip") return { default: "history-tip" };
         if (id.endsWith("/api"))
           return {
             INVENTORY_API_URL: "https://inventory.test",
@@ -224,6 +228,23 @@ function setup() {
 
   return { runner, requests, respond, select, selectedDates, batchUserIds };
 }
+
+test("the history tip opens the inventory date picker", () => {
+  const { runner } = setup();
+  const page = runner();
+  let tip = nodes(page.render()).find((node) => node.type === "history-tip")!;
+  expect(tip.props.datePickerOpen).toBe(false);
+  expect(tip.props.anchorRef).toBe(
+    nodes(page.render()).find((node) => node.props.ref)!.props.ref,
+  );
+  tip.props.onOpenDatePicker!();
+  const view = page.render();
+  tip = nodes(view).find((node) => node.type === "history-tip")!;
+  expect(tip.props.datePickerOpen).toBe(true);
+  expect(nodes(view).find((node) => node.type === "popover")!.props.open).toBe(
+    true,
+  );
+});
 
 const item = {
   item_id: "aW13RLHQ^hRP",

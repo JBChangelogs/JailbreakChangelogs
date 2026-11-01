@@ -833,7 +833,6 @@ export default function Header({
         {releaseAnnouncement}
         <div className="relative z-10">
           <NavbarModern
-            searchOpen={searchOpen}
             onOpenSearch={searchEnabled ? () => setSearchOpen(true) : undefined}
             unreadCount={unreadCount}
             unreadMessageCount={unreadMessageCount}

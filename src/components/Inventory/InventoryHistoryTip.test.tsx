@@ -4,19 +4,23 @@ import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 
 type Element = { type: string; props: Record<string, unknown> };
-const seenKey = "jbcl:global-search-tip-seen";
+const seenKey = "jbcl:inventory-history-tip-seen";
 
-function setup(seen = false) {
+function setup(seen = false, isSmallScreen = false) {
   const storage = new Map<string, string>(seen ? [[seenKey, "true"]] : []);
   let open = false;
-  let previousSearchOpen: boolean | undefined;
+  let previousDatePickerOpen: boolean | undefined;
   let pendingEffect: (() => void) | undefined;
-  let searchOpens = 0;
+  let datePickerOpens = 0;
+  const anchorRef = { current: null };
   const jsx = (type: string, props: Element["props"]) => ({ type, props });
   const exports = {} as { default: (props: unknown) => Element };
   runInNewContext(
     transpileModule(
-      readFileSync(new URL("./GlobalSearchTip.tsx", import.meta.url), "utf8"),
+      readFileSync(
+        new URL("./InventoryHistoryTip.tsx", import.meta.url),
+        "utf8",
+      ),
       {
         compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
       },
@@ -34,13 +38,21 @@ function setup(seen = false) {
               },
             ],
             useId: () => "tip-label",
-            useEffect: (effect: () => void, [searchOpen]: [boolean]) => {
-              if (previousSearchOpen !== searchOpen) pendingEffect = effect;
-              previousSearchOpen = searchOpen;
+            useEffect: (effect: () => void, [datePickerOpen]: [boolean]) => {
+              if (previousDatePickerOpen !== datePickerOpen)
+                pendingEffect = effect;
+              previousDatePickerOpen = datePickerOpen;
             },
           };
         if (name === "radix-ui")
           return { Popover: { Anchor: "Anchor", Arrow: "Arrow" } };
+        if (name === "@/hooks/useMediaQuery")
+          return {
+            useMediaQuery: (query: string) => {
+              expect(query).toBe("(max-width: 639px)");
+              return isSmallScreen;
+            },
+          };
         if (name === "@/utils/storage/safeStorage")
           return {
             safeLocalStorage: {
@@ -52,11 +64,12 @@ function setup(seen = false) {
       },
     },
   );
-  const render = (searchOpen = false) => {
+  const render = (datePickerOpen = false, isOwnInventory = false) => {
     const props = {
-      searchOpen,
-      onOpenSearch: () => searchOpens++,
-      children: jsx("button", {}),
+      datePickerOpen,
+      onOpenDatePicker: () => datePickerOpens++,
+      anchorRef,
+      isOwnInventory,
     };
     const tree = exports.default(props);
     const effect = pendingEffect;
@@ -64,7 +77,7 @@ function setup(seen = false) {
     effect?.();
     return { initial: tree, tree: exports.default(props) };
   };
-  return { render, storage, searchOpens: () => searchOpens };
+  return { render, storage, anchorRef, datePickerOpens: () => datePickerOpens };
 }
 
 function content(tree: Element): Element {
@@ -76,27 +89,53 @@ function buttons(tree: Element): Element[] {
     .children as Element[];
 }
 
-test("tip waits for mount, anchors to search, and persists Got it dismissal", () => {
+test("the tip prefers above the date button on mobile and below on desktop", () => {
+  expect(content(setup(false, true).render().tree).props.side).toBe("top");
+  expect(content(setup(false, false).render().tree).props.side).toBe("bottom");
+});
+
+test("copy addresses the linked inventory owner and keeps the availability note", () => {
+  const tip = setup();
+  for (const isOwnInventory of [false, true]) {
+    const children = content(tip.render(false, isOwnInventory).tree).props
+      .children as Element[];
+    expect(children[0].props.children).toBe(
+      isOwnInventory ? "View your past inventories" : "View past inventories",
+    );
+    expect(children[1].props.children).toEqual([
+      isOwnInventory
+        ? "Choose a date to see what you owned."
+        : "Choose a date to see what they owned.",
+      " ",
+      "Only scans from October 31, 2026 onward are available.",
+    ]);
+  }
+});
+
+test("tip waits for mount, anchors to the date picker, and persists Got it dismissal", () => {
   const tip = setup();
   const { initial, tree } = tip.render();
   expect(initial.props.open).toBe(false);
   expect(tree.props.open).toBe(true);
   expect((tree.props.children as Element[])[0].type).toBe("Anchor");
+  expect((tree.props.children as Element[])[0].props.virtualRef).toBe(
+    tip.anchorRef,
+  );
   (buttons(tree)[1].props.onClick as () => void)();
   expect(tip.render().tree.props.open).toBe(false);
   expect(tip.storage.get(seenKey)).toBe("true");
   expect(setup(true).render().tree.props.open).toBe(false);
 });
 
-test("Try search dismisses the tip and opens search once", () => {
+test("Choose a date dismisses the tip and opens the date picker once", () => {
   const tip = setup();
   (buttons(tip.render().tree)[0].props.onClick as () => void)();
-  expect(tip.searchOpens()).toBe(1);
+  expect(tip.datePickerOpens()).toBe(1);
   expect(tip.storage.get(seenKey)).toBe("true");
   expect(tip.render().tree.props.open).toBe(false);
 });
 
-test("outside or Escape dismissal persists; keyboard search also consumes the tip", () => {
+test("outside or Escape dismissal persists; opening the date picker also consumes the tip", () => {
   const dismissed = setup();
   (dismissed.render().tree.props.onOpenChange as (open: boolean) => void)(
     false,
@@ -104,11 +143,11 @@ test("outside or Escape dismissal persists; keyboard search also consumes the ti
   expect(dismissed.storage.get(seenKey)).toBe("true");
   expect(dismissed.render().tree.props.open).toBe(false);
 
-  const keyboard = setup();
-  keyboard.render();
-  expect(keyboard.render(true).tree.props.open).toBe(false);
-  expect(keyboard.storage.get(seenKey)).toBe("true");
-  expect(keyboard.render(false).tree.props.open).toBe(false);
+  const calendar = setup();
+  calendar.render();
+  expect(calendar.render(true).tree.props.open).toBe(false);
+  expect(calendar.storage.get(seenKey)).toBe("true");
+  expect(calendar.render(false).tree.props.open).toBe(false);
 });
 
 test("automatic tip opening and closing preserve the current focus", () => {

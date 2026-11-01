@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Icon } from "@/components/ui/IconWrapper";
 import InventoryItemsSkeleton from "./InventoryItemsSkeleton";
+import InventoryHistoryTip from "./InventoryHistoryTip";
 import InventoryItemAppearance from "./InventoryItemAppearance";
 import InventoryMarketSummary from "./InventoryMarketSummary";
 import { useCatalogValues } from "@/hooks/usePartialItems";
@@ -179,11 +180,13 @@ export default function InventoryHistory({
   children,
   preview,
   onDateChange,
+  isOwnInventory = false,
 }: {
   userId: string;
   children?: ReactNode;
   preview?: ReactNode;
   onDateChange?: (date: string) => void;
+  isOwnInventory?: boolean;
 }) {
   const [date, setDate] = useState("");
   const dateTriggerRef = useRef<HTMLButtonElement>(null);
@@ -343,6 +346,12 @@ export default function InventoryHistory({
                 />
               </PopoverContent>
             </Popover>
+            <InventoryHistoryTip
+              isOwnInventory={isOwnInventory}
+              anchorRef={dateTriggerRef}
+              datePickerOpen={isDatePickerOpen}
+              onOpenDatePicker={() => setIsDatePickerOpen(true)}
+            />
             {date && (
               <Button
                 type="button"

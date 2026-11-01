@@ -11,7 +11,6 @@ import {
   getNavigationSection,
   getNavigationViewportCenter,
 } from "@/utils/ui/navigation";
-import GlobalSearchTip from "@/components/Layout/GlobalSearchTip";
 import SiteLogo from "@/components/ui/SiteLogo";
 import { NavigationMenu as NavigationMenu } from "radix-ui";
 import { useIsCollabPage } from "@/hooks/useIsCollabPage";
@@ -120,11 +119,9 @@ export const NavbarModern = ({
   onUserMenuOpenChange,
   setUtmModalOpen,
   onOpenSearch,
-  searchOpen,
 }: {
   className?: string;
   onOpenSearch?: () => void;
-  searchOpen: boolean;
   unreadCount: number;
   unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
@@ -418,29 +415,27 @@ export const NavbarModern = ({
         </div>
 
         {onOpenSearch && (
-          <GlobalSearchTip searchOpen={searchOpen} onOpenSearch={onOpenSearch}>
-            <button
-              type="button"
-              data-desktop-search
-              onClick={onOpenSearch}
-              aria-label={`Search the site (${searchShortcut})`}
-              aria-keyshortcuts="Control+k Meta+k"
-              aria-haspopup="dialog"
-              className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 max-w-md min-w-40 flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          <button
+            type="button"
+            data-desktop-search
+            onClick={onOpenSearch}
+            aria-label={`Search the site (${searchShortcut})`}
+            aria-keyshortcuts="Control+k Meta+k"
+            aria-haspopup="dialog"
+            className="text-secondary-text border-border-card bg-tertiary-bg hover:bg-quaternary-bg hover:text-primary-text focus-visible:ring-link flex h-10 w-40 max-w-md min-w-40 flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="size-4 shrink-0"
+            />
+            <span>Search…</span>
+            <kbd
+              aria-hidden="true"
+              className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
             >
-              <Icon
-                icon="heroicons:magnifying-glass"
-                className="size-4 shrink-0"
-              />
-              <span>Search…</span>
-              <kbd
-                aria-hidden="true"
-                className="border-border-card bg-secondary-bg ml-auto shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none"
-              >
-                {searchShortcut}
-              </kbd>
-            </button>
-          </GlobalSearchTip>
+              {searchShortcut}
+            </kbd>
+          </button>
         )}
 
         {/* Right side actions */}
