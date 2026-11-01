@@ -17,6 +17,7 @@ import {
 } from "@tanstack/react-query";
 import type { Dispatch, SetStateAction } from "react";
 import { usePathname } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,7 @@ function blockedUserMap(data: unknown): Record<string, boolean> {
 
 export default function MessagesInbox() {
   const pathname = usePathname();
+  const router = useRouter();
 
   useLockBodyScroll(true);
 
@@ -131,6 +133,13 @@ export default function MessagesInbox() {
     bans,
     setBan,
   } = useAuthContext();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && pathname.startsWith("/messages/")) {
+      router.replace(`/messages${window.location.search}`);
+    }
+  }, [isLoading, isAuthenticated, pathname, router]);
+
   const messageBan = bans["communication"] ?? null;
   const emojiStringMap = useEmojiStringMap();
   const { twemojiEnabled } = useTwemoji();

@@ -18,7 +18,7 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children)];
 }
 
-test("inbox cache setters preserve pagination, realtime changes and sibling conversations", () => {
+test("inbox preserves pagination, realtime changes, sibling conversations and guest redirects", () => {
   const client = new QueryClient();
   const threadKey = ["message-thread", "me", "them"];
   const siblingKey = ["message-thread", "me", "sibling"];
@@ -66,6 +66,12 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
   const callbacks: unknown[] = [];
   let stateIndex = 0;
   let authLoading = true;
+  let authenticated = true;
+  let pathname = "/messages/them";
+  const redirects: string[] = [];
+  const location = { search: "" };
+  const router = { replace: (path: string) => redirects.push(path) };
+  let redirectEffect = () => {};
   let threadLoading = false;
   let conversationFetching = false;
   let threadError: Error | null = null;
@@ -94,6 +100,7 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
     ).outputText,
     {
       exports,
+      window: { location },
       require: (name: string) => {
         if (name === "react")
           return {
@@ -102,7 +109,9 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
               return callback;
             },
             useMemo: (callback: () => unknown) => callback(),
-            useEffect: noop,
+            useEffect: (effect: () => void, dependencies?: unknown[]) => {
+              if (dependencies?.includes(router)) redirectEffect = effect;
+            },
             useRef: ref,
             // The second local state is the selected conversation. Lazy
             // initializers run, as in React.
@@ -129,14 +138,13 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
             useQuery: readQuery,
             useInfiniteQuery: readQuery,
           };
-        if (name === "next/navigation")
-          return { usePathname: () => "/messages/them" };
-        if (name === "nextjs-toploader/app") return { useRouter: () => ({}) };
+        if (name === "next/navigation") return { usePathname: () => pathname };
+        if (name === "nextjs-toploader/app") return { useRouter: () => router };
         if (name === "@/contexts/AuthContext")
           return {
             useAuthContext: () => ({
               user: { id: "me", username: "Me" },
-              isAuthenticated: true,
+              isAuthenticated: authenticated,
               isLoading: authLoading,
               bans: {},
             }),
@@ -348,6 +356,34 @@ test("inbox cache setters preserve pagination, realtime changes and sibling conv
     expect(
       failedTree.some((node) => node.props.children === "User not found."),
     ).toBe(true);
+
+    for (const [path, search] of [
+      ["/messages/them", ""],
+      ["/messages/group/123", ""],
+      ["/messages/dsadas", "?invite=CW4HDSYD"],
+      ["/messages/group/123", "?invite=CW4HDSYD&app=true"],
+    ]) {
+      pathname = path;
+      location.search = search;
+      authenticated = false;
+      authLoading = true;
+      render();
+      redirectEffect();
+      expect(redirects).toHaveLength(0);
+      authLoading = false;
+      authenticated = true;
+      render();
+      redirectEffect();
+      expect(redirects).toHaveLength(0);
+      authenticated = false;
+      render();
+      redirectEffect();
+      expect(redirects.splice(0)).toEqual([`/messages${search}`]);
+    }
+    pathname = "/messages";
+    render();
+    redirectEffect();
+    expect(redirects).toHaveLength(0);
   } finally {
     client.clear();
   }
