@@ -36,7 +36,7 @@ function SiteBanScreen() {
       <div className="relative z-10 mx-auto w-full max-w-6xl">
         <div className="mx-auto w-full max-w-lg lg:mx-0">
           <Image
-            src="/logos/h/JBCL_Halloween_Logo_Long-Form-Halloween.webp"
+            src="/logos/JBCL_Header.webp"
             alt="Jailbreak Changelogs"
             width={256}
             height={58}

@@ -12,7 +12,7 @@ const pageMetadata: Metadata = {
       "Jailbreak seasons are paused until further notice. Weekly season contracts are unavailable. Browse past seasons and their rewards.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -28,7 +28,7 @@ const pageMetadata: Metadata = {
     description:
       "Jailbreak seasons are paused until further notice. Weekly season contracts are unavailable. Browse past seasons and their rewards.",
     images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
     ],
   },
 };

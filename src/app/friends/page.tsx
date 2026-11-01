@@ -4,7 +4,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { FriendsPage } from "@/components/Users/Friends";
 
 const BANNER =
-  "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png";
+  "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png";
 
 export const metadata: Metadata = withDiscordEmbed(
   {

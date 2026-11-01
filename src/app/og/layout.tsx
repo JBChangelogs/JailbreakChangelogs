@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Find the OG items you traded away in Jailbreak and see who owns them now. Enter any Roblox username or ID to track where your originals ended up.",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
           width: 2400,
           height: 1260,
           alt: "Jailbreak Changelogs Banner",
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Find the OG items you traded away in Jailbreak and see who owns them now. Enter any Roblox username or ID to track where your originals ended up.",
       images: [
-        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
       ],
     },
   };

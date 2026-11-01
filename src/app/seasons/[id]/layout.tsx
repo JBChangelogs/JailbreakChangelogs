@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         siteName: "Jailbreak Changelogs",
         url: "https://jailbreakchangelogs.com/seasons",
         images: [
-          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
       twitter: {
@@ -104,7 +104,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Jailbreak Seasons",
         description: "Explore all seasons of Roblox Jailbreak.",
         images: [
-          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Halloween_Banner.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
     };
