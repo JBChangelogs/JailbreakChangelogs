@@ -14,40 +14,32 @@ import { getUserAvatar } from "@/utils/ui/images";
 import { TradeHistoryAvatar } from "./TradeHistoryList";
 import DupeComparisonLoading from "./DupeComparisonLoading";
 
-function CopySegment({
-  segment,
+function OwnerIdentity({
+  id,
   users,
+  nested = false,
 }: {
-  segment: CopyTreeSegment;
+  id: string;
   users: Record<string, RobloxUser>;
+  nested?: boolean;
 }) {
-  const holderIsLastHop =
-    segment.holder?.user_id === segment.hops.at(-1)?.user_id;
-  const holderDetails = segment.holder && (
-    <div className="text-secondary-text w-full space-y-1 pl-12 text-xs">
-      <p className="text-primary-text font-medium">Last recorded holder</p>
-      <p>
-        {segment.holder.last_seen === null
-          ? "Last seen date unavailable"
-          : `Last seen ${formatShortDateTime(segment.holder.last_seen)}`}
-      </p>
-    </div>
-  );
-  const owner = (id: string) => (
+  return (
     <a
       href={`https://www.roblox.com/users/${id}/profile`}
       target="_blank"
       rel="noopener noreferrer"
       className="text-link hover:text-link-hover flex min-w-0 items-center gap-2 wrap-anywhere"
     >
-      <span className="border-border-card bg-tertiary-bg size-10 shrink-0 overflow-hidden rounded-full border">
+      <span
+        className={`border-border-card size-10 shrink-0 overflow-hidden rounded-full border ${nested ? "bg-quaternary-bg" : "bg-tertiary-bg"}`}
+      >
         <TradeHistoryAvatar
           avatarUrl={getUserAvatar(id)}
           name={users[id]?.displayName || users[id]?.name || id}
         />
       </span>
       <span className="min-w-0">
-        <span className="block">
+        <span className="block font-medium">
           {users[id]?.displayName || users[id]?.name || id}
         </span>
         {users[id]?.name && (
@@ -58,29 +50,77 @@ function CopySegment({
       </span>
     </a>
   );
-  const hop = (entry: CopyTreeSegment["hops"][number], index: number) => (
-    <li
-      key={index}
-      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2 text-sm"
-    >
-      {owner(entry.user_id)}
-      <span className="text-secondary-text">
-        {formatShortDateTime(entry.trade_time)}
-      </span>
-      {holderIsLastHop && entry === segment.hops.at(-1) && holderDetails}
-    </li>
+}
+
+function CopySegment({
+  segment,
+  users,
+}: {
+  segment: CopyTreeSegment;
+  users: Record<string, RobloxUser>;
+}) {
+  if (segment.attached === "root" && segment.hops.length > 1) {
+    return (
+      <CopySegment
+        users={users}
+        segment={{
+          attached: "root",
+          hops: segment.hops.slice(0, 1),
+          split: false,
+          holder: null,
+          children: [
+            { ...segment, attached: "direct", hops: segment.hops.slice(1) },
+          ],
+        }}
+      />
+    );
+  }
+
+  const endpoint = segment.hops.at(-1);
+  const isRoot = segment.attached === "root";
+  const isCopy = !isRoot && !segment.split && segment.holder !== null;
+  const shownId = isCopy ? segment.holder!.user_id : endpoint?.user_id;
+  const previousOwners = segment.hops.slice(
+    0,
+    isCopy && shownId !== endpoint?.user_id ? undefined : -1,
   );
+  const directCopies = segment.split
+    ? segment.children.filter(
+        (child) =>
+          child.attached === "direct" &&
+          child.holder &&
+          !child.split &&
+          child.children.length === 0,
+      )
+    : [];
+  const branches = segment.children.filter(
+    (child) => !directCopies.includes(child),
+  );
+  const retainedCopy = segment.holder && !isCopy;
+  const copyCount = directCopies.length + (retainedCopy ? 1 : 0);
+  const now = Math.floor(Date.now() / 1000);
+  const lastSeen = segment.holder?.last_seen;
+  const recentIndicator = typeof lastSeen === "number" &&
+    lastSeen <= now &&
+    lastSeen >= now - 30 * 24 * 60 * 60 && (
+      <span
+        role="img"
+        aria-label="Seen in the last 30 days"
+        title="Seen in the last 30 days"
+        className="bg-status-success inline-block size-2 shrink-0 rounded-full"
+      />
+    );
 
   return (
     <li
       className={
-        segment.attached === "root"
+        isRoot
           ? "min-w-0"
-          : `before:border-border-card after:border-border-card relative min-w-0 pb-3 pl-3 before:absolute before:top-10 before:left-0 before:w-3 before:border-t-2 after:absolute after:inset-y-0 after:left-0 after:border-l-2 last:pb-0 last:after:bottom-auto last:after:h-10 sm:pl-5 sm:before:w-5 ${segment.attached === "gap" ? "before:border-dashed after:border-dashed" : "before:border-solid after:border-solid"}`
+          : `before:border-border-card after:border-border-card relative min-w-0 pb-3 pl-3 before:absolute before:top-8 before:left-0 before:w-3 before:border-t-2 after:absolute after:inset-y-0 after:left-0 after:border-l-2 last:pb-0 last:after:bottom-auto last:after:h-8 sm:pl-5 sm:before:w-5 ${segment.attached === "gap" ? "before:border-dashed after:border-dashed" : "before:border-solid after:border-solid"}`
       }
     >
       {segment.attached === "gap" && (
-        <div className="text-secondary-text mb-2 text-sm">
+        <div className="text-secondary-text mb-2 text-xs">
           <p className="font-semibold">Earlier trades not recorded</p>
           <p>
             This branch connects somewhere later in the history above, not at
@@ -88,41 +128,107 @@ function CopySegment({
           </p>
         </div>
       )}
-      <div className="bg-secondary-bg border-border-card rounded-lg border p-3">
-        {segment.hops.length > 2 ? (
-          <>
-            <ol>{segment.hops.slice(0, 1).map(hop)}</ol>
-            <details className="border-border-card border-y py-2 text-sm">
-              <summary className="text-secondary-text cursor-pointer">
-                Show {segment.hops.length - 2}{" "}
-                {segment.hops.length === 3
-                  ? "previous owner"
-                  : "previous owners"}
-              </summary>
-              <ol>{segment.hops.slice(1, -1).map(hop)}</ol>
-            </details>
-            <ol>{segment.hops.slice(-1).map(hop)}</ol>
-          </>
-        ) : (
-          <ol>{segment.hops.map(hop)}</ol>
+      <div
+        className={`rounded-lg border p-3 ${isRoot ? "border-border-focus bg-secondary-bg" : isCopy ? "border-border-card border-l-status-warning bg-tertiary-bg border-l-2" : "border-border-card bg-secondary-bg"}`}
+      >
+        {isRoot && (
+          <p className="text-primary-text mb-2 text-xs font-semibold">
+            Original owner
+          </p>
         )}
         {segment.split && (
-          <div className="border-border-card mt-2 border-t pt-3">
-            <span className="border-status-warning/30 bg-status-warning/10 text-status-warning inline-block rounded-md border px-2 py-1 text-xs font-semibold">
-              Dupe point · copies split here
-            </span>
+          <p className="text-status-warning mb-2 text-xs font-semibold">
+            Dupe point
+          </p>
+        )}
+        {shownId && (
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
+            <OwnerIdentity id={shownId} users={users} nested={isCopy} />
+            <div
+              className={`text-secondary-text text-xs sm:text-right ${isCopy ? "w-full sm:w-auto" : ""}`}
+            >
+              <p className="inline-flex items-center gap-1.5">
+                {isCopy && recentIndicator}
+                {isCopy
+                  ? "Last seen"
+                  : isRoot
+                    ? "Original owner since"
+                    : "History date"}
+              </p>
+              <p>
+                {isCopy
+                  ? segment.holder!.last_seen === null
+                    ? "Date unavailable"
+                    : formatShortDateTime(segment.holder!.last_seen)
+                  : endpoint
+                    ? formatShortDateTime(endpoint.trade_time)
+                    : "Date unavailable"}
+              </p>
+            </div>
           </div>
         )}
-        {segment.holder && !holderIsLastHop && (
-          <div className="border-border-card mt-2 space-y-1 border-t pt-3 text-sm">
-            {owner(segment.holder.user_id)}
-            {holderDetails}
+        {previousOwners.length > 0 && (
+          <details className="text-secondary-text mt-2 text-xs">
+            <summary className="cursor-pointer py-1">
+              Show {previousOwners.length}{" "}
+              {previousOwners.length === 1
+                ? "previous owner"
+                : "previous owners"}
+            </summary>
+            <ol className="border-border-card mt-2 space-y-2 border-t pt-2">
+              {previousOwners.map((entry, index) => (
+                <li
+                  key={index}
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm"
+                >
+                  <OwnerIdentity
+                    id={entry.user_id}
+                    users={users}
+                    nested={isCopy}
+                  />
+                  <span className="text-secondary-text text-xs">
+                    {formatShortDateTime(entry.trade_time)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
+        {retainedCopy && (
+          <div className="border-border-card text-secondary-text mt-2 border-t pt-2 text-xs">
+            {segment.holder!.user_id !== shownId && (
+              <OwnerIdentity id={segment.holder!.user_id} users={users} />
+            )}
+            <p className="mt-1">
+              Last recorded holder ·{" "}
+              {segment.split ? "kept a copy here" : "recorded copy"}
+            </p>
+            <p className="flex items-center gap-1.5">
+              {recentIndicator}
+              Last seen{" "}
+              {segment.holder!.last_seen === null
+                ? "date unavailable"
+                : formatShortDateTime(segment.holder!.last_seen)}
+            </p>
           </div>
+        )}
+        {copyCount > 0 && segment.split && (
+          <p className="text-secondary-text mt-3 text-xs">
+            {copyCount} recorded {copyCount === 1 ? "copy" : "copies"} from this
+            dupe point
+          </p>
+        )}
+        {directCopies.length > 0 && (
+          <ul className="mt-2" aria-label="Copies from this dupe point">
+            {directCopies.map((child, index) => (
+              <CopySegment key={index} segment={child} users={users} />
+            ))}
+          </ul>
         )}
       </div>
-      {segment.children.length > 0 && (
+      {branches.length > 0 && (
         <ul className="pt-3" aria-label="Dupe branches">
-          {segment.children.map((child, index) => (
+          {branches.map((child, index) => (
             <CopySegment key={index} segment={child} users={users} />
           ))}
         </ul>
@@ -154,6 +260,13 @@ export function CopyTree({
         <p className="text-secondary-text mt-1 text-sm">
           Solid lines connect recorded trades. Dashed lines mark missing earlier
           trades; their exact connection is unknown.
+        </p>
+        <p className="text-secondary-text mt-1 flex items-center gap-1.5 text-sm">
+          <span
+            aria-hidden="true"
+            className="bg-status-success size-2 shrink-0 rounded-full"
+          />
+          Seen in the last 30 days.
         </p>
       </div>
       <div className="overflow-x-auto pb-2">

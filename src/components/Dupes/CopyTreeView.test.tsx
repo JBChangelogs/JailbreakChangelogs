@@ -1,9 +1,10 @@
-import { afterEach, beforeEach, expect, test } from "bun:test";
+import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CopyTreeView, { CopyTree } from "./CopyTreeView";
 import DupeComparisonLoader from "./DupeComparisonLoader";
 import type { CopyTreeResponse, CopyTreeSegment } from "@/utils/api/copyTree";
+import { formatShortDateTime } from "@/utils/helpers/timestamp";
 
 const originalApiUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
 beforeEach(() => {
@@ -22,6 +23,55 @@ const branch = (overrides: Partial<CopyTreeSegment> = {}): CopyTreeSegment => ({
   holder: null,
   children: [],
   ...overrides,
+});
+
+test("marks holders seen in the past 30 days, including retained copies, without marking old, missing, or future dates", () => {
+  const now = 1793541678;
+  const clock = spyOn(Date, "now").mockReturnValue(now * 1000);
+  try {
+    for (const [lastSeen, recent] of [
+      [now, true],
+      [now - 30 * 24 * 60 * 60, true],
+      [now - 30 * 24 * 60 * 60 - 1, false],
+      [now + 1, false],
+      [null, false],
+    ] as const) {
+      for (const split of [false, true]) {
+        const markup = renderToStaticMarkup(
+          <CopyTree
+            users={{}}
+            tree={{
+              title: "Test",
+              copies: 1,
+              splits: split ? 1 : 0,
+              history_entries: 2,
+              roots: [
+                branch({
+                  attached: "root",
+                  children: [
+                    branch({
+                      split,
+                      holder: {
+                        user_id: "123",
+                        last_seen: lastSeen,
+                        duplicate: true,
+                      },
+                    }),
+                  ],
+                }),
+              ],
+            }}
+          />,
+        );
+        expect(
+          (markup.match(/aria-label="Seen in the last 30 days"/g) ?? []).length,
+        ).toBe(recent ? 1 : 0);
+        expect(markup).toContain("Seen in the last 30 days.");
+      }
+    }
+  } finally {
+    clock.mockRestore();
+  }
 });
 
 test("renders multiple roots, splits, gap uncertainty, and holders on branching segments", () => {
@@ -50,7 +100,7 @@ test("renders multiple roots, splits, gap uncertainty, and holders on branching 
   expect(markup).toContain("385 history entries");
   expect(markup).toContain("2 dupe points");
   expect(markup).toContain("each trade once");
-  expect(markup).toContain("Dupe point · copies split here");
+  expect(markup).toContain("Dupe point");
   expect(markup).toContain("Earlier trades not recorded");
   expect(markup).toContain("not at the point shown");
   expect(markup.match(/before:border-dashed/g)).toHaveLength(1);
@@ -58,7 +108,7 @@ test("renders multiple roots, splits, gap uncertainty, and holders on branching 
   expect(markup).toContain('href="https://www.roblox.com/users/456/profile"');
   expect(markup).toContain('href="https://www.roblox.com/users/789/profile"');
   expect(markup).toContain("Last seen date unavailable");
-  expect(markup.match(/Last recorded holder/g)).toHaveLength(2);
+  expect(markup).toContain("Last seen");
 });
 
 test("shows matching holders once at the final trade, including when they keep a copy at a split", () => {
@@ -98,23 +148,17 @@ test("shows matching holders once at the final trade, including when they keep a
     ).toHaveLength(1);
     expect(markup.match(new RegExp(`alt="${id}"`, "g"))).toHaveLength(1);
   }
-  expect(markup.match(/Last recorded holder/g)).toHaveLength(2);
-  expect(markup).toContain("Last seen date unavailable");
+  expect(markup).toContain("kept a copy here");
+  expect(markup).toContain("Date unavailable");
   expect(markup).toContain("Last seen Nov");
-  expect(markup).toContain("text-status-warning");
+  expect(markup).toContain("Original owner");
+  expect(markup).toContain("2 recorded copies from this dupe point");
+  expect(markup).toContain('aria-label="Copies from this dupe point"');
   expect(markup).toContain("before:border-t-2");
   expect(markup).toContain("after:border-l-2");
-  const holderRow = markup.slice(
-    markup.indexOf('href="https://www.roblox.com/users/3/profile"'),
-    markup.indexOf(
-      "</li>",
-      markup.indexOf('href="https://www.roblox.com/users/3/profile"'),
-    ),
-  );
-  expect(holderRow).toContain("Last recorded holder");
 });
 
-test("collapses runs of three or four entries and keeps one or two entries visible", () => {
+test("compact copy rows show the holder and keep every earlier owner expandable", () => {
   for (const length of [1, 2, 3, 4]) {
     const markup = renderToStaticMarkup(
       <CopyTree
@@ -127,22 +171,90 @@ test("collapses runs of three or four entries and keeps one or two entries visib
           roots: [
             branch({
               attached: "root",
-              hops: Array.from({ length }, (_, index) => ({
-                user_id: String(index),
-                trade_time: 1699862400 + index,
-              })),
+              children: [
+                branch({
+                  hops: Array.from({ length }, (_, index) => ({
+                    user_id: String(index),
+                    trade_time: 1699862400 + index,
+                  })),
+                  holder: {
+                    user_id: String(length - 1),
+                    last_seen: 1699862500,
+                    duplicate: true,
+                  },
+                }),
+              ],
             }),
           ],
         }}
       />,
     );
-    expect(markup.includes("<details")).toBe(length > 2);
-    if (length > 2) {
+    expect(markup.includes("<details")).toBe(length > 1);
+    if (length > 1) {
       expect(markup).toContain(
-        `Show ${length - 2} ${length === 3 ? "previous owner" : "previous owners"}`,
+        `Show ${length - 1} ${length === 2 ? "previous owner" : "previous owners"}`,
       );
     }
   }
+});
+
+test("groups direct copies under their dupe point without grouping later splits or gap branches there", () => {
+  const copy = (id: string) =>
+    branch({
+      hops: [{ user_id: id, trade_time: 1699862400 }],
+      holder: { user_id: id, last_seen: 1764882136, duplicate: true },
+    });
+  const markup = renderToStaticMarkup(
+    <CopyTree
+      users={{}}
+      tree={{
+        title: "Test",
+        copies: 5,
+        splits: 2,
+        history_entries: 8,
+        roots: [
+          branch({
+            attached: "root",
+            children: [
+              branch({
+                split: true,
+                children: [
+                  copy("1"),
+                  copy("2"),
+                  branch({ split: true, children: [copy("3"), copy("4")] }),
+                  { ...copy("5"), attached: "gap" },
+                ],
+              }),
+            ],
+          }),
+        ],
+      }}
+    />,
+  );
+  const groups = markup.match(
+    /<ul class="mt-2" aria-label="Copies from this dupe point">[\s\S]*?<\/ul>/g,
+  )!;
+  expect(groups).toHaveLength(2);
+  for (const id of [1, 2])
+    expect(groups[0]).toContain(
+      `href="https://www.roblox.com/users/${id}/profile"`,
+    );
+  for (const id of [3, 4, 5])
+    expect(groups[0]).not.toContain(
+      `href="https://www.roblox.com/users/${id}/profile"`,
+    );
+  for (const id of [3, 4])
+    expect(groups[1]).toContain(
+      `href="https://www.roblox.com/users/${id}/profile"`,
+    );
+  expect(groups[1]).not.toContain(
+    'href="https://www.roblox.com/users/5/profile"',
+  );
+  expect(markup).toContain('href="https://www.roblox.com/users/5/profile"');
+  expect(markup).toContain("Earlier trades not recorded");
+  expect(markup.match(/2 recorded copies from this dupe point/g)).toHaveLength(
+    2,
+  );
 });
 
 test("shows display names above @usernames, avatars, and Roblox profile links", () => {
@@ -200,7 +312,7 @@ test("shows display names above @usernames, avatars, and Roblox profile links", 
   expect(markup).not.toContain("/inventories/");
 });
 
-test("collapses long runs while keeping both endpoints and every intermediate entry", () => {
+test("shows only the holder by default while preserving all previous owners and their dates", () => {
   const markup = renderToStaticMarkup(
     <CopyTree
       users={{}}
@@ -212,25 +324,36 @@ test("collapses long runs while keeping both endpoints and every intermediate en
         roots: [
           branch({
             attached: "root",
-            hops: Array.from({ length: 6 }, (_, index) => ({
-              user_id: String(index + 1),
-              trade_time: 1699862400 + index,
-            })),
+            children: [
+              branch({
+                hops: Array.from({ length: 6 }, (_, index) => ({
+                  user_id: String(index + 1),
+                  trade_time: 1699862400 + index,
+                })),
+                holder: {
+                  user_id: "6",
+                  last_seen: 1764882136,
+                  duplicate: true,
+                },
+              }),
+            ],
           }),
         ],
       }}
     />,
   );
-  expect(markup).toContain("Show 4 previous owners");
+  expect(markup).toContain("Show 5 previous owners");
   const start = markup.indexOf("<details");
   const end = markup.indexOf("</details>");
   expect(markup.slice(0, start)).toContain(
-    'href="https://www.roblox.com/users/1/profile"',
-  );
-  expect(markup.slice(end)).toContain(
     'href="https://www.roblox.com/users/6/profile"',
   );
-  for (const id of [2, 3, 4, 5]) {
+  expect(markup.slice(0, start)).not.toContain(
+    'href="https://www.roblox.com/users/1/profile"',
+  );
+  expect(markup).toContain("Last seen");
+  expect(markup).toContain(formatShortDateTime(1764882136));
+  for (const id of [1, 2, 3, 4, 5]) {
     expect(markup.slice(start, end)).toContain(
       `href="https://www.roblox.com/users/${id}/profile"`,
     );
