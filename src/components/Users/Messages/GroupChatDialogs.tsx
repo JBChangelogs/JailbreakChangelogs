@@ -61,7 +61,6 @@ export function AppDialog({
   description,
   children,
   footer,
-  footerClassName,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -69,7 +68,6 @@ export function AppDialog({
   description?: ReactNode;
   children?: ReactNode;
   footer: ReactNode;
-  footerClassName?: string;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -83,12 +81,7 @@ export function AppDialog({
           )}
         </div>
         {children && <div className="space-y-3 px-5 py-4">{children}</div>}
-        <div
-          className={cn(
-            "border-border-primary mt-1 flex shrink-0 items-center justify-end gap-2 border-t px-5 py-4",
-            footerClassName,
-          )}
-        >
+        <div className="mt-1 flex shrink-0 items-center justify-end gap-2 px-5 py-4">
           {footer}
         </div>
       </DialogContent>
@@ -266,7 +259,7 @@ export function UserPickerDialog({
         <div
           aria-hidden={!showGroupName}
           className={cn(
-            "border-border-primary grid shrink-0 border-t transition-[grid-template-rows,opacity] duration-200 ease-out",
+            "grid shrink-0 transition-[grid-template-rows,opacity] duration-200 ease-out",
             showGroupName
               ? "grid-rows-[1fr] opacity-100"
               : "grid-rows-[0fr] opacity-0",
@@ -382,7 +375,7 @@ export function RenameGroupDialog({
         maxLength={GROUP_NAME_MAX}
         placeholder="Group name"
         aria-label="Group name"
-        className={INPUT}
+        className={cn(INPUT, "bg-tertiary-bg")}
       />
       {error && (
         <p role="alert" className="text-form-error text-xs">

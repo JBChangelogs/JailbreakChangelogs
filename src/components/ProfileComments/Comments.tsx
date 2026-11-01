@@ -210,7 +210,7 @@ function ProfileReactionsDialog({
           </div>
         </div>
 
-        <div className="border-border-card border-t px-4 py-3">
+        <div className="px-4 py-3">
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="ghost" size="sm">

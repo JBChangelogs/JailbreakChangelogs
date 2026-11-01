@@ -80,7 +80,7 @@ export function SuggestionGuidelinesDialog({
           </div>
         </div>
 
-        <div className="border-border-card flex shrink-0 items-center justify-center border-t px-6 py-4 sm:justify-end">
+        <div className="flex shrink-0 items-center justify-center px-6 py-4 sm:justify-end">
           <Button onClick={onConfirm} size="sm">
             I Understand
           </Button>

@@ -71,7 +71,6 @@ export function GroupInviteDialog({
       open
       onOpenChange={(open) => !open && onClose()}
       title="Invite link"
-      footerClassName="border-t-0"
       description="Links expire after 7 days. Resetting disables the previous link."
       footer={
         <>

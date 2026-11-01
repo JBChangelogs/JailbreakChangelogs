@@ -1125,7 +1125,7 @@ export function SuggestionForm({
           </div>
 
           {/* Sticky footer */}
-          <div className="border-border-card shrink-0 border-t px-6 py-4">
+          <div className="shrink-0 px-6 py-4">
             <div className="flex justify-end gap-2">
               <DialogClose asChild>
                 <Button variant="ghost" size="sm" disabled={submitting}>

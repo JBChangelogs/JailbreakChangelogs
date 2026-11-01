@@ -186,7 +186,7 @@ export default function LatestReleaseDialogClient({
             />
           </div>
 
-          <DialogFooter className="border-border-card shrink-0 gap-2 border-t px-6 py-4 sm:items-center">
+          <DialogFooter className="shrink-0 gap-2 px-6 py-4 sm:items-center">
             <Link
               href="/dev/changelogs"
               onClick={dismiss}
