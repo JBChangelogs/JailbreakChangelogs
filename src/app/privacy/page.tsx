@@ -24,7 +24,7 @@ export default function PrivacyPage() {
     <LegalLayout
       title="Privacy Policy"
       icon="heroicons-outline:shield-check"
-      lastUpdated="August 27th, 2026"
+      lastUpdated="November 1st, 2026"
       toc={TOC}
       intro={
         <p>
@@ -149,6 +149,12 @@ export default function PrivacyPage() {
           session. This allows us to understand how our registered members
           interact with specific features. This data is stored securely on our
           private servers and is never sold or shared.
+        </p>
+        <p>
+          We use a first-party device cookie and, for logged-in users, device
+          signals to recognize devices and help detect alternate accounts and
+          abuse. This information is stored on our private servers and is never
+          sold or shared with third parties.
         </p>
       </LegalSection>
 

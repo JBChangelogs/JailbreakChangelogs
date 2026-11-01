@@ -19,6 +19,7 @@ import { AuthState, UserData } from "@/types/auth";
 import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
 import { getJbclToken } from "@/utils/auth/sessionToken";
 import { loginWithToken } from "@/utils/auth/login";
+import { reportHardwareOnce } from "@/utils/auth/hardware";
 export { getJbclToken } from "@/utils/auth/sessionToken";
 import {
   safeGetJSON,
@@ -146,6 +147,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
   const isUserActiveRef = useRef(true);
+
+  useEffect(() => {
+    if (authState.isAuthenticated && authState.user?.id) {
+      void reportHardwareOnce(authState.user.id);
+    }
+  }, [authState.isAuthenticated, authState.user?.id]);
 
   useEffect(() => {
     const unsubscribe = subscribeSiteBan(setSiteBan);
