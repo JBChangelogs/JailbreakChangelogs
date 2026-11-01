@@ -62,21 +62,11 @@ import { UserData } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("INVENTORY");
-const MoneyHistoryChart = dynamic(
-  () => import("@/components/Inventory/MoneyHistoryChart"),
+const InventoryHistoryChart = dynamic(
+  () => import("@/components/Inventory/InventoryHistoryChart"),
   {
     loading: () => (
-      <div className="h-100" role="status" aria-label="Loading money chart">
-        <Spinner />
-      </div>
-    ),
-  },
-);
-const NetworthHistoryChart = dynamic(
-  () => import("@/components/Inventory/NetworthHistoryChart"),
-  {
-    loading: () => (
-      <div className="h-100" role="status" aria-label="Loading networth chart">
+      <div className="h-100" role="status" aria-label="Loading history chart">
         <Spinner />
       </div>
     ),
@@ -89,8 +79,7 @@ import UserTradeHistory from "@/components/Inventory/UserTradeHistory";
 const MemoInventoryItems = React.memo(InventoryItems);
 const MemoDuplicatesTab = React.memo(DuplicatesTab);
 const MemoDupedItemsTab = React.memo(DupedItemsTab);
-const MemoNetworthHistoryChart = React.memo(NetworthHistoryChart);
-const MemoMoneyHistoryChart = React.memo(MoneyHistoryChart);
+const MemoInventoryHistoryChart = React.memo(InventoryHistoryChart);
 const MemoInventoryBreakdown = React.memo(InventoryBreakdown, (prev, next) => {
   const keys = (Object.keys(next) as Array<keyof typeof next>).filter(
     (k) => k !== "isActive",
@@ -1179,29 +1168,11 @@ export default function InventoryCheckerClient({
                           effectiveActiveTab === tabIndex.graphs ? "" : "hidden"
                         }
                       >
-                        <div className="space-y-6">
-                          <div className="space-y-3">
-                            <h4 className="text-primary-text text-sm font-semibold">
-                              Networth Graph
-                            </h4>
-                            <MemoNetworthHistoryChart
-                              userId={robloxId}
-                              initialData={networthData}
-                              isActive={effectiveActiveTab === tabIndex.graphs}
-                            />
-                          </div>
-
-                          <div className="space-y-3">
-                            <h4 className="text-primary-text text-sm font-semibold">
-                              Money Graph
-                            </h4>
-                            <MemoMoneyHistoryChart
-                              userId={robloxId}
-                              initialData={moneyHistoryData}
-                              isActive={effectiveActiveTab === tabIndex.graphs}
-                            />
-                          </div>
-                        </div>
+                        <MemoInventoryHistoryChart
+                          networthData={networthData}
+                          moneyData={moneyHistoryData}
+                          isActive={effectiveActiveTab === tabIndex.graphs}
+                        />
                       </div>
                     )}
 

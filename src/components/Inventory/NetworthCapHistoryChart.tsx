@@ -12,19 +12,11 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/ui/chart";
 import {
   fetchNetworthCap,
@@ -32,6 +24,12 @@ import {
   NetworthCapSnapshot,
 } from "@/utils/api/api";
 import { formatMonthDayYear } from "@/utils/helpers/timestamp";
+import {
+  formatShortDate,
+  formatValue,
+  getYAxis,
+  Sparkline,
+} from "@/components/Inventory/chartParts";
 
 type DateRange = "7" | "14" | "30";
 
@@ -44,60 +42,6 @@ const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
 const NETWORTH_COLOR = "#8b5cf6";
 const AVG_COLOR = "#06b6d4";
 const DUPED_COLOR = "#f59e0b";
-
-const chartConfig = {
-  total_networth: { label: "Total Networth", color: NETWORTH_COLOR },
-} satisfies ChartConfig;
-
-// Matches the API's *_str style (1.94T, 161.41B) without trailing zeros
-const formatValue = (value: number) => {
-  const scaled = (divisor: number, suffix: string) =>
-    `${Number((value / divisor).toFixed(2))}${suffix}`;
-  if (value >= 1_000_000_000_000) return scaled(1_000_000_000_000, "T");
-  if (value >= 1_000_000_000) return scaled(1_000_000_000, "B");
-  if (value >= 1_000_000) return scaled(1_000_000, "M");
-  if (value >= 1_000) return scaled(1_000, "K");
-  return value.toString();
-};
-
-const formatShortDate = (ts: number) =>
-  new Date(ts).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
-
-const getNiceStep = (rangeValue: number, targetTicks = 6) => {
-  if (rangeValue <= 0) return 1;
-  const roughStep = rangeValue / (targetTicks - 1);
-  const magnitude = 10 ** Math.floor(Math.log10(roughStep));
-  const fraction = roughStep / magnitude;
-  let niceFraction = 1;
-  if (fraction <= 1) niceFraction = 1;
-  else if (fraction <= 2) niceFraction = 2;
-  else if (fraction <= 5) niceFraction = 5;
-  else niceFraction = 10;
-  return niceFraction * magnitude;
-};
-
-const getYAxisDomain = (values: number[]): [number, number, number] => {
-  if (values.length === 0) return [0, 1, 1];
-  const finite = values.filter(Number.isFinite);
-  if (finite.length === 0) return [0, 1, 1];
-  const rawMin = Math.min(...finite);
-  const rawMax = Math.max(...finite);
-  const baseMin = Math.max(0, rawMin);
-  const baseMax = Math.max(baseMin, rawMax);
-  const baseRange = Math.max(baseMax - baseMin, baseMax * 0.01, 1);
-  const padding = baseRange * 0.08;
-  const paddedMin = Math.max(0, baseMin - padding);
-  const paddedMax = baseMax + padding;
-  const step = getNiceStep(paddedMax - paddedMin);
-  const axisMin = Math.floor(paddedMin / step) * step;
-  const axisMax = Math.ceil(paddedMax / step) * step;
-  if (axisMax <= axisMin)
-    return [Math.max(0, axisMin - step), axisMin + step, step];
-  return [axisMin, axisMax, step];
-};
 
 const filterByDays = (data: NetworthCapSnapshot[], days: number) => {
   const cutoff = Date.now() / 1000 - days * 86400;
@@ -156,32 +100,6 @@ function TrendChip({
   );
 }
 
-function Sparkline({ values, color }: { values: number[]; color: string }) {
-  const data = values.map((v, i) => ({ i, v }));
-  return (
-    <div className="h-8" aria-hidden="true">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={data}
-          margin={{ top: 2, bottom: 2, left: 0, right: 0 }}
-        >
-          <YAxis hide domain={["dataMin", "dataMax"]} />
-          <Area
-            type="monotone"
-            dataKey="v"
-            stroke={color}
-            strokeWidth={1.5}
-            fill={color}
-            fillOpacity={0.12}
-            dot={false}
-            isAnimationActive={false}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
 function SnapshotTile({
   label,
   value,
@@ -192,6 +110,8 @@ function SnapshotTile({
   upIsBad,
   spark,
   rangeDays,
+  isSelected,
+  onSelect,
 }: {
   label: string;
   value?: string | number;
@@ -202,23 +122,34 @@ function SnapshotTile({
   upIsBad?: boolean;
   spark: number[];
   rangeDays: string;
+  isSelected: boolean;
+  onSelect: () => void;
 }) {
   return (
-    <div className="border-border-card bg-tertiary-bg flex gap-3 rounded-lg border p-3">
+    <button
+      type="button"
+      aria-pressed={isSelected}
+      onClick={onSelect}
+      className={`bg-tertiary-bg flex cursor-pointer gap-3 rounded-lg border p-3 text-left transition-colors ${
+        isSelected
+          ? "border-border-focus"
+          : "border-border-card hover:border-border-focus/60"
+      }`}
+    >
       <span
         className="w-1 shrink-0 rounded-full"
         style={{ backgroundColor: accentColor }}
         aria-hidden="true"
       />
-      <div className="min-w-0 flex-1">
-        <p className="text-secondary-text text-xs font-medium uppercase">
+      <span className="min-w-0 flex-1">
+        <span className="text-secondary-text block text-xs font-medium uppercase">
           {label}
-        </p>
+        </span>
         {isLoading ? (
           <Skeleton className="mt-1 h-5 w-20" />
         ) : (
-          <div className="flex items-baseline justify-between gap-2">
-            <p className="text-primary-text truncate font-mono text-lg font-semibold tabular-nums">
+          <span className="flex items-baseline justify-between gap-2">
+            <span className="text-primary-text truncate font-mono text-lg font-semibold tabular-nums">
               {typeof value === "number"
                 ? value.toLocaleString()
                 : (value ?? "???")}
@@ -227,22 +158,26 @@ function SnapshotTile({
                   {note}
                 </span>
               )}
-            </p>
+            </span>
             <TrendChip trend={trend} upIsBad={upIsBad} rangeDays={rangeDays} />
-          </div>
+          </span>
         )}
         {spark.length > 1 && (
-          <div className="mt-1">
-            <Sparkline values={spark} color={accentColor} />
-          </div>
+          <span className="mt-1 block">
+            <Sparkline
+              data={spark.map((v, x) => ({ x, v }))}
+              color={accentColor}
+            />
+          </span>
         )}
-      </div>
-    </div>
+      </span>
+    </button>
   );
 }
 
 export default function NetworthCapHistoryChart() {
   const [dateRange, setDateRange] = useState<DateRange>("30");
+  const [selected, setSelected] = useState("Total Networth");
   const isSmallScreen = useMediaQuery("(max-width: 639px)");
   const chartId = useId().replace(/:/g, "");
   const networthGradientId = `fill-networth-cap-${chartId}`;
@@ -306,33 +241,24 @@ export default function NetworthCapHistoryChart() {
 
   // Total networth tracks how many inventories were scanned, so the
   // per-inventory average is what shows whether values actually moved
-  const avgValues = chartData
-    .filter((d) => d.total_inventories > 0)
-    .map((d) => d.total_networth / d.total_inventories);
-  const inventoryValues = chartData.map((d) => d.total_inventories);
-  const networthValues = chartData.map((d) => d.total_networth);
-  const dupedValues = chartData.map((d) => d.total_duped_networth);
-
-  const [yMin, yMax, yStep] = hasChartData
-    ? getYAxisDomain(networthValues)
-    : [0, 1, 1];
-  const yTicks = Array.from(
-    { length: Math.round((yMax - yMin) / yStep) + 1 },
-    (_, i) => yMin + i * yStep,
-  );
+  type Row = (typeof chartData)[number];
+  const valuesOf = (get: (d: Row) => number | null) =>
+    chartData.map(get).filter((v): v is number => v !== null);
 
   const tiles = [
     {
       label: "Inventories",
       value: capStats?.total_inventories,
       accentColor: "var(--color-button-info)",
-      spark: inventoryValues,
+      get: (d: Row) => d.total_inventories,
+      format: (v: number) => Math.round(v).toLocaleString(),
     },
     {
       label: "Total Networth",
       value: capStats?.total_networth_str,
       accentColor: NETWORTH_COLOR,
-      spark: networthValues,
+      get: (d: Row) => d.total_networth,
+      format: formatValue,
     },
     {
       label: "Avg per Inventory",
@@ -342,13 +268,16 @@ export default function NetworthCapHistoryChart() {
           )
         : undefined,
       accentColor: AVG_COLOR,
-      spark: avgValues,
+      get: (d: Row) =>
+        d.total_inventories > 0 ? d.total_networth / d.total_inventories : null,
+      format: (v: number) => formatValue(Math.round(v)),
     },
     {
       label: "Duped Networth",
       value: capStats?.total_duped_networth_str,
       accentColor: DUPED_COLOR,
-      spark: dupedValues,
+      get: (d: Row) => d.total_duped_networth,
+      format: formatValue,
       upIsBad: true,
       note:
         capStats?.duplicates_percentage !== undefined
@@ -356,6 +285,10 @@ export default function NetworthCapHistoryChart() {
           : undefined,
     },
   ];
+
+  const active = tiles.find((t) => t.label === selected) ?? tiles[1];
+  const activeData = chartData.map((d) => ({ ...d, v: active.get(d) }));
+  const yAxis = getYAxis(valuesOf(active.get));
 
   const currentLabel =
     DATE_RANGE_OPTIONS.find((o) => o.value === dateRange)?.label ??
@@ -406,15 +339,21 @@ export default function NetworthCapHistoryChart() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {tiles.map((tile) => (
-          <SnapshotTile
-            key={tile.label}
-            {...tile}
-            isLoading={isCapStatsLoading}
-            trend={getTrendSummary(tile.spark)}
-            rangeDays={dateRange}
-          />
-        ))}
+        {tiles.map(({ get, format: _format, ...tile }) => {
+          const spark = valuesOf(get);
+          return (
+            <SnapshotTile
+              key={tile.label}
+              {...tile}
+              spark={spark}
+              isLoading={isCapStatsLoading}
+              trend={getTrendSummary(spark)}
+              rangeDays={dateRange}
+              isSelected={tile.label === active.label}
+              onSelect={() => setSelected(tile.label)}
+            />
+          );
+        })}
       </div>
 
       {!hasChartData ? (
@@ -435,10 +374,13 @@ export default function NetworthCapHistoryChart() {
         </div>
       ) : (
         <div className="h-64">
-          <ChartContainer config={chartConfig} className="h-full w-full">
+          <ChartContainer
+            config={{ v: { label: active.label, color: active.accentColor } }}
+            className="h-full w-full"
+          >
             <AreaChart
               accessibilityLayer
-              data={chartData}
+              data={activeData}
               margin={{ left: 6, right: 6 }}
             >
               <defs>
@@ -451,12 +393,12 @@ export default function NetworthCapHistoryChart() {
                 >
                   <stop
                     offset="5%"
-                    stopColor="var(--color-total_networth)"
+                    stopColor={active.accentColor}
                     stopOpacity={0.45}
                   />
                   <stop
                     offset="95%"
-                    stopColor="var(--color-total_networth)"
+                    stopColor={active.accentColor}
                     stopOpacity={0.04}
                   />
                 </linearGradient>
@@ -483,14 +425,14 @@ export default function NetworthCapHistoryChart() {
                 axisLine={false}
                 tickMargin={isSmallScreen ? 0 : 8}
                 width={isSmallScreen ? 0 : 56}
-                domain={[yMin, yMax]}
-                ticks={yTicks}
+                domain={yAxis.domain}
+                ticks={yAxis.ticks}
                 tick={
                   isSmallScreen
                     ? false
                     : { fill: "var(--color-secondary-text)", fontSize: 12 }
                 }
-                tickFormatter={(v: number) => formatValue(Number(v))}
+                tickFormatter={(v: number) => active.format(Number(v))}
               />
               <ChartTooltip
                 cursor={false}
@@ -502,12 +444,12 @@ export default function NetworthCapHistoryChart() {
                         <span className="text-secondary-text flex items-center gap-2">
                           <span
                             className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                            style={{ backgroundColor: NETWORTH_COLOR }}
+                            style={{ backgroundColor: active.accentColor }}
                           />
-                          Total Networth
+                          {active.label}
                         </span>
                         <span className="text-primary-text font-mono font-semibold tabular-nums">
-                          {value == null ? "N/A" : formatValue(Number(value))}
+                          {value == null ? "N/A" : active.format(Number(value))}
                         </span>
                       </div>
                     )}
@@ -531,11 +473,11 @@ export default function NetworthCapHistoryChart() {
               />
               <Area
                 type="monotone"
-                dataKey="total_networth"
-                name="Total Networth"
+                dataKey="v"
+                name={active.label}
                 fill={`url(#${networthGradientId})`}
                 fillOpacity={1}
-                stroke="var(--color-total_networth)"
+                stroke={active.accentColor}
                 strokeWidth={3}
                 dot={({ cx, cy, index, payload }) =>
                   payload?.isLive ? (
@@ -544,7 +486,7 @@ export default function NetworthCapHistoryChart() {
                       cx={cx}
                       cy={cy}
                       r={4}
-                      fill="var(--color-total_networth)"
+                      fill={active.accentColor}
                       stroke="var(--color-secondary-bg)"
                       strokeWidth={2}
                     />
@@ -556,7 +498,7 @@ export default function NetworthCapHistoryChart() {
                 activeDot={{
                   r: 5,
                   fill: "var(--color-secondary-bg)",
-                  stroke: "var(--color-total_networth)",
+                  stroke: active.accentColor,
                   strokeWidth: 2,
                 }}
               />
