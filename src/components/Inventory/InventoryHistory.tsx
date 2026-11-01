@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type {
   HistoricalInventoryItem,
@@ -172,6 +172,8 @@ export default function InventoryHistory({
   onDateChange?: (date: string) => void;
 }) {
   const [date, setDate] = useState("");
+  const dateTriggerRef = useRef<HTMLButtonElement>(null);
+  const restoreDateFocusRef = useRef(false);
   const catalogQuery = useCatalogValues(Boolean(date));
   const catalogById = new Map(
     (catalogQuery.data ?? []).map((item) => [item.id, item]),
@@ -264,8 +266,8 @@ export default function InventoryHistory({
 
   return (
     <div className="space-y-4">
-      {!date && preview}
-      <section className="border-border-card bg-secondary-bg rounded-lg border p-4 sm:p-6">
+      {preview}
+      <section className="border-border-card bg-secondary-bg min-h-dvh rounded-lg border p-4 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-primary-text text-xl font-semibold">
             Inventory Items
@@ -280,6 +282,7 @@ export default function InventoryHistory({
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button
+                  ref={dateTriggerRef}
                   type="button"
                   variant="ghost"
                   aria-label="Inventory date (UTC)"
@@ -298,6 +301,12 @@ export default function InventoryHistory({
               <PopoverContent
                 align="end"
                 collisionPadding={16}
+                onCloseAutoFocus={(event) => {
+                  if (!restoreDateFocusRef.current) return;
+                  event.preventDefault();
+                  restoreDateFocusRef.current = false;
+                  dateTriggerRef.current?.focus({ preventScroll: true });
+                }}
                 className="border-border-card bg-secondary-bg w-auto p-0"
               >
                 <Calendar
@@ -306,6 +315,7 @@ export default function InventoryHistory({
                   defaultMonth={date ? new Date(`${date}T00:00:00`) : undefined}
                   onSelect={(day) => {
                     if (!day) return;
+                    restoreDateFocusRef.current = true;
                     changeDate(format(day, "yyyy-MM-dd"));
                     setIsDatePickerOpen(false);
                   }}

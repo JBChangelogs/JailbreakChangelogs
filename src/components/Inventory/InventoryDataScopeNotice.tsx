@@ -12,9 +12,9 @@ export default function InventoryDataScopeNotice({
         {historical ? "Historical inventory items" : "Latest available data"}
       </p>
       <p className="mt-1">
-        {historical
-          ? "The selected date applies only to inventory items and their trade histories. Profile, stats, other tabs, market values and current owner lookups use the latest available data."
-          : "This view uses the latest available data. Snapshot dates apply only to Inventory Items and their trade histories."}
+        Inventory dates filter only items and their trade histories. Profile,
+        stats, other tabs, market values and current owner lookups always use
+        the latest available data.
       </p>
     </div>
   );

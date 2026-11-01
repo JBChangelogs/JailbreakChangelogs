@@ -30,6 +30,8 @@ interface Node {
     transfers?: typeof item.history;
     historyDate?: string;
     onClose?: () => void;
+    onCloseAutoFocus?: (event: { preventDefault: () => void }) => void;
+    ref?: { current: { focus: (options: FocusOptions) => void } | null };
     data?: { cash_value?: string | null };
   };
 }
@@ -85,6 +87,12 @@ function setup() {
         if (id === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (id === "react")
           return {
+            useRef: (initial: unknown) => {
+              const index = active.cursor++;
+              if (!(index in active.state))
+                active.state[index] = { current: initial };
+              return active.state[index];
+            },
             useState: (initial: unknown) => {
               const instance = active;
               const index = instance.cursor++;
@@ -230,7 +238,7 @@ test("date selection uses UTC snapshots, ignores stale requests, and restores la
   expect(nodes(view).some((node) => node.type === "inventory-skeleton")).toBe(
     true,
   );
-  expect(content(view)).not.toContain("Inventory preview");
+  expect(content(view)).toContain("Inventory preview");
   expect(content(view)).not.toContain("Latest inventory");
   const calendarMonth = nodes(view).find((node) => node.type === "calendar")!
     .props.defaultMonth!;
@@ -480,7 +488,42 @@ test("both data scope notices use the same visible banner", () => {
   }
   expect(historical).toContain("Historical inventory items");
   expect(historical).toContain(
-    "Profile, stats, other tabs, market values and current owner lookups",
+    "stats, other tabs, market values and current owner lookups",
   );
   expect(latest).toContain("Latest available data");
+});
+
+test("date changes keep the preview mounted and restore calendar focus without scrolling", () => {
+  const { runner, select } = setup();
+  const page = runner();
+  let view = page.render();
+  const focusCalls: FocusOptions[] = [];
+  expect(
+    nodes(view).find((node) => node.type === "section")!.props.className,
+  ).toContain("min-h-dvh");
+  const trigger = nodes(view).find((node) => node.props.ref)!;
+  trigger.props.ref!.current = { focus: (options) => focusCalls.push(options) };
+  let prevented = 0;
+  const close = () =>
+    nodes(view).find((node) => node.type === "popover-content")!.props
+      .onCloseAutoFocus!({
+      preventDefault: () => {
+        prevented++;
+      },
+    });
+  close();
+  expect(focusCalls).toHaveLength(0);
+  select(view, "2026-10-31");
+  view = page.render();
+  expect(content(view)).toContain("Inventory preview");
+  close();
+  expect(prevented).toBe(1);
+  expect(focusCalls).toEqual([{ preventScroll: true }]);
+  close();
+  expect(focusCalls).toHaveLength(1);
+  nodes(view).find(
+    (node) =>
+      node.type === "button" && content(node).includes("Back to latest"),
+  )!.props.onClick!();
+  expect(content(page.render())).toContain("Inventory preview");
 });
