@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/chart";
 import {
   formatShortDate,
+  getTimeAxis,
   formatValue,
   getYAxis,
   Sparkline,
@@ -202,6 +203,7 @@ export default function InventoryHistoryChart({
   const chartData = sliceRange(active.series, cutoff, now);
   const yAxis = getYAxis(chartData.map((p) => p.v));
   const lastScan = active.series[active.series.length - 1];
+  const xAxis = getTimeAxis(cutoff ?? chartData[0]?.t ?? now, now);
   const noScansInRange = cutoff !== null && lastScan.t < cutoff;
 
   return (
@@ -344,14 +346,15 @@ export default function InventoryHistoryChart({
                 dataKey="t"
                 type="number"
                 scale="time"
-                domain={[cutoff ?? "dataMin", now]}
+                domain={xAxis.domain}
+                ticks={xAxis.ticks}
                 allowDataOverflow
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
                 minTickGap={48}
                 tick={{ fill: "var(--color-secondary-text)", fontSize: 12 }}
-                tickFormatter={(v: number) => formatShortDate(Number(v))}
+                tickFormatter={(v: number) => xAxis.format(Number(v))}
               />
               <YAxis
                 tickLine={false}

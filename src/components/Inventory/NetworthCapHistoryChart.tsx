@@ -239,8 +239,6 @@ export default function NetworthCapHistoryChart() {
 
   const hasChartData = chartData.length > 0;
 
-  // Total networth tracks how many inventories were scanned, so the
-  // per-inventory average is what shows whether values actually moved
   type Row = (typeof chartData)[number];
   const valuesOf = (get: (d: Row) => number | null) =>
     chartData.map(get).filter((v): v is number => v !== null);
@@ -261,6 +259,8 @@ export default function NetworthCapHistoryChart() {
       format: formatValue,
     },
     {
+      // Adjusts for scan volume, but still shifts with which inventories got
+      // scanned (fewer scans tend to skew toward larger, active inventories)
       label: "Avg per Inventory",
       value: capStats?.total_inventories
         ? formatValue(

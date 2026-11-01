@@ -20,6 +20,21 @@ export const formatShortDate = (ts: number) =>
     day: "numeric",
   });
 
+// Evenly spaced time ticks; labels gain a year once the span passes ~1 year
+export const getTimeAxis = (start: number, end: number, count = 6) => {
+  const ticks = Array.from(
+    { length: count },
+    (_, i) => start + ((end - start) * i) / (count - 1),
+  );
+  const withYear = end - start > 300 * 86_400_000;
+  const format = (ts: number) =>
+    new Date(ts).toLocaleDateString(undefined, {
+      month: "short",
+      ...(withYear ? { year: "2-digit" } : { day: "numeric" }),
+    });
+  return { domain: [start, end] as [number, number], ticks, format };
+};
+
 const getNiceStep = (rangeValue: number, targetTicks = 6) => {
   if (rangeValue <= 0) return 1;
   const roughStep = rangeValue / (targetTicks - 1);
