@@ -3,29 +3,16 @@
 import type { CatalogValues } from "@/hooks/usePartialItems";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 import Image from "next/image";
-import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
 import Link from "next/link";
 import { useState } from "react";
 import { InventoryItem } from "@/app/inventories/types";
-import {
-  getItemImagePath,
-  isVideoItem,
-  isDriftItem,
-  getDriftVideoPath,
-  getVideoPath,
-  handleImageError,
-} from "@/utils/ui/images";
-import {
-  getCategoryIcon,
-  getCategoryColor,
-  CategoryIconBadge,
-} from "@/utils/items/categoryIcons";
+import { CategoryIconBadge } from "@/utils/items/categoryIcons";
+import InventoryItemAppearance from "./InventoryItemAppearance";
+import InventoryMarketSummary from "./InventoryMarketSummary";
+import { Button } from "@/components/ui/button";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { formatFullValue } from "@/utils/trading/values";
-import { getInventoryDupedValue } from "@/utils/trading/inventoryValues";
-import { hasItemValue } from "@/utils/items/itemValue";
 import { hasSeason, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
@@ -38,8 +25,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { bangers } from "@/app/fonts";
-import ItemSignatures from "@/components/Items/ItemSignatures";
 
 interface InventoryItemCardProps {
   item: InventoryItem;
@@ -73,15 +58,10 @@ export default function InventoryItemCard({
   );
   const isDuplicate = duplicateCount > 1;
   const isMissingItem = item.id.startsWith("missing-");
-  const usesCleanValue =
-    isDupedItem &&
-    !hasItemValue(itemData?.duped_value) &&
-    hasItemValue(itemData?.cash_value);
-  const displayedDupedValue = itemData
-    ? isDupedItem
-      ? getInventoryDupedValue(itemData)
-      : itemData.duped_value
-    : null;
+  const originalOwnerId = isOriginalOwner ? userId : originalOwnerInfo?.value;
+  const createdAt = item.info.find(
+    (info) => info.title === "Created At",
+  )?.value;
   const displayedSeason = itemData?.season ?? undefined;
   const displayedLevel = unlockLevel(itemData?.level);
   const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
@@ -91,69 +71,25 @@ export default function InventoryItemCard({
     displayedLevel,
   );
 
-  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <div
-      className={`text-primary-text relative flex min-h-100 cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
+      className={`text-primary-text relative flex flex-col rounded-lg border p-3 transition-all duration-200 ${
         isOriginalOwner
           ? "hover:shadow-card-shadow border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
           : "border-border-card bg-tertiary-bg"
       }`}
-      onClick={() => onCardClick(item)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onCardClick(item);
-        }
-      }}
     >
-      {/* Duplicate Indicator */}
       {isDuplicate && (
         <div className="bg-button-info text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
           #{duplicateOrder}
         </div>
       )}
 
-      {/* Title */}
-      <div className="mb-4 text-left">
-        <h2
-          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide wrap-break-word`}
-        >
-          <Link
-            href={`/item/${encodeURIComponent(item.categoryTitle)}/${encodeURIComponent(item.title)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="hover:text-link-hover transition-colors"
-            prefetch={false}
-          >
-            {item.title}
-          </Link>
-        </h2>
-        <div className="flex items-center gap-2">
-          <span
-            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-            style={{
-              borderColor: getCategoryColor(item.categoryTitle),
-              backgroundColor: `${getCategoryColor(item.categoryTitle)}22`,
-            }}
-          >
-            {(() => {
-              const categoryIcon = getCategoryIcon(item.categoryTitle);
-              return categoryIcon ? (
-                <categoryIcon.Icon
-                  className="h-3 w-3"
-                  style={{ color: getCategoryColor(item.categoryTitle) }}
-                />
-              ) : null;
-            })()}
-            {item.categoryTitle}
-          </span>
-        </div>
-      </div>
-
-      {/* Item Image - Always show container for consistent layout */}
-      <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-lg">
+      <InventoryItemAppearance
+        title={item.title}
+        categoryTitle={item.categoryTitle}
+        signs={item.Sign}
+      >
         {(itemData?.is_limited === 1 || isSeasonal) && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -190,194 +126,62 @@ export default function InventoryItemCard({
             <TooltipContent>{requirementsTooltipText}</TooltipContent>
           </Tooltip>
         )}
-        {!["Brakes"].includes(item.categoryTitle) ? (
-          isVideoItem(item.title) ? (
-            <video
-              src={getVideoPath(item.categoryTitle, item.title)}
-              className="h-full w-full object-cover"
-              muted
-              playsInline
-              loop
-              autoPlay
-            />
-          ) : isDriftItem(item.categoryTitle) ? (
-            <div className="relative h-full w-full">
-              <Image
-                placeholder={IMAGE_PLACEHOLDER}
-                src={getItemImagePath(item.categoryTitle, item.title, true)}
-                alt={item.title}
-                fill
-                className="object-cover"
-                onError={handleImageError}
-              />
-              <video
-                src={getDriftVideoPath(item.title, true)}
-                className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 hover:opacity-100"
-                muted
-                playsInline
-                loop
-              />
+      </InventoryItemAppearance>
+
+      <InventoryMarketSummary data={itemData} />
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {originalOwnerId && !isMissingItem && (
+            <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
+              {avatarError ? (
+                <DefaultAvatar name={getUserDisplay(originalOwnerId)} />
+              ) : (
+                <Image
+                  src={getUserAvatar(originalOwnerId)}
+                  alt="Original owner avatar"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  onError={() => setAvatarError(true)}
+                />
+              )}
             </div>
-          ) : (
-            <Image
-              placeholder={IMAGE_PLACEHOLDER}
-              src={getItemImagePath(item.categoryTitle, item.title, true)}
-              alt={item.title}
-              fill
-              className="object-cover"
-              onError={handleImageError}
-            />
-          )
-        ) : (
-          <Image
-            placeholder={IMAGE_PLACEHOLDER}
-            src={getItemImagePath(item.categoryTitle, item.title, true)}
-            alt={item.title}
-            fill
-            className="object-cover"
-            onError={handleImageError}
-          />
-        )}
-        <ItemSignatures signs={item.Sign} />
-      </div>
-
-      {/* Statistics */}
-      <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
-        <div>
-          <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                {item.uniqueCirculation.toLocaleString("en-US")}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              Monthly unique: {item.uniqueCirculation.toLocaleString("en-US")}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Cash Value */}
-        {itemData && (
-          <div>
-            <div className="text-secondary-text text-sm">CASH VALUE</div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-primary-text cursor-help text-xl font-bold">
-                  <span className="sm:hidden">
-                    {hasItemValue(itemData.cash_value)
-                      ? itemData.cash_value
-                      : "N/A"}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatFullValue(itemData.cash_value)}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {formatFullValue(itemData.cash_value)}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        )}
-
-        {/* Duped Value */}
-        {itemData && (
-          <div>
-            <div className="text-secondary-text text-sm">DUPED VALUE</div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-primary-text cursor-help text-xl font-bold">
-                  <span className="sm:hidden">
-                    {hasItemValue(displayedDupedValue)
-                      ? displayedDupedValue
-                      : "N/A"}
-                  </span>
-                  <span className="hidden sm:inline">
-                    {formatFullValue(displayedDupedValue ?? null)}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {usesCleanValue ? "Uses clean value" : "Duped value"}:{" "}
-                {formatFullValue(displayedDupedValue ?? null)}
-              </TooltipContent>
-            </Tooltip>
-            {usesCleanValue && (
-              <div className="text-secondary-text text-xs">
-                Uses clean value
-              </div>
-            )}
-          </div>
-        )}
-
-        <div>
-          <div className="text-secondary-text text-sm">ORIGINAL OWNER</div>
-          <div className="text-xl font-bold">
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-secondary-text text-xs">Original owner</p>
             {isMissingItem ? (
-              <span className="text-primary-text text-xl font-bold">???</span>
-            ) : originalOwnerInfo ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="border-border-card bg-quaternary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
-                  {avatarError ? (
-                    <DefaultAvatar
-                      name={getUserDisplay(
-                        isOriginalOwner ? userId : originalOwnerInfo.value,
-                      )}
-                    />
-                  ) : (
-                    <Image
-                      src={getUserAvatar(
-                        isOriginalOwner ? userId : originalOwnerInfo.value,
-                      )}
-                      alt="Owner Avatar"
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                      onError={() => {
-                        setAvatarError(true);
-                      }}
-                    />
-                  )}
-                </div>
-                <a
-                  href={`https://www.roblox.com/users/${isOriginalOwner ? userId : originalOwnerInfo.value}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover min-w-0 text-center transition-colors hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <span className="inline-flex max-w-full items-center gap-2">
-                    <span className="min-w-0 wrap-anywhere">
-                      {isOriginalOwner
-                        ? getUserDisplay(userId)
-                        : getUserDisplay(originalOwnerInfo.value)}
-                    </span>
-                    {getHasVerifiedBadge &&
-                      (isOriginalOwner
-                        ? getHasVerifiedBadge(userId)
-                        : getHasVerifiedBadge(originalOwnerInfo.value)) && (
-                        <VerifiedBadgeIcon className="h-4 w-4 shrink-0" />
-                      )}
-                  </span>
-                </a>
-              </div>
+              <p>???</p>
+            ) : originalOwnerId ? (
+              <a
+                href={`https://www.roblox.com/users/${originalOwnerId}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:text-link-hover flex items-center gap-1 text-sm font-medium hover:underline"
+              >
+                <span className="truncate">
+                  {getUserDisplay(originalOwnerId)}
+                </span>
+                {getHasVerifiedBadge?.(originalOwnerId) && (
+                  <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
+                )}
+              </a>
             ) : (
-              <span className="text-secondary-text text-sm">Unknown</span>
+              <p className="text-secondary-text text-sm">Unknown</p>
             )}
           </div>
         </div>
-
-        <div>
-          <div className="text-secondary-text text-sm">CREATED ON</div>
-          <div className="text-primary-text text-xl font-bold">
-            {isMissingItem ? (
-              <span className="text-primary-text text-xl font-bold">???</span>
-            ) : (
-              item.info.find((info) => info.title === "Created At")?.value ||
-              "N/A"
-            )}
-          </div>
+        <div className="mt-auto flex items-center justify-between gap-3">
+          <p className="text-secondary-text min-w-0 text-sm">
+            Created {isMissingItem ? "???" : createdAt || "date unknown"}
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => onCardClick(item)}
+          >
+            History
+          </Button>
         </div>
       </div>
 
@@ -398,5 +202,4 @@ export default function InventoryItemCard({
       )}
     </div>
   );
-  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }

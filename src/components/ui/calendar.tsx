@@ -193,7 +193,9 @@ function CalendarDayButton({
   return (
     <Button
       ref={ref}
-      variant="ghost"
+      variant={
+        modifiers.selected && !modifiers.range_middle ? "default" : "ghost"
+      }
       size="icon"
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
@@ -208,6 +210,10 @@ function CalendarDayButton({
       className={cn(
         "data-[selected-single=true]:bg-button-info data-[selected-single=true]:text-form-button-text! data-[range-middle=true]:bg-button-info/20 data-[range-middle=true]:text-primary-text data-[range-start=true]:bg-button-info data-[range-start=true]:text-form-button-text! data-[range-end=true]:bg-button-info data-[range-end=true]:text-form-button-text! group-data-[focused=true]/day:border-button-info group-data-[focused=true]/day:ring-button-info/40 flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
+        !modifiers.selected &&
+          "enabled:hover:bg-quaternary-bg! enabled:active:bg-quaternary-bg!",
+        modifiers.range_middle &&
+          "enabled:hover:bg-button-info/30! enabled:active:bg-button-info/30!",
         className,
       )}
       {...props}

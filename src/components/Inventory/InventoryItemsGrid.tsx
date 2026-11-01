@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useCatalogValues } from "@/hooks/usePartialItems";
 import InventoryItemCard from "./InventoryItemCard";
+import InventoryItemsSkeleton from "./InventoryItemsSkeleton";
 import { Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 
@@ -62,40 +63,7 @@ export default function InventoryItemsGrid({
     isLoading ||
     (displayedItems.some(({ itemData }) => !itemData) && itemQuery.isPending)
   ) {
-    return (
-      <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <div
-            key={index}
-            className="border-border-card bg-tertiary-bg animate-pulse rounded-lg border p-3"
-          >
-            {/* Title + category badge */}
-            <div className="mb-4">
-              <div className="bg-button-secondary mb-2 h-7 w-3/4 rounded"></div>
-              <div className="bg-button-secondary h-6 w-24 rounded-md"></div>
-            </div>
-
-            {/* Image */}
-            <div className="bg-button-secondary mb-3 aspect-video w-full rounded-lg"></div>
-
-            {/* Stats */}
-            <div className="flex flex-1 flex-col justify-center space-y-3 text-center">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="bg-button-secondary mx-auto h-3 w-24 rounded"></div>
-                  <div className="bg-button-secondary mx-auto h-5 w-16 rounded"></div>
-                </div>
-              ))}
-            </div>
-
-            {/* Footer badges */}
-            <div className="border-secondary-text mt-3 flex min-h-10 justify-center border-t pt-3">
-              <div className="bg-button-secondary h-8 w-8 rounded-full"></div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <InventoryItemsSkeleton />;
   }
 
   if (filteredItems.length === 0) {

@@ -57,6 +57,36 @@ export interface UserConnectionData {
   roblox_username?: string;
 }
 
+export interface HistoricalInventoryItem {
+  item_id: string;
+  branch_id: string;
+  catalog_item_id: number;
+  title: string;
+  category_title: string;
+  held_since: number;
+  history: Array<{
+    from_user_id: string | null;
+    to_user_id: string;
+    trade_time: number;
+    gap: boolean;
+  }>;
+}
+
+export interface InventoryHistoryData {
+  as_of: number;
+  items: HistoricalInventoryItem[];
+}
+
+export interface ItemOwnerData {
+  duplicated_since: boolean;
+  owners: Array<{
+    user_id: string;
+    last_seen: number | null;
+    still_held: boolean | null;
+    left_at: number | null;
+  }>;
+}
+
 type TradeConfidence = "confirmed" | "partial";
 type TradeStatus = "completed" | "pending";
 

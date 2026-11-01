@@ -564,11 +564,7 @@ export default function InventoryItems({
   }, [mergedInventoryData, partialItemsQuery.data, showMissingItems]);
 
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-      <h2 className="text-primary-text mb-4 text-xl font-semibold">
-        Inventory Items
-      </h2>
-
+    <div>
       {/* Filters */}
       <InventoryFilters
         searchTerm={searchTerm}

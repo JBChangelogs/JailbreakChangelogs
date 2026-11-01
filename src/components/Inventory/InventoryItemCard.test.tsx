@@ -5,11 +5,86 @@ import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import { hasItemValue } from "@/utils/items/itemValue";
 import { formatFullValue } from "@/utils/trading/values";
 import { getInventoryDupedValue } from "@/utils/trading/inventoryValues";
+import * as imageUtils from "@/utils/ui/images";
 
 interface Node {
   type: unknown;
   props: Record<string, unknown>;
 }
+
+test("shared inventory appearance retains item links, category styling, media, overlays and signatures", () => {
+  const exports = {} as { default: (props: unknown) => Node };
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  runInNewContext(
+    transpileModule(
+      readFileSync(
+        new URL("./InventoryItemAppearance.tsx", import.meta.url),
+        "utf8",
+      ),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      require: (name: string) => {
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "next/image") return { default: "image" };
+        if (name === "next/link") return { default: "link" };
+        if (name === "@/app/fonts")
+          return { bangers: { className: "bangers" } };
+        if (name.endsWith("/images")) return imageUtils;
+        if (name.endsWith("/imagePlaceholder"))
+          return { IMAGE_PLACEHOLDER: "blur" };
+        if (name.endsWith("/categoryIcons"))
+          return {
+            getCategoryColor: () => "#123456",
+            getCategoryIcon: () => null,
+          };
+        if (name.endsWith("/ItemSignatures")) return { default: "signatures" };
+        throw new Error(`Unexpected import ${name}`);
+      },
+    },
+  );
+  function descendants(value: unknown): Node[] {
+    if (Array.isArray(value)) return value.flatMap(descendants);
+    if (!value || typeof value !== "object" || !("props" in value)) return [];
+    const node = value as Node;
+    return [node, ...descendants(node.props.children)];
+  }
+  for (const [categoryTitle, title] of [
+    ["Vehicle", "Roadster"],
+    ["HyperChrome", "HyperShift"],
+    ["Drift", "Blue Fire"],
+  ]) {
+    const signs = ["123"];
+    const overlay = jsx("overlay", {});
+    const view = descendants(
+      exports.default({ title, categoryTitle, signs, children: overlay }),
+    );
+    expect(view.find((node) => node.type === "link")!.props.href).toBe(
+      `/item/${encodeURIComponent(categoryTitle)}/${encodeURIComponent(title)}`,
+    );
+    expect(view.find((node) => node.type === "h2")!.props.className).toContain(
+      "bangers",
+    );
+    expect(view.some((node) => node === overlay)).toBe(true);
+    expect(view.find((node) => node.type === "signatures")!.props.signs).toBe(
+      signs,
+    );
+    if (imageUtils.isVideoItem(title)) {
+      expect(view.find((node) => node.type === "video")!.props.src).toBe(
+        imageUtils.getVideoPath(categoryTitle, title),
+      );
+    } else {
+      const image = view.find((node) => node.type === "image")!;
+      expect(image.props.src).toBe(
+        imageUtils.getItemImagePath(categoryTitle, title, true),
+      );
+      expect(image.props.onError).toBe(imageUtils.handleImageError);
+    }
+  }
+});
 
 function mobileValues(value: unknown): unknown[] {
   if (Array.isArray(value)) return value.flatMap(mobileValues);
@@ -20,7 +95,7 @@ function mobileValues(value: unknown): unknown[] {
     : mobileValues(node.props.children);
 }
 
-for (const path of ["./InventoryItemCard.tsx", "../OG/OGItemCard.tsx"]) {
+for (const path of ["../OG/OGItemCard.tsx"]) {
   test(`${path} shows N/A for unavailable mobile values and preserves compact prices`, () => {
     const exports = {} as { default: (props: unknown) => Node };
     const noop = () => null;
@@ -73,8 +148,79 @@ for (const path of ["./InventoryItemCard.tsx", "../OG/OGItemCard.tsx"]) {
     expect(render("28m")).toEqual(["28m", "28m"]);
     expect(render("0")).toEqual(["0", "0"]);
     expect(render("28m", "")).toEqual(["28m", "N/A"]);
-    if (path === "./InventoryItemCard.tsx") {
-      expect(render("28m", "", true)).toEqual(["28m", "28m"]);
-    }
   });
 }
+
+test("compact inventory cards keep ownership and history actions without oversized stat blocks", () => {
+  const exports = {} as { default: (props: unknown) => Node };
+  const noop = () => null;
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./InventoryItemCard.tsx", import.meta.url), "utf8"),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      require: (name: string) => {
+        if (name === "react")
+          return { useState: (initial: unknown) => [initial, noop] };
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "@/components/ui/button") return { Button: "button" };
+        if (name === "next/image") return { default: "image" };
+        if (name === "next/link") return { default: "link" };
+        return new Proxy({}, { get: () => noop });
+      },
+    },
+  );
+  function descendants(value: unknown): Node[] {
+    if (Array.isArray(value)) return value.flatMap(descendants);
+    if (!value || typeof value !== "object" || !("props" in value)) return [];
+    const node = value as Node;
+    return [node, ...descendants(node.props.children)];
+  }
+  const item = {
+    id: "copy",
+    title: "Roadster",
+    categoryTitle: "Vehicle",
+    info: [
+      { title: "Original Owner", value: "123" },
+      { title: "Created At", value: "Oct 31, 2026" },
+    ],
+    isOriginalOwner: false,
+  };
+  const opened: unknown[] = [];
+  const props = {
+    item,
+    userId: "456",
+    getUserDisplay: (id: string) => `User ${id}`,
+    getUserAvatar: (id: string) => `/avatar/${id}`,
+    onCardClick: (selected: unknown) => opened.push(selected),
+  };
+  let view = descendants(exports.default(props));
+  expect(view.find((node) => node.type === "a")!.props.href).toBe(
+    "https://www.roblox.com/users/123/profile",
+  );
+  expect(view.some((node) => node.props.children === "Original owner")).toBe(
+    true,
+  );
+  expect(view.some((node) => node.props.children === "MONTHLY UNIQUE")).toBe(
+    false,
+  );
+  expect(view.some((node) => node.props.children === "CASH VALUE")).toBe(false);
+  expect(view.some((node) => node.props.children === "DUPED VALUE")).toBe(
+    false,
+  );
+  const history = view.find((node) => node.type === "button")!;
+  expect(history.props.children).toBe("History");
+  (history.props.onClick as () => void)();
+  expect(opened).toEqual([item]);
+  view = descendants(
+    exports.default({ ...props, item: { ...item, isOriginalOwner: true } }),
+  );
+  expect(view.find((node) => node.type === "a")!.props.href).toBe(
+    "https://www.roblox.com/users/456/profile",
+  );
+});

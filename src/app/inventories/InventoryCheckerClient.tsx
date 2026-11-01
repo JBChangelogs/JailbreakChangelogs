@@ -34,6 +34,8 @@ import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
+import InventoryHistory from "@/components/Inventory/InventoryHistory";
+import InventoryDataScopeNotice from "@/components/Inventory/InventoryDataScopeNotice";
 import DuplicatesTab from "@/components/Inventory/MultipleCopiesTab";
 import DupedItemsTab from "@/components/Inventory/DupedItemsTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -140,6 +142,7 @@ export default function InventoryCheckerClient({
   );
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [itemSnapshot, setItemSnapshot] = useState({ userId: "", date: "" });
   const forceShowErrorHandledRef = useRef<boolean>(false);
   const lastShownErrorRef = useRef<string | null>(null);
   const lastShownSuccessRef = useRef<string | null>(null);
@@ -1016,29 +1019,38 @@ export default function InventoryCheckerClient({
               </div>
             )}
 
+          {!initialData && robloxId && /^\d+$/.test(robloxId) && (
+            <InventoryHistory key={robloxId} userId={robloxId} />
+          )}
+
           {/* User Stats and Inventory Items - Only show when no error and has data */}
           {!error && initialData && currentData && (
             <>
               {/* User Stats */}
-              <UserStats
-                initialData={currentData}
-                robloxUsers={initialRobloxUsers ?? {}}
-                userConnectionData={userConnectionData || null}
-                itemsData={itemsData}
-                currentSeason={activeSeason}
-                seasonRateLimitMessage={seasonRateLimitMessage}
-                initialNetworthData={networthData}
-                showOnlyNonOriginal={showOnlyNonOriginal}
-                showOnlyOriginal={showOnlyOriginal}
-                showOnlyLimited={showOnlyLimited}
-                showOnlySeasonal={showOnlySeasonal}
-                scanWebSocket={scanWebSocket}
-                scanErrorBanner={scanErrorBanner}
-                queuePosition={queuePosition}
-                isLoadingQueuePosition={isLoadingQueuePosition}
-                queueStatusMessage={queueStatusMessage}
-                fetchQueuePosition={fetchQueuePosition}
-              />
+              <section className="space-y-3">
+                <h2 className="text-secondary-text text-sm font-medium">
+                  Latest scan overview
+                </h2>
+                <UserStats
+                  initialData={currentData}
+                  robloxUsers={initialRobloxUsers ?? {}}
+                  userConnectionData={userConnectionData || null}
+                  itemsData={itemsData}
+                  currentSeason={activeSeason}
+                  seasonRateLimitMessage={seasonRateLimitMessage}
+                  initialNetworthData={networthData}
+                  showOnlyNonOriginal={showOnlyNonOriginal}
+                  showOnlyOriginal={showOnlyOriginal}
+                  showOnlyLimited={showOnlyLimited}
+                  showOnlySeasonal={showOnlySeasonal}
+                  scanWebSocket={scanWebSocket}
+                  scanErrorBanner={scanErrorBanner}
+                  queuePosition={queuePosition}
+                  isLoadingQueuePosition={isLoadingQueuePosition}
+                  queueStatusMessage={queueStatusMessage}
+                  fetchQueuePosition={fetchQueuePosition}
+                />
+              </section>
 
               {/* Tabbed Interface */}
               <div className="mt-6">
@@ -1055,41 +1067,59 @@ export default function InventoryCheckerClient({
                   robloxId={robloxId}
                 />
 
-                {effectiveActiveTab === 0 && robloxId && (
-                  <InventoryFeaturePreview
-                    networthData={networthData}
-                    itemsData={itemsData}
-                    inventoryData={currentData}
-                    isOwnInventory={isOwnInventory}
-                    ownerName={
-                      deferredRobloxUsers[robloxId]?.displayName ||
-                      deferredRobloxUsers[robloxId]?.name
-                    }
-                    tabs={tabIndex}
-                    onExplore={(event, index, section) => {
-                      pendingSectionRef.current = section ?? null;
-                      handleTabChange(event, index);
-                      document
-                        .getElementById(`inventory-tab-${index}`)
-                        ?.focus();
-                    }}
-                  />
-                )}
+                <InventoryDataScopeNotice
+                  historical={
+                    effectiveActiveTab === 0 &&
+                    itemSnapshot.userId === currentData.user_id &&
+                    Boolean(itemSnapshot.date)
+                  }
+                />
 
                 {/* Tab Content */}
                 <div className="mt-4">
                   <div className={effectiveActiveTab === 0 ? "" : "hidden"}>
-                    <MemoInventoryItems
-                      initialData={currentData}
-                      robloxUsers={deferredRobloxUsers}
-                      onItemClick={handleItemClick}
-                      itemsData={itemsData}
-                      isOwnInventory={isOwnInventory}
-                      onShowOnlyOriginalChange={setShowOnlyOriginal}
-                      onShowOnlyNonOriginalChange={setShowOnlyNonOriginal}
-                      onShowOnlyLimitedChange={setShowOnlyLimited}
-                      onShowOnlySeasonalChange={setShowOnlySeasonal}
-                    />
+                    <InventoryHistory
+                      key={currentData.user_id}
+                      userId={currentData.user_id}
+                      onDateChange={(date) =>
+                        setItemSnapshot({ userId: currentData.user_id, date })
+                      }
+                      preview={
+                        effectiveActiveTab === 0 &&
+                        robloxId && (
+                          <InventoryFeaturePreview
+                            networthData={networthData}
+                            itemsData={itemsData}
+                            inventoryData={currentData}
+                            isOwnInventory={isOwnInventory}
+                            ownerName={
+                              deferredRobloxUsers[robloxId]?.displayName ||
+                              deferredRobloxUsers[robloxId]?.name
+                            }
+                            tabs={tabIndex}
+                            onExplore={(event, index, section) => {
+                              pendingSectionRef.current = section ?? null;
+                              handleTabChange(event, index);
+                              document
+                                .getElementById(`inventory-tab-${index}`)
+                                ?.focus();
+                            }}
+                          />
+                        )
+                      }
+                    >
+                      <MemoInventoryItems
+                        initialData={currentData}
+                        robloxUsers={deferredRobloxUsers}
+                        onItemClick={handleItemClick}
+                        itemsData={itemsData}
+                        isOwnInventory={isOwnInventory}
+                        onShowOnlyOriginalChange={setShowOnlyOriginal}
+                        onShowOnlyNonOriginalChange={setShowOnlyNonOriginal}
+                        onShowOnlyLimitedChange={setShowOnlyLimited}
+                        onShowOnlySeasonalChange={setShowOnlySeasonal}
+                      />
+                    </InventoryHistory>
                   </div>
 
                   {tabIndex.trades !== null &&

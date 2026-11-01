@@ -375,6 +375,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                     </PopoverTrigger>
                     <PopoverContent
                       align="start"
+                      collisionPadding={16}
                       className="border-border-card bg-secondary-bg z-[10001] w-auto p-0"
                     >
                       <Calendar
