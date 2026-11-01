@@ -958,7 +958,7 @@ export default function MessagesInbox() {
           <h1 className="text-primary-text text-base font-semibold">
             Your Messages
           </h1>
-          <p className="text-quaternary-text mt-1 max-w-xs text-sm">
+          <p className="text-secondary-text mt-1 max-w-xs text-sm">
             Log in to view your conversations and send messages.
           </p>
         </div>
