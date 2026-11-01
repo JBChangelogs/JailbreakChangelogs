@@ -61,6 +61,7 @@ export function AppDialog({
   description,
   children,
   footer,
+  footerClassName,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -68,6 +69,7 @@ export function AppDialog({
   description?: ReactNode;
   children?: ReactNode;
   footer: ReactNode;
+  footerClassName?: string;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,7 +83,12 @@ export function AppDialog({
           )}
         </div>
         {children && <div className="space-y-3 px-5 py-4">{children}</div>}
-        <div className="border-border-primary mt-1 flex shrink-0 items-center justify-end gap-2 border-t px-5 py-4">
+        <div
+          className={cn(
+            "border-border-primary mt-1 flex shrink-0 items-center justify-end gap-2 border-t px-5 py-4",
+            footerClassName,
+          )}
+        >
           {footer}
         </div>
       </DialogContent>

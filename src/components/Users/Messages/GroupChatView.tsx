@@ -19,6 +19,13 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { GroupInviteDialog } from "./GroupInviteDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import {
@@ -328,6 +335,7 @@ export function GroupChatView({
   useEffect(() => setMembersOverlayOpen(false), [membersNarrow]);
   const [renameOpen, setRenameOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteLinkOpen, setInviteLinkOpen] = useState(false);
 
   // Messages, newest page first; shown oldest to newest.
   const messagesKey = useMemo(() => ["group-messages", groupId], [groupId]);
@@ -802,6 +810,36 @@ export function GroupChatView({
             </Tooltip>
           )}
         </button>
+        {isOwner && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Group menu"
+                className={headerButton}
+              >
+                <Icon
+                  icon="heroicons:ellipsis-horizontal"
+                  className="h-4.5 w-4.5"
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setRenameOpen(true)}>
+                Edit group name
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => setInviteOpen(true)}
+                disabled={!canInvite}
+              >
+                Invite to group
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setInviteLinkOpen(true)}>
+                Invite link
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
         {canInvite && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -1056,6 +1094,14 @@ export function GroupChatView({
               throw error;
             }
           }}
+        />
+      )}
+
+      {group && isOwner && inviteLinkOpen && (
+        <GroupInviteDialog
+          key={groupId}
+          groupId={groupId}
+          onClose={() => setInviteLinkOpen(false)}
         />
       )}
 

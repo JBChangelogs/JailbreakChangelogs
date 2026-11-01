@@ -30,6 +30,17 @@ export interface GroupChatSummary extends GroupChat {
   lastMessage: Message | null;
 }
 
+export interface GroupInvite {
+  code: string;
+  expires_in: number;
+}
+
+export interface GroupInvitePreview extends GroupChat {
+  memberCount: number;
+  maxMembers: number;
+  isMember: boolean;
+}
+
 export interface GroupMessagesPage {
   messages: Message[];
   page: number;
@@ -159,6 +170,34 @@ export const renameGroupChat = async (id: string, name: string) =>
 
 export const deleteGroupChat = (id: string) =>
   request(groupPath(id), { method: "DELETE" });
+
+export const createGroupInvite = (id: string) =>
+  request<GroupInvite>(`${groupPath(id)}/invite`, { method: "POST" });
+
+export const revokeGroupInvite = (id: string) =>
+  request(`${groupPath(id)}/invite`, { method: "DELETE" });
+
+const invitePath = (code: string) =>
+  `/v2/group-chats/invites/${encodeURIComponent(code)}`;
+
+export async function fetchGroupInvite(
+  code: string,
+): Promise<GroupInvitePreview> {
+  const data = await request<{
+    member_count: number;
+    max_members: number;
+    is_member: boolean;
+  }>(invitePath(code));
+  return {
+    ...toGroup(data),
+    memberCount: data.member_count,
+    maxMembers: data.max_members,
+    isMember: data.is_member,
+  };
+}
+
+export const joinGroupInvite = async (code: string) =>
+  toGroup(await request(invitePath(code), { method: "POST" }));
 
 export const addGroupMembers = async (id: string, memberIds: string[]) =>
   toGroup(

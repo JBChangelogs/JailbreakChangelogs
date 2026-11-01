@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import {
   createGroupChat,
+  createGroupInvite,
+  revokeGroupInvite,
+  fetchGroupInvite,
+  joinGroupInvite,
   fetchGroupChats,
   fetchGroupIcon,
   GroupChatError,
@@ -22,6 +26,72 @@ const respond = (body: string, status = 200) => {
   globalThis.fetch = (async () =>
     new Response(body, { status })) as unknown as typeof fetch;
 };
+
+test("invite creation, revocation, preview and joining share authenticated group requests", async () => {
+  const calls: { url: string; init?: RequestInit }[] = [];
+  const group = `{"id":1234567890123456789,"name":"Crew","owner_id":9876543210987654321,"member_ids":[9876543210987654321],"member_count":1,"max_members":10,"is_member":false}`;
+  globalThis.fetch = (async (url, init) => {
+    calls.push({ url: String(url), init });
+    return new Response(
+      String(url).endsWith("/invite")
+        ? '{"code":"K7MPX4QD","expires_in":604800}'
+        : group,
+    );
+  }) as typeof fetch;
+  expect(await createGroupInvite("group")).toEqual({
+    code: "K7MPX4QD",
+    expires_in: 604800,
+  });
+  await revokeGroupInvite("group");
+  const preview = await fetchGroupInvite("K7MPX4QD");
+  expect(preview).toMatchObject({
+    id: "1234567890123456789",
+    ownerId: "9876543210987654321",
+    memberIds: ["9876543210987654321"],
+    memberCount: 1,
+    maxMembers: 10,
+    isMember: false,
+  });
+  expect((await joinGroupInvite("K7MPX4QD")).id).toBe(preview.id);
+  expect(
+    calls.map(({ url, init }) => [
+      url,
+      init?.method ?? "GET",
+      init?.credentials,
+    ]),
+  ).toEqual([
+    ["https://api.example.com/v2/group-chats/group/invite", "POST", "include"],
+    [
+      "https://api.example.com/v2/group-chats/group/invite",
+      "DELETE",
+      "include",
+    ],
+    [
+      "https://api.example.com/v2/group-chats/invites/K7MPX4QD",
+      "GET",
+      "include",
+    ],
+    [
+      "https://api.example.com/v2/group-chats/invites/K7MPX4QD",
+      "POST",
+      "include",
+    ],
+  ]);
+});
+
+test("invite errors preserve expired, full and blocked response codes", async () => {
+  for (const [code, status] of [
+    ["invite_not_found", 404],
+    ["group_full", 400],
+    ["blocked", 403],
+  ] as const) {
+    respond(JSON.stringify({ error: code, message: code }), status);
+    const error = await joinGroupInvite("K7MPX4QD").catch((err) => err);
+    expect(error).toBeInstanceOf(GroupChatError);
+    expect(error.code).toBe(code);
+    expect(error.status).toBe(status);
+  }
+});
 
 test("group lists keep snowflake ids and map messages onto the shared type", async () => {
   // Raw JSON: these ids are past 2^53 and would lose digits as numbers.
