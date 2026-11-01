@@ -8,9 +8,12 @@ import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
 } from "@/utils/api/api";
-import { Spinner } from "@/components/ui/Spinner";
+import DupeComparisonLoading from "./DupeComparisonLoading";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DupeComparisonClient from "./DupeComparisonClient";
 import DupeComparisonNotFound from "./DupeComparisonNotFound";
+import CopyTreeView from "./CopyTreeView";
+import DupeComparisonHeader from "./DupeComparisonHeader";
 
 const log = createLogger("UI");
 
@@ -64,45 +67,58 @@ export default function DupeComparisonLoader({
   if (variantsQuery.error && !variantsQuery.data) throw variantsQuery.error;
   if (itemQuery.error && !itemQuery.data) throw itemQuery.error;
 
-  if (variantsQuery.isPending) {
-    return (
-      <div className="border-border-card bg-secondary-bg flex min-h-64 items-center justify-center rounded-xl border">
-        <div className="text-center">
-          <Spinner className="mx-auto h-8 w-8" />
-          <p className="text-secondary-text mt-3 text-sm">
-            Loading duplicate variants...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  function renderSimplified() {
+    if (variantsQuery.isPending || (variants && itemQuery.isPending)) {
+      return <DupeComparisonLoading message="Loading simplified history..." />;
+    }
 
-  if (variants && itemQuery.isPending) {
-    return (
-      <div className="border-border-card bg-secondary-bg flex min-h-64 items-center justify-center rounded-xl border">
-        <Spinner className="h-8 w-8" />
-      </div>
-    );
-  }
+    if (variants) {
+      return (
+        <DupeComparisonClient
+          ogItem={variants.og}
+          duplicateItem={variants.duplicate}
+        />
+      );
+    }
 
-  if (variants) {
+    if (!variantsQuery.isSuccess) return null;
+
     return (
-      <DupeComparisonClient
-        ogItem={variants.og}
-        duplicateItem={variants.duplicate}
-        itemsData={itemQuery.data ?? []}
+      <DupeComparisonNotFound
+        key={id}
+        id={id}
+        reportItem={reportItem}
+        originalOwner={originalOwner}
       />
     );
   }
 
-  if (!variantsQuery.isSuccess) return null;
-
   return (
-    <DupeComparisonNotFound
-      key={id}
-      id={id}
-      reportItem={reportItem}
-      originalOwner={originalOwner}
-    />
+    <div className="space-y-8">
+      {variants && !itemQuery.isPending && (
+        <DupeComparisonHeader
+          key={`header-${id}`}
+          ogItem={variants.og}
+          duplicateItem={variants.duplicate}
+          itemsData={itemQuery.data ?? []}
+        />
+      )}
+      <Tabs key={`views-${id}`} defaultValue="simplified">
+        <TabsList aria-label="Dupe history view" fullWidth>
+          <TabsTrigger value="simplified" fullWidth>
+            Simplified
+          </TabsTrigger>
+          <TabsTrigger value="copy-tree" fullWidth>
+            Dupe Tree
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="simplified" className="mt-6">
+          {renderSimplified()}
+        </TabsContent>
+        <TabsContent value="copy-tree" className="mt-6">
+          <CopyTreeView id={id} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
