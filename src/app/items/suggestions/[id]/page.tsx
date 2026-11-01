@@ -52,9 +52,7 @@ import {
 import Image from "next/image";
 import DriftPreview from "@/components/Items/DriftPreview";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
-import ChartUpdateNotice, {
-  itemHistoryStaleTime,
-} from "@/components/Items/ChartUpdateNotice";
+import { itemHistoryStaleTime } from "@/components/Items/ChartUpdateNotice";
 import Link from "next/link";
 import type { Item } from "@/types/index";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
@@ -391,35 +389,13 @@ function SuggestionHistoryChart({
   historyData: ComponentProps<typeof ItemValueChart>["historyData"];
   loading: boolean;
 }) {
-  const [tab, setTab] = useState("value");
-  const showTrading = tab === "trading" && itemId !== 587;
-
-  return (
-    <div className="space-y-4">
-      {itemId !== 587 && (
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList fullWidth>
-            <TabsTrigger value="value" fullWidth>
-              Value History
-            </TabsTrigger>
-            <TabsTrigger value="trading" fullWidth>
-              Trading Metrics
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      )}
-      <ChartUpdateNotice />
-      {loading ? (
-        <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
-      ) : (
-        <ItemValueChart
-          historyData={historyData}
-          hideTradingMetrics={!showTrading}
-          showOnlyValueHistory={!showTrading}
-          showOnlyTradingMetrics={showTrading}
-        />
-      )}
-    </div>
+  return loading ? (
+    <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
+  ) : (
+    <ItemValueChart
+      historyData={historyData}
+      hideTradingMetrics={itemId === 587}
+    />
   );
 }
 

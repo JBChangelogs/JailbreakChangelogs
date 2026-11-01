@@ -10,7 +10,7 @@ export function itemHistoryStaleTime(query: {
   return Math.min(next.getTime() - fetchedAt, 60 * 60_000);
 }
 
-const CHART_UPDATE_TIME = (() => {
+export const CHART_UPDATE_TIME = (() => {
   const today = new Date();
   const utcTime = new Date(
     Date.UTC(
@@ -29,16 +29,3 @@ const CHART_UPDATE_TIME = (() => {
     timeZoneName: "short",
   });
 })();
-
-export default function ChartUpdateNotice() {
-  return (
-    <div className="bg-button-info/10 border-button-info/30 rounded-lg border p-3">
-      <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-        Chart Update Schedule
-      </div>
-      <div className="text-secondary-text mt-1 text-xs">
-        Charts update daily at {CHART_UPDATE_TIME}
-      </div>
-    </div>
-  );
-}

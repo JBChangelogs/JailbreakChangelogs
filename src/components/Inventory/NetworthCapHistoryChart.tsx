@@ -28,8 +28,9 @@ import {
   formatShortDate,
   formatValue,
   getYAxis,
+  selectedCardStyle,
   Sparkline,
-} from "@/components/Inventory/chartParts";
+} from "@/components/charts/chartParts";
 
 type DateRange = "7" | "14" | "30";
 
@@ -131,10 +132,9 @@ function SnapshotTile({
       aria-pressed={isSelected}
       onClick={onSelect}
       className={`bg-tertiary-bg flex cursor-pointer gap-3 rounded-lg border p-3 text-left transition-colors ${
-        isSelected
-          ? "border-border-focus"
-          : "border-border-card hover:border-border-focus/60"
+        isSelected ? "" : "border-border-card hover:border-border-focus/60"
       }`}
+      style={isSelected ? selectedCardStyle(accentColor) : undefined}
     >
       <span
         className="w-1 shrink-0 rounded-full"

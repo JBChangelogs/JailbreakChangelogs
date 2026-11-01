@@ -14,6 +14,11 @@ export const formatValue = (value: number) => {
   return value.toString();
 };
 
+export const selectedCardStyle = (color: string) => ({
+  borderColor: color,
+  backgroundColor: `color-mix(in srgb, ${color} 12%, var(--color-tertiary-bg))`,
+});
+
 export const formatShortDate = (ts: number) =>
   new Date(ts).toLocaleDateString(undefined, {
     month: "short",

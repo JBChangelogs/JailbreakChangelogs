@@ -36,7 +36,6 @@ const ItemValueChart = dynamic(
 );
 
 import type { ValueHistory } from "@/components/Items/ItemValueChart";
-import ChartUpdateNotice from "@/components/Items/ChartUpdateNotice";
 import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
 import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
@@ -434,7 +433,6 @@ export default function ItemDetailsClient({
     [tabParam],
   );
   const [tabDirection, setTabDirection] = useState(0);
-  const [activeChartTab, setActiveChartTab] = useState(0);
   const queryClient = useQueryClient();
   const itemQuery = useQuery({
     queryKey: ["item", "id", initialItem.id],
@@ -819,48 +817,17 @@ export default function ItemDetailsClient({
 
                   {activeTab === 1 && (
                     <div className="mb-8 space-y-6">
-                      {/* Chart Sub-tabs */}
-                      <div className="border-border-card bg-secondary-bg rounded-lg border p-2 sm:p-4">
-                        <Tabs
-                          value={String(activeChartTab)}
-                          onValueChange={(tabValue) =>
-                            setActiveChartTab(Number(tabValue))
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                        <Suspense
+                          fallback={
+                            <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
                           }
                         >
-                          <TabsList fullWidth>
-                            <TabsTrigger value="0" fullWidth>
-                              Value History
-                            </TabsTrigger>
-                            {item.id !== 587 && (
-                              <TabsTrigger value="1" fullWidth>
-                                Trading Metrics
-                              </TabsTrigger>
-                            )}
-                          </TabsList>
-                        </Tabs>
-
-                        {/* Chart Update Notice */}
-                        <div className="mt-4 mb-4">
-                          <ChartUpdateNotice />
-                        </div>
-
-                        {/* Chart Content */}
-                        <div className="mt-4">
-                          <Suspense
-                            fallback={
-                              <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
-                            }
-                          >
-                            <ItemValueChart
-                              historyPromise={historyPromise}
-                              hideTradingMetrics={
-                                activeChartTab === 0 || currentItem.id === 587
-                              }
-                              showOnlyValueHistory={activeChartTab === 0}
-                              showOnlyTradingMetrics={activeChartTab === 1}
-                            />
-                          </Suspense>
-                        </div>
+                          <ItemValueChart
+                            historyPromise={historyPromise}
+                            hideTradingMetrics={currentItem.id === 587}
+                          />
+                        </Suspense>
                       </div>
                     </div>
                   )}
