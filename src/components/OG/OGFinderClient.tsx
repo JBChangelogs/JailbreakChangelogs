@@ -1,5 +1,6 @@
 "use client";
 
+import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
@@ -197,9 +198,9 @@ export default function OGFinderClient({
 
       {/* Results */}
       {externalIsLoading ? (
-        <div className="animate-pulse space-y-6">
+        <div className="space-y-6">
           {/* User info card */}
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+          <div className="border-border-card bg-secondary-bg animate-pulse rounded-lg border p-6">
             <div className="bg-quaternary-bg/70 mb-4 h-7 w-40 rounded" />
             <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -222,19 +223,7 @@ export default function OGFinderClient({
             </div>
           </div>
 
-          {/* Item grid */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-              <div
-                key={i}
-                className="border-border-card bg-secondary-bg rounded-lg border p-4"
-              >
-                <div className="bg-quaternary-bg/70 mb-3 aspect-square w-full rounded-md" />
-                <div className="bg-quaternary-bg/70 mb-2 h-4 w-3/4 rounded" />
-                <div className="bg-quaternary-bg/70 h-3 w-1/2 rounded" />
-              </div>
-            ))}
-          </div>
+          <InventoryItemsSkeleton variant="og" />
         </div>
       ) : (
         robloxId && <OGFinderDataStreamer robloxId={robloxId} />

@@ -401,6 +401,7 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
     );
     const notes = readComponent("../../app/app/AppReleaseNotes.tsx");
     const dupeGrid = readComponent("../Dupes/DupeItemsGrid.tsx");
+    const itemSkeleton = readComponent("./InventoryItemsSkeleton.tsx");
     const directory = mkdtempSync(join(tmpdir(), "translation-test-"));
     try {
       const entry = join(directory, "fixture.js");
@@ -446,6 +447,7 @@ test.skipIf(process.env.RUN_TRANSLATION_BROWSER_TESTS !== "1")(
         const useQuery = () => ({data: appPhase === "granted", isPending: false, isError: false, isFetching: false, refetch() {}});
         ${notes}
         ${app}
+        ${itemSkeleton}
         ${dupeGrid}
         function DupeGridRetry({busy}) {
           catalogPending = busy;

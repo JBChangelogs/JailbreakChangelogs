@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { useCatalogValues, type CatalogValues } from "@/hooks/usePartialItems";
 import DupeItemCard from "./DupeItemCard";
@@ -59,24 +60,7 @@ export default function DupeItemsGrid({
     ) &&
       itemQuery.isPending)
   ) {
-    return (
-      <div className="space-y-4">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="animate-pulse">
-            <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-              <div className="flex items-start gap-4">
-                <div className="bg-quaternary-bg/70 h-16 w-16 rounded-lg"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="bg-quaternary-bg/70 h-4 w-3/4 rounded"></div>
-                  <div className="bg-quaternary-bg/70 h-3 w-1/2 rounded"></div>
-                  <div className="bg-quaternary-bg/70 h-3 w-1/3 rounded"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <InventoryItemsSkeleton variant="dupes" />;
   }
 
   if (filteredItems.length === 0) {

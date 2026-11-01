@@ -1,5 +1,6 @@
 "use client";
 
+import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useQuery } from "@tanstack/react-query";
@@ -708,9 +709,9 @@ export default function InventoryCheckerClient({
       </div>
 
       {externalIsLoading ? (
-        <div className="animate-pulse space-y-6">
+        <div className="space-y-6">
           {/* User profile card */}
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+          <div className="border-border-card bg-secondary-bg animate-pulse rounded-lg border p-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="flex items-center gap-4">
                 <div className="bg-quaternary-bg/70 h-16 w-16 shrink-0 rounded-full" />
@@ -728,7 +729,7 @@ export default function InventoryCheckerClient({
           </div>
 
           {/* Item count chips */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid animate-pulse grid-cols-2 gap-4 sm:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -741,7 +742,7 @@ export default function InventoryCheckerClient({
           </div>
 
           {/* Value stat cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid animate-pulse grid-cols-1 gap-4 sm:grid-cols-2">
             {[0, 1].map((i) => (
               <div
                 key={i}
@@ -754,7 +755,7 @@ export default function InventoryCheckerClient({
           </div>
 
           {/* Tab bar */}
-          <div className="border-border-card bg-secondary-bg flex gap-1 rounded-lg border p-1">
+          <div className="border-border-card bg-secondary-bg flex animate-pulse gap-1 rounded-lg border p-1">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
@@ -763,19 +764,7 @@ export default function InventoryCheckerClient({
             ))}
           </div>
 
-          {/* Item grid */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-              <div
-                key={i}
-                className="border-border-card bg-secondary-bg rounded-lg border p-3"
-              >
-                <div className="bg-quaternary-bg/70 mb-3 aspect-square w-full rounded-md" />
-                <div className="bg-quaternary-bg/70 mb-2 h-4 w-3/4 rounded" />
-                <div className="bg-quaternary-bg/70 h-3 w-1/2 rounded" />
-              </div>
-            ))}
-          </div>
+          <InventoryItemsSkeleton />
         </div>
       ) : (
         <>

@@ -447,12 +447,42 @@ test("missing owner can be retried and a single owner links to their inventory",
   expect(content(view)).not.toContain("This copy could not be found");
 });
 
-test("shared inventory loading state contains eight animated item cards", () => {
-  expect(
-    nodes(InventoryItemsSkeleton()).filter((node) =>
+test("shared item skeleton matches the card grid, market summary, owner and actions", () => {
+  for (const variant of ["inventory", "og", "dupes"] as const) {
+    const view = InventoryItemsSkeleton({ variant });
+    expect(view.props.role).toBe("status");
+    expect(view.props["aria-label"]).toBe(`Loading ${variant} items`);
+    expect(view.props.className).toContain("md:grid-cols-2");
+    expect(view.props.className).toContain("xl:grid-cols-4");
+    const cards = nodes(view).filter((node) =>
       node.props.className?.includes("animate-pulse"),
-    ),
-  ).toHaveLength(8);
+    );
+    expect(cards).toHaveLength(8);
+    for (const card of cards) {
+      const parts = nodes(card);
+      expect(
+        parts.some((node) => node.props.className?.includes("aspect-video")),
+      ).toBe(true);
+      const summary = parts.find((node) =>
+        node.props.className?.includes("grid-cols-2"),
+      )!;
+      expect(summary.props.className).toContain("border p-2.5");
+      expect(summary.props.children).toHaveLength(4);
+      expect(
+        parts.some((node) => node.props.className?.includes("rounded-full")),
+      ).toBe(true);
+      expect(
+        parts.some((node) => node.props.className === "min-w-0 flex-1"),
+      ).toBe(true);
+      const actions = parts.find((node) =>
+        node.props.className?.startsWith("mt-auto"),
+      )!;
+      expect(actions.props.children).toHaveLength(variant === "dupes" ? 3 : 2);
+      expect(actions.props.className).toContain(
+        variant === "dupes" ? "grid-cols-3" : "justify-between",
+      );
+    }
+  }
 });
 
 test("calendar allows today in UTC and disables future dates", () => {
