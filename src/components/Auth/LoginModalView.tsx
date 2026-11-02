@@ -49,7 +49,7 @@ export default function LoginModalView({
   const isDark = resolvedTheme === "dark";
 
   const trustBadge = (
-    <div className="text-secondary-text mb-4 flex items-center justify-center gap-1.5 text-xs">
+    <div className="text-secondary-text mb-3 flex items-center justify-center gap-1.5 text-xs">
       <Icon
         icon="heroicons:shield-check"
         className="text-link size-4 shrink-0"
@@ -73,7 +73,7 @@ export default function LoginModalView({
         </DialogDescription>
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList fullWidth className="mb-6">
+          <TabsList fullWidth className="mb-4">
             {!onlyRoblox && (
               <TabsTrigger value="discord" fullWidth>
                 <Image
@@ -110,15 +110,13 @@ export default function LoginModalView({
 
           {!onlyRoblox && (
             <TabsContent value="discord">
-              <p className="text-secondary-text mb-4 text-center text-sm">
-                Jailbreak Changelogs connects with Discord to build your user
-                profile. We only collect your publicly available Discord
-                details. To use our trading features, you&apos;ll need to link
-                your Roblox account after signing in.
+              <p className="text-secondary-text mb-3 text-center text-sm">
+                Sign in with Discord to create your profile. Link Roblox after
+                signing in to access trading features.
               </p>
               {trustBadge}
-              <div className="space-y-4 text-center">
-                <p className="text-primary-text mb-4 text-xs">
+              <div className="space-y-3 text-center">
+                <p className="text-secondary-text text-xs">
                   By continuing, you agree to our{" "}
                   <a
                     href="/tos"
@@ -141,7 +139,7 @@ export default function LoginModalView({
                 </p>
                 <label
                   htmlFor="join-discord"
-                  className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg mb-4 flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors select-none"
+                  className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors select-none"
                 >
                   <Checkbox
                     id="join-discord"
@@ -170,15 +168,13 @@ export default function LoginModalView({
 
           {canLinkRoblox && (
             <TabsContent value="roblox">
-              <p className="text-secondary-text mb-4 text-center text-sm">
-                Jailbreak Changelogs connects with Roblox to build your user
-                profile. We only collect your publicly available Roblox details.
-                To use our trading features, you&apos;ll need to link your
-                Roblox account after signing in.
+              <p className="text-secondary-text mb-3 text-center text-sm">
+                Link your Roblox account to access trading features. We only
+                collect your publicly available Roblox details.
               </p>
               {trustBadge}
-              <div className="space-y-4 text-center">
-                <p className="text-primary-text mb-4 text-xs">
+              <div className="space-y-3 text-center">
+                <p className="text-secondary-text text-xs">
                   By continuing, you agree to our{" "}
                   <a
                     href="/tos"
