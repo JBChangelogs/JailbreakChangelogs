@@ -14,6 +14,7 @@ import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { accentCardTheme, userCardAccent } from "@/utils/ui/accentColor";
+import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 
 function InlineSpinner() {
   return (
@@ -39,7 +40,21 @@ export default function UserSearch() {
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
   const debouncedQuery = useDebounce(searchQuery.trim(), 400);
   const pushedQueryRef = useRef(queryFromUrl);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const usersPerPage = 30;
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isItemSearchShortcut(event) && searchInputRef.current) {
+        event.preventDefault();
+        searchInputRef.current.focus();
+        searchInputRef.current.select();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const trimmedQuery = queryFromUrl.trim();
   const usersQuery = useQuery({
@@ -125,6 +140,8 @@ export default function UserSearch() {
       <Form action="/users">
         <div className="relative flex items-center">
           <input
+            ref={searchInputRef}
+            aria-keyshortcuts="/"
             type="text"
             id="searchInput"
             name="query"
@@ -172,6 +189,15 @@ export default function UserSearch() {
           </div>
         </div>
       </Form>
+
+      <div className="text-secondary-text hidden items-center gap-1 text-xs lg:flex">
+        <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
+        Helpful tip: Press{" "}
+        <kbd className="border-border-card bg-secondary-bg text-secondary-text shrink-0 rounded border px-1.5 py-1 font-sans text-xs leading-none">
+          /
+        </kbd>{" "}
+        to quickly focus the search.
+      </div>
 
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="text-secondary-text flex items-center gap-2 text-sm">
