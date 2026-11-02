@@ -109,7 +109,7 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-type ChartValueType = number | string | Array<number | string>;
+type ChartValueType = number | string | ReadonlyArray<number | string>;
 type ChartNameType = number | string;
 type ChartTooltipProps = React.ComponentProps<"div"> & {
   active?: boolean;

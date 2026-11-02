@@ -344,8 +344,14 @@ export default function MetricHistoryChart({
             />
             <ChartTooltip
               cursor={false}
-              content={
+              content={({ active: tooltipActive, label, payload }) => (
                 <ChartTooltipContent
+                  active={tooltipActive}
+                  label={label}
+                  payload={payload?.toSorted(
+                    (a, b) =>
+                      Number(b.dataKey === "v") - Number(a.dataKey === "v"),
+                  )}
                   className="min-w-48 px-3 py-2"
                   formatter={(value, name) => {
                     const m =
@@ -379,7 +385,7 @@ export default function MetricHistoryChart({
                     });
                   }}
                 />
-              }
+              )}
             />
             {overlay && (
               <Area
