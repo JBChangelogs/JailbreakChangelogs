@@ -6,32 +6,76 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/IconWrapper";
 
+const DropdownMenuTouchContext = React.createContext<(() => void) | null>(null);
+
 const DropdownMenu = ({
+  open: controlledOpen,
+  defaultOpen = false,
   onOpenChange,
   modal = false,
   ...props
 }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>) => {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const changeOpen = (nextOpen: boolean) => {
+    if (controlledOpen === undefined) setUncontrolledOpen(nextOpen);
+    if (!nextOpen) {
+      const activeElement = document.activeElement;
+      if (
+        activeElement instanceof HTMLElement &&
+        activeElement.getAttribute("aria-haspopup") === "menu"
+      ) {
+        activeElement.blur();
+      }
+    }
+    onOpenChange?.(nextOpen);
+  };
+
   return (
-    <DropdownMenuPrimitive.Root
-      modal={modal}
-      onOpenChange={(open) => {
-        if (!open) {
-          const activeElement = document.activeElement;
-          if (
-            activeElement instanceof HTMLElement &&
-            activeElement.getAttribute("aria-haspopup") === "menu"
-          ) {
-            activeElement.blur();
-          }
-        }
-        onOpenChange?.(open);
-      }}
-      {...props}
-    />
+    <DropdownMenuTouchContext.Provider value={() => changeOpen(!open)}>
+      <DropdownMenuPrimitive.Root
+        modal={modal}
+        open={open}
+        onOpenChange={changeOpen}
+        {...props}
+      />
+    </DropdownMenuTouchContext.Provider>
   );
 };
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+const DropdownMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>(({ onPointerDown, onClick, disabled, ...props }, ref) => {
+  const toggle = React.useContext(DropdownMenuTouchContext);
+  const touch = React.useRef(false);
+  return (
+    <DropdownMenuPrimitive.Trigger
+      {...props}
+      ref={ref}
+      disabled={disabled}
+      onPointerDown={(event) => {
+        onPointerDown?.(event);
+        touch.current =
+          event.pointerType === "touch" && !event.defaultPrevented;
+        // Wait for a native click: scrolling cancels it, unlike pointerdown.
+        if (touch.current) event.preventDefault();
+      }}
+      onClick={(event) => {
+        onClick?.(event);
+        if (
+          !event.defaultPrevented &&
+          !disabled &&
+          touch.current &&
+          event.detail > 0
+        ) {
+          toggle?.();
+        }
+      }}
+    />
+  );
+});
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName;
 
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
 
