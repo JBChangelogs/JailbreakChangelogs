@@ -130,7 +130,7 @@ export default function ItemValueChart({
 
   return (
     <MetricHistoryChart
-      title="Item History"
+      title={`${history[0]?.name || "Item"} History`}
       caption={`Updates daily at ${CHART_UPDATE_TIME}. Select a card to chart it.`}
       metrics={metrics}
       defaultMetric={defaultMetric}
