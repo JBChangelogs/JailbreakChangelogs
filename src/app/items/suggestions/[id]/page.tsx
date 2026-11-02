@@ -962,11 +962,18 @@ export default function ValueSuggestionDetailPage() {
                       <div className="bg-quaternary-bg/70 h-6 w-20 rounded-md" />
                       <div className="bg-quaternary-bg/70 h-6 w-16 rounded-md" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="bg-quaternary-bg/70 h-5 w-5 rounded-full" />
-                      <div className="bg-quaternary-bg/70 h-4 w-28 rounded" />
+                    <div className="bg-quaternary-bg/70 h-20 w-full rounded-xl" />
+                  </div>
+                </div>
+                <div className="border-border-card flex flex-col gap-4 border-t px-5 py-4 md:flex-row md:items-center md:justify-between lg:px-6">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-quaternary-bg/70 h-9 w-9 rounded-full" />
+                    <div className="space-y-2">
+                      <div className="bg-quaternary-bg/70 h-3 w-24 rounded" />
+                      <div className="bg-quaternary-bg/70 h-3 w-48 max-w-full rounded" />
                     </div>
                   </div>
+                  <div className="bg-quaternary-bg/70 h-8 w-64 max-w-full rounded" />
                 </div>
               </div>
 
@@ -1266,107 +1273,107 @@ export default function ValueSuggestionDetailPage() {
                             : `${voteRateLimitSeconds}s`}
                         </p>
                       )}
-
-                      <div>
-                        <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
-                          Suggested by
-                        </p>
-                        <div className="mt-1 flex items-start gap-2.5">
-                          <UserAvatar
-                            userId={suggestion.user.id}
-                            avatarHash={null}
-                            username={
-                              suggestion.user.roblox_username ??
-                              suggestion.user.username ??
-                              ""
-                            }
-                            forceAvatarUrl={
-                              suggestion.user.roblox_avatar ?? undefined
-                            }
-                            premiumType={suggestion.user.premiumtype ?? 0}
-                            size={9}
-                            showBadge={false}
-                            bgClassName="bg-tertiary-bg"
-                          />
-                          <div className="min-w-0">
-                            <UserProfilePopover user={suggestion.user}>
-                              <Link
-                                href={`/users/${suggestion.user.id}`}
-                                prefetch={false}
-                                className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
-                              >
-                                {suggestion.user.roblox_display_name ||
-                                  suggestion.user.roblox_username ||
-                                  `User #${suggestion.user.id}`}
-                              </Link>
-                            </UserProfilePopover>
-                            <p className="text-secondary-text mt-1 text-xs">
-                              Posted on{" "}
-                              {formatMessageDate(suggestion.created_at)}
-                              {suggestion.updated_at !== suggestion.created_at
-                                ? " (Updated)"
-                                : ""}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-3 flex flex-wrap items-center gap-1">
-                          {suggestion.user.roblox_id && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              asChild
-                              className="w-fit"
-                            >
-                              <Link
-                                href={`/inventories/${suggestion.user.roblox_id}`}
-                                prefetch={false}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Icon
-                                  icon="material-symbols:inventory-2-outline-rounded"
-                                  className="h-4 w-4"
-                                  inline
-                                />
-                                Suggester&apos;s inventory
-                              </Link>
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            asChild
-                            className="text-secondary-text! hover:text-primary-text! w-fit"
-                          >
+                    </div>
+                  </div>
+                  <div className="border-border-card flex flex-col gap-4 border-t px-5 py-4 md:flex-row md:items-center md:justify-between lg:px-6">
+                    <div className="min-w-0">
+                      <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                        Suggested by
+                      </p>
+                      <div className="mt-1 flex items-start gap-2.5">
+                        <UserAvatar
+                          userId={suggestion.user.id}
+                          avatarHash={null}
+                          username={
+                            suggestion.user.roblox_username ??
+                            suggestion.user.username ??
+                            ""
+                          }
+                          forceAvatarUrl={
+                            suggestion.user.roblox_avatar ?? undefined
+                          }
+                          premiumType={suggestion.user.premiumtype ?? 0}
+                          size={9}
+                          showBadge={false}
+                          bgClassName="bg-tertiary-bg"
+                        />
+                        <div className="min-w-0">
+                          <UserProfilePopover user={suggestion.user}>
                             <Link
-                              href="/items/suggestions?submit=true"
+                              href={`/users/${suggestion.user.id}`}
                               prefetch={false}
+                              className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
                             >
-                              <Icon
-                                icon="material-symbols:add-rounded"
-                                className="h-4 w-4"
-                                inline
-                              />
-                              New suggestion
+                              {suggestion.user.roblox_display_name ||
+                                suggestion.user.roblox_username ||
+                                `User #${suggestion.user.id}`}
                             </Link>
-                          </Button>
-                          {user?.id !== suggestion.user.id && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => openReportModal(suggestion)}
-                              className="text-button-danger! hover:bg-button-danger/10!"
-                            >
-                              <Icon
-                                icon="material-symbols:flag-outline-rounded"
-                                className="h-3.5 w-3.5"
-                                inline
-                              />
-                              Report
-                            </Button>
-                          )}
+                          </UserProfilePopover>
+                          <p className="text-secondary-text mt-1 text-xs">
+                            Posted on {formatMessageDate(suggestion.created_at)}
+                            {suggestion.updated_at !== suggestion.created_at
+                              ? " (Updated)"
+                              : ""}
+                          </p>
                         </div>
                       </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1">
+                      {suggestion.user.roblox_id && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          asChild
+                          className="w-fit"
+                        >
+                          <Link
+                            href={`/inventories/${suggestion.user.roblox_id}`}
+                            prefetch={false}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Icon
+                              icon="material-symbols:inventory-2-outline-rounded"
+                              className="h-4 w-4"
+                              inline
+                            />
+                            Suggester&apos;s inventory
+                          </Link>
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-secondary-text! hover:text-primary-text! w-fit"
+                      >
+                        <Link
+                          href="/items/suggestions?submit=true"
+                          prefetch={false}
+                        >
+                          <Icon
+                            icon="material-symbols:add-rounded"
+                            className="h-4 w-4"
+                            inline
+                          />
+                          New suggestion
+                        </Link>
+                      </Button>
+                      {user?.id !== suggestion.user.id && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openReportModal(suggestion)}
+                          className="text-button-danger! hover:bg-button-danger/10!"
+                        >
+                          <Icon
+                            icon="material-symbols:flag-outline-rounded"
+                            className="h-3.5 w-3.5"
+                            inline
+                          />
+                          Report
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
