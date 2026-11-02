@@ -86,14 +86,14 @@ export default function ItemValueChart({
     metric(
       "cash",
       "Cash Value",
-      "#2462cd",
+      "var(--color-chart-1)",
       history.map((d) => ({ t: at(d), v: parseRawValue(d.cash_value) })),
       { format: formatValue, curve: "stepAfter", overlay: "duped" },
     ),
     metric(
       "duped",
       "Duped Value",
-      "#ed4f4f",
+      "var(--color-chart-6)",
       history.map((d) => ({ t: at(d), v: parseRawValue(d.duped_value) })),
       { format: formatValue, curve: "stepAfter", overlay: "cash" },
     ),
@@ -103,13 +103,13 @@ export default function ItemValueChart({
           metric(
             "traded",
             "Times Traded",
-            "#10b981",
+            "var(--color-chart-2)",
             withMeta.map((d) => ({ t: at(d), v: d.metadata!.TimesTraded })),
           ),
           metric(
             "circulation",
             "Circulation",
-            "#f59e0b",
+            "var(--color-chart-3)",
             withMeta.map((d) => ({
               t: at(d),
               v: d.metadata!.UniqueCirculation,
@@ -118,7 +118,7 @@ export default function ItemValueChart({
           metric(
             "scanned",
             "Times Scanned",
-            "#8b5cf6",
+            "var(--color-chart-4)",
             withMeta
               .filter((d) => d.metadata!.TimesScanned != null)
               .map((d) => ({ t: at(d), v: d.metadata!.TimesScanned! })),

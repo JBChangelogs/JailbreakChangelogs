@@ -92,7 +92,7 @@ function DeltaChip({
       ? "var(--color-secondary-text)"
       : delta > 0 !== Boolean(upIsBad)
         ? "var(--color-form-success)"
-        : "var(--color-button-danger)";
+        : "var(--color-form-error)";
   return (
     <span
       className="inline-flex shrink-0 items-center gap-0.5 font-sans text-xs font-semibold tabular-nums"

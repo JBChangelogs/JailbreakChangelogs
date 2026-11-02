@@ -54,3 +54,25 @@ test("problems group under the color most of them share", () => {
   ]);
   expect(groups[0][1][1].keys).toEqual(["--color-primary-text", raised]);
 });
+
+test("older themes gain chart defaults without overwriting custom series colors", () => {
+  const saved = {
+    "--color-highlight": "#abcdef",
+    "--color-button-danger": "#ff0000",
+    "--color-chart-3": "#123456",
+  };
+  const filled = withDefaultColors(saved);
+  const expected = {
+    "--color-chart-1": "var(--color-highlight)",
+    "--color-chart-2": "#10b981",
+    "--color-chart-3": "#123456",
+    "--color-chart-4": "#8b5cf6",
+    "--color-chart-5": "#06b6d4",
+    "--color-chart-6": "var(--color-button-danger)",
+  };
+  for (const [key, value] of Object.entries(expected)) {
+    expect(filled[key]).toBe(value);
+    expect(colorGroup(key)).toBe("Charts");
+  }
+  expect(saved).not.toHaveProperty("--color-chart-1");
+});

@@ -29,7 +29,7 @@ export function parseThemeCss(
 
   // Comments aside, a declaration is "name: value" up to ";", "}" or a line end.
   const body = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  for (const match of body.matchAll(/([a-z-]+)\s*:\s*([^;{}\n]+)/gi)) {
+  for (const match of body.matchAll(/([a-z-][a-z0-9-]*)\s*:\s*([^;{}\n]+)/gi)) {
     const name = match[1].toLowerCase();
     const value = match[2].trim();
     if (name === "color-scheme") {

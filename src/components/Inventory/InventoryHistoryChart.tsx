@@ -45,21 +45,21 @@ export default function InventoryHistoryChart({
     {
       key: "networth",
       label: "Networth",
-      color: "#8b5cf6",
+      color: "var(--color-chart-4)",
       format: formatValue,
       series: toSeries(snapshots.map((d) => ({ t: at(d), v: d.networth }))),
     },
     {
       key: "money",
       label: "Money",
-      color: "#10b981",
+      color: "var(--color-chart-2)",
       format: formatValue,
       series: toSeries(moneyPoints),
     },
     {
       key: "duped",
       label: "Duped Value",
-      color: "#f59e0b",
+      color: "var(--color-chart-6)",
       format: formatValue,
       upIsBad: true,
       series: toSeries(
@@ -69,7 +69,7 @@ export default function InventoryHistoryChart({
     {
       key: "items",
       label: "Items",
-      color: "var(--color-button-info)",
+      color: "var(--color-chart-1)",
       format: formatCount,
       series: toSeries(
         snapshots.map((d) => ({ t: at(d), v: d.inventory_count })),

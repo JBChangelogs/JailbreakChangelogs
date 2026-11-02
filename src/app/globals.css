@@ -288,6 +288,14 @@ body:has(
   --color-tertiary: hsl(155, 61%, 44%); /* Tertiary accent color */
   --color-stroke: hsl(0, 0%, 0%); /* Primary stroke color */
 
+  /* Chart series */
+  --color-chart-1: var(--color-highlight);
+  --color-chart-2: #10b981;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #8b5cf6;
+  --color-chart-5: #06b6d4;
+  --color-chart-6: var(--color-button-danger);
+
   /* Warning Colors */
   --color-warning: hsl(38, 100%, 61%); /* Orange for Double XP alerts */
   --color-warning-light: hsl(48, 100%, 62%); /* Yellow for 2 weeks left */

@@ -5,6 +5,8 @@ const theme = {
   scheme: "dark" as const,
   vars: {
     "--color-primary-bg": "#121317",
+    "--color-chart-1": "#abcdef",
+    "--color-chart-6": "var(--color-button-danger)",
     "--color-link": "color-mix(in srgb, #8839ef 85%, black)",
   },
   logo_filter: "hue-rotate(45deg)",

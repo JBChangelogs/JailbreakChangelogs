@@ -32,6 +32,12 @@ const MAIN_NAMES = new Map<string, string>([
   ["--color-menu-badge-text", "Menu badge text"],
   ["--color-border-focus", "Focus rings and tab underline"],
   ["--color-tab-active", "Filled tab active"],
+  ["--color-chart-1", "Chart: cash value, items, inventories"],
+  ["--color-chart-2", "Chart: money, times traded"],
+  ["--color-chart-3", "Chart: circulation"],
+  ["--color-chart-4", "Chart: networth, times scanned"],
+  ["--color-chart-5", "Chart: avg per inventory"],
+  ["--color-chart-6", "Chart: duped value"],
 ]);
 
 // Mixing toward the text color lightens on dark themes, darkens on light.
@@ -68,6 +74,7 @@ export function colorGroup(key: string): string {
   const name = key.replace(/^--color-/, "");
   if (name.startsWith("demand-")) return "Demand";
   if (name.startsWith("trend-")) return "Trends";
+  if (name.startsWith("chart-")) return "Charts";
   if (name.startsWith("icon-tile") || name.startsWith("menu-badge"))
     return "Icons and menu badges";
   if (name.startsWith("supporter-")) return "Supporters";
@@ -103,6 +110,7 @@ export const COLOR_GROUPS = [
   "Status and accents",
   "Demand",
   "Trends",
+  "Charts",
   "Icons and menu badges",
   "Supporters",
   "Overlays",
@@ -121,6 +129,18 @@ const NEWER_COLORS: [
   [
     "--color-tab-active",
     (v) => v["--color-button-info"] && "var(--color-button-info)",
+  ],
+  [
+    "--color-chart-1",
+    (v) => v["--color-highlight"] && "var(--color-highlight)",
+  ],
+  ["--color-chart-2", (v) => v["--color-highlight"] && "#10b981"],
+  ["--color-chart-3", (v) => v["--color-highlight"] && "#f59e0b"],
+  ["--color-chart-4", (v) => v["--color-highlight"] && "#8b5cf6"],
+  ["--color-chart-5", (v) => v["--color-highlight"] && "#06b6d4"],
+  [
+    "--color-chart-6",
+    (v) => v["--color-button-danger"] && "var(--color-button-danger)",
   ],
   [
     "--color-icon-tile-bg",

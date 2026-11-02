@@ -40,9 +40,9 @@ const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
   { value: "30", label: "Last 30 days" },
 ];
 
-const NETWORTH_COLOR = "#8b5cf6";
-const AVG_COLOR = "#06b6d4";
-const DUPED_COLOR = "#f59e0b";
+const NETWORTH_COLOR = "var(--color-chart-4)";
+const AVG_COLOR = "var(--color-chart-5)";
+const DUPED_COLOR = "var(--color-chart-6)";
 
 const filterByDays = (data: NetworthCapSnapshot[], days: number) => {
   const cutoff = Date.now() / 1000 - days * 86400;
@@ -77,7 +77,7 @@ function TrendChip({
     ? "var(--color-secondary-text)"
     : isGood
       ? "var(--color-form-success)"
-      : "var(--color-button-danger)";
+      : "var(--color-form-error)";
   return (
     <span
       className="inline-flex shrink-0 items-center gap-0.5 font-sans text-xs font-semibold tabular-nums"
@@ -247,7 +247,7 @@ export default function NetworthCapHistoryChart() {
     {
       label: "Inventories",
       value: capStats?.total_inventories,
-      accentColor: "var(--color-button-info)",
+      accentColor: "var(--color-chart-1)",
       get: (d: Row) => d.total_inventories,
       format: (v: number) => Math.round(v).toLocaleString(),
     },
