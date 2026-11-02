@@ -99,6 +99,7 @@ export default function RobberyGrid<T>({
   return (
     <div
       ref={containerRef}
+      className="min-h-screen"
       aria-busy={isUpdating}
       style={{ height: virtualizer.getTotalSize(), position: "relative" }}
       onFocusCapture={(event) => {

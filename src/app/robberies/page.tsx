@@ -680,8 +680,9 @@ function RobberyTrackerContent() {
     matchesCountryFilter,
   ]);
 
+  // Keep groups ready so switching views does not unmount the deferred grid.
   const groupedRobberies = useMemo(() => {
-    if (isPowerComboMode || robberiesDisplayMode !== "grouped") return [];
+    if (isPowerComboMode) return [];
 
     const groups = new Map<string, RobberyData[]>();
     for (const robbery of filteredRobberies) {
@@ -702,7 +703,7 @@ function RobberyTrackerContent() {
         ),
       }))
       .sort((a, b) => b.latestTimestamp - a.latestTimestamp);
-  }, [filteredRobberies, isPowerComboMode, robberiesDisplayMode]);
+  }, [filteredRobberies, isPowerComboMode]);
 
   const baselineStats = useMemo(() => {
     let total = 0;

@@ -37,5 +37,6 @@ test("short grids retain every card and expose pending updates", () => {
     />,
   );
   expect(markup).toContain("Join first server");
+  expect(markup).toContain('class="min-h-screen"');
   expect(markup).toContain('aria-busy="true"');
 });
