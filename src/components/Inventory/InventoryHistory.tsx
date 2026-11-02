@@ -344,6 +344,10 @@ export default function InventoryHistory({
                   }
                   initialFocus
                 />
+                <p className="text-secondary-text max-w-64 px-3 pb-3 text-xs">
+                  Dates unlock at midnight UTC. Recent scans may appear under
+                  yesterday’s date.
+                </p>
               </PopoverContent>
             </Popover>
             <InventoryHistoryTip
