@@ -42,6 +42,7 @@ import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
 import ItemChangelogsTab from "@/components/Items/ItemChangelogsTab";
 import ItemTradesTab from "@/components/Items/ItemTradesTab";
 import ReportItemInfoButton from "@/components/Items/ReportItemInfoButton";
+import CopyItemIdButton from "@/components/Items/CopyItemIdButton";
 import {
   handleImageError,
   getItemImagePath,
@@ -514,7 +515,10 @@ export default function ItemDetailsClient({
           {/* Right column - Details */}
           <div className="space-y-6">
             <div>
-              <h2 className="page-heading">{currentItem.name}</h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="page-heading">{currentItem.name}</h2>
+                <CopyItemIdButton itemId={currentItem.id} />
+              </div>
               <p className="text-secondary-text mt-2 text-sm">
                 Created by <CreatorLink creator={currentItem.creator} />
               </p>
