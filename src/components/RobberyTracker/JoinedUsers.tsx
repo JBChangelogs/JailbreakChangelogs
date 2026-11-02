@@ -1,7 +1,6 @@
 "use client";
 
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -51,24 +50,6 @@ export default function JoinedUsers({
   users: TrackerJoinUser[];
   variant?: "robbery" | "bounty";
 }) {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const clearCloseTimer = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = null;
-  };
-  const scheduleClose = () => {
-    clearCloseTimer();
-    closeTimer.current = setTimeout(() => setPopoverOpen(false), 150);
-  };
-
-  useEffect(
-    () => () => {
-      if (closeTimer.current) clearTimeout(closeTimer.current);
-    },
-    [],
-  );
-
   const isBounty = variant === "bounty";
   const userIds = users.map((user) => String(user.user_id)).sort();
   const { data: userDetails } = useQuery({
@@ -157,20 +138,12 @@ export default function JoinedUsers({
           joined
         </span>
       ) : (
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <Popover>
           <PopoverTrigger asChild>
             <button
               type="button"
               className="hover:text-link cursor-pointer"
               aria-label={`View ${users.length} people who joined this server`}
-              onPointerEnter={(event) => {
-                if (event.pointerType !== "mouse") return;
-                clearCloseTimer();
-                setPopoverOpen(true);
-              }}
-              onPointerLeave={(event) => {
-                if (event.pointerType === "mouse") scheduleClose();
-              }}
             >
               {users.length} people joined
             </button>
@@ -178,12 +151,6 @@ export default function JoinedUsers({
           <PopoverContent
             align="start"
             className="w-64 p-3"
-            onPointerEnter={(event) => {
-              if (event.pointerType === "mouse") clearCloseTimer();
-            }}
-            onPointerLeave={(event) => {
-              if (event.pointerType === "mouse") scheduleClose();
-            }}
             onCloseAutoFocus={(event) => event.preventDefault()}
           >
             <p className="text-secondary-text mb-2 text-xs font-semibold">
