@@ -403,6 +403,11 @@ body:has(
     ); /* Button info color with opacity */
   }
 
+  /* Recharts makes inner layers focusable; hide the ring on tap/click */
+  .recharts-wrapper :focus:not(:focus-visible) {
+    outline: none;
+  }
+
   select,
   select option {
     font-family: inherit;

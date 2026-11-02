@@ -110,7 +110,9 @@ function DeltaChip({
         inline={true}
       />
       {delta === 0
-        ? "No change"
+        ? points.every((p) => p.v === points[0].v)
+          ? "No change"
+          : "±0"
         : `${delta > 0 ? "+" : "-"}${format(Math.abs(delta))}`}
       <span className="text-secondary-text hidden font-medium @[11rem]:inline">
         · {rangeShort}
