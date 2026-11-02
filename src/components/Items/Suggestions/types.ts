@@ -16,7 +16,14 @@ export interface CommonTradeSubmission {
 interface CommonTradeItem extends Partial<
   Pick<
     TradeItem,
-    "cash_value" | "duped_value" | "demand" | "duped_demand" | "trend"
+    | "cash_value"
+    | "duped_value"
+    | "demand"
+    | "duped_demand"
+    | "trend"
+    | "is_limited"
+    | "season"
+    | "level"
   >
 > {
   id: string | number;

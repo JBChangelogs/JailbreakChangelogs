@@ -950,12 +950,12 @@ export default function ValueSuggestionDetailPage() {
             <div className="animate-pulse space-y-5">
               {/* Hero */}
               <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-                <div className="flex flex-col sm:flex-row">
+                <div className="flex flex-col gap-5 p-5 sm:flex-row lg:gap-6 lg:p-6">
                   <div
-                    className="bg-quaternary-bg/70 w-full shrink-0 sm:w-56"
+                    className="bg-quaternary-bg/70 w-full shrink-0 self-start overflow-hidden rounded-lg sm:w-56 lg:w-80"
                     style={{ aspectRatio: "16/9" }}
                   />
-                  <div className="flex flex-1 flex-col justify-center gap-4 p-5">
+                  <div className="flex flex-1 flex-col gap-4">
                     <div className="bg-quaternary-bg/70 h-7 w-48 rounded" />
                     <div className="flex flex-wrap gap-1.5">
                       <div className="bg-quaternary-bg/70 h-6 w-16 rounded-md" />
@@ -1100,10 +1100,10 @@ export default function ValueSuggestionDetailPage() {
               <div className="space-y-5">
                 {/* ── Hero ── */}
                 <div className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border">
-                  <div className="flex flex-col sm:flex-row">
+                  <div className="flex flex-col gap-5 p-5 sm:flex-row lg:gap-6 lg:p-6">
                     {/* Item image */}
                     <div
-                      className="bg-secondary-bg relative w-full shrink-0 sm:w-56 lg:w-80"
+                      className="bg-secondary-bg relative w-full shrink-0 self-start overflow-hidden rounded-lg sm:w-56 lg:w-80"
                       style={{ aspectRatio: "16/9" }}
                     >
                       {item && isVideoItem(item.name) ? (
@@ -1133,7 +1133,7 @@ export default function ValueSuggestionDetailPage() {
                     </div>
 
                     {/* Info */}
-                    <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-5 lg:p-6">
+                    <div className="flex min-w-0 flex-1 flex-col gap-3">
                       <div>
                         <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                           Suggestion #{suggestion.id}

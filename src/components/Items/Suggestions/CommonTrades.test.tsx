@@ -112,3 +112,31 @@ test("unknown values never count as zero or fall back to clean value for duped i
     expect(markup).not.toContain(" higher");
   }
 });
+
+test("common trade cards show limited and seasonal badges only for qualifying items", () => {
+  for (const appearance of ["default", "detail"] as const) {
+    for (const [status, expected] of [
+      [{ is_limited: 1 }, [true, false]],
+      [{ season: 1 }, [false, true]],
+      [{ level: 0 }, [false, true]],
+      [{ is_limited: 1, season: 2 }, [true, true]],
+      [{ is_limited: 0, season: null, level: null }, [false, false]],
+    ] as const) {
+      const markup = renderToStaticMarkup(
+        <CommonTradesDisplay
+          trades={[
+            {
+              offering: [
+                { id: 1, name: "Torpedo", type: "Vehicle", ...status },
+              ],
+              requesting: [],
+            },
+          ]}
+          appearance={appearance}
+        />,
+      );
+      expect(markup.includes("Limited")).toBe(expected[0]);
+      expect(markup.includes("Seasonal")).toBe(expected[1]);
+    }
+  }
+});

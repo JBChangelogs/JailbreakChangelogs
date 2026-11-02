@@ -16,6 +16,7 @@ import { fetchTradeItemsByIds } from "@/utils/api/fetchTradeItemsByIds";
 import { formatFullValue, parseCashValue } from "@/utils/trading/values";
 import { formatCurrencyValue } from "@/utils/trading/currency";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
+import { isSeasonalItem } from "@/utils/items/season";
 import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import type { Item } from "@/types/index";
 import type { TradeItem } from "@/types/trading";
@@ -216,6 +217,8 @@ function TradeItemSummary({
   const amount = Math.max(1, Number(item.amount) || 1);
   const isOg = item.og ?? item.isOG ?? false;
   const isDuped = item.duped ?? item.isDuped ?? false;
+  const isLimited = item.is_limited === 1;
+  const isSeasonal = isSeasonalItem(item);
   const { demand, trend } = getTradeItemMarketDetails(item, isDuped);
   const status = item.cash_value !== undefined ? "ready" : valuesStatus;
   const categoryIcon = item.type ? getCategoryIcon(item.type) : null;
@@ -251,7 +254,7 @@ function TradeItemSummary({
             <span className="text-secondary-text"> ×{amount}</span>
           )}
         </p>
-        {(showItemType || isOg || isDuped) && (
+        {(showItemType || isLimited || isSeasonal || isOg || isDuped) && (
           <div className="mt-1 flex flex-wrap gap-1">
             {showItemType && item.type && categoryColor && (
               <span
@@ -268,6 +271,30 @@ function TradeItemSummary({
                   />
                 )}
                 {item.type}
+              </span>
+            )}
+            {isLimited && (
+              <span
+                className={`${badgeBase} border-border-card bg-quaternary-bg text-primary-text gap-1.5`}
+              >
+                <Icon
+                  icon="mdi:clock"
+                  className="h-3 w-3"
+                  style={{ color: "#ffd700" }}
+                />
+                Limited
+              </span>
+            )}
+            {isSeasonal && (
+              <span
+                className={`${badgeBase} border-border-card bg-quaternary-bg text-primary-text gap-1.5`}
+              >
+                <Icon
+                  icon="noto-v1:snowflake"
+                  className="h-3 w-3"
+                  style={{ color: "#40c0e7" }}
+                />
+                Seasonal
               </span>
             )}
             {isOg && <OgBadge compact />}
