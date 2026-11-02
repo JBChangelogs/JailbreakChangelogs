@@ -141,7 +141,7 @@ export default function RobberyPlayersModal({
                   className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3"
                 >
                   {/* Avatar */}
-                  <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                  <div className="bg-quaternary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     {robloxData?.usersData ? (
                       <Image
                         placeholder={IMAGE_PLACEHOLDER}
