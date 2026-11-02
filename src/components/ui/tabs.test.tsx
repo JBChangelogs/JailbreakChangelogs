@@ -1,6 +1,60 @@
 import { expect, test } from "bun:test";
+import type { ComponentProps, ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Tabs, TabsList, TabsTrigger } from "./tabs";
+
+test("pointer focus survives a window switch but clears for keyboard navigation", () => {
+  let handlers!: ComponentProps<"button">;
+  // Capture the primitive's handlers while React provides the context dispatcher.
+  const { render: renderTrigger } = TabsTrigger as unknown as {
+    render: (
+      props: ComponentProps<typeof TabsTrigger>,
+      ref: null,
+    ) => ReactElement<ComponentProps<"button">>;
+  };
+  function Probe() {
+    handlers = renderTrigger({ value: "a" }, null).props;
+    return null;
+  }
+  renderToStaticMarkup(<Probe />);
+
+  let windowFocused = true;
+  const target = {
+    dataset: {} as DOMStringMap,
+    ownerDocument: { hasFocus: () => windowFocused },
+  };
+  const pointerDown = () =>
+    handlers.onPointerDown?.({ currentTarget: target } as unknown as Parameters<
+      NonNullable<typeof handlers.onPointerDown>
+    >[0]);
+  const blur = () =>
+    handlers.onBlur?.({ currentTarget: target } as unknown as Parameters<
+      NonNullable<typeof handlers.onBlur>
+    >[0]);
+  const keyDown = (key: string, altKey = false) =>
+    handlers.onKeyDown?.({
+      currentTarget: target,
+      key,
+      altKey,
+    } as unknown as Parameters<NonNullable<typeof handlers.onKeyDown>>[0]);
+
+  pointerDown();
+  expect(target.dataset.pointerFocus).toBe("true");
+  keyDown("Alt", true);
+  keyDown("Tab", true);
+  expect(target.dataset.pointerFocus).toBe("true");
+  windowFocused = false;
+  blur();
+  windowFocused = true;
+  expect(target.dataset.pointerFocus).toBe("true");
+
+  keyDown("ArrowRight");
+  expect(target.dataset.pointerFocus).toBeUndefined();
+
+  pointerDown();
+  blur();
+  expect(target.dataset.pointerFocus).toBeUndefined();
+});
 
 const render = (radio: boolean) =>
   renderToStaticMarkup(

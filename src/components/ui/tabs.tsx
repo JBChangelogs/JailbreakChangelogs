@@ -292,33 +292,70 @@ interface TabsTriggerProps extends React.ComponentPropsWithoutRef<
 const TabsTrigger = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Trigger>,
   TabsTriggerProps
->(({ className, fullWidth = false, onMouseDown, ...props }, ref) => {
-  const radio = React.useContext(RadioContext);
-  return (
-    <TabsPrimitive.Trigger
-      ref={ref}
-      data-slot="tabs-trigger"
-      {...(radio && {
-        role: "radio",
-        "aria-checked": radio.value === props.value,
-        "aria-selected": undefined,
-        "aria-controls": undefined,
-      })}
-      onMouseDown={(event) => {
-        // Radix focuses the trigger programmatically on mousedown, which can
-        // match :focus-visible and show the keyboard ring on a mouse click.
-        event.currentTarget.focus({ focusVisible: false });
-        onMouseDown?.(event);
-      }}
-      className={cn(
-        "focus-visible:ring-border-focus text-secondary-text data-[state=inactive]:hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-        fullWidth && "flex-1 px-2",
-        className,
-      )}
-      {...props}
-    />
-  );
-});
+>(
+  (
+    {
+      className,
+      fullWidth = false,
+      onPointerDown,
+      onKeyDown,
+      onBlur,
+      ...props
+    },
+    ref,
+  ) => {
+    const radio = React.useContext(RadioContext);
+    return (
+      <TabsPrimitive.Trigger
+        ref={ref}
+        data-slot="tabs-trigger"
+        {...(radio && {
+          role: "radio",
+          "aria-checked": radio.value === props.value,
+          "aria-selected": undefined,
+          "aria-controls": undefined,
+        })}
+        onPointerDown={(event) => {
+          // Some browsers show :focus-visible after Radix focuses a tapped tab.
+          event.currentTarget.dataset.pointerFocus = "true";
+          onPointerDown?.(event);
+        }}
+        onKeyDown={(event) => {
+          if (
+            !event.altKey &&
+            [
+              "Tab",
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowUp",
+              "ArrowDown",
+              "Home",
+              "End",
+              "Enter",
+              " ",
+            ].includes(event.key)
+          ) {
+            delete event.currentTarget.dataset.pointerFocus;
+          }
+          onKeyDown?.(event);
+        }}
+        onBlur={(event) => {
+          // Keep pointer focus when the browser restores focus after a window switch.
+          if (event.currentTarget.ownerDocument.hasFocus()) {
+            delete event.currentTarget.dataset.pointerFocus;
+          }
+          onBlur?.(event);
+        }}
+        className={cn(
+          "focus-visible:ring-border-focus text-secondary-text data-[state=inactive]:hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:not-data-[pointer-focus]:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+          fullWidth && "flex-1 px-2",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const TabsContent = React.forwardRef<
