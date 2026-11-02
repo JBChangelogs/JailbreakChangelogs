@@ -52,6 +52,7 @@ import {
 import Image from "next/image";
 import DriftPreview from "@/components/Items/DriftPreview";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
+import { SUGGESTION_CHART_METRICS } from "@/components/Items/Suggestions/shared";
 import { itemHistoryStaleTime } from "@/components/Items/ChartUpdateNotice";
 import Link from "next/link";
 import type { Item } from "@/types/index";
@@ -384,8 +385,10 @@ function SuggestionHistoryChart({
   itemId,
   historyData,
   loading,
+  defaultMetric,
 }: {
   itemId: number;
+  defaultMetric: ComponentProps<typeof ItemValueChart>["defaultMetric"];
   historyData: ComponentProps<typeof ItemValueChart>["historyData"];
   loading: boolean;
 }) {
@@ -393,6 +396,8 @@ function SuggestionHistoryChart({
     <div className="bg-quaternary-bg/70 h-87.5 animate-pulse rounded" />
   ) : (
     <ItemValueChart
+      key={`${itemId}:${defaultMetric}`}
+      defaultMetric={defaultMetric}
       historyData={historyData}
       hideTradingMetrics={itemId === 587}
     />
@@ -526,6 +531,8 @@ export default function ValueSuggestionDetailPage() {
   const [refreshType, setRefreshType] = useState<string | null>(null);
   const isValueSuggestion =
     suggestion?.field === "cash_value" || suggestion?.field === "duped_value";
+  const defaultChartMetric = SUGGESTION_CHART_METRICS[suggestion?.field ?? ""];
+  const hasHistoryChart = defaultChartMetric !== undefined;
   const tradeItemsQuery = useQuery({
     queryKey: ["tradable-items-page", 1],
     queryFn: () => fetchItemsClientPage(1),
@@ -874,7 +881,7 @@ export default function ValueSuggestionDetailPage() {
   const historyQuery = useQuery({
     queryKey: ["item", item?.id, "history"],
     queryFn: () => fetchItemHistoryClient(String(item!.id)),
-    enabled: !!item?.id && isValueSuggestion,
+    enabled: !!item?.id && hasHistoryChart,
     staleTime: itemHistoryStaleTime,
     gcTime: 60 * 60_000,
     retry: false,
@@ -890,12 +897,12 @@ export default function ValueSuggestionDetailPage() {
   });
   const activeSuggestionTab =
     suggestionTabParam === "discussion" ||
-    (suggestionTabParam === "history" && isValueSuggestion)
+    (suggestionTabParam === "history" && hasHistoryChart)
       ? suggestionTabParam
       : "details";
   const [suggestionTabDirection, setSuggestionTabDirection] = useState(0);
   const handleSuggestionTabChange = (newValue: string) => {
-    const order = isValueSuggestion
+    const order = hasHistoryChart
       ? ["details", "history", "discussion"]
       : ["details", "discussion"];
     const newIdx = order.indexOf(newValue);
@@ -1735,7 +1742,7 @@ export default function ValueSuggestionDetailPage() {
                         <TabsTrigger value="details" fullWidth>
                           Details
                         </TabsTrigger>
-                        {isValueSuggestion && (
+                        {hasHistoryChart && (
                           <TabsTrigger value="history" fullWidth>
                             Charts
                           </TabsTrigger>
@@ -1946,12 +1953,13 @@ export default function ValueSuggestionDetailPage() {
                                 </div>
                               )}
                             </TabsContent>
-                            {isValueSuggestion && (
+                            {hasHistoryChart && (
                               <TabsContent value="history" className="mt-4">
                                 <div className="border-border-card bg-secondary-bg rounded-xl border">
                                   <div className="p-5">
                                     <SuggestionHistoryChart
                                       itemId={suggestion.item_id}
+                                      defaultMetric={defaultChartMetric}
                                       historyData={itemHistory}
                                       loading={historyLoading}
                                     />
@@ -2001,13 +2009,37 @@ export default function ValueSuggestionDetailPage() {
                       />
                     </div>
 
-                    {/* Sidebar — value change + votes + suggester stats */}
+                    {/* Sidebar — value change + charts + votes + suggester stats */}
                     <div className="space-y-5 lg:col-span-2">
                       <ValueChangeCard
                         field={suggestion.field}
                         currentValue={suggestion.current_value}
                         suggestedValue={suggestion.suggested_value}
                       />
+                      {/* History Charts */}
+                      {hasHistoryChart && (
+                        <div className="border-border-card bg-secondary-bg rounded-xl border">
+                          <div className="border-border-card border-b px-5 py-3.5">
+                            <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                              <Icon
+                                icon="material-symbols:show-chart-rounded"
+                                className="text-secondary-text h-4 w-4"
+                                inline
+                              />
+                              Charts
+                            </h2>
+                          </div>
+                          <div className="p-5">
+                            <SuggestionHistoryChart
+                              itemId={suggestion.item_id}
+                              defaultMetric={defaultChartMetric}
+                              historyData={itemHistory}
+                              loading={historyLoading}
+                            />
+                          </div>
+                        </div>
+                      )}
+
                       {/* Votes */}
                       <div className="border-border-card bg-secondary-bg rounded-xl border">
                         <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
@@ -2166,29 +2198,6 @@ export default function ValueSuggestionDetailPage() {
                                 </p>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* History Charts */}
-                      {isValueSuggestion && (
-                        <div className="border-border-card bg-secondary-bg rounded-xl border">
-                          <div className="border-border-card border-b px-5 py-3.5">
-                            <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                              <Icon
-                                icon="material-symbols:show-chart-rounded"
-                                className="text-secondary-text h-4 w-4"
-                                inline
-                              />
-                              Charts
-                            </h2>
-                          </div>
-                          <div className="p-5">
-                            <SuggestionHistoryChart
-                              itemId={suggestion.item_id}
-                              historyData={itemHistory}
-                              loading={historyLoading}
-                            />
                           </div>
                         </div>
                       )}

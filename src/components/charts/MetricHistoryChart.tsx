@@ -127,6 +127,7 @@ export default function MetricHistoryChart({
   metrics,
   ranges,
   defaultRange = "all",
+  defaultMetric,
   emptyState,
   compact = false,
 }: {
@@ -135,11 +136,12 @@ export default function MetricHistoryChart({
   metrics: Metric[];
   ranges: RangeOption[];
   defaultRange?: string;
+  defaultMetric?: string;
   emptyState: ReactNode;
   compact?: boolean;
 }) {
   const [range, setRange] = useState(defaultRange);
-  const [selected, setSelected] = useState(metrics[0]?.key);
+  const [selected, setSelected] = useState(defaultMetric ?? metrics[0]?.key);
   const isSmallScreen = useMediaQuery("(max-width: 639px)");
   const gradientId = `fill-metric-history-${useId().replace(/:/g, "")}`;
 

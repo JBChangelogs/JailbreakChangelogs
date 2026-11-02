@@ -7,6 +7,16 @@ export const SUGGESTION_FIELDS = [
   "notes",
 ];
 
+export const SUGGESTION_CHART_METRICS: Partial<
+  Record<string, "cash" | "duped" | "traded">
+> = {
+  cash_value: "cash",
+  duped_value: "duped",
+  demand: "traded",
+  duped_demand: "traded",
+  trend: "cash",
+};
+
 export const fieldLabel = (field: string) =>
   field
     .split("_")

@@ -56,10 +56,12 @@ export default function ItemValueChart({
   historyPromise,
   historyData,
   hideTradingMetrics = false,
+  defaultMetric,
 }: {
   historyPromise?: Promise<ValueHistory[] | null>;
   historyData?: ValueHistory[] | null;
   hideTradingMetrics?: boolean;
+  defaultMetric?: "cash" | "duped" | "traded" | "circulation" | "scanned";
 }) {
   const resolved = historyPromise ? use(historyPromise) : null;
   const history = (historyData !== undefined ? historyData : resolved) ?? [];
@@ -131,6 +133,7 @@ export default function ItemValueChart({
       title="Item History"
       caption={`Updates daily at ${CHART_UPDATE_TIME}. Select a card to chart it.`}
       metrics={metrics}
+      defaultMetric={defaultMetric}
       ranges={RANGES}
       compact
       emptyState={
