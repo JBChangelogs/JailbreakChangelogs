@@ -1,6 +1,6 @@
 "use client";
 
-import ProfileTabError from "./ProfileTabError";
+import ProfileTabError from "@/components/Profile/ProfileTabError";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -54,22 +54,14 @@ function BanCardSkeleton() {
   );
 }
 
-export default function UserBansTab({ userId }: { userId: string }) {
+export default function BanHistory() {
   const { user } = useAuthContext();
-  const isOwnProfile = user?.id === userId;
-  const canViewBans =
-    isOwnProfile ||
-    user?.flags?.some(
-      (flag) => flag.flag === "is_owner" && flag.enabled !== false,
-    );
   const bansQuery = useQuery({
-    queryKey: ["profile-bans", userId, user?.id],
+    queryKey: ["account-bans", user?.id],
     queryFn: async ({ signal }): Promise<BansResponse> => {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
-        isOwnProfile
-          ? "/v2/users/me/bans"
-          : `/v2/users/${encodeURIComponent(userId)}/bans`,
+        "/v2/users/me/bans",
       );
       const res = await fetch(url, { credentials: "include", headers, signal });
       if (!res.ok) {
@@ -77,7 +69,7 @@ export default function UserBansTab({ userId }: { userId: string }) {
       }
       return res.json() as Promise<BansResponse>;
     },
-    enabled: Boolean(user?.id && canViewBans),
+    enabled: Boolean(user?.id),
     staleTime: 0,
     gcTime: 0,
     retry: false,
@@ -87,18 +79,10 @@ export default function UserBansTab({ userId }: { userId: string }) {
   const loading = bansQuery.isPending;
   const error = bansQuery.data ? null : bansQuery.error?.message;
 
-  if (!canViewBans) return null;
+  if (!user) return null;
 
   return (
-    <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
-      <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-primary-text text-lg font-semibold">
-          Bans{" "}
-          <span className="text-secondary-text ml-1 text-sm font-normal">
-            {!loading && !error && (bansQuery.data?.total ?? bans.length)}
-          </span>
-        </h2>
-      </div>
+    <div>
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -119,9 +103,7 @@ export default function UserBansTab({ userId }: { userId: string }) {
           />
           <p className="text-primary-text font-medium">No bans on record</p>
           <p className="text-secondary-text text-sm">
-            {isOwnProfile
-              ? "Your account is in good standing."
-              : "This account is in good standing."}
+            Your account is in good standing.
           </p>
         </div>
       ) : (

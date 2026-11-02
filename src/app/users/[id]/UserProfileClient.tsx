@@ -1277,6 +1277,12 @@ export default function UserProfileClient({
                 (flag) => flag.flag === "is_owner" && flag.enabled !== false,
               ) ?? false
             }
+            isWebsiteModerator={
+              currentUser?.flags?.some(
+                (flag) =>
+                  flag.flag === "website_moderator" && flag.enabled !== false,
+              ) ?? false
+            }
             bio={bio}
             onBioUpdate={refreshBio}
           />

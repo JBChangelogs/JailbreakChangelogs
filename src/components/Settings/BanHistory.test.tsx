@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 
-test("bans use the viewed profile and only enable requests for self or site owners", async () => {
+test("ban history only requests the signed-in account and disables requests after logout", async () => {
   let viewer: {
     id: string;
     flags: { flag: string; enabled?: boolean }[];
@@ -14,11 +14,11 @@ test("bans use the viewed profile and only enable requests for self or site owne
     queryFn: (context: { signal: AbortSignal }) => Promise<unknown>;
   };
   const paths: string[] = [];
-  const exports = {} as { default: (props: { userId: string }) => unknown };
+  const exports = {} as { default: () => unknown };
   const jsx = (type: unknown, props: unknown) => ({ type, props });
   runInNewContext(
     transpileModule(
-      readFileSync(new URL("./UserBansTab.tsx", import.meta.url), "utf8"),
+      readFileSync(new URL("./BanHistory.tsx", import.meta.url), "utf8"),
       {
         compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
       },
@@ -54,25 +54,19 @@ test("bans use the viewed profile and only enable requests for self or site owne
     },
   );
   const context = { signal: new AbortController().signal };
-  exports.default({ userId: "123" });
+  exports.default();
   expect(query!.enabled).toBe(true);
   await query!.queryFn(context);
   expect(paths).toEqual(["/v2/users/me/bans"]);
 
   viewer = { id: "789", flags: [{ flag: "is_owner", enabled: true }] };
-  exports.default({ userId: "123" });
+  exports.default();
   expect(query!.enabled).toBe(true);
-  expect(query!.queryKey).toEqual(["profile-bans", "123", "789"]);
+  expect(query!.queryKey).toEqual(["account-bans", "789"]);
   await query!.queryFn(context);
-  expect(paths).toEqual(["/v2/users/me/bans", "/v2/users/123/bans"]);
+  expect(paths).toEqual(["/v2/users/me/bans", "/v2/users/me/bans"]);
 
-  for (const unauthorized of [
-    null,
-    { id: "789", flags: [] },
-    { id: "789", flags: [{ flag: "is_owner", enabled: false }] },
-  ]) {
-    viewer = unauthorized;
-    expect(exports.default({ userId: "123" })).toBeNull();
-    expect(query!.enabled).toBe(false);
-  }
+  viewer = null;
+  expect(exports.default()).toBeNull();
+  expect(query!.enabled).toBe(false);
 });

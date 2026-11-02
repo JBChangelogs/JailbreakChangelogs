@@ -50,6 +50,7 @@ import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import { useSupporterLevelActions } from "@/hooks/useSupporterLevelActions";
 import { useSupporterGifting } from "@/hooks/useSupporterGifting";
 import { usePurchaseGiftModal } from "@/hooks/usePurchaseGiftModal";
+import BanHistory from "@/components/Settings/BanHistory";
 import SettingsLoading from "./loading";
 
 const PREVIEW_SETTINGS = new Set(["custom_avatar", "custom_banner"]);
@@ -62,6 +63,7 @@ const SECTION_ICONS: Record<string, string> = {
   appearance: "material-symbols:auto-awesome-rounded",
   privacy: "material-symbols:lock-rounded",
   notifications: "material-symbols:notifications-rounded",
+  "account-standing": "heroicons:shield-check",
   connections: "material-symbols:link-rounded",
   export: "material-symbols:download-rounded",
   "supporter-history": "material-symbols:history-rounded",
@@ -420,6 +422,11 @@ export default function SettingsPage() {
                   title: "Account",
                   items: [
                     {
+                      id: "account-standing",
+                      title: FRONTEND_SETTINGS["account-standing"].title,
+                      icon: sectionIcon("account-standing"),
+                    },
+                    {
                       id: "connections",
                       title: FRONTEND_SETTINGS["connections"].title,
                       icon: sectionIcon("connections"),
@@ -699,6 +706,25 @@ export default function SettingsPage() {
                   )}
                 </section>
               </div>
+            </SettingsCard>
+
+            <SettingsCard
+              id="account-standing"
+              title={FRONTEND_SETTINGS["account-standing"].title}
+              icon={sectionIcon("account-standing")}
+              isOwner={isOwner}
+              highlightStyle={getSectionHighlightStyle("account-standing")}
+              scrollRef={(el) =>
+                scrollHighlightedSectionIntoView("account-standing", el)
+              }
+              onCopyLink={() =>
+                copySectionLink(
+                  "account-standing",
+                  FRONTEND_SETTINGS["account-standing"].title,
+                )
+              }
+            >
+              <BanHistory />
             </SettingsCard>
 
             <SettingsCard

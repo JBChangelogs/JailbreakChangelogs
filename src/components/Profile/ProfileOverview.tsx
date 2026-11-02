@@ -10,7 +10,6 @@ import TradeAdsProfileTab from "./TradeAdsProfileTab";
 import ProfileInventoryTab from "./ProfileInventoryTab";
 import PrivateServersTab from "./PrivateServersTab";
 import UserValueSuggestionsTab from "./UserValueSuggestionsTab";
-import UserBansTab from "./UserBansTab";
 import type { UserSettingsV2, UserFlag } from "@/types/auth";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -50,6 +49,7 @@ interface ProfileOverviewProps {
   user: User | null;
   currentUserId: string | null;
   isSiteOwner?: boolean;
+  isWebsiteModerator?: boolean;
   bio: string | null;
   onBioUpdate?: (newBio: string) => void;
 }
@@ -58,6 +58,7 @@ export default function ProfileOverview({
   user,
   currentUserId,
   isSiteOwner = false,
+  isWebsiteModerator = false,
   bio,
   onBioUpdate,
 }: ProfileOverviewProps) {
@@ -79,7 +80,6 @@ export default function ProfileOverview({
       flag.enabled !== false,
   );
   const hasValueSuggestions = !hasVTFlag || isOwnProfile || isSiteOwner;
-  const canViewBans = isOwnProfile || isSiteOwner;
   const sections = [
     { id: "", label: "Overview", icon: "heroicons:squares-2x2" },
     { id: "favorites", label: "Favorites", icon: "heroicons:heart" },
@@ -116,9 +116,6 @@ export default function ProfileOverview({
             icon: "heroicons:light-bulb",
           },
         ]
-      : []),
-    ...(canViewBans
-      ? [{ id: "bans", label: "Bans", icon: "heroicons:shield-check" }]
       : []),
   ];
   const requestedSection =
@@ -189,6 +186,23 @@ export default function ProfileOverview({
               </button>
             ))}
           </div>
+          {(isSiteOwner || isWebsiteModerator) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="hover:bg-quaternary-bg! mt-3 w-full"
+            >
+              <a
+                href={`https://dashboard.jailbreakchangelogs.com/profile/${encodeURIComponent(user.id)}?tab=bans`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon icon="heroicons:shield-check" />
+                View bans in dashboard
+              </a>
+            </Button>
+          )}
         </nav>
       </aside>
 
@@ -253,7 +267,6 @@ export default function ProfileOverview({
             currentUserId={currentUserId}
           />
         )}
-        {section.id === "bans" && <UserBansTab userId={user.id} />}
         {hasRobloxConnection && (
           <div hidden={section.id !== "inventory"}>
             <ProfileInventoryTab

@@ -142,16 +142,37 @@ test("overview previews and legacy section links preserve account and owner rest
   ).toBe(false);
   section = "bans";
   expect(render().some((node) => node.type === "UserBansTab")).toBe(false);
-  const ownerBans = render({ isSiteOwner: true }).find(
-    (node) => node.type === "UserBansTab",
-  );
-  expect(ownerBans?.props.userId).toBe(user.id);
   expect(render().some((node) => node.type === "AboutTab")).toBe(true);
+  for (const viewer of [
+    { isSiteOwner: true },
+    { isWebsiteModerator: true },
+    { currentUserId: user.id },
+  ]) {
+    const profile = render(viewer);
+    expect(profile.some((node) => node.props.children === "Bans")).toBe(false);
+    expect(profile.some((node) => node.type === "UserBansTab")).toBe(false);
+    expect(profile.some((node) => node.type === "AboutTab")).toBe(true);
+    const dashboardLink = profile.find(
+      (node) =>
+        node.type === "a" &&
+        String(node.props.href).includes("dashboard.jailbreakchangelogs.com"),
+    );
+    if ("currentUserId" in viewer) {
+      expect(dashboardLink).toBeUndefined();
+    } else {
+      expect(dashboardLink?.props.href).toBe(
+        "https://dashboard.jailbreakchangelogs.com/profile/123?tab=bans",
+      );
+      expect(dashboardLink?.props.target).toBe("_blank");
+    }
+  }
   expect(
-    render({ currentUserId: user.id }).some(
-      (node) => node.type === "UserBansTab",
+    overview.some(
+      (node) =>
+        node.type === "a" &&
+        String(node.props.href).includes("dashboard.jailbreakchangelogs.com"),
     ),
-  ).toBe(true);
+  ).toBe(false);
 
   section = "inventory";
   const restricted = render({

@@ -103,6 +103,7 @@ export const FRONTEND_SETTINGS: Record<string, FrontendSetting> = {
     target: "notifications",
     requiresAccount: true,
   },
+  "account-standing": { title: "Account standing", requiresAccount: true },
   connections: { title: "Connections", requiresAccount: true },
   export: { title: "Export Data", requiresAccount: true },
   "supporter-history": {
