@@ -222,9 +222,11 @@ function PopoverBanner({
 export function UserProfilePopover({
   user,
   children,
+  side = "right",
 }: {
   user: PopoverUser;
   children: React.ReactNode;
+  side?: React.ComponentProps<typeof PopoverContent>["side"];
 }) {
   // Safe: the popover also renders where there is no AuthProvider (tests, previews).
   const auth = useSafeAuthContext();
@@ -303,7 +305,7 @@ export function UserProfilePopover({
         {children}
       </PopoverTrigger>
       <PopoverContent
-        side={isMobile ? "bottom" : "right"}
+        side={isMobile ? "bottom" : side}
         align="start"
         sideOffset={12}
         collisionPadding={12}

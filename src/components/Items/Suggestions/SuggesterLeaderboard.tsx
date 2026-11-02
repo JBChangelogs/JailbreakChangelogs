@@ -128,7 +128,7 @@ export function SuggesterLeaderboard({
                         key={entry.user.id}
                         className="border-border-card min-w-0 border-b py-1"
                       >
-                        <UserProfilePopover user={entry.user}>
+                        <UserProfilePopover user={entry.user} side="bottom">
                           <Link
                             href={`/users/${entry.user.id}`}
                             prefetch={false}

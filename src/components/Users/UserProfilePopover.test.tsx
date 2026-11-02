@@ -93,8 +93,9 @@ test("profile cards intercept plain clicks, preserve modified links, and stack a
       },
     },
   );
-  const render = () =>
+  const render = (side?: "bottom" | "right") =>
     exports.UserProfilePopover({
+      side,
       user: { id: "123", username: "Alice" },
       children: jsx("Link", { href: "/users/123" }),
     });
@@ -142,6 +143,11 @@ test("profile cards intercept plain clicks, preserve modified links, and stack a
   const content = nodes(tree).find((node) => node.type === "PopoverContent")!;
   expect(content.props.className).toContain("z-[10001]");
   expect(content.props.side).toBe("right");
+  const rowContent = nodes(render("bottom")).find(
+    (node) => node.type === "PopoverContent",
+  )!;
+  expect(rowContent.props.side).toBe("bottom");
+  expect(rowContent.props.align).toBe("start");
   isMobile = true;
   const mobileContent = nodes(render()).find(
     (node) => node.type === "PopoverContent",
