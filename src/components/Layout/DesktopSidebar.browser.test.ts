@@ -241,8 +241,8 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       expect(result.expanded.pinnedToggle.scrollTop).toBeGreaterThan(0);
       expect(result.expanded.clearances).toEqual([12, 12, 12]);
       expect(result.expanded.toggleClearance).toBe(12);
-      expect(result.expanded.pinnedToggle.bottom).toBeLessThanOrEqual(
-        result.expanded.pinnedToggle.sidebarBottom - 24,
+      expect(result.expanded.pinnedToggle.bottom).toBe(
+        result.expanded.pinnedToggle.sidebarBottom - 12,
       );
       expect(result.expanded.pinnedToggle.navigationBottom).toBeLessThanOrEqual(
         result.expanded.pinnedToggle.top,

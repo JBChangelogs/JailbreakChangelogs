@@ -211,8 +211,7 @@ export default function DesktopSidebar({
           ))}
         </div>
       </nav>
-      {/* Leave room for the browser's bottom-left link preview. */}
-      <div className="relative shrink-0 p-3 pb-6">
+      <div className="relative shrink-0 p-3">
         <div
           aria-hidden="true"
           className={cn(
