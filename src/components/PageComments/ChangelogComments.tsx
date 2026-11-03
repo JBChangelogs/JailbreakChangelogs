@@ -228,7 +228,7 @@ function CommentsLayout() {
                   {totalComments === 1 ? "comment" : "comments"}
                 </button>
               )}
-              <div className="flex flex-col space-y-3">
+              <div className="flex flex-col space-y-2">
                 {currentComments.map((item) => {
                   if (!item) return null;
 

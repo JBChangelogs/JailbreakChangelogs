@@ -12,6 +12,10 @@ test("comment links show only their thread, and the list merges loaded pages", a
   const paramUpdates: Record<string, string | number | null>[] = [];
   let timer: () => Promise<void>;
   let lookupStatus = 200;
+  let fetchOverride:
+    | ((url: string, init?: RequestInit) => Promise<Response>)
+    | undefined;
+  const deleteErrors: string[] = [];
   let authUser: {
     id: string;
     flags?: { flag: string; enabled: boolean }[];
@@ -48,7 +52,8 @@ test("comment links show only their thread, and the list merges loaded pages", a
     canDeleteAnyComment: boolean;
     profileCommentsDisabled: boolean;
     isBlocked: boolean;
-    comments: { id: number }[];
+    comments: { id: number; replies?: { id: number; date: string }[] }[];
+    handleDeleteComment: (id: number) => Promise<void>;
     totalComments: number;
     focusedThread: { page: number; commentId: number } | null;
     sortOrder: string | null;
@@ -114,8 +119,9 @@ test("comment links show only their thread, and the list merges loaded pages", a
         removeEventListener: () => {},
         dispatchEvent: () => {},
       },
-      fetch: async (url: string) => {
+      fetch: async (url: string, init?: RequestInit) => {
         requests.push(url);
+        if (fetchOverride) return fetchOverride(url, init);
         const thread = /\/v2\/comments\/(\d+)$/.exec(url)?.[1];
         if (thread && thread !== "42")
           return Response.json({
@@ -168,7 +174,12 @@ test("comment links show only their thread, and the list merges loaded pages", a
                 },
               ];
             },
-            useRef: (initial: unknown) => ({ current: initial }),
+            useRef: (initial: unknown) => {
+              const index = hookIndex++;
+              if (!(index in hookStates))
+                hookStates[index] = { current: initial };
+              return hookStates[index];
+            },
             useEffect: (callback: () => unknown, deps: unknown[]) => {
               effects.push({ callback, deps });
             },
@@ -198,6 +209,10 @@ test("comment links show only their thread, and the list merges loaded pages", a
           return { useSupporterModal: () => ({}) };
         if (name === "@/hooks/useEmojiStringMap")
           return { useEmojiStringMap: () => ({}) };
+        if (name === "sonner")
+          return {
+            toast: { error: (message: string) => deleteErrors.push(message) },
+          };
         if (name === "@/services/logger")
           return { createLogger: () => ({ error: () => {} }) };
         if (name === "@/utils/api/api")
@@ -396,6 +411,105 @@ test("comment links show only their thread, and the list merges loaded pages", a
       { id: 80, date: "1700000000" },
     ]);
   }
+
+  // Rapid deletes must stay removed when an older refresh arrives last.
+  location.search = "?tab=comments&commentsSort=newest";
+  const deleteKey = ["comments", "changelog", 5, "list", "newest", null];
+  const pendingRequests: {
+    url: string;
+    method: string;
+    resolve: (response: Response) => void;
+  }[] = [];
+  fetchOverride = (url, init) =>
+    new Promise((resolve) => {
+      pendingRequests.push({ url, method: init?.method ?? "GET", resolve });
+    });
+  const flush = async () => {
+    for (let i = 0; i < 5; i++) await Bun.sleep(0);
+  };
+  const seedReplies = (ids: number[]) => {
+    cache.set(JSON.stringify(deleteKey), {
+      pages: [
+        {
+          ...page([8]),
+          comments: [
+            { id: 8, replies: ids.map((id) => ({ id, date: String(id) })) },
+          ],
+        },
+      ],
+      pageParams: [1],
+    });
+    return render();
+  };
+  const visibleReplies = () =>
+    render().comments[0].replies?.map((reply) => reply.id);
+  state = seedReplies([83, 82]);
+  const deleteFirst = state.handleDeleteComment(83);
+  const firstRequest = pendingRequests.shift()!;
+  expect(firstRequest.method).toBe("DELETE");
+  firstRequest.resolve(Response.json({}));
+  await deleteFirst;
+  const staleRefresh = pendingRequests.shift()!;
+  expect(staleRefresh.method).toBe("GET");
+  const deleteSecond = render().handleDeleteComment(82);
+  const secondRequest = pendingRequests.shift()!;
+  expect(visibleReplies()).toEqual([]);
+  // The first refresh still includes the second reply while its delete is pending.
+  staleRefresh.resolve(
+    Response.json({ id: 8, replies: [{ id: 82, date: "82" }] }),
+  );
+  await flush();
+  expect(visibleReplies()).toEqual([]);
+  secondRequest.resolve(Response.json({}));
+  await deleteSecond;
+  pendingRequests.shift()!.resolve(Response.json({ id: 8, replies: [] }));
+  await flush();
+  expect(visibleReplies()).toEqual([]);
+
+  // A failed second delete restores only that reply, never the successfully deleted first one.
+  state = seedReplies([85, 84]);
+  const successfulDelete = state.handleDeleteComment(85);
+  const successRequest = pendingRequests.shift()!;
+  const failedDelete = render().handleDeleteComment(84);
+  const failureRequest = pendingRequests.shift()!;
+  successRequest.resolve(Response.json({}));
+  await successfulDelete;
+  const oldRefresh = pendingRequests.shift()!;
+  failureRequest.resolve(Response.json({}, { status: 500 }));
+  await failedDelete;
+  expect(visibleReplies()).toEqual([84]);
+  expect(deleteErrors).toEqual(["Failed to delete comment"]);
+  oldRefresh.resolve(
+    Response.json({
+      id: 8,
+      replies: [
+        { id: 85, date: "85" },
+        { id: 84, date: "84" },
+      ],
+    }),
+  );
+  await flush();
+  expect(visibleReplies()).toEqual([84]);
+  // The hidden deleted reply cannot be deleted again through a stale handler.
+  await render().handleDeleteComment(85);
+  expect(pendingRequests).toHaveLength(0);
+  // Root comment rollback also leaves another successful deletion removed.
+  cache.set(JSON.stringify(deleteKey), {
+    pages: [page([10, 9])],
+    pageParams: [1],
+  });
+  const firstRootDelete = render().handleDeleteComment(10);
+  const firstRootRequest = pendingRequests.shift()!;
+  const secondRootDelete = render().handleDeleteComment(9);
+  const secondRootRequest = pendingRequests.shift()!;
+  firstRootRequest.resolve(Response.json({}));
+  await firstRootDelete;
+  secondRootRequest.resolve(Response.json({}, { status: 500 }));
+  await secondRootDelete;
+  expect(render().comments.map((comment) => comment.id)).toEqual([9]);
+  expect(render().totalComments).toBe(24);
+  expect(pendingRequests).toHaveLength(0);
+  fetchOverride = undefined;
 
   // Sort changes push history without a page param.
   render().handleSortChange("oldest");

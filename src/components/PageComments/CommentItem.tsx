@@ -457,7 +457,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     >
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <div className="comment-link-surface flex gap-2 rounded-lg px-2 py-2 sm:gap-3">
+          <div className="comment-link-surface flex gap-2 rounded-lg px-2 py-1 sm:gap-3">
             <div className="flex w-10 shrink-0 items-start pt-1.5">
               <div
                 className={`${
@@ -746,7 +746,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               </div>
 
               {/* Content Section */}
-              <div className="pb-2">
+              <div>
                 {editingCommentId === comment.id ? (
                   <div className="border-border-card bg-tertiary-bg focus-within:border-button-info -ml-12 rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
                     <CommentTextarea

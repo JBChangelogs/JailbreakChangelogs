@@ -253,15 +253,30 @@ export function useCommentState(props: ChangelogCommentsProps) {
         : (commentsQuery.data?.pages ?? []),
     [focusedThread, threadQuery.data, commentsQuery.data],
   );
+  // Keep pending and confirmed local deletions hidden from stale server snapshots.
+  const deletedCommentIds = useRef(new Set<number>());
   const comments = useMemo(() => {
-    if (loadedPages.length === 0) return focusedThread ? [] : initialComments;
-    const all = loadedPages.flatMap((result) => result.comments);
-    if (focusedThread)
-      return all.filter((comment) => comment.id === focusedThread.commentId);
+    const all =
+      loadedPages.length === 0
+        ? focusedThread
+          ? []
+          : initialComments
+        : loadedPages.flatMap((result) => result.comments);
     // New comments shift later pages, so a comment can arrive twice.
     return Array.from(
       new Map(all.map((comment) => [comment.id, comment])).values(),
-    );
+    )
+      .filter(
+        (comment) =>
+          !deletedCommentIds.current.has(comment.id) &&
+          (!focusedThread || comment.id === focusedThread.commentId),
+      )
+      .map((comment) => ({
+        ...comment,
+        replies: comment.replies?.filter(
+          (reply) => !deletedCommentIds.current.has(reply.id),
+        ),
+      }));
   }, [loadedPages, focusedThread, initialComments]);
   // Linked comment is no longer on its page: fall back to the full list.
   useEffect(() => {
@@ -1427,14 +1442,18 @@ export function useCommentState(props: ChangelogCommentsProps) {
    * Deletes a comment. Optimistically removes it from the UI.
    */
   const handleDeleteComment = async (commentId: number) => {
-    // Keep a copy of current comments for restoration if delete fails
-    const previousComments = comments.map((c) => ({
-      ...c,
-      replies: [...(c.replies ?? [])],
-    }));
-
-    const isTopLevel = comments.some((c) => c.id === commentId);
+    if (deletedCommentIds.current.has(commentId)) return;
+    const previousComments = commentsRef.current;
+    const parent = previousComments.find(
+      (c) => c.id === commentId || c.replies?.some((r) => r.id === commentId),
+    );
+    const isTopLevel = parent?.id === commentId;
+    const removed = isTopLevel
+      ? parent
+      : parent?.replies?.find((r) => r.id === commentId);
+    if (!removed) return;
     const threadId = threadIdOf(commentId);
+    deletedCommentIds.current.add(commentId);
     setComments((prev) =>
       isTopLevel
         ? prev.filter((c) => c.id !== commentId)
@@ -1466,8 +1485,27 @@ export function useCommentState(props: ChangelogCommentsProps) {
       // Comment successfully deleted, track with analytics
       window.rybbit?.event("Comment Deleted", { type });
     } catch (err) {
-      // If deletion failed, restore the previous state
-      setComments(previousComments);
+      // Restore only this deletion; other in-flight changes must survive.
+      deletedCommentIds.current.delete(commentId);
+      setComments((prev) => {
+        if (isTopLevel) {
+          if (prev.some((c) => c.id === commentId)) return prev;
+          const index = previousComments.findIndex((c) => c.id === commentId);
+          return [...prev.slice(0, index), removed, ...prev.slice(index)];
+        }
+        return prev.map((c) =>
+          c.id === threadId
+            ? {
+                ...c,
+                replies: c.replies?.some((r) => r.id === commentId)
+                  ? c.replies
+                  : [...(c.replies ?? []), removed].sort(
+                      (a, b) => Number(b.date) - Number(a.date),
+                    ),
+              }
+            : c,
+        );
+      });
       toast.error(
         err instanceof Error ? err.message : "Failed to delete comment",
       );

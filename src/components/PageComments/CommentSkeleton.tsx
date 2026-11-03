@@ -23,7 +23,7 @@ function CommentSkeletonItem() {
 
 export function CommentSkeletonList({ count = 4 }: { count?: number }) {
   return (
-    <div className="flex animate-pulse flex-col space-y-3">
+    <div className="flex animate-pulse flex-col space-y-2">
       {Array.from({ length: count }).map((_, i) => (
         <CommentSkeletonItem key={i} />
       ))}

@@ -133,13 +133,7 @@ export function CommentReactions({
 
   return (
     <>
-      <div
-        className={
-          compact
-            ? "mt-1.5 flex flex-wrap items-center gap-1.5"
-            : "flex flex-wrap items-center gap-1.5 pb-2"
-        }
-      >
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         {top5.map((r) => (
           <Tooltip key={`${r.emoji}-${tooltipResetKey}`} delayDuration={500}>
             <TooltipTrigger asChild>
