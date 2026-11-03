@@ -137,38 +137,43 @@ export default async function ThemeDetailsPage({ params }: Props) {
             <p className="text-secondary-text text-center text-xs">
               Anyone can use this theme. Change it anytime in Settings.
             </p>
+            <dl className="border-border-card grid grid-cols-2 gap-5 border-t pt-6 text-sm lg:grid-cols-1">
+              <div>
+                <dt className="text-secondary-text mb-1">Appearance</dt>
+                <dd className="capitalize">{theme.scheme}</dd>
+              </div>
+              <div>
+                <dt className="text-secondary-text mb-1">Share code</dt>
+                <dd className="font-mono">{theme.share_code}</dd>
+              </div>
+            </dl>
           </div>
-          <section className="min-w-0 space-y-4">
-            <h2 className="text-lg font-semibold">About this theme</h2>
-            <p className="text-secondary-text leading-relaxed wrap-break-word whitespace-pre-wrap">
-              {theme.description ||
-                "The creator hasn't added a description yet."}
-            </p>
-            {!!theme.previews?.length && (
-              <details className="pt-4">
-                <summary className="text-link cursor-pointer font-medium">
-                  Explore the colors
-                </summary>
-                <div className="mt-4">
-                  <CustomThemePreview
-                    vars={theme.vars}
-                    scheme={theme.scheme}
-                    logoFilter={theme.logo_filter}
-                  />
-                </div>
-              </details>
-            )}
-          </section>
-          <dl className="border-border-card space-y-5 border-t pt-6 text-sm">
-            <div>
-              <dt className="text-secondary-text mb-1">Appearance</dt>
-              <dd className="capitalize">{theme.scheme}</dd>
+          {(theme.description || !!theme.previews?.length) && (
+            <div className="min-w-0 space-y-4">
+              {theme.description && (
+                <section className="space-y-4">
+                  <h2 className="text-lg font-semibold">About this theme</h2>
+                  <p className="text-secondary-text leading-relaxed wrap-break-word whitespace-pre-wrap">
+                    {theme.description}
+                  </p>
+                </section>
+              )}
+              {!!theme.previews?.length && (
+                <details className="pt-4">
+                  <summary className="text-link cursor-pointer font-medium">
+                    Explore the colors
+                  </summary>
+                  <div className="mt-4">
+                    <CustomThemePreview
+                      vars={theme.vars}
+                      scheme={theme.scheme}
+                      logoFilter={theme.logo_filter}
+                    />
+                  </div>
+                </details>
+              )}
             </div>
-            <div>
-              <dt className="text-secondary-text mb-1">Share code</dt>
-              <dd className="font-mono">{theme.share_code}</dd>
-            </div>
-          </dl>
+          )}
         </div>
         <div className="mt-10">
           <ChangelogComments

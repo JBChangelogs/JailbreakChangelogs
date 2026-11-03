@@ -112,7 +112,11 @@ test("direct theme visits fetch by code and show a generated preview without scr
   expect(markup).toContain('data-component="CustomThemePreview"');
   expect(markup).not.toContain('data-component="ThemePreviewImages"');
   expect(markup).toContain("Unknown author");
-  expect(markup).toContain("The creator hasn&#x27;t added a description yet.");
+  expect(markup).not.toContain("About this theme");
+  expect(markup).not.toContain("hasn&#x27;t added a description");
+  expect(markup).not.toContain('class="min-w-0 space-y-4"');
+  expect(markup).toContain("Appearance");
+  expect(markup).toContain("Share code");
 });
 
 test("uploaded previews appear in the hero and theme links get their own metadata", async () => {
@@ -125,12 +129,32 @@ test("uploaded previews appear in the hero and theme links get their own metadat
       previews: [{ id: "a", kind: "desktop", url }],
     },
   });
-  expect(await view.render()).toContain('data-component="ThemePreviewImages"');
+  const markup = await view.render();
+  expect(markup).toContain('data-component="ThemePreviewImages"');
+  expect(markup).toContain("About this theme");
+  expect(markup).toContain("Soft colors");
   expect(await view.metadata()).toMatchObject({
     description: "Soft colors",
     alternates: { canonical: "/themes/8V8RN337" },
     openGraph: { images: [{ url, alt: "Midnight" }] },
   });
+});
+
+test("themes without a description still offer the color preview when screenshots exist", async () => {
+  const markup = await page({
+    theme: {
+      ...theme,
+      previews: [
+        {
+          id: "a",
+          kind: "desktop",
+          url: "https://uploads.jailbreakchangelogs.com/theme-previews/8V8RN337/a.webp",
+        },
+      ],
+    },
+  }).render();
+  expect(markup).not.toContain("About this theme");
+  expect(markup).toContain("Explore the colors");
 });
 
 test("theme discussions use the shared comments component and the theme share code", async () => {
