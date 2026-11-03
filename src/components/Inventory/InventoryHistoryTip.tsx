@@ -65,7 +65,8 @@ export default function InventoryHistoryTip({
           {isOwnInventory
             ? "Choose a date to see what you owned."
             : "Choose a date to see what they owned."}{" "}
-          Only scans from October 31, 2026 onward are available.
+          Only scans from October 31, 2026 onward are available. Dates unlock at
+          midnight UTC. Recent scans may appear under yesterday’s date.
         </p>
         <div className="mt-4 flex items-center gap-2">
           <Button

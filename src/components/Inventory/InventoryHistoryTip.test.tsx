@@ -107,7 +107,7 @@ test("copy addresses the linked inventory owner and keeps the availability note"
         ? "Choose a date to see what you owned."
         : "Choose a date to see what they owned.",
       " ",
-      "Only scans from October 31, 2026 onward are available.",
+      "Only scans from October 31, 2026 onward are available. Dates unlock at midnight UTC. Recent scans may appear under yesterday’s date.",
     ]);
   }
 });

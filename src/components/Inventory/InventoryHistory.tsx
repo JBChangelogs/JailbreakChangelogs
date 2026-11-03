@@ -396,12 +396,11 @@ export default function InventoryHistory({
                         </button>
                       </>
                     ) : (
-                      "Dots mark recorded scan dates (latest 1,000 scans)."
+                      "Dots mark scans · Latest 1,000"
                     )}
                   </div>
                   <p className="text-secondary-text max-w-64 px-3 pb-3 text-xs">
-                    Dates unlock at midnight UTC. Recent scans may appear under
-                    yesterday’s date.
+                    History tracking since Oct 31, 2026 · UTC
                   </p>
                 </PopoverContent>
               </Popover>
