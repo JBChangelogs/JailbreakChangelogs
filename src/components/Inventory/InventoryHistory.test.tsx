@@ -16,7 +16,7 @@ interface Node {
     onSelect?: (date: Date) => void;
     defaultMonth?: Date;
     endMonth?: Date;
-    modifiers?: { scanned: (day: Date) => boolean };
+    modifiers?: Record<string, unknown>;
     className?: string;
     disabled?: boolean | ((date: Date) => boolean);
     href?: string;
@@ -73,6 +73,7 @@ function ownerPopover(view: Node) {
 
 function setup(
   scanHistory: Array<{ scan_id: string; created_at: number }> = [],
+  queryState = { isLoading: false, isError: false },
 ) {
   const scanHistoryCalls: Array<{ userId: string; enabled: boolean }> = [];
   let active: ReturnType<typeof runner>;
@@ -174,7 +175,7 @@ function setup(
           return {
             useInventoryScanHistory: (userId: string, enabled: boolean) => {
               scanHistoryCalls.push({ userId, enabled });
-              return { data: scanHistory, isLoading: false, isError: false };
+              return { data: scanHistory, ...queryState };
             },
           };
         if (id.endsWith("/usePartialItems"))
@@ -504,24 +505,26 @@ test("shared item skeleton matches the card grid, market summary, owner and acti
   }
 });
 
-test("calendar disables dates before tracking and after today in UTC", () => {
-  const { runner } = setup();
-  const view = runner().render();
-  const disabled = nodes(view).find((node) => node.type === "calendar")!.props
-    .disabled as (date: Date) => boolean;
+test("calendar allows recorded scan dates only within the tracking period and UTC today", () => {
   const today = new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00`);
-  expect(
-    nodes(view)
-      .find((node) => node.type === "calendar")!
-      .props.endMonth?.getTime(),
-  ).toBe(today.getTime());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+  const { runner } = setup([
+    {
+      scan_id: "before",
+      created_at: Date.parse("2026-10-30T23:59:59Z") / 1000,
+    },
+    { scan_id: "start", created_at: Date.parse("2026-10-31T00:00:00Z") / 1000 },
+    { scan_id: "today", created_at: Date.now() / 1000 },
+    { scan_id: "future", created_at: Date.now() / 1000 + 86400 },
+  ]);
+  const calendar = nodes(runner().render()).find(
+    (node) => node.type === "calendar",
+  )!;
+  const disabled = calendar.props.disabled as (date: Date) => boolean;
+  expect(calendar.props.endMonth?.getTime()).toBe(today.getTime());
   expect(disabled(new Date(2026, 9, 30))).toBe(true);
   expect(disabled(new Date(2026, 9, 31))).toBe(false);
-  expect(disabled(yesterday)).toBe(false);
   expect(disabled(today)).toBe(false);
   expect(disabled(tomorrow)).toBe(true);
 });
@@ -664,7 +667,7 @@ test("current owners open in an anchored popover independently of the history mo
   );
 });
 
-test("scan highlights use UTC dates and history loads only when the picker opens", () => {
+test("scan availability uses UTC dates and history loads only when the picker opens", () => {
   const { runner, scanHistoryCalls } = setup([
     {
       scan_id: "before-tracking",
@@ -685,12 +688,37 @@ test("scan highlights use UTC dates and history loads only when the picker opens
   view = page.render();
   expect(scanHistoryCalls.at(-1)?.enabled).toBe(true);
   const calendar = nodes(view).find((node) => node.type === "calendar")!;
-  expect(calendar.props.modifiers!.scanned(new Date(2026, 9, 30))).toBe(false);
-  expect(calendar.props.modifiers!.scanned(new Date(2026, 9, 31))).toBe(true);
-  expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 2))).toBe(true);
-  expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 3))).toBe(true);
-  expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 1))).toBe(false);
-  expect(
-    (calendar.props.disabled as (day: Date) => boolean)(new Date(2026, 10, 1)),
-  ).toBe(false);
+  const disabled = calendar.props.disabled as (day: Date) => boolean;
+  expect(disabled(new Date(2026, 9, 30))).toBe(true);
+  expect(disabled(new Date(2026, 9, 31))).toBe(false);
+  expect(disabled(new Date(2026, 10, 2))).toBe(false);
+  expect(disabled(new Date(2026, 10, 3))).toBe(false);
+  expect(disabled(new Date(2026, 10, 1))).toBe(true);
+  expect(calendar.props.modifiers).toBeUndefined();
+  expect(content(view)).toContain("Scan dates only · Latest 1,000 scans");
+});
+
+test("loading, failed and empty scan history leave dates disabled with clear status", () => {
+  for (const queryState of [
+    { isLoading: true, isError: false },
+    { isLoading: false, isError: true },
+    { isLoading: false, isError: false },
+  ]) {
+    const { runner } = setup([], queryState);
+    const view = runner().render();
+    const calendar = nodes(view).find((node) => node.type === "calendar")!;
+    expect(
+      (calendar.props.disabled as (day: Date) => boolean)(
+        new Date(2026, 10, 1),
+      ),
+    ).toBe(true);
+    expect(content(view)).toContain(
+      queryState.isLoading
+        ? "Loading scan dates…"
+        : queryState.isError
+          ? "Scan dates could not be loaded."
+          : "No recorded scan dates available.",
+    );
+    if (queryState.isError) expect(content(view)).toContain("Try again");
+  }
 });

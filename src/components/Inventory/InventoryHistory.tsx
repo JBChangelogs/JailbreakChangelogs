@@ -351,14 +351,6 @@ export default function InventoryHistory({
                       new Date(`${INVENTORY_HISTORY_START_DATE}T00:00:00`)
                     }
                     endMonth={new Date(`${todayUtc}T00:00:00`)}
-                    modifiers={{
-                      scanned: (day) =>
-                        scanDates.has(format(day, "yyyy-MM-dd")),
-                    }}
-                    modifiersClassNames={{
-                      scanned:
-                        "[&_button]:relative [&_button]:after:absolute [&_button]:after:bottom-0.5 [&_button]:after:left-1/2 [&_button]:after:size-1 [&_button]:after:-translate-x-1/2 [&_button]:after:rounded-full [&_button]:after:bg-button-info [&_button]:after:content-[''] [&_button[data-selected-single=true]]:after:bg-form-button-text",
-                    }}
                     selected={date ? new Date(`${date}T00:00:00`) : undefined}
                     defaultMonth={
                       date ? new Date(`${date}T00:00:00`) : undefined
@@ -372,8 +364,12 @@ export default function InventoryHistory({
                     disabled={(day) => {
                       const dayString = format(day, "yyyy-MM-dd");
                       return (
+                        scanHistoryQuery.isLoading ||
+                        scanHistoryQuery.isError ||
                         dayString < INVENTORY_HISTORY_START_DATE ||
-                        dayString > todayUtc
+                        dayString > todayUtc ||
+                        // shortcut: only the latest 1,000 scans are selectable; paginate history for older dates.
+                        !scanDates.has(dayString)
                       );
                     }}
                     initialFocus
@@ -395,8 +391,10 @@ export default function InventoryHistory({
                           Try again
                         </button>
                       </>
+                    ) : scanDates.size ? (
+                      "Scan dates only · Latest 1,000 scans"
                     ) : (
-                      "Dots mark scans · Latest 1,000"
+                      "No recorded scan dates available."
                     )}
                   </div>
                   <p className="text-secondary-text max-w-64 px-3 pb-3 text-xs">
