@@ -5,6 +5,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
+import { getUserAvatar } from "@/utils/ui/images";
+import { UserAvatar } from "@/utils/ui/avatar";
 import React, { Suspense } from "react";
 import { STICKY_COLUMN_CLASS, stickyColumnRef } from "@/utils/ui/stickyColumn";
 import dynamic from "next/dynamic";
@@ -602,7 +604,7 @@ export default function ItemDetailsClient({
                       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                         {typeof currentItem.metadata.TimesTraded ===
                           "number" && (
-                          <div className="border-border-card bg-tertiary-bg rounded-md border p-3">
+                          <div className="border-border-card bg-tertiary-bg flex items-center justify-between gap-2 rounded-md border p-2.5 sm:block sm:p-3">
                             <div className="text-secondary-text text-xs">
                               Times Traded
                             </div>
@@ -615,7 +617,7 @@ export default function ItemDetailsClient({
                         )}
                         {typeof currentItem.metadata.UniqueCirculation ===
                           "number" && (
-                          <div className="border-border-card bg-tertiary-bg rounded-md border p-3">
+                          <div className="border-border-card bg-tertiary-bg flex items-center justify-between gap-2 rounded-md border p-2.5 sm:block sm:p-3">
                             <div className="text-secondary-text flex items-center gap-1 text-xs">
                               Unique Circulation
                               <Tooltip>
@@ -642,7 +644,7 @@ export default function ItemDetailsClient({
                         )}
                         {typeof currentItem.metadata.DemandMultiple ===
                           "number" && (
-                          <div className="border-border-card bg-tertiary-bg rounded-md border p-3">
+                          <div className="border-border-card bg-tertiary-bg flex items-center justify-between gap-2 rounded-md border p-2.5 sm:block sm:p-3">
                             <div className="text-secondary-text text-xs">
                               Demand Multiple
                             </div>
@@ -658,55 +660,132 @@ export default function ItemDetailsClient({
                   </div>
                 )}
 
-              {currentItem.id !== 587 &&
-                currentItem.id !== 713 &&
-                [
-                  {
-                    label: "Scanned copies · 30 days",
-                    description:
-                      "Unique copies that have been scanned in inventories",
-                    count: scanCount?.copyCount,
-                    enabled: true,
-                  },
-                  {
-                    label: "Duped copies seen · 30 days",
-                    description:
-                      "Individual duped copies observed in inventory scans",
-                    count: scanCount?.dupedCopyCount,
-                    enabled: dupedCopyCountsEnabled,
-                  },
-                ]
-                  .filter(({ enabled }) => enabled)
-                  .map(({ label, description, count }) => (
-                    <div
-                      key={label}
-                      className="border-border-card mt-4 flex min-h-14 items-center justify-between gap-4 border-b pb-3"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="text-primary-text text-sm font-medium">
-                          {label}
+              {currentItem.id !== 587 && currentItem.id !== 713 && (
+                <div className="border-border-card bg-secondary-bg mt-3 rounded-md border p-4">
+                  <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
+                    Inventory scans
+                  </div>
+                  <div className="text-secondary-text text-xs">
+                    Last 30 days
+                  </div>
+                  <div
+                    className={`mt-2 grid grid-cols-1 gap-2 ${dupedCopyCountsEnabled ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+                  >
+                    {[
+                      {
+                        label: "Scanned copies",
+                        description: "Unique copies scanned in inventories",
+                        count: scanCount?.copyCount,
+                        enabled: true,
+                      },
+                      {
+                        label: "Duped",
+                        description:
+                          "Individual duped copies observed in inventory scans",
+                        count: scanCount?.dupedCopyCount,
+                        enabled: dupedCopyCountsEnabled,
+                      },
+                      {
+                        label: "Signed",
+                        description:
+                          "Unique signed copies observed in inventory scans. Copies signed by multiple people count toward each signer.",
+                        count: scanCount?.signedCopyCount,
+                        enabled: true,
+                      },
+                    ]
+                      .filter(({ enabled }) => enabled)
+                      .map(({ label, description, count }) => (
+                        <div
+                          key={label}
+                          className="border-border-card bg-tertiary-bg flex min-w-0 items-center justify-between gap-2 rounded-md border p-2.5 sm:block"
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                tabIndex={0}
+                                className="text-secondary-text cursor-help text-xs"
+                              >
+                                {label}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-64">
+                              {description}
+                            </TooltipContent>
+                          </Tooltip>
+                          <div
+                            className="text-primary-text flex flex-wrap items-center justify-end gap-2 text-lg font-semibold tabular-nums sm:justify-start"
+                            aria-live="polite"
+                          >
+                            {scanCount === undefined ? (
+                              <Skeleton
+                                className="h-6 w-16"
+                                aria-hidden="true"
+                              />
+                            ) : count == null ? (
+                              <span aria-label={`${label} unavailable`}>—</span>
+                            ) : (
+                              count.toLocaleString("en-US")
+                            )}
+                            {label === "Signed" &&
+                              !!scanCount?.signedCounts?.length && (
+                                <div
+                                  className="text-secondary-text flex flex-wrap justify-end gap-1.5 text-xs font-normal sm:justify-start"
+                                  aria-label="Copies by signer"
+                                >
+                                  {scanCount.signedCounts.map(
+                                    ({ sign, count }) => {
+                                      const profileId = (
+                                        {
+                                          epic_tank: 606723718,
+                                          asimo3089: 2837719,
+                                          badcc: 2025110,
+                                        } as Record<string, number>
+                                      )[sign.toLowerCase()];
+                                      return (
+                                        <span
+                                          key={sign}
+                                          className="border-border-card bg-secondary-bg inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2 pl-0.5"
+                                        >
+                                          {profileId ? (
+                                            <a
+                                              href={`https://www.roblox.com/users/${profileId}/profile`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-primary-text inline-flex items-center gap-1 hover:underline"
+                                            >
+                                              <UserAvatar
+                                                userId={String(profileId)}
+                                                username={sign}
+                                                avatarHash={null}
+                                                forceAvatarUrl={getUserAvatar(
+                                                  String(profileId),
+                                                )}
+                                                size={5}
+                                                showBadge={false}
+                                              />
+                                              {sign}
+                                            </a>
+                                          ) : (
+                                            <span>{sign}</span>
+                                          )}
+                                          <span
+                                            className="tabular-nums"
+                                            aria-label={`${count.toLocaleString("en-US")} copies signed by ${sign}`}
+                                          >
+                                            ×{count.toLocaleString("en-US")}
+                                          </span>
+                                        </span>
+                                      );
+                                    },
+                                  )}
+                                </div>
+                              )}
+                          </div>
                         </div>
-                        <div className="text-secondary-text text-xs">
-                          {description}
-                        </div>
-                      </div>
-                      <div
-                        className="text-primary-text w-20 shrink-0 text-right text-lg font-semibold tabular-nums"
-                        aria-live="polite"
-                      >
-                        {scanCount === undefined ? (
-                          <Skeleton
-                            className="ml-auto h-6 w-16"
-                            aria-hidden="true"
-                          />
-                        ) : count == null ? (
-                          <span aria-label={`${label} unavailable`}>—</span>
-                        ) : (
-                          count.toLocaleString("en-US")
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                      ))}
+                  </div>
+                </div>
+              )}
 
               {/* Mobile Ad - shown only on smaller screens */}
               <div className="mt-4 flex justify-center xl:hidden">

@@ -1233,9 +1233,12 @@ export async function fetchUserFavorites(userId: string, throwOnError = false) {
   }
 }
 
-export async function fetchItemScanCount(
-  itemId: number,
-): Promise<{ copyCount: number | null; dupedCopyCount: number | null } | null> {
+export async function fetchItemScanCount(itemId: number): Promise<{
+  copyCount: number | null;
+  dupedCopyCount: number | null;
+  signedCopyCount: number | null;
+  signedCounts: { sign: string; count: number }[] | null;
+} | null> {
   if (!INVENTORY_API_URL) return null;
 
   try {
@@ -1256,6 +1259,8 @@ export async function fetchItemScanCount(
     const data = (await response.json()) as {
       copy_count?: unknown;
       duped_copy_count?: unknown;
+      signed_copy_count?: unknown;
+      signed_counts?: unknown;
     };
     const parseCount = (value: unknown) =>
       typeof value === "number" && Number.isFinite(value) && value >= 0
@@ -1264,6 +1269,16 @@ export async function fetchItemScanCount(
     return {
       copyCount: parseCount(data.copy_count),
       dupedCopyCount: parseCount(data.duped_copy_count),
+      signedCopyCount: parseCount(data.signed_copy_count),
+      signedCounts: Array.isArray(data.signed_counts)
+        ? data.signed_counts.filter(
+            (entry): entry is { sign: string; count: number } =>
+              entry != null &&
+              typeof entry.sign === "string" &&
+              entry.sign.trim().length > 0 &&
+              parseCount(entry.count) !== null,
+          )
+        : null,
     };
   } catch (error) {
     log.error("Error fetching item scan count", error);
