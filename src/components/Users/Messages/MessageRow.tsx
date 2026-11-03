@@ -806,7 +806,7 @@ export function MessageRow({
                         />
                       )}
                       <span className="text-primary-text/90 shrink-0 font-medium">
-                        @{parentLabel}
+                        {parentLabel}
                       </span>
                       <span className="min-w-0 truncate">
                         {formatMessageText(
