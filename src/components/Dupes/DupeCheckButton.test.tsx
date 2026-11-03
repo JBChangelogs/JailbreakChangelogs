@@ -63,6 +63,11 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
           };
         if (name === "@/utils/dupeComparisonUrl")
           return { getDupeComparisonUrl };
+        if (name === "@/utils/items/categoryIcons")
+          return {
+            getCategoryColor: () => "#6335b1",
+            getCategoryIcon: () => ({ Icon: "CategoryIcon" }),
+          };
         if (name === "@/components/ui/dialog")
           return {
             Dialog: "Dialog",
@@ -108,6 +113,19 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
     return [element, ...flatten(element.props?.children)];
   };
   const elements = flatten(exports.default(props));
+  const categoryBadge = elements.find(
+    (element) =>
+      element.type === "span" &&
+      Array.isArray(element.props.children) &&
+      element.props.children.includes("Rim"),
+  )!;
+  expect(categoryBadge.props.style).toEqual({
+    borderColor: "#6335b1",
+    backgroundColor: "#6335b122",
+  });
+  expect(
+    flatten(categoryBadge).some((element) => element.type === "CategoryIcon"),
+  ).toBe(true);
   const button = (label: string) =>
     elements.find(
       (element) =>
@@ -131,6 +149,9 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   expect(checks).toEqual([["123", 49]]);
   stateIndex = 0;
   const checked = exports.default(props);
+  expect(
+    flatten(checked).find((element) => element.type === "dl")?.props.className,
+  ).toContain("bg-tertiary-bg");
   expect(JSON.stringify(checked)).toContain("Not flagged by this check");
   expect(JSON.stringify(checked)).not.toContain("Flagged as duped");
   expect(JSON.stringify(checked)).toContain("Check details");
@@ -296,4 +317,12 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   expect(JSON.stringify(comparisonView)).not.toContain("Compare histories");
   expect(JSON.stringify(comparisonView)).toContain("Dupe check:");
   expect(JSON.stringify(comparisonView)).toContain("Original Display");
+  stateIndex = 0;
+  const withoutCategory = exports.default({
+    ...props,
+    item: { ...item, categoryTitle: undefined },
+  });
+  expect(
+    flatten(withoutCategory).some((element) => element.type === "CategoryIcon"),
+  ).toBe(false);
 });

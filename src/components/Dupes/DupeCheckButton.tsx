@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { checkDupe, type DupeCheckResult } from "@/utils/api/dupeCheck";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import {
   formatShortDateTime,
   formatRelativeDate,
@@ -41,7 +42,9 @@ export default function DupeCheckButton({
   const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
   const [checkOpen, setCheckOpen] = useState(false);
-
+  const categoryIcon = item.categoryTitle
+    ? getCategoryIcon(item.categoryTitle)
+    : null;
   const runCheck = async () => {
     if (checking) return;
     setCheckOpen(true);
@@ -95,7 +98,26 @@ export default function DupeCheckButton({
       <Dialog open={checkOpen} onOpenChange={setCheckOpen}>
         <DialogContent className="w-[calc(100%_-_2rem)] max-w-3xl" showClose>
           <DialogHeader className="pr-5 text-left">
-            <DialogTitle>Dupe check: {item.title}</DialogTitle>
+            <div className="flex flex-wrap items-center gap-3">
+              <DialogTitle>Dupe check: {item.title}</DialogTitle>
+              {item.categoryTitle && (
+                <span
+                  className="text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium"
+                  style={{
+                    borderColor: getCategoryColor(item.categoryTitle),
+                    backgroundColor: `${getCategoryColor(item.categoryTitle)}22`,
+                  }}
+                >
+                  {categoryIcon && (
+                    <categoryIcon.Icon
+                      className="mr-1.5 h-3 w-3"
+                      style={{ color: getCategoryColor(item.categoryTitle) }}
+                    />
+                  )}
+                  {item.categoryTitle}
+                </span>
+              )}
+            </div>
             <DialogDescription className="wrap-anywhere">
               Original owner:{" "}
               <span className="text-primary-text font-medium">{ownerName}</span>
@@ -175,7 +197,7 @@ export default function DupeCheckButton({
                       ))}
                     </ul>
                   </div>
-                  <dl className="divide-border-card border-border-card grid divide-y rounded-lg border text-sm sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+                  <dl className="divide-border-card border-border-card bg-tertiary-bg grid divide-y rounded-lg border text-sm sm:grid-cols-2 sm:divide-x sm:divide-y-0">
                     <div className="px-3 py-2">
                       <dt className="text-secondary-text mb-1 text-sm">
                         Dupe logged
