@@ -6,7 +6,9 @@ import {
   ThemeApiError,
   type MarketplaceTheme,
   type ThemePreviewImage,
+  type MarketplaceThemesPage,
 } from "@/utils/api/userThemes";
+import * as marketplaceRealtime from "@/utils/ui/marketplaceRealtime";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 
 interface Node {
@@ -32,6 +34,7 @@ function marketplace({
   total = 25,
   previews = [] as ThemePreviewImage[],
   description = null as string | null,
+  scrolled = false,
 } = {}) {
   const theme: MarketplaceTheme = {
     share_code: "ABCDEFGH",
@@ -53,7 +56,36 @@ function marketplace({
   const updates: unknown[] = [];
   const invalidations: unknown[] = [];
   const searchRef = { current: null as { focus: () => void } | null };
-  let keydown: ((event: KeyboardEvent) => void) | undefined;
+  const listeners = new Map<string, (event: unknown) => unknown>();
+  let refCursor = 0;
+  let scrolls = 0;
+  let refetches = 0;
+  let cache: MarketplaceThemesPage | undefined;
+  let cacheKey = "";
+  const marketplaceRef = {
+    current: {
+      getBoundingClientRect: () => ({ top: scrolled ? -200 : 100 }),
+      scrollIntoView: () => {
+        scrolls++;
+      },
+    },
+  };
+  const client = {
+    invalidateQueries: async ({ queryKey }: { queryKey: unknown }) => {
+      invalidations.push(queryKey);
+    },
+    cancelQueries: async () => {},
+    getQueryData: () => cache,
+    setQueryData: (
+      _key: unknown,
+      updater: (
+        previous: MarketplaceThemesPage | undefined,
+      ) => MarketplaceThemesPage | undefined,
+    ) => {
+      cache = updater(cache);
+      return cache;
+    },
+  };
   const effects: { deps: unknown[]; cleanup?: () => void }[] = [];
   let effectCursor = 0;
   let dirty = false;
@@ -73,23 +105,23 @@ function marketplace({
       Error,
       window: {
         addEventListener: (
-          _name: string,
-          callback: (event: KeyboardEvent) => void,
+          name: string,
+          callback: (event: unknown) => unknown,
         ) => {
-          keydown = callback;
+          listeners.set(name, callback);
         },
         removeEventListener: (
-          _name: string,
-          callback: (event: KeyboardEvent) => void,
+          name: string,
+          callback: (event: unknown) => unknown,
         ) => {
-          if (keydown === callback) keydown = undefined;
+          if (listeners.get(name) === callback) listeners.delete(name);
         },
       },
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "react")
           return {
-            useRef: () => searchRef,
+            useRef: () => (refCursor++ === 0 ? searchRef : marketplaceRef),
             useEffect: (
               effect: () => (() => void) | undefined,
               deps: unknown[],
@@ -110,34 +142,37 @@ function marketplace({
               return [
                 states[index],
                 (value: unknown) => {
-                  if (states[index] !== value) dirty = true;
-                  states[index] = value;
+                  const next =
+                    typeof value === "function" ? value(states[index]) : value;
+                  if (states[index] !== next) dirty = true;
+                  states[index] = next;
                 },
               ];
             },
           };
         if (name === "@tanstack/react-query")
           return {
-            useQueryClient: () => ({
-              invalidateQueries: async ({
-                queryKey,
-              }: {
-                queryKey: unknown;
-              }) => {
-                invalidations.push(queryKey);
-              },
-            }),
+            useQueryClient: () => client,
             useQuery: (options: { queryKey: unknown[] }) => {
               queryKey = options.queryKey;
-              return {
-                data: pending
+              const nextKey = JSON.stringify(queryKey);
+              if (cacheKey !== nextKey) {
+                cacheKey = nextKey;
+                cache = pending
                   ? undefined
                   : {
                       items: empty ? [] : [theme],
                       total: empty ? 0 : total,
-                      page: states[2],
+                      page: Number(states[2]),
                       total_pages: empty ? 0 : 2,
-                    },
+                      size: 24,
+                    };
+              }
+              return {
+                data: cache,
+                refetch: async () => {
+                  refetches++;
+                },
                 isPending: pending,
                 isFetching: pending || fetching,
               };
@@ -179,6 +214,8 @@ function marketplace({
         if (name === "@/utils/ui/searchShortcut")
           return { isItemSearchShortcut };
         if (name === "@/utils/ui/avatar") return { UserAvatar: "UserAvatar" };
+        if (name === "@/utils/ui/marketplaceRealtime")
+          return marketplaceRealtime;
         if (name === "@/hooks/useDebounce")
           return {
             useDebounce: (_value: string, delay: number) => {
@@ -205,6 +242,7 @@ function marketplace({
     let rendered: Node[];
     do {
       cursor = 0;
+      refCursor = 0;
       effectCursor = 0;
       dirty = false;
       rendered = nodes(exports.default());
@@ -231,7 +269,15 @@ function marketplace({
     updates,
     invalidations,
     keydown: (event: Partial<KeyboardEvent>) =>
-      keydown?.(event as KeyboardEvent),
+      listeners.get("keydown")?.(event),
+    emitMarketplace: async (detail: unknown) => {
+      render();
+      await listeners.get("realtimeThemeMarketplace")?.({ detail });
+      return render();
+    },
+    cache: () => cache,
+    scrolls: () => scrolls,
+    refetches: () => refetches,
     cleanup: () => effects.forEach((effect) => effect.cleanup?.()),
     flushDebounce: () => {
       debounced = String(states[0]).trim();
@@ -268,6 +314,141 @@ test("search and sort reset pagination, and use theme applies and remembers the 
   expect(view.applied[0].share_code).toBe("ABCDEFGH");
   expect(view.recent).toEqual(["ABCDEFGH"]);
   expect(view.button("In use").props.disabled).toBe(true);
+});
+
+const liveTheme: MarketplaceTheme = {
+  share_code: "K4SZ865G",
+  label: "Ocean",
+  description: "Soft blue accents",
+  scheme: "dark",
+  vars: {},
+  logo_filter: null,
+  published_at: 123,
+  user: { id: "other", username: "builder" },
+};
+
+test("live publications prepend at the top, updates replace in place, and removals drop cards", async () => {
+  const view = marketplace();
+  await view.emitMarketplace({
+    action: "marketplace_theme_published",
+    data: liveTheme,
+  });
+  expect(view.cache()!.items.map((theme) => theme.share_code)).toEqual([
+    liveTheme.share_code,
+    "ABCDEFGH",
+  ]);
+  const edited = { ...liveTheme, label: "Edited ocean" };
+  await view.emitMarketplace({
+    action: "marketplace_theme_updated",
+    data: edited,
+  });
+  expect(view.cache()!.items[0].label).toBe("Edited ocean");
+  await view.emitMarketplace({
+    action: "marketplace_theme_removed",
+    data: { share_code: liveTheme.share_code },
+  });
+  expect(view.cache()!.items.map((theme) => theme.share_code)).toEqual([
+    "ABCDEFGH",
+  ]);
+});
+
+test("new themes show the shared update pill when scrolled down or viewing another page", async () => {
+  for (const scrolled of [true, false]) {
+    const view = marketplace({ scrolled });
+    if (!scrolled)
+      (
+        view.render().find((node) => node.type === "Pagination")!.props
+          .onChange as (event: unknown, page: number) => void
+      )(null, 2);
+    const event = { action: "marketplace_theme_published", data: liveTheme };
+    await view.emitMarketplace(event);
+    await view.emitMarketplace(event);
+    expect(view.cache()!.items).toHaveLength(1);
+    const pill = view.render().find((node) => node.type === "UpdatePill")!;
+    expect(pill.props.children).toContain("1 new theme");
+    (pill.props.onClick as () => void)();
+    view.render();
+    expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
+    expect(view.scrolls()).toBe(1);
+    expect(view.render().some((node) => node.type === "UpdatePill")).toBe(
+      false,
+    );
+    if (scrolled) expect(view.refetches()).toBe(1);
+  }
+});
+
+test("nonmatching publications and signed-out visitors do not receive live cards or a pill", async () => {
+  const guest = marketplace({ signedIn: false });
+  await guest.emitMarketplace({
+    action: "marketplace_theme_published",
+    data: liveTheme,
+  });
+  expect(guest.cache()!.items).toHaveLength(1);
+  const view = marketplace({ scrolled: true });
+  (
+    view.render().find((node) => node.type === "input")!.props.onChange as (
+      event: unknown,
+    ) => void
+  )({ target: { value: "No match" } });
+  view.flushDebounce();
+  await view.emitMarketplace({
+    action: "marketplace_theme_published",
+    data: liveTheme,
+  });
+  expect(view.render().some((node) => node.type === "UpdatePill")).toBe(false);
+  expect(view.cache()!.items).toHaveLength(1);
+});
+
+test("a removed queued theme disappears from the new-theme count", async () => {
+  const view = marketplace({ scrolled: true });
+  await view.emitMarketplace({
+    action: "marketplace_theme_published",
+    data: liveTheme,
+  });
+  await view.emitMarketplace({
+    action: "marketplace_theme_removed",
+    data: { share_code: liveTheme.share_code },
+  });
+  expect(view.render().some((node) => node.type === "UpdatePill")).toBe(false);
+});
+
+test("oldest sort queues new publications and the pill returns to newest sort", async () => {
+  const view = marketplace();
+  (
+    view.render().find((node) => node.type === "DropdownMenuRadioGroup")!.props
+      .onValueChange as (value: string) => void
+  )("oldest");
+  await view.emitMarketplace({
+    action: "marketplace_theme_published",
+    data: liveTheme,
+  });
+  expect(view.cache()!.items).toHaveLength(1);
+  (
+    view.render().find((node) => node.type === "UpdatePill")!.props
+      .onClick as () => void
+  )();
+  view.render();
+  expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
+});
+
+test("live publications match descriptions and queue edits can stop matching the search", async () => {
+  const view = marketplace({ scrolled: true });
+  (
+    view.render().find((node) => node.type === "input")!.props.onChange as (
+      event: unknown,
+    ) => void
+  )({ target: { value: "Soft blue" } });
+  view.flushDebounce();
+  await view.emitMarketplace({
+    action: "marketplace_theme_published",
+    data: liveTheme,
+  });
+  expect(view.render().some((node) => node.type === "UpdatePill")).toBe(true);
+  await view.emitMarketplace({
+    action: "marketplace_theme_updated",
+    data: { ...liveTheme, description: "Red accents" },
+  });
+  expect(view.render().some((node) => node.type === "UpdatePill")).toBe(false);
 });
 
 test("marketplace descriptions are clamped and absent for null descriptions", () => {

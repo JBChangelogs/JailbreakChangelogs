@@ -21,7 +21,7 @@ function setupRealtime(
     target: { internalPath: string };
   }[] = [];
   const errors: unknown[] = [];
-  const events: { type: string }[] = [];
+  const events: { type: string; detail?: unknown }[] = [];
   const destinations: string[] = [];
   const dismissed: (string | undefined)[] = [];
   const windowListeners = new Map<string, Set<(event: unknown) => void>>();
@@ -217,6 +217,31 @@ const dm = {
     content: "Hello",
   },
 };
+
+test("marketplace socket actions are forwarded without creating notification alerts", async () => {
+  const realtime = setupRealtime({ path: "/themes" });
+  try {
+    for (const action of [
+      "marketplace_theme_published",
+      "marketplace_theme_updated",
+      "marketplace_theme_removed",
+    ]) {
+      const data = {
+        share_code: "ABCDEFGH",
+        description: "Soft purple accents",
+      };
+      await realtime.receive({ action, data });
+      expect(realtime.events).toContainEqual({
+        type: "realtimeThemeMarketplace",
+        detail: { action, data },
+      });
+    }
+    expect(realtime.toasts).toEqual([]);
+    expect(realtime.desktop).toEqual([]);
+  } finally {
+    realtime.cleanup();
+  }
+});
 const group = {
   action: "group_message_received",
   data: {

@@ -304,3 +304,18 @@ test("description word-filter errors retain the backend message", async () => {
   expect(error).toBeInstanceOf(ThemeApiError);
   expect(error.message).toBe(message);
 });
+
+test("marketplace fetches pass cancellation signals through to the API", async () => {
+  const signal = new AbortController().signal;
+  globalThis.fetch = (async (_url: string, init?: RequestInit) => {
+    expect(init?.signal).toBe(signal);
+    return Response.json({
+      items: [],
+      total: 0,
+      page: 1,
+      total_pages: 0,
+      size: 24,
+    });
+  }) as unknown as typeof fetch;
+  await fetchMarketplaceThemes(1, "newest", "", signal);
+});

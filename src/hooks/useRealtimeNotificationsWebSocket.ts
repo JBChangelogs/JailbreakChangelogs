@@ -1154,6 +1154,19 @@ export function useRealtimeNotificationsWebSocket(
               return;
             }
 
+            if (
+              payload.action === "marketplace_theme_published" ||
+              payload.action === "marketplace_theme_updated" ||
+              payload.action === "marketplace_theme_removed"
+            ) {
+              window.dispatchEvent(
+                new CustomEvent("realtimeThemeMarketplace", {
+                  detail: { action: payload.action, data: payload.data },
+                }),
+              );
+              return;
+            }
+
             if (payload.action === "refresh_comments") {
               window.dispatchEvent(
                 new CustomEvent("realtimeComments", {

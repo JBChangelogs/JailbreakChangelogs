@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
+import { UpdatePill } from "@/components/ui/UpdatePill";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Pagination } from "@/components/ui/Pagination";
 import { ReportReasonModal } from "@/components/ui/ReportReasonModal";
@@ -30,11 +31,17 @@ import {
   ThemeApiError,
   type MarketplaceSort,
   type MarketplaceTheme,
+  type MarketplaceThemesPage,
 } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { UserAvatar } from "@/utils/ui/avatar";
+import {
+  applyMarketplaceEvent,
+  parseMarketplaceEvent,
+  marketplaceMatchesSearch,
+} from "@/utils/ui/marketplaceRealtime";
 
 export default function ThemeMarketplace() {
   const queryClient = useQueryClient();
@@ -47,7 +54,9 @@ export default function ThemeMarketplace() {
   const [reporting, setReporting] = useState<MarketplaceTheme | null>(null);
   const [reason, setReason] = useState("");
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
+  const [pendingNew, setPendingNew] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const marketplaceRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isItemSearchShortcut(event) && searchInputRef.current) {
@@ -65,10 +74,97 @@ export default function ThemeMarketplace() {
   }, [debouncedInput]);
   const { data, isPending, isFetching, error, refetch } = useQuery({
     queryKey: ["theme-marketplace", query, page, sort],
-    queryFn: () => fetchMarketplaceThemes(page, sort, query),
+    queryFn: ({ signal }) => fetchMarketplaceThemes(page, sort, query, signal),
     retry: false,
   });
   const searching = isFetching || input.trim() !== query;
+
+  useEffect(() => setPendingNew(new Set()), [query, sort, isAuthenticated]);
+  useEffect(() => {
+    if (!data) return;
+    setPendingNew((previous) => {
+      const remaining = new Set(
+        [...previous].filter(
+          (code) => !data.items.some((theme) => theme.share_code === code),
+        ),
+      );
+      return remaining.size === previous.size ? previous : remaining;
+    });
+  }, [data]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const queryKey = ["theme-marketplace", query, page, sort];
+    const handleUpdate = async (event: Event) => {
+      const update = parseMarketplaceEvent(
+        (event as CustomEvent<unknown>).detail,
+      );
+      if (!update) return;
+      const before = queryClient.getQueryData<MarketplaceThemesPage>(queryKey);
+      const nearTop =
+        (marketplaceRef.current?.getBoundingClientRect().top ?? 0) >= 0;
+      const matches =
+        update.action !== "marketplace_theme_removed" &&
+        marketplaceMatchesSearch(update.data, query);
+      if (update.action === "marketplace_theme_removed" || !matches) {
+        setPendingNew((previous) => {
+          if (!previous.has(update.data.share_code)) return previous;
+          const next = new Set(previous);
+          next.delete(update.data.share_code);
+          return next;
+        });
+      }
+      if (
+        update.action !== "marketplace_theme_removed" &&
+        !matches &&
+        !before?.items.some(
+          (theme) => theme.share_code === update.data.share_code,
+        )
+      )
+        return;
+      if (
+        update.action === "marketplace_theme_published" &&
+        before &&
+        matches &&
+        !before.items.some(
+          (theme) => theme.share_code === update.data.share_code,
+        ) &&
+        (page !== 1 || sort !== "newest" || !nearTop)
+      ) {
+        setPendingNew((previous) =>
+          previous.has(update.data.share_code)
+            ? previous
+            : new Set([...previous, update.data.share_code]),
+        );
+        return;
+      }
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      const previous =
+        queryClient.getQueryData<MarketplaceThemesPage>(queryKey);
+      queryClient.setQueryData<MarketplaceThemesPage>(queryKey, (current) =>
+        applyMarketplaceEvent(current, update, query, sort),
+      );
+      await queryClient.invalidateQueries({
+        queryKey,
+        exact: true,
+        refetchType:
+          !previous ||
+          (nearTop &&
+            page === 1 &&
+            update.action === "marketplace_theme_removed")
+            ? "active"
+            : "none",
+      });
+    };
+    window.addEventListener("realtimeThemeMarketplace", handleUpdate);
+    return () =>
+      window.removeEventListener("realtimeThemeMarketplace", handleUpdate);
+  }, [queryClient, query, page, sort, isAuthenticated]);
+
+  useEffect(() => {
+    if (data && page > Math.max(1, data.total_pages))
+      setPage(Math.max(1, data.total_pages));
+  }, [data, page]);
 
   const unpublishTheme = async (theme: MarketplaceTheme) => {
     if (!isAuthenticated || !user || theme.user?.id !== user.id || unpublishing)
@@ -124,7 +220,38 @@ export default function ThemeMarketplace() {
   };
 
   return (
-    <div className="space-y-6">
+    <div ref={marketplaceRef} className="space-y-6">
+      {pendingNew.size > 0 && !isPending && (
+        <UpdatePill
+          centerOn={marketplaceRef}
+          onClick={() => {
+            setPendingNew(new Set());
+            if (page === 1 && sort === "newest") void refetch();
+            else {
+              void queryClient.invalidateQueries({
+                queryKey: ["theme-marketplace"],
+                refetchType: "none",
+              });
+              setPage(1);
+              setSort("newest");
+            }
+            marketplaceRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }}
+        >
+          <Icon
+            icon="material-symbols:arrow-upward-rounded"
+            aria-hidden="true"
+            className="size-4"
+          />
+          {pendingNew.size === 1
+            ? "1 new theme"
+            : `${pendingNew.size} new themes`}{" "}
+          — click to load
+        </UpdatePill>
+      )}
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <form

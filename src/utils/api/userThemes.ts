@@ -249,12 +249,14 @@ export async function fetchMarketplaceThemes(
   page = 1,
   sort: MarketplaceSort = "newest",
   query = "",
+  signal?: AbortSignal,
 ) {
   const params = new URLSearchParams({ page: String(page), sort });
   const search = query.trim();
   if (search) params.set("query", search);
   const data = await request<MarketplaceThemesPage>(
     `/v2/themes/marketplace${search ? "/search" : ""}?${params}`,
+    { signal },
   );
   return { ...data, items: data.items.map(sanitizeCustomTheme) };
 }
