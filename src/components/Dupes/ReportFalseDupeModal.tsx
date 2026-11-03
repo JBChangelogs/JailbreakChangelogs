@@ -146,9 +146,6 @@ export default function ReportFalseDupeModal({
             </span>
           )}
         </div>
-        <p className="text-secondary-text text-sm [overflow-wrap:anywhere]">
-          Item instance ID: {item.id}
-        </p>
         <div className="space-y-2">
           <p className="text-primary-text text-sm font-medium">
             Review the dupe tree before reporting
