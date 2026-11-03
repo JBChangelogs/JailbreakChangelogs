@@ -199,6 +199,19 @@ test("shared header preserves the original owner, login guard, report payload, a
   )!;
   expect(badges.props.season).toBe(8);
   expect(badges.props.level).toBe(10);
+  expect(badges.props.className).toBe("");
+  expect(
+    nodes(view()).some(
+      (node) =>
+        node.props.className === "flex flex-wrap items-center gap-2" &&
+        nodes(node).some((child) => child.type === "ItemUnlockBadges") &&
+        nodes(node).some(
+          (child) =>
+            Array.isArray(child.props.children) &&
+            child.props.children.includes("Vehicle"),
+        ),
+    ),
+  ).toBe(true);
   expect(
     nodes(view()).find((node) => node.props.href === "/dupes/123"),
   ).toBeDefined();

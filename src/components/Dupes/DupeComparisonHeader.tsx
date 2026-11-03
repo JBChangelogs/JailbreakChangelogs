@@ -171,10 +171,6 @@ export default function DupeComparisonHeader({
                 onError={handleImageError}
               />
             )}
-            <ItemUnlockBadges
-              season={sharedItemData.season}
-              level={sharedItemData.level}
-            />
           </div>
           <div className="min-w-0 flex-1 space-y-2">
             <Link
@@ -203,6 +199,11 @@ export default function DupeComparisonHeader({
                 )}
                 {duplicateItem.categoryTitle}
               </span>
+              <ItemUnlockBadges
+                season={sharedItemData.season}
+                level={sharedItemData.level}
+                className=""
+              />
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {normalizedOriginalOwnerId && (
