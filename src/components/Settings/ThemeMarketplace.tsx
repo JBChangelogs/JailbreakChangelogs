@@ -474,13 +474,15 @@ export default function ThemeMarketplace() {
               return (
                 <article
                   key={theme.share_code}
-                  className="border-border-card bg-secondary-bg min-w-0 space-y-3 rounded-xl border p-4"
+                  className="border-border-card bg-secondary-bg relative isolate min-w-0 space-y-3 rounded-xl border p-4"
                 >
                   {theme.previews?.length ? (
-                    <ThemePreviewImages
-                      previews={theme.previews}
-                      label={theme.label}
-                    />
+                    <div className="relative z-10">
+                      <ThemePreviewImages
+                        previews={theme.previews}
+                        label={theme.label}
+                      />
+                    </div>
                   ) : (
                     <CustomThemePreview
                       vars={theme.vars}
@@ -498,9 +500,9 @@ export default function ThemeMarketplace() {
                       />
                       <Link
                         href={`/themes/${theme.share_code}`}
-                        className="hover:text-link min-w-0 truncate transition-colors"
+                        className="hover:text-link focus-visible:after:ring-button-info min-w-0 transition-colors after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2"
                       >
-                        {theme.label}
+                        <span className="block truncate">{theme.label}</span>
                       </Link>
                     </h2>
                     {theme.description && (
@@ -526,7 +528,7 @@ export default function ThemeMarketplace() {
                         {theme.user?.id ? (
                           <Link
                             href={`/users/${theme.user.id}`}
-                            className="text-link hover:text-link-hover transition-colors"
+                            className="text-link hover:text-link-hover relative z-10 transition-colors"
                           >
                             {author}
                           </Link>
@@ -539,7 +541,7 @@ export default function ThemeMarketplace() {
                       <TooltipTrigger asChild>
                         <button
                           type="button"
-                          className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group mt-2 inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
+                          className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group relative z-10 mt-2 inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
                           aria-label={`Copy share code ${theme.share_code}`}
                           onClick={async () => {
                             try {
@@ -575,6 +577,7 @@ export default function ThemeMarketplace() {
                   <div className="flex flex-wrap gap-2">
                     <Button
                       size="sm"
+                      className="relative z-10"
                       disabled={inUse}
                       onClick={() => {
                         setCustomTheme(theme);
@@ -588,6 +591,7 @@ export default function ThemeMarketplace() {
                       <Button
                         size="sm"
                         variant="secondary"
+                        className="relative z-10"
                         disabled={unpublishing !== null}
                         onClick={() => void unpublishTheme(theme)}
                       >
@@ -602,6 +606,7 @@ export default function ThemeMarketplace() {
                         <Button
                           size="sm"
                           variant="ghost"
+                          className="relative z-10"
                           onClick={() => {
                             setReason("");
                             setReporting(theme);

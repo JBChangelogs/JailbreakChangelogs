@@ -536,14 +536,29 @@ test("fetching themes replaces the search icon with a spinner", () => {
   ).toBe(true);
 });
 
-test("marketplace titles link directly to theme details", () => {
+test("marketplace detail links cover the card while its controls stay above the link", () => {
+  const rendered = marketplace().render();
+  const link = rendered.find(
+    (node) => node.type === "Link" && node.props.href === "/themes/ABCDEFGH",
+  )!;
+  expect(link.props.className).toContain("after:inset-0");
+  expect(link.props.className).toContain("focus-visible:after:ring-2");
   expect(
-    marketplace()
-      .render()
-      .find(
-        (node) => node.type === "Link" && node.props.children === "Midnight",
-      )?.props.href,
-  ).toBe("/themes/ABCDEFGH");
+    rendered.find((node) => node.type === "article")?.props.className,
+  ).toContain("relative isolate");
+  const author = rendered.find(
+    (node) => node.type === "Link" && node.props.href === "/users/other",
+  )!;
+  expect(author.props.className).toContain("relative z-10");
+  for (const label of ["Use theme", "Report"]) {
+    expect(marketplace().button(label).props.className).toContain(
+      "relative z-10",
+    );
+  }
+  expect(
+    marketplace({ author: "me" }).button("Remove from marketplace").props
+      .className,
+  ).toContain("relative z-10");
 });
 
 test("uploaded screenshots replace the generated marketplace preview", () => {
