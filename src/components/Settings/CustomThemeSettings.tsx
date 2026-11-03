@@ -23,6 +23,7 @@ import {
   deleteMyTheme,
   fetchSharedTheme,
   listMyThemes,
+  updateMyTheme,
   ThemeApiError,
   type CustomTheme,
   type UserTheme,
@@ -84,6 +85,7 @@ export function useCustomThemes() {
     enabled: isAuthenticated,
   });
   const [deleting, setDeleting] = useState<UserTheme | null>(null);
+  const [publishing, setPublishing] = useState(false);
 
   const mine = data?.themes ?? [];
   const limit = data?.limit ?? 0;
@@ -159,6 +161,35 @@ export function useCustomThemes() {
     }
   };
 
+  const togglePublished = async (theme: UserTheme) => {
+    if (publishing || !checkAccess()) return;
+    const published = theme.published_at == null;
+    setPublishing(true);
+    try {
+      await updateMyTheme(theme.id, { published });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey }),
+        queryClient.invalidateQueries({ queryKey: ["theme-marketplace"] }),
+      ]);
+      toast.success(
+        published
+          ? "Theme published to marketplace"
+          : "Theme removed from marketplace",
+      );
+    } catch (err) {
+      toast.error(
+        published
+          ? "Couldn't publish the theme"
+          : "Couldn't unpublish the theme",
+        {
+          description: err instanceof Error ? err.message : undefined,
+        },
+      );
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!deleting) return;
     try {
@@ -200,6 +231,8 @@ export function useCustomThemes() {
     inUse: (code: string) => customTheme?.share_code === code,
     openEditor,
     copyLink,
+    publishing,
+    togglePublished,
     askDelete: setDeleting,
     dialogs,
   };
@@ -273,6 +306,20 @@ export function CustomThemeMenu({
             </DropdownMenuItem>
             {own ? (
               <>
+                <DropdownMenuItem
+                  className={item}
+                  disabled={custom.publishing}
+                  onSelect={() => void custom.togglePublished(own)}
+                >
+                  <Icon
+                    icon="lucide:globe"
+                    aria-hidden="true"
+                    className="size-4"
+                  />
+                  {own.published_at != null
+                    ? "Remove from marketplace"
+                    : "Publish to marketplace"}
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className={item}
                   onSelect={() => custom.openEditor(own)}

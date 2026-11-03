@@ -21,8 +21,10 @@ function marketplace({
   signedIn = true,
   author = "other",
   reportError = false,
+  unpublishError = false,
   empty = false,
   pending = false,
+  fetching = false,
   total = 25,
 } = {}) {
   const theme: MarketplaceTheme = {
@@ -40,9 +42,15 @@ function marketplace({
   const recent: string[] = [];
   const reports: unknown[] = [];
   const errors: unknown[] = [];
+  const updates: unknown[] = [];
+  const invalidations: unknown[] = [];
   const searchRef = { current: null as { focus: () => void } | null };
   let keydown: ((event: KeyboardEvent) => void) | undefined;
-  let cleanup: (() => void) | undefined;
+  const effects: { deps: unknown[]; cleanup?: () => void }[] = [];
+  let effectCursor = 0;
+  let dirty = false;
+  let debounced = "";
+  let debounceDelay = 0;
   const jsx = (type: string, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: () => Node };
   runInNewContext(
@@ -54,6 +62,7 @@ function marketplace({
     ).outputText,
     {
       exports,
+      Error,
       window: {
         addEventListener: (
           _name: string,
@@ -73,8 +82,19 @@ function marketplace({
         if (name === "react")
           return {
             useRef: () => searchRef,
-            useEffect: (effect: () => () => void) => {
-              cleanup ??= effect();
+            useEffect: (
+              effect: () => (() => void) | undefined,
+              deps: unknown[],
+            ) => {
+              const index = effectCursor++;
+              const previous = effects[index];
+              if (
+                previous &&
+                deps.every((value, i) => value === previous.deps[i])
+              )
+                return;
+              previous?.cleanup?.();
+              effects[index] = { deps, cleanup: effect() };
             },
             useState: (initial: unknown) => {
               const index = cursor++;
@@ -82,6 +102,7 @@ function marketplace({
               return [
                 states[index],
                 (value: unknown) => {
+                  if (states[index] !== value) dirty = true;
                   states[index] = value;
                 },
               ];
@@ -89,6 +110,15 @@ function marketplace({
           };
         if (name === "@tanstack/react-query")
           return {
+            useQueryClient: () => ({
+              invalidateQueries: async ({
+                queryKey,
+              }: {
+                queryKey: unknown;
+              }) => {
+                invalidations.push(queryKey);
+              },
+            }),
             useQuery: (options: { queryKey: unknown[] }) => {
               queryKey = options.queryKey;
               return {
@@ -101,6 +131,7 @@ function marketplace({
                       total_pages: empty ? 0 : 2,
                     },
                 isPending: pending,
+                isFetching: pending || fetching,
               };
             },
           };
@@ -116,6 +147,11 @@ function marketplace({
         if (name === "@/utils/api/userThemes")
           return {
             ThemeApiError,
+            listMyThemes: async () => ({ themes: [{ ...theme, id: 7 }] }),
+            updateMyTheme: async (id: number, input: unknown) => {
+              updates.push({ id, input });
+              if (unpublishError) throw new Error("API unavailable");
+            },
             reportMarketplaceTheme: async (code: string, reason: string) => {
               reports.push({ code, reason });
               if (reportError)
@@ -135,6 +171,13 @@ function marketplace({
         if (name === "@/utils/ui/searchShortcut")
           return { isItemSearchShortcut };
         if (name === "@/utils/ui/avatar") return { UserAvatar: "UserAvatar" };
+        if (name === "@/hooks/useDebounce")
+          return {
+            useDebounce: (_value: string, delay: number) => {
+              debounceDelay = delay;
+              return debounced;
+            },
+          };
         if (name === "sonner")
           return {
             toast: {
@@ -150,8 +193,14 @@ function marketplace({
     },
   );
   const render = () => {
-    cursor = 0;
-    return nodes(exports.default());
+    let rendered: Node[];
+    do {
+      cursor = 0;
+      effectCursor = 0;
+      dirty = false;
+      rendered = nodes(exports.default());
+    } while (dirty);
+    return rendered;
   };
   const button = (label: string) =>
     render().find(
@@ -170,9 +219,16 @@ function marketplace({
     recent,
     reports,
     errors,
+    updates,
+    invalidations,
     keydown: (event: Partial<KeyboardEvent>) =>
       keydown?.(event as KeyboardEvent),
-    cleanup: () => cleanup?.(),
+    cleanup: () => effects.forEach((effect) => effect.cleanup?.()),
+    flushDebounce: () => {
+      debounced = String(states[0]).trim();
+      return render();
+    },
+    debounceDelay: () => debounceDelay,
     key: () => queryKey,
   };
 }
@@ -205,6 +261,37 @@ test("search and sort reset pagination, and use theme applies and remembers the 
   expect(view.button("In use").props.disabled).toBe(true);
 });
 
+test("typing searches after the debounce, resets pagination, and shows a waiting spinner", () => {
+  const view = marketplace();
+  const pagination = view.render().find((node) => node.type === "Pagination")!;
+  (pagination.props.onChange as (event: unknown, page: number) => void)(
+    null,
+    2,
+  );
+  const input = view.render().find((node) => node.type === "input")!;
+  (input.props.onChange as (event: unknown) => void)({
+    target: { value: "  Moon  " },
+  });
+  const waiting = view.render();
+  expect(view.key()).toEqual(["theme-marketplace", "", 2, "newest"]);
+  expect(waiting.some((node) => node.type === "Spinner")).toBe(true);
+  expect(view.debounceDelay()).toBe(400);
+  const searched = view.flushDebounce();
+  expect(view.key()).toEqual(["theme-marketplace", "Moon", 1, "newest"]);
+  expect(searched.some((node) => node.type === "Spinner")).toBe(false);
+});
+
+test("fetching themes replaces the search icon with a spinner", () => {
+  const rendered = marketplace({ fetching: true }).render();
+  const button = rendered.find(
+    (node) => node.type === "button" && node.props["aria-label"] === "Search",
+  )!;
+  expect(button.props["aria-busy"]).toBe(true);
+  expect(
+    nodes(button.props.children).some((node) => node.type === "Spinner"),
+  ).toBe(true);
+});
+
 test("report is hidden for visitors and owners; another user's theme can be reported", async () => {
   for (const options of [{ signedIn: false }, { author: "me" }]) {
     expect(marketplace(options).button("Report")).toBeUndefined();
@@ -219,6 +306,41 @@ test("report is hidden for visitors and owners; another user's theme can be repo
     { code: "ABCDEFGH", reason: "Offensive name" },
   ]);
   expect(view.dialog().open).toBe(false);
+});
+
+test("owners can unpublish a marketplace card without deleting or stopping their theme", async () => {
+  const view = marketplace({ author: "me" });
+  view.click("Use theme");
+  view.click("Remove from marketplace");
+  expect(view.button("Removing…").props.disabled).toBe(true);
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(view.updates).toEqual([{ id: 7, input: { published: false } }]);
+  expect(view.invalidations).toEqual([
+    ["my-themes", "me"],
+    ["theme-marketplace"],
+  ]);
+  expect(view.applied[0].share_code).toBe("ABCDEFGH");
+  expect(view.button("Remove from marketplace").props.disabled).toBe(false);
+});
+
+test("marketplace removal is hidden from visitors and non-owners", () => {
+  for (const options of [
+    { signedIn: false, author: "me" },
+    { author: "other" },
+  ]) {
+    expect(
+      marketplace(options).button("Remove from marketplace"),
+    ).toBeUndefined();
+  }
+});
+
+test("failed marketplace removal leaves the card available and shows the API error", async () => {
+  const view = marketplace({ author: "me", unpublishError: true });
+  view.click("Remove from marketplace");
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(view.invalidations).toEqual([]);
+  expect(view.button("Remove from marketplace").props.disabled).toBe(false);
+  expect(view.errors).toEqual([{ description: "API unavailable" }]);
 });
 
 test("search and clear actions live inside the field, and clearing resets results and focus", () => {
@@ -351,7 +473,9 @@ test("slash focuses marketplace search, respects editable targets, and unregiste
 
 test("pending themes show six skeleton cards with an accessible loading status", () => {
   const rendered = marketplace({ pending: true }).render();
-  const grid = rendered.find((node) => node.props["aria-busy"] === true)!;
+  const grid = rendered.find(
+    (node) => node.type === "div" && node.props["aria-busy"] === true,
+  )!;
   expect(
     nodes(grid.props.children).filter(
       (node) => node.type === "div" && node.props["aria-hidden"] === "true",

@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/Spinner";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Pagination } from "@/components/ui/Pagination";
 import { ReportReasonModal } from "@/components/ui/ReportReasonModal";
 import {
@@ -22,6 +24,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import {
   fetchMarketplaceThemes,
   reportMarketplaceTheme,
+  listMyThemes,
+  updateMyTheme,
   ThemeApiError,
   type MarketplaceSort,
   type MarketplaceTheme,
@@ -32,6 +36,7 @@ import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { UserAvatar } from "@/utils/ui/avatar";
 
 export default function ThemeMarketplace() {
+  const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuthContext();
   const { customTheme } = useTheme();
   const [input, setInput] = useState("");
@@ -40,6 +45,7 @@ export default function ThemeMarketplace() {
   const [sort, setSort] = useState<MarketplaceSort>("newest");
   const [reporting, setReporting] = useState<MarketplaceTheme | null>(null);
   const [reason, setReason] = useState("");
+  const [unpublishing, setUnpublishing] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -51,11 +57,43 @@ export default function ThemeMarketplace() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-  const { data, isPending, error, refetch } = useQuery({
+  const debouncedInput = useDebounce(input.trim(), 400);
+  useEffect(() => {
+    setQuery(debouncedInput);
+    setPage(1);
+  }, [debouncedInput]);
+  const { data, isPending, isFetching, error, refetch } = useQuery({
     queryKey: ["theme-marketplace", query, page, sort],
     queryFn: () => fetchMarketplaceThemes(page, sort, query),
     retry: false,
   });
+  const searching = isFetching || input.trim() !== query;
+
+  const unpublishTheme = async (theme: MarketplaceTheme) => {
+    if (!isAuthenticated || !user || theme.user?.id !== user.id || unpublishing)
+      return;
+    setUnpublishing(theme.share_code);
+    try {
+      // Marketplace entries have share codes; owner updates require the private numeric ID.
+      const { themes } = await listMyThemes();
+      const own = themes.find((saved) => saved.share_code === theme.share_code);
+      if (!own)
+        throw new Error("This theme is no longer in your saved themes.");
+      await updateMyTheme(own.id, { published: false });
+      setPage(1);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["my-themes", user.id] }),
+        queryClient.invalidateQueries({ queryKey: ["theme-marketplace"] }),
+      ]);
+      toast.success("Theme removed from marketplace");
+    } catch (err) {
+      toast.error("Couldn't remove the theme from marketplace", {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setUnpublishing(null);
+    }
+  };
 
   const submitReport = async (reportReason: string) => {
     if (!reporting || !isAuthenticated || reporting.user?.id === user?.id)
@@ -133,13 +171,18 @@ export default function ThemeMarketplace() {
               <button
                 type="submit"
                 aria-label="Search"
+                aria-busy={searching}
                 className="hover:bg-link/10 text-link flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors"
               >
-                <Icon
-                  icon="heroicons:magnifying-glass"
-                  aria-hidden="true"
-                  className="size-5"
-                />
+                {searching ? (
+                  <Spinner className="size-5" />
+                ) : (
+                  <Icon
+                    icon="heroicons:magnifying-glass"
+                    aria-hidden="true"
+                    className="size-5"
+                  />
+                )}
               </button>
             </div>
           </form>
@@ -350,6 +393,18 @@ export default function ThemeMarketplace() {
                     >
                       {inUse ? "In use" : "Use theme"}
                     </Button>
+                    {isAuthenticated && user && theme.user?.id === user.id && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={unpublishing !== null}
+                        onClick={() => void unpublishTheme(theme)}
+                      >
+                        {unpublishing === theme.share_code
+                          ? "Removing…"
+                          : "Remove from marketplace"}
+                      </Button>
+                    )}
                     {isAuthenticated &&
                       theme.user?.id &&
                       theme.user.id !== user?.id && (
