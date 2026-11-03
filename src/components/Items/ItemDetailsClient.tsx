@@ -605,8 +605,26 @@ export default function ItemDetailsClient({
                         {typeof currentItem.metadata.TimesTraded ===
                           "number" && (
                           <div className="border-border-card bg-tertiary-bg flex items-center justify-between gap-2 rounded-md border p-2.5 sm:block sm:p-3">
-                            <div className="text-secondary-text text-xs">
+                            <div className="text-secondary-text flex items-center gap-1 text-xs">
                               Times Traded
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span
+                                    tabIndex={0}
+                                    aria-label="About times traded"
+                                    className="text-tertiary-text hover:text-primary-text cursor-help"
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:information-circle"
+                                      className="h-4 w-4"
+                                    />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-64">
+                                  Total times copies of this item were traded in
+                                  the last 30 days.
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                             <div className="text-primary-text text-lg font-semibold">
                               {currentItem.metadata.TimesTraded.toLocaleString(
@@ -645,8 +663,25 @@ export default function ItemDetailsClient({
                         {typeof currentItem.metadata.DemandMultiple ===
                           "number" && (
                           <div className="border-border-card bg-tertiary-bg flex items-center justify-between gap-2 rounded-md border p-2.5 sm:block sm:p-3">
-                            <div className="text-secondary-text text-xs">
+                            <div className="text-secondary-text flex items-center gap-1 text-xs">
                               Demand Multiple
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span
+                                    tabIndex={0}
+                                    aria-label="About demand multiple"
+                                    className="text-tertiary-text hover:text-primary-text cursor-help"
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:information-circle"
+                                      className="h-4 w-4"
+                                    />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-64">
+                                  Times Traded divided by Unique Circulation.
+                                </TooltipContent>
+                              </Tooltip>
                             </div>
                             <div className="text-primary-text text-lg font-semibold">
                               {currentItem.metadata.DemandMultiple.toLocaleString(
@@ -666,7 +701,13 @@ export default function ItemDetailsClient({
                     Inventory scans
                   </div>
                   <div className="text-secondary-text text-xs">
-                    Last 30 days
+                    {scanCount === undefined ? (
+                      <Skeleton className="h-4 w-24" aria-hidden="true" />
+                    ) : scanCount?.days == null ? (
+                      "Time window unavailable"
+                    ) : (
+                      `Last ${scanCount.days.toLocaleString("en-US")} ${scanCount.days === 1 ? "day" : "days"}`
+                    )}
                   </div>
                   <div
                     className={`mt-2 grid grid-cols-1 gap-2 ${dupedCopyCountsEnabled ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
@@ -688,7 +729,7 @@ export default function ItemDetailsClient({
                       {
                         label: "Signed copies",
                         description:
-                          "Unique signed copies observed in inventory scans. Copies signed by multiple people count toward each signer.",
+                          "Unique signed copies observed in inventory scans",
                         count: scanCount?.signedCopyCount,
                         enabled: true,
                       },
@@ -699,19 +740,31 @@ export default function ItemDetailsClient({
                           key={label}
                           className="border-border-card bg-tertiary-bg flex min-w-0 items-center justify-between gap-2 rounded-md border p-2.5 sm:block"
                         >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span
-                                tabIndex={0}
-                                className="text-secondary-text cursor-help text-xs"
-                              >
-                                {label}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-64">
-                              {description}
-                            </TooltipContent>
-                          </Tooltip>
+                          <div className="text-secondary-text flex items-center gap-1 text-xs">
+                            {label}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  tabIndex={0}
+                                  aria-label={`About ${label.toLowerCase()}`}
+                                  className="text-tertiary-text hover:text-primary-text cursor-help"
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:information-circle"
+                                    className="h-4 w-4"
+                                  />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-64">
+                                {description}
+                                {scanCount?.days != null &&
+                                  ` in the last ${scanCount.days.toLocaleString("en-US")} ${scanCount.days === 1 ? "day" : "days"}`}
+                                .
+                                {label === "Signed copies" &&
+                                  " Copies signed by multiple people count toward each signer."}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
                           <div
                             className="text-primary-text flex flex-wrap items-center justify-end gap-2 text-lg font-semibold tabular-nums sm:justify-start"
                             aria-live="polite"

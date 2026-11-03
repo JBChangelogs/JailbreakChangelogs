@@ -1234,6 +1234,7 @@ export async function fetchUserFavorites(userId: string, throwOnError = false) {
 }
 
 export async function fetchItemScanCount(itemId: number): Promise<{
+  days: number | null;
   copyCount: number | null;
   dupedCopyCount: number | null;
   signedCopyCount: number | null;
@@ -1243,7 +1244,7 @@ export async function fetchItemScanCount(itemId: number): Promise<{
 
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/items/${itemId}/scans/count?days=30`,
+      `${INVENTORY_API_URL}/items/${itemId}/scans/count`,
       {
         headers: { "X-Source": INVENTORY_API_SOURCE_HEADER },
       },
@@ -1257,6 +1258,7 @@ export async function fetchItemScanCount(itemId: number): Promise<{
     }
 
     const data = (await response.json()) as {
+      days?: unknown;
       copy_count?: unknown;
       duped_copy_count?: unknown;
       signed_copy_count?: unknown;
@@ -1267,6 +1269,12 @@ export async function fetchItemScanCount(itemId: number): Promise<{
         ? value
         : null;
     return {
+      days:
+        typeof data.days === "number" &&
+        Number.isSafeInteger(data.days) &&
+        data.days > 0
+          ? data.days
+          : null,
       copyCount: parseCount(data.copy_count),
       dupedCopyCount: parseCount(data.duped_copy_count),
       signedCopyCount: parseCount(data.signed_copy_count),

@@ -25,6 +25,7 @@ test("only the duped count requires experiment access and unavailable counts sta
   runInNewContext(compiled, {
     exports,
     require: () => jsxRuntime,
+    Icon: () => jsxRuntime.jsx("svg", { "data-info-icon": true }),
     Tooltip: ({ children }: { children: ReactElement }) => children,
     TooltipTrigger: ({ children }: { children: ReactElement }) => children,
     TooltipContent: ({ children }: { children: ReactElement }) =>
@@ -43,11 +44,12 @@ test("only the duped count requires experiment access and unavailable counts sta
     for (const scanCount of [
       undefined,
       null,
-      { copyCount: 1234, dupedCopyCount: 0 },
-      { copyCount: 10, dupedCopyCount: null },
+      { days: 7, copyCount: 1234, dupedCopyCount: 0 },
+      { days: 1, copyCount: 10, dupedCopyCount: null },
       {
         copyCount: 10,
         dupedCopyCount: 0,
+        days: 30,
         signedCopyCount: 0,
         signedCounts: [],
       },
@@ -78,7 +80,25 @@ test("only the duped count requires experiment access and unavailable counts sta
       expect(markup).not.toContain("<button");
       expect(markup).not.toContain(" title=");
       expect(markup).toContain("Inventory scans");
-      expect(markup).toContain("Last 30 days");
+      if (scanCount?.days != null) {
+        expect(markup).toContain(
+          `Last ${scanCount.days} ${scanCount.days === 1 ? "day" : "days"}`,
+        );
+        expect(
+          markup.match(
+            new RegExp(
+              `in the last ${scanCount.days} ${scanCount.days === 1 ? "day" : "days"}\\.`,
+              "g",
+            ),
+          )?.length,
+        ).toBe(enabled ? 3 : 2);
+      } else if (scanCount !== undefined) {
+        expect(markup).toContain("Time window unavailable");
+      }
+      if (scanCount?.days !== 30) expect(markup).not.toContain("Last 30 days");
+      expect(markup.match(/data-info-icon/g)?.length).toBe(enabled ? 3 : 2);
+      expect(markup).toContain('aria-label="About scanned copies"');
+      expect(markup).toContain('aria-label="About signed copies"');
       expect(markup).toContain(">Signed copies<");
       if (scanCount?.signedCounts?.length) {
         expect(markup).toContain("Copies by signer");
