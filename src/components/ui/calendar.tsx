@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   DayButton,
+  Day,
   DayPicker,
   getDefaultClassNames,
   type DropdownProps,
@@ -172,6 +173,36 @@ function Calendar({
             />
           );
         },
+        Day: ({ day, modifiers, children, className, ...dayProps }) => {
+          const showBoundaryDate =
+            showOutsideDays &&
+            !props.hidden &&
+            modifiers.outside &&
+            modifiers.hidden;
+          return (
+            <Day
+              {...dayProps}
+              day={day}
+              modifiers={modifiers}
+              className={cn(
+                className,
+                showBoundaryDate && "visible opacity-50",
+              )}
+              data-hidden={
+                showBoundaryDate ? undefined : modifiers.hidden || undefined
+              }
+              aria-disabled={showBoundaryDate || dayProps["aria-disabled"]}
+            >
+              {showBoundaryDate ? (
+                <span className="text-primary-text flex size-10 items-center justify-center">
+                  {day.date.getDate()}
+                </span>
+              ) : (
+                children
+              )}
+            </Day>
+          );
+        },
         DayButton: CalendarDayButton,
         Dropdown: CalendarDropdown,
         WeekNumber: ({ children, ...props }) => {
@@ -269,6 +300,8 @@ function CalendarDayButton({
       className={cn(
         "data-[selected-single=true]:bg-button-info data-[selected-single=true]:text-form-button-text! data-[range-middle=true]:bg-button-info/20 data-[range-middle=true]:text-primary-text data-[range-start=true]:bg-button-info data-[range-start=true]:text-form-button-text! data-[range-end=true]:bg-button-info data-[range-end=true]:text-form-button-text! group-data-[focused=true]/day:border-button-info group-data-[focused=true]/day:ring-button-info/40 flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
+        // The day cell owns disabled opacity.
+        "disabled:opacity-100",
         !modifiers.range_start &&
           !modifiers.range_end &&
           !modifiers.range_middle &&
