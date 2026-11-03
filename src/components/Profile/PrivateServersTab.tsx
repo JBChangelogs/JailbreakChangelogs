@@ -3,6 +3,7 @@
 import { trackWebEvent } from "@/utils/analytics/web";
 
 import ProfileTabError from "./ProfileTabError";
+import ReportServerButton from "@/components/Servers/ReportServerButton";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -181,6 +182,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                 Server #{index + 1}
               </h3>
               <div className="flex flex-wrap gap-2">
+                <ReportServerButton server={server} />
                 <Button
                   onClick={() => handleCopyLink(server.link)}
                   variant="secondary"
@@ -219,7 +221,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                   : formatProfileDate(server.expires)}
               </span>
             </div>
-            <div className="border-border-card bg-secondary-bg rounded-lg border p-3 sm:p-4">
+            <div className="min-w-0">
               <h4 className="text-primary-text mb-2 text-sm font-medium">
                 Server rules
               </h4>

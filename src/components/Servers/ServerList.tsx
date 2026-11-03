@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import AddServerModal from "./AddServerModal";
+import ReportServerButton from "./ReportServerButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
@@ -477,7 +478,7 @@ const ServerList: React.FC = () => {
                 <Skeleton style={{ width: 90, height: 28 }} />
               </div>
 
-              <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
+              <div className="mb-4 min-w-0">
                 <Skeleton style={{ width: 90, height: 16 }} />
                 <div className="mt-2 flex items-center gap-2">
                   <Skeleton
@@ -493,7 +494,7 @@ const ServerList: React.FC = () => {
                 <Skeleton style={{ width: 120, height: 28 }} />
               </div>
 
-              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
+              <div className="min-w-0">
                 <Skeleton style={{ width: 70, height: 20 }} />
                 <div className="mt-2 space-y-2">
                   <Skeleton className="w-full" style={{ height: 16 }} />
@@ -600,116 +601,111 @@ const ServerList: React.FC = () => {
               className="border-border-card bg-secondary-bg flex h-full flex-col rounded-xl border p-4 shadow-sm transition-all hover:shadow-md sm:p-5"
             >
               <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <span className="text-primary-text block text-base font-semibold">
-                    Server #{serverNumberMap[server.id]}
-                  </span>
-                </div>
+                <span className="text-primary-text block min-w-0 text-base font-semibold">
+                  Server #{serverNumberMap[server.id]}
+                </span>
 
-                <div className="flex shrink-0 items-center gap-2">
-                  {isServerOwner && (
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          aria-label="Server actions"
-                        >
-                          <Icon icon="heroicons:ellipsis-horizontal" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        onCloseAutoFocus={(event) => event.preventDefault()}
-                        className="border-border-card bg-secondary-bg text-primary-text min-w-45 rounded-xl border p-0"
+                <ReportServerButton server={server} />
+                {isServerOwner && (
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        aria-label="Server actions"
                       >
-                        <DropdownMenuItem
-                          className="w-full cursor-pointer rounded-none px-4 py-2"
-                          onSelect={() => handleEditServerFromMenu(server)}
-                        >
-                          <Icon
-                            icon="heroicons:pencil"
-                            className="mr-2 h-4 w-4"
-                          />
-                          Edit server
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger focus:bg-button-danger/10 focus:text-button-danger w-full cursor-pointer rounded-none px-4 py-2"
-                          onSelect={() => handleDeleteServerFromMenu(server)}
-                        >
-                          <Icon
-                            icon="heroicons:trash-solid"
-                            className="mr-2 h-4 w-4"
-                          />
-                          Delete server
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
+                        <Icon icon="heroicons:ellipsis-horizontal" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      onCloseAutoFocus={(event) => event.preventDefault()}
+                      className="border-border-card bg-secondary-bg text-primary-text min-w-45 rounded-xl border p-0"
+                    >
+                      <DropdownMenuItem
+                        className="w-full cursor-pointer rounded-none px-4 py-2"
+                        onSelect={() => handleEditServerFromMenu(server)}
+                      >
+                        <Icon
+                          icon="heroicons:pencil"
+                          className="mr-2 h-4 w-4"
+                        />
+                        Edit server
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger focus:bg-button-danger/10 focus:text-button-danger w-full cursor-pointer rounded-none px-4 py-2"
+                        onSelect={() => handleDeleteServerFromMenu(server)}
+                      >
+                        <Icon
+                          icon="heroicons:trash-solid"
+                          className="mr-2 h-4 w-4"
+                        />
+                        Delete server
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
 
-              <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
+              <div className="mb-4 min-w-0">
                 <p className="text-secondary-text mb-2 text-xs tracking-wide uppercase">
                   Server owner
                 </p>
-                <div className="flex items-center justify-between gap-3">
-                  {server.user.id ? (
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      <UserAvatar
-                        userId={server.user.id}
-                        avatarHash={server.user.avatar}
-                        username={server.user.username}
-                        size={9}
-                        custom_avatar={server.user.custom_avatar ?? undefined}
-                        showBadge={false}
-                        settings={server.user.settings}
-                        premiumType={server.user.premiumtype}
-                      />
-                      <UserProfilePopover user={server.user}>
-                        <Link
-                          href={`/users/${server.user.id}`}
-                          prefetch={false}
-                          className="text-primary-text hover:text-link active:text-link-active min-w-0 truncate font-medium transition-colors"
-                        >
-                          {server.user.username}
-                        </Link>
-                      </UserProfilePopover>
-                      {isSupporter && supporterTier && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="flex items-center">
-                              <Image
-                                src={
-                                  supporterIcons[
-                                    supporterTier as keyof typeof supporterIcons
-                                  ]
-                                }
-                                alt={`Supporter Type ${supporterTier}`}
-                                width={16}
-                                height={16}
-                                className="object-contain"
-                              />
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                            <p>Supporter Type {supporterTier}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-                  ) : (
-                    <Skeleton style={{ width: 100 }} />
-                  )}
-                </div>
+                {server.user.id ? (
+                  <div className="flex min-w-0 items-center gap-2">
+                    <UserAvatar
+                      userId={server.user.id}
+                      avatarHash={server.user.avatar}
+                      username={server.user.username}
+                      size={9}
+                      custom_avatar={server.user.custom_avatar ?? undefined}
+                      showBadge={false}
+                      settings={server.user.settings}
+                      premiumType={server.user.premiumtype}
+                    />
+                    <UserProfilePopover user={server.user}>
+                      <Link
+                        href={`/users/${server.user.id}`}
+                        prefetch={false}
+                        className="text-primary-text hover:text-link active:text-link-active min-w-0 truncate font-medium transition-colors"
+                      >
+                        {server.user.username}
+                      </Link>
+                    </UserProfilePopover>
+                    {isSupporter && supporterTier && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center">
+                            <Image
+                              src={
+                                supporterIcons[
+                                  supporterTier as keyof typeof supporterIcons
+                                ]
+                              }
+                              alt={`Supporter Type ${supporterTier}`}
+                              width={16}
+                              height={16}
+                              className="object-contain"
+                            />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          <p>Supporter Type {supporterTier}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                ) : (
+                  <Skeleton style={{ width: 100 }} />
+                )}
               </div>
 
               <div className="mb-4 flex flex-wrap gap-2">
-                <div className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all">
+                <div className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all">
                   <Icon icon="heroicons:clock" className="h-3.5 w-3.5" />
                   Added {formatProfileDate(server.created_at)}
                 </div>
-                <div className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all">
+                <div className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all">
                   <Icon
                     icon="heroicons:calendar-days"
                     className="h-3.5 w-3.5"
@@ -718,7 +714,7 @@ const ServerList: React.FC = () => {
                 </div>
               </div>
 
-              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
+              <div className="min-w-0">
                 <h4 className="text-primary-text mb-2 text-sm font-medium">
                   Server rules
                 </h4>
