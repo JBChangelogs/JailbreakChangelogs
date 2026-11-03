@@ -755,7 +755,7 @@ export default function ItemDetailsClient({
                             }
                             target={profileId ? "_blank" : undefined}
                             rel={profileId ? "noopener noreferrer" : undefined}
-                            className="border-border-card bg-tertiary-bg text-primary-text inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2 pl-0.5 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                            className="group/signer border-border-card bg-tertiary-bg text-primary-text inline-flex items-center gap-1.5 rounded-lg border py-0.5 pr-2 pl-0.5 focus-visible:outline-2 focus-visible:outline-offset-2"
                           >
                             {profileId && (
                               <UserAvatar
@@ -770,7 +770,15 @@ export default function ItemDetailsClient({
                                 bgClassName="bg-quaternary-bg"
                               />
                             )}
-                            <span>{sign}</span>
+                            <span
+                              className={
+                                profileId
+                                  ? "text-link group-hover/signer:text-link-hover group-focus-visible/signer:text-link-hover transition-colors"
+                                  : undefined
+                              }
+                            >
+                              {sign}
+                            </span>
                             <span
                               className="tabular-nums"
                               aria-label={`${count.toLocaleString("en-US")} copies signed by ${sign}`}
