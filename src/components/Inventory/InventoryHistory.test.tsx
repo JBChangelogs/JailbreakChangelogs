@@ -15,6 +15,7 @@ interface Node {
     onClick?: () => void;
     onSelect?: (date: Date) => void;
     defaultMonth?: Date;
+    endMonth?: Date;
     modifiers?: { scanned: (day: Date) => boolean };
     className?: string;
     disabled?: boolean | ((date: Date) => boolean);
@@ -509,6 +510,11 @@ test("calendar disables dates before tracking and after today in UTC", () => {
   const disabled = nodes(view).find((node) => node.type === "calendar")!.props
     .disabled as (date: Date) => boolean;
   const today = new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00`);
+  expect(
+    nodes(view)
+      .find((node) => node.type === "calendar")!
+      .props.endMonth?.getTime(),
+  ).toBe(today.getTime());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const yesterday = new Date(today);

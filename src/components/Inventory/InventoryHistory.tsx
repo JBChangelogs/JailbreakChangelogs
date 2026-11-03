@@ -216,6 +216,7 @@ export default function InventoryHistory({
     onDateChange?.(nextDate);
   };
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const todayUtc = new Date().toISOString().slice(0, 10);
   const scanHistoryQuery = useInventoryScanHistory(userId, isDatePickerOpen);
   const scanDates = new Set(
     (scanHistoryQuery.data ?? [])
@@ -349,6 +350,7 @@ export default function InventoryHistory({
                     startMonth={
                       new Date(`${INVENTORY_HISTORY_START_DATE}T00:00:00`)
                     }
+                    endMonth={new Date(`${todayUtc}T00:00:00`)}
                     modifiers={{
                       scanned: (day) =>
                         scanDates.has(format(day, "yyyy-MM-dd")),
@@ -371,7 +373,7 @@ export default function InventoryHistory({
                       const dayString = format(day, "yyyy-MM-dd");
                       return (
                         dayString < INVENTORY_HISTORY_START_DATE ||
-                        dayString > new Date().toISOString().slice(0, 10)
+                        dayString > todayUtc
                       );
                     }}
                     initialFocus
