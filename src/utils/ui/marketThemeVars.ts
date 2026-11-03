@@ -5,6 +5,7 @@
 export function marketThemeVars(
   vars: Record<string, string>,
   textColor?: (hex: string) => string,
+  resolveBrowserColors = true,
 ): Record<string, string> {
   const colors = Object.fromEntries(
     Object.entries(vars).filter(
@@ -28,7 +29,7 @@ export function marketThemeVars(
     if (!/^--color-(demand|trend)-[a-z-]+$/.test(key)) continue;
     let hex = resolve(value);
     if (!/^#[0-9a-f]{6}$/i.test(hex)) {
-      if (typeof document === "undefined") continue;
+      if (!resolveBrowserColors || typeof document === "undefined") continue;
       canvas ??= document.createElement("canvas").getContext("2d");
       if (!canvas) continue;
       // Composite translucent colors over the theme's card background.

@@ -1,6 +1,12 @@
 "use client";
 
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
@@ -76,6 +82,8 @@ export default function CustomThemePreview({
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   // The hovered element's box, relative to the preview, and its colors.
   const [tip, setTip] = useState<{
     text: string;
@@ -86,8 +94,8 @@ export default function CustomThemePreview({
   } | null>(null);
 
   const previewStyle = {
-    // Older themes lack the newer text colors; the page's would leak in.
-    ...marketThemeVars(withDefaultColors(vars), readableTextColor),
+    // Fill missing colors, deferring canvas-only contrast until after hydration.
+    ...marketThemeVars(withDefaultColors(vars), readableTextColor, hydrated),
     "--logo-filter": logoFilter || "none",
     colorScheme: scheme,
   } as CSSProperties;
