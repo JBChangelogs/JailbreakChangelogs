@@ -8,21 +8,9 @@ import ThemePreviewImages from "./ThemePreviewImages";
 import {
   uploadThemePreview,
   deleteThemePreview,
-  ThemeApiError,
   type ThemePreviewImage,
   type UserTheme,
 } from "@/utils/api/userThemes";
-
-const previewErrors: Record<string, string> = {
-  upload_failed:
-    "Couldn't upload the screenshot. Check its image format, file size, and dimensions.",
-  image_rejected:
-    "This screenshot was rejected by the automatic content review. Please choose another image.",
-  preview_limit_reached:
-    "You can upload up to 3 screenshots. Remove one before adding another.",
-  review_unavailable:
-    "Image review is temporarily unavailable. Please try again shortly.",
-};
 
 export default function ThemePreviewUploader({
   theme,
@@ -48,13 +36,9 @@ export default function ThemePreviewUploader({
       onChange(await operation());
     } catch (err) {
       setError(
-        err instanceof ThemeApiError
-          ? err.status === 403
-            ? "Managing preview images requires Supporter II."
-            : (previewErrors[err.code ?? ""] ?? err.message)
-          : err instanceof Error
-            ? err.message
-            : "Couldn't update the screenshots. Please try again.",
+        err instanceof Error
+          ? err.message
+          : "Couldn't update the screenshots. Please try again.",
       );
     } finally {
       setBusy(false);
@@ -87,8 +71,8 @@ export default function ThemePreviewUploader({
           id="theme-screenshots-description"
           className="text-secondary-text mt-1 text-xs"
         >
-          Upload a 16:9 desktop screenshot or a portrait phone screenshot
-          between 9:21 and 9:16. Screenshots are saved immediately.
+          Upload up to 3 screenshots in any aspect ratio, up to 10 MB each.
+          Screenshots are saved immediately.
         </p>
       </div>
       {!theme ? (

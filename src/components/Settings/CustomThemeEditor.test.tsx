@@ -222,7 +222,6 @@ test("screenshots update the saved theme without saving draft colors and block c
     view
       .render()
       .find((node) => node.type === "default" && node.props.onBusyChange)!;
-  // The test imports components as their exported name; the uploader is a default export.
   const props = upload().props;
   (props.onBusyChange as (busy: boolean) => void)(true);
   await view.save();

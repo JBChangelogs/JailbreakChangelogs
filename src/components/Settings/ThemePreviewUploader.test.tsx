@@ -167,17 +167,21 @@ test("upload controls disable at three screenshots while deletion stays availabl
   ).toBe(false);
 });
 
-test("upload failures explain validation, moderation, limits, unavailable review, and tier requirements", async () => {
+test("upload failures display the backend message verbatim for every API error", async () => {
   for (const [code, status, message] of [
-    ["upload_failed", 400, "dimensions"],
-    ["image_rejected", 400, "content review"],
-    ["preview_limit_reached", 400, "up to 3"],
-    ["review_unavailable", 503, "try again shortly"],
-    ["supporter_required", 403, "Supporter II"],
+    [
+      "upload_failed",
+      400,
+      "Image must be non-empty and at most 10485760 bytes.",
+    ],
+    ["image_rejected", 400, "This image failed automatic review."],
+    ["preview_limit_reached", 400, "Maximum preview count reached."],
+    ["review_unavailable", 503, "Review is unavailable. Retry shortly."],
+    ["supporter_required", 403, "Supporter tier two is required."],
   ] as const) {
     const view = uploader({
       count: 1,
-      failure: new ThemeApiError(status, code, "Rejected"),
+      failure: new ThemeApiError(status, code, message),
     });
     await view.select();
     const rendered = view.render();
@@ -185,7 +189,7 @@ test("upload failures explain validation, moderation, limits, unavailable review
       String(
         rendered.find((node) => node.props.role === "alert")!.props.children,
       ),
-    ).toContain(message);
+    ).toBe(message);
     expect(view.changed).toEqual([]);
     expect(
       rendered.find((node) => node.type === "ThemePreviewImages")!.props
@@ -193,4 +197,22 @@ test("upload failures explain validation, moderation, limits, unavailable review
     ).toEqual([screenshot]);
     expect(view.busy).toEqual([true, false]);
   }
+});
+
+test("deletion failures display the backend message and retain the screenshot", async () => {
+  const message = "You do not have permission to remove this preview.";
+  const view = uploader({
+    count: 1,
+    failure: new ThemeApiError(403, "forbidden", message),
+  });
+  const gallery = view
+    .render()
+    .find((node) => node.type === "ThemePreviewImages")!;
+  (gallery.props.onDelete as (id: string) => void)(screenshot.id);
+  await new Promise((resolve) => setImmediate(resolve));
+  expect(
+    view.render().find((node) => node.props.role === "alert")!.props.children,
+  ).toBe(message);
+  expect(view.changed).toEqual([]);
+  expect(view.busy).toEqual([true, false]);
 });
