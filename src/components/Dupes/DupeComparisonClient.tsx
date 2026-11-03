@@ -256,7 +256,7 @@ export default function DupeComparisonClient({
             size="sm"
             onClick={onExploreTree}
           >
-            Explore all copies
+            Explore recorded copies
           </Button>
         </div>
         {summary.detail && (

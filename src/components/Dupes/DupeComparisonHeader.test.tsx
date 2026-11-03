@@ -310,7 +310,8 @@ test("simplified summaries promote the tree without changing recorded history", 
     });
     const button = nodes(root).find(
       (node) =>
-        node.type === "Button" && node.props.children === "Explore all copies",
+        node.type === "Button" &&
+        node.props.children === "Explore recorded copies",
     )!;
     (button.props.onClick as () => void)();
     expect(explored).toBe(1);
