@@ -101,7 +101,7 @@ const fetchServersPage = async (
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
   const response = await fetch(url, {
     credentials: "include",
-    ...(query ? { cache: "no-store" as const } : {}),
+    cache: "no-store",
     headers,
     signal,
   });
@@ -297,8 +297,28 @@ const ServerList: React.FC = () => {
         headers,
       });
       if (response.ok) {
+        await queryClient.cancelQueries({ queryKey: ["servers"] });
+        queryClient.setQueryData<PrivateServerListResponse>(
+          ["servers", page, queryFromUrl.trim(), sort],
+          (data) => {
+            if (!data) return data;
+            const items = data.items.filter(
+              (server) => server.id !== serverToDelete.id,
+            );
+            const total = data.total - (data.items.length - items.length);
+            return {
+              ...data,
+              items,
+              total,
+              total_pages: Math.ceil(total / data.size),
+            };
+          },
+        );
+        void queryClient.invalidateQueries({ queryKey: ["servers"] });
+        void queryClient.invalidateQueries({
+          queryKey: ["profile-private-servers", loggedInUserId],
+        });
         toast.success("Server deleted successfully!", { id: deletingToastId });
-        handleServerAdded();
       } else {
         const message = await getResponseErrorMessage(
           response,
