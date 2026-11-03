@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useInventoryScanHistory } from "@/hooks/useInventoryScanHistory";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -180,32 +181,15 @@ export default function UserStatsSection({
   const { data: botRobloxData } = useRobloxUserDataQuery(botId || null);
   const botUser = botId ? botRobloxData?.usersData?.[botId] : null;
 
-  const scanHistoryQuery = useQuery({
-    queryKey: ["inventory-scan-history", userId],
-    enabled: isScanHistoryModalOpen,
-    queryFn: async ({
-      signal,
-    }): Promise<Array<{ scan_id: string; created_at: number }>> => {
-      const response = await fetch(
-        `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
-        { signal },
-      );
-      if (!response.ok) throw new Error("Failed to fetch scan history");
-      const data = await response.json();
-      return Array.isArray(data) ? data : [];
-    },
-    staleTime: Infinity,
-    gcTime: 0,
-    retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+  const scanHistoryQuery = useInventoryScanHistory(
+    userId,
+    isScanHistoryModalOpen,
+  );
   const scanHistory = scanHistoryQuery.data ?? [];
   const isLoadingScanHistory = scanHistoryQuery.isLoading;
   const handleOpenScanHistory = () => {
     setIsScanHistoryModalOpen(true);
-    if (scanHistoryQuery.isError || scanHistoryQuery.data?.length === 0)
-      void scanHistoryQuery.refetch();
+    if (scanHistoryQuery.isError) void scanHistoryQuery.refetch();
   };
   const queueQuery = useQuery({
     queryKey: ["inventory-queue-position", userId],

@@ -20,6 +20,7 @@ import InventoryItemsSkeleton from "./InventoryItemsSkeleton";
 import InventoryHistoryTip from "./InventoryHistoryTip";
 import InventoryItemAppearance from "./InventoryItemAppearance";
 import InventoryMarketSummary from "./InventoryMarketSummary";
+import { useInventoryScanHistory } from "@/hooks/useInventoryScanHistory";
 import { useCatalogValues } from "@/hooks/usePartialItems";
 import InventoryListControls from "./InventoryListControls";
 import { Pagination } from "@/components/ui/Pagination";
@@ -213,6 +214,15 @@ export default function InventoryHistory({
     onDateChange?.(nextDate);
   };
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const scanHistoryQuery = useInventoryScanHistory(userId, isDatePickerOpen);
+  const scanDates = new Set(
+    (scanHistoryQuery.data ?? [])
+      .map((scan) =>
+        new Date(scan.created_at * 1000).toISOString().slice(0, 10),
+      )
+      // Inventory history tracking began on October 31, 2026 UTC.
+      .filter((scanDate) => scanDate >= "2026-10-31"),
+  );
   const [result, setResult] = useState<{
     date: string;
     data?: InventoryHistoryData;
@@ -330,6 +340,17 @@ export default function InventoryHistory({
               >
                 <Calendar
                   mode="single"
+                  modifiers={{
+                    scanned: (day) => scanDates.has(format(day, "yyyy-MM-dd")),
+                  }}
+                  modifiersClassNames={{
+                    scanned:
+                      "[&_button]:relative [&_button]:after:absolute [&_button]:after:bottom-0.5 [&_button]:after:left-1/2 [&_button]:after:size-1 [&_button]:after:-translate-x-1/2 [&_button]:after:rounded-full [&_button]:after:bg-button-info [&_button]:after:content-[''] [&_button[data-selected-single=true]]:after:bg-form-button-text",
+                  }}
+                  className="[&_button[data-day]]:rounded-full!"
+                  classNames={{
+                    today: "bg-quaternary-bg text-primary-text rounded-full",
+                  }}
                   selected={date ? new Date(`${date}T00:00:00`) : undefined}
                   defaultMonth={date ? new Date(`${date}T00:00:00`) : undefined}
                   onSelect={(day) => {
@@ -344,6 +365,27 @@ export default function InventoryHistory({
                   }
                   initialFocus
                 />
+                <div
+                  className="text-secondary-text max-w-64 px-3 pb-2 text-xs"
+                  aria-live="polite"
+                >
+                  {scanHistoryQuery.isLoading ? (
+                    "Loading scan dates…"
+                  ) : scanHistoryQuery.isError ? (
+                    <>
+                      Scan dates could not be loaded.{" "}
+                      <button
+                        type="button"
+                        className="text-link underline"
+                        onClick={() => void scanHistoryQuery.refetch()}
+                      >
+                        Try again
+                      </button>
+                    </>
+                  ) : (
+                    "Dots mark recorded scan dates (latest 1,000 scans)."
+                  )}
+                </div>
                 <p className="text-secondary-text max-w-64 px-3 pb-3 text-xs">
                   Dates unlock at midnight UTC. Recent scans may appear under
                   yesterday’s date.

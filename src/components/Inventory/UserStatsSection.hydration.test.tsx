@@ -49,6 +49,8 @@ test("inventory stats initially match across timezones and number locales", () =
         if (id.endsWith("timestamp")) return { formatMessageDate };
         if (id === "@tanstack/react-query")
           return { useQuery: () => ({ data: undefined }) };
+        if (id.endsWith("useInventoryScanHistory"))
+          return { useInventoryScanHistory: () => ({ data: undefined }) };
         if (id.endsWith("AuthContext"))
           return {
             useAuthContext: () => ({ user: null, isAuthenticated: false }),

@@ -15,6 +15,7 @@ interface Node {
     onClick?: () => void;
     onSelect?: (date: Date) => void;
     defaultMonth?: Date;
+    modifiers?: { scanned: (day: Date) => boolean };
     className?: string;
     disabled?: boolean | ((date: Date) => boolean);
     href?: string;
@@ -69,7 +70,10 @@ function ownerPopover(view: Node) {
   )!;
 }
 
-function setup() {
+function setup(
+  scanHistory: Array<{ scan_id: string; created_at: number }> = [],
+) {
+  const scanHistoryCalls: Array<{ userId: string; enabled: boolean }> = [];
   let active: ReturnType<typeof runner>;
   const selectedDates: string[] = [];
   const batchUserIds: string[][] = [];
@@ -165,6 +169,13 @@ function setup() {
           };
         if (id === "./InventoryMarketSummary")
           return { default: "market-summary" };
+        if (id.endsWith("/useInventoryScanHistory"))
+          return {
+            useInventoryScanHistory: (userId: string, enabled: boolean) => {
+              scanHistoryCalls.push({ userId, enabled });
+              return { data: scanHistory, isLoading: false, isError: false };
+            },
+          };
         if (id.endsWith("/usePartialItems"))
           return {
             useCatalogValues: () => ({
@@ -226,7 +237,15 @@ function setup() {
       new Date(`${date}T00:00:00`),
     );
 
-  return { runner, requests, respond, select, selectedDates, batchUserIds };
+  return {
+    runner,
+    requests,
+    respond,
+    select,
+    selectedDates,
+    batchUserIds,
+    scanHistoryCalls,
+  };
 }
 
 test("the history tip opens the inventory date picker", () => {
@@ -638,4 +657,35 @@ test("current owners open in an anchored popover independently of the history mo
   expect(nodes(view).some((node) => typeof node.type === "function")).toBe(
     false,
   );
+});
+
+test("scan highlights use UTC dates and history loads only when the picker opens", () => {
+  const { runner, scanHistoryCalls } = setup([
+    {
+      scan_id: "before-tracking",
+      created_at: Date.parse("2026-10-30T23:59:59Z") / 1000,
+    },
+    {
+      scan_id: "tracking-start",
+      created_at: Date.parse("2026-10-31T00:00:00Z") / 1000,
+    },
+    { scan_id: "one", created_at: Date.parse("2026-11-02T23:30:00Z") / 1000 },
+    { scan_id: "two", created_at: Date.parse("2026-11-03T00:30:00Z") / 1000 },
+  ]);
+  const page = runner();
+  let view = page.render();
+  expect(scanHistoryCalls.at(-1)?.enabled).toBe(false);
+  nodes(view).find((node) => node.type === "history-tip")!.props
+    .onOpenDatePicker!();
+  view = page.render();
+  expect(scanHistoryCalls.at(-1)?.enabled).toBe(true);
+  const calendar = nodes(view).find((node) => node.type === "calendar")!;
+  expect(calendar.props.modifiers!.scanned(new Date(2026, 9, 30))).toBe(false);
+  expect(calendar.props.modifiers!.scanned(new Date(2026, 9, 31))).toBe(true);
+  expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 2))).toBe(true);
+  expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 3))).toBe(true);
+  expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 1))).toBe(false);
+  expect(
+    (calendar.props.disabled as (day: Date) => boolean)(new Date(2026, 9, 1)),
+  ).toBe(false);
 });
