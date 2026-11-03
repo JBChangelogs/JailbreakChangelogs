@@ -319,7 +319,7 @@ export default function DupeItemCard({
             </a>
           </div>
         </div>
-        <p className="text-secondary-text text-xs">
+        <p className="text-secondary-text text-sm">
           Logged {formatMonthDayYear(item.logged_at)}
         </p>
         <div className="mt-auto grid grid-cols-3 gap-2">
