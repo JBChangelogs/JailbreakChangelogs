@@ -14,6 +14,7 @@ export interface ChangelogCommentsProps {
     | "tradev2"
     | "inventory"
     | "vsuggestion"
+    | "theme"
     | "user";
   itemType?: string;
   pinnedTitle?: boolean;

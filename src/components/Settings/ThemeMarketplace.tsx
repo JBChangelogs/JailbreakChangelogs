@@ -496,7 +496,12 @@ export default function ThemeMarketplace() {
                         className="h-5 w-5 shrink-0"
                         aria-hidden="true"
                       />
-                      <span className="min-w-0 truncate">{theme.label}</span>
+                      <Link
+                        href={`/themes/${theme.share_code}`}
+                        className="hover:text-link min-w-0 truncate transition-colors"
+                      >
+                        {theme.label}
+                      </Link>
                     </h2>
                     {theme.description && (
                       <p className="text-secondary-text mt-1 line-clamp-3 text-sm wrap-break-word whitespace-pre-line">

@@ -31,7 +31,7 @@ export const shareUrl = (code: string) =>
 
 /**
  * The share code in what someone pasted: a code, a share link
- * (…?theme=CODE), or an older /themes/shared/CODE link. Null if none.
+ * (…?theme=CODE or /themes/CODE), or an older /themes/shared/CODE link.
  */
 export function parseShareCode(input: string): string | null {
   const text = input.trim();
@@ -40,7 +40,7 @@ export function parseShareCode(input: string): string | null {
     const url = new URL(text);
     candidate =
       url.searchParams.get(SHARE_PARAM) ??
-      url.pathname.match(/\/themes\/shared\/([^/]+)/)?.[1] ??
+      url.pathname.match(/^\/themes\/(?:shared\/)?([^/]+)\/?$/)?.[1] ??
       "";
   } catch {
     // Not a link, so it's the code itself.

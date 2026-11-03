@@ -15,6 +15,49 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children)];
 }
 
+test("theme comment headings keep the theme name without an empty item category", () => {
+  const state = {
+    totalComments: 0,
+    type: "theme",
+    changelogTitle: "Fall Theme (Light)",
+    sortGroups: [],
+    itemType: undefined as string | undefined,
+  };
+  const exports = {} as { CommentHeader: (props: object) => Node };
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./CommentHeader.tsx", import.meta.url), "utf8"),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      require: (name: string) => {
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name.endsWith("CommentsContext"))
+          return { useCommentsContext: () => state };
+        if (name.endsWith("sortGroups"))
+          return { getSortLabel: () => "Newest" };
+        return {};
+      },
+    },
+  );
+  const text = (value: unknown): string => {
+    if (Array.isArray(value)) return value.map(text).join("");
+    if (value && typeof value === "object" && "props" in value)
+      return text((value as Node).props.children);
+    return typeof value === "string" ? value : "";
+  };
+  const heading = () =>
+    text(nodes(exports.CommentHeader({})).find((node) => node.type === "h2"));
+  expect(heading()).toBe(" Comments for Fall Theme (Light)");
+  state.type = "item";
+  state.itemType = "vehicle";
+  expect(heading()).toBe(" Comments for Fall Theme (Light) (vehicle)");
+});
+
 function renderComments(state: object) {
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: (props: object) => Node };

@@ -1271,7 +1271,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
         author: user?.username || "You",
         content: displayContent,
         date: Math.floor(Date.now() / 1000).toString(),
-        item_id: type === "user" ? String(changelogId) : Number(changelogId),
+        item_id:
+          type === "user" || type === "theme"
+            ? String(changelogId)
+            : Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
         user_id: currentUserId || "",
         edited_at: null,
@@ -1684,7 +1687,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
         author: user?.username || "You",
         content: displayContent,
         date: Math.floor(Date.now() / 1000).toString(),
-        item_id: type === "user" ? String(changelogId) : Number(changelogId),
+        item_id:
+          type === "user" || type === "theme"
+            ? String(changelogId)
+            : Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
         user_id: currentUserId || "",
         edited_at: null,

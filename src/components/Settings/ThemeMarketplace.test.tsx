@@ -536,6 +536,16 @@ test("fetching themes replaces the search icon with a spinner", () => {
   ).toBe(true);
 });
 
+test("marketplace titles link directly to theme details", () => {
+  expect(
+    marketplace()
+      .render()
+      .find(
+        (node) => node.type === "Link" && node.props.children === "Midnight",
+      )?.props.href,
+  ).toBe("/themes/ABCDEFGH");
+});
+
 test("uploaded screenshots replace the generated marketplace preview", () => {
   const previews: ThemePreviewImage[] = [
     {

@@ -61,6 +61,8 @@ test("a pasted code or share link gives the share code", () => {
     "https://jailbreakchangelogs.com/?theme=8V8RN337",
     "http://localhost:5500/values?page=2&theme=8v8rn337",
     "http://localhost:5500/themes/shared/8V8RN337",
+    "https://jailbreakchangelogs.com/themes/8V8RN337",
+    "https://jailbreakchangelogs.com/themes/8v8rn337/",
   ]) {
     expect(parseShareCode(input)).toBe("8V8RN337");
   }

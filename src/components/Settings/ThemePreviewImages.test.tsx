@@ -34,6 +34,12 @@ test("desktop and phone screenshots share one carousel frame and keep full image
     /<img[^>]*alt="Midnight: mobile screenshot 2"[^>]*class="object-contain"/,
   );
   expect(markup).toContain("Preview Midnight: mobile screenshot 2");
+  expect(markup).toMatch(
+    /<button[^>]*aria-label="Preview Midnight: mobile screenshot 2"[^>]*class="[^"]*bg-secondary-bg/,
+  );
+  expect(markup).toMatch(
+    /<button[^>]*aria-label="Preview Midnight: desktop screenshot 1"[^>]*class="[^"]*bg-primary-bg/,
+  );
   expect(markup).not.toContain('aria-label="Delete screenshot 1"');
 });
 

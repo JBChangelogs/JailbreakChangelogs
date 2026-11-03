@@ -58,7 +58,7 @@ export default function ThemePreviewImages({
         images={images}
         initialIndex={index}
         alt={images[index].alt}
-        className={`border-border-card bg-primary-bg w-full border ${onDelete ? "h-28" : "aspect-video"}`}
+        className={`border-border-card w-full border ${preview.kind === "mobile" ? "bg-secondary-bg" : "bg-primary-bg"} ${onDelete ? "h-28" : "aspect-video"}`}
       >
         <Image
           src={preview.url}
