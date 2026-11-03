@@ -25,6 +25,7 @@ function editor({
   active = false,
   fail = false,
   collapsed = true,
+  published = false,
   vars = {
     "--color-primary-bg": "#111111",
     "--color-secondary-bg": "#222222",
@@ -37,6 +38,7 @@ function editor({
     scheme: "dark",
     vars,
     logo_filter: null,
+    published_at: published ? 123 : null,
   };
   const states: unknown[] = [];
   let cursor = 0;
@@ -44,6 +46,7 @@ function editor({
   const savedEvents: UserTheme[] = [];
   const closedEvents: string[] = [];
   const requests: string[] = [];
+  const inputs: Record<string, unknown>[] = [];
   const errors: string[] = [];
   const scrolls: string[] = [];
   const timers: (() => void)[] = [];
@@ -71,6 +74,7 @@ function editor({
         }),
       },
       require: (name: string) => {
+        if (name === "next/link") return { default: "Link" };
         if (name === "radix-ui")
           return { Popover: { Anchor: "PopoverAnchor" } };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
@@ -120,8 +124,14 @@ function editor({
         if (name === "@/lib/utils") return { cn };
         if (name === "@/utils/api/userThemes")
           return {
-            createMyTheme: () => persist("create"),
-            updateMyTheme: () => persist("update"),
+            createMyTheme: (input: Record<string, unknown>) => {
+              inputs.push(input);
+              return persist("create");
+            },
+            updateMyTheme: (_id: number, input: Record<string, unknown>) => {
+              inputs.push(input);
+              return persist("update");
+            },
             ThemeApiError: class extends Error {},
           };
         if (name === "@/utils/ui/customTheme")
@@ -172,6 +182,7 @@ function editor({
     savedEvents,
     closedEvents,
     requests,
+    inputs,
     errors,
     prompt,
     save,
@@ -179,6 +190,30 @@ function editor({
     scrolls,
     flushTimers: () => timers.splice(0).forEach((callback) => callback()),
   };
+}
+
+for (const published of [false, true]) {
+  test(`publish toggle loads ${published ? "public" : "private"} state and saves a change`, async () => {
+    const view = editor({ existing: true, collapsed: false, published });
+    const toggle = view
+      .render()
+      .find((node) => node.props.id === "publish-theme")!;
+    expect(toggle.props.checked).toBe(published);
+    (toggle.props.onCheckedChange as (value: boolean) => void)(!published);
+    expect(
+      view.render().find((node) => node.props.id === "publish-theme")!.props
+        .checked,
+    ).toBe(!published);
+    (
+      view.render().find((node) => node.type === "Sheet")!.props
+        .onOpenChange as (open: boolean) => void
+    )(false);
+    expect(
+      view.render().find((node) => node.type === "Dialog")!.props.open,
+    ).toBe(true);
+    await view.save();
+    expect(view.inputs[0].published).toBe(!published);
+  });
 }
 
 for (const mobile of [true, false]) {

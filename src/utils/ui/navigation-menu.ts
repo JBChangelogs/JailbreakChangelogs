@@ -175,6 +175,12 @@ export const navigationSections: NavigationSection[] = [
         description: "What players say about us",
       },
       {
+        href: "/themes",
+        icon: "lucide:palette",
+        title: "Theme Marketplace",
+        description: "Browse and use custom themes made by the community",
+      },
+      {
         href: "/supporting",
         icon: "material-symbols:favorite-rounded",
         title: "Support Us",

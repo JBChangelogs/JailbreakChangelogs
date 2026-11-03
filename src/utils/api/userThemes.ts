@@ -1,4 +1,5 @@
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import type { UserData } from "@/types/auth";
 import { marketThemeVars } from "@/utils/ui/marketThemeVars";
 import {
   safeValue,
@@ -16,6 +17,7 @@ export interface CustomTheme {
   logo_filter: string | null;
   /** An Iconify name, or null for the default palette. Older themes lack it. */
   icon?: string | null;
+  published_at?: number | null;
 }
 
 /** One of the signed-in user's own themes. */
@@ -32,7 +34,33 @@ export interface SharedTheme extends CustomTheme {
 export type CustomThemeInput = Pick<
   CustomTheme,
   "label" | "scheme" | "vars" | "logo_filter" | "icon"
->;
+> & { published?: boolean };
+
+export interface MarketplaceTheme extends CustomTheme {
+  user:
+    | (Pick<UserData, "id" | "username"> &
+        Partial<
+          Pick<
+            UserData,
+            | "global_name"
+            | "avatar"
+            | "custom_avatar"
+            | "settings"
+            | "premiumtype"
+          >
+        >)
+    | null;
+}
+
+export interface MarketplaceThemesPage {
+  items: MarketplaceTheme[];
+  total: number;
+  page: number;
+  total_pages: number;
+  size: number;
+}
+
+export type MarketplaceSort = "newest" | "oldest";
 
 /** An error from the themes API, with its code such as "supporter_required". */
 export class ThemeApiError extends Error {
@@ -175,3 +203,23 @@ export const fetchSharedTheme = async (code: string, baseUrl?: string) =>
 /** The site's themes with their colors, for starting a custom theme from one. */
 export const fetchSiteThemes = async () =>
   sanitizeThemes(await request<SiteTheme[]>("/v2/themes"));
+
+export async function fetchMarketplaceThemes(
+  page = 1,
+  sort: MarketplaceSort = "newest",
+  query = "",
+) {
+  const params = new URLSearchParams({ page: String(page), sort });
+  const search = query.trim();
+  if (search) params.set("query", search);
+  const data = await request<MarketplaceThemesPage>(
+    `/v2/themes/marketplace${search ? "/search" : ""}?${params}`,
+  );
+  return { ...data, items: data.items.map(sanitizeCustomTheme) };
+}
+
+export const reportMarketplaceTheme = (code: string, reason: string) =>
+  request<{ success: boolean }>(
+    `/v2/themes/marketplace/${encodeURIComponent(code)}/reports`,
+    { method: "POST", body: JSON.stringify({ reason: reason.trim() }) },
+  );

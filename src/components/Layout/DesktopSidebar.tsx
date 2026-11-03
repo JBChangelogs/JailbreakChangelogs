@@ -60,7 +60,7 @@ export default function DesktopSidebar({
           navigation.scrollTop -
           navigation.clientHeight >
         1
-          ? "linear-gradient(to bottom, black calc(100% - 20px), transparent)"
+          ? "linear-gradient(to bottom, black calc(100% - 8px), transparent)"
           : "none";
     };
     const updateLayout = () => {
@@ -122,7 +122,7 @@ export default function DesktopSidebar({
         ref={navigationRef}
         id="desktop-sidebar-navigation"
         aria-label="Main"
-        className="scrollbar-hide m-3 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
+        className="scrollbar-hide mx-3 mt-3 min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
       >
         <div className="flex flex-col gap-4">
           {navigationSections.map((section) => (
@@ -167,7 +167,11 @@ export default function DesktopSidebar({
                                 : "location"
                               : undefined
                           }
-                          className={linkClassName(activeHref === item.href)}
+                          className={cn(
+                            linkClassName(activeHref === item.href),
+                            activeHref !== item.href &&
+                              "hover:bg-quaternary-bg/50",
+                          )}
                         >
                           <Icon
                             icon={item.icon}
@@ -211,7 +215,7 @@ export default function DesktopSidebar({
           ))}
         </div>
       </nav>
-      <div className="relative shrink-0 p-3">
+      <div className="relative shrink-0 px-3 pt-2 pb-3">
         <div
           aria-hidden="true"
           className={cn(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Popover as PopoverPrimitive } from "radix-ui";
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseThemeCss, themeToCss } from "@/utils/ui/themeCss";
@@ -218,6 +220,7 @@ export default function CustomThemeEditor({
           vars: withDefaultColors({ ...theme.vars }),
           logo_filter: theme.logo_filter,
           icon: theme.icon ?? null,
+          published: theme.published_at != null,
         }
       : null,
   );
@@ -257,7 +260,7 @@ export default function CustomThemeEditor({
       ? fromSiteTheme(base)
       : null;
   const current: CustomThemeInput | null =
-    draft ?? (start ? { label: "My theme", ...start } : null);
+    draft ?? (start ? { label: "My theme", published: false, ...start } : null);
   // What the theme was when the editor opened or last saved, to tell
   // whether closing would lose changes.
   const snapshot = current && JSON.stringify(current);
@@ -627,6 +630,7 @@ export default function CustomThemeEditor({
       vars: withDefaultColors({ ...loaded.vars }),
       logo_filter: loaded.logo_filter,
       icon: loaded.icon ?? null,
+      published: current.published,
     });
     // current and theme are read when a new theme arrives, not tracked.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -823,6 +827,35 @@ export default function CustomThemeEditor({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <label
+                    htmlFor="publish-theme"
+                    className="text-primary-text text-sm font-medium"
+                  >
+                    Publish to marketplace
+                  </label>
+                  <p
+                    id="publish-theme-description"
+                    className="text-secondary-text text-xs"
+                  >
+                    Your theme and author name will be public after saving.
+                  </p>
+                  <Link
+                    href="/themes"
+                    className="text-link hover:text-link-hover mt-1 inline-block text-xs hover:underline"
+                  >
+                    Browse marketplace
+                  </Link>
+                </div>
+                <Switch
+                  id="publish-theme"
+                  aria-describedby="publish-theme-description"
+                  checked={current.published ?? false}
+                  disabled={saving}
+                  onCheckedChange={(published) => update({ published })}
+                />
+              </div>
               {/* On phones: name and icon side by side, "Start from a theme"
                   full width below them. */}
               <div className="flex flex-wrap items-end gap-3">

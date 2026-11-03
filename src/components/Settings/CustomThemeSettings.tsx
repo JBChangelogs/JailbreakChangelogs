@@ -1,6 +1,7 @@
 "use client";
 
 import { FRONTEND_SETTINGS } from "@/config/settings";
+import Link from "next/link";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -166,6 +167,7 @@ export function useCustomThemes() {
         setCustomTheme(null);
       }
       await queryClient.invalidateQueries({ queryKey });
+      await queryClient.invalidateQueries({ queryKey: ["theme-marketplace"] });
       toast.success("Theme deleted");
     } catch (err) {
       toast.error("Couldn't delete the theme", {
@@ -345,6 +347,12 @@ export default function CustomThemeControls({
         <p className="text-secondary-text mt-1 text-sm">
           {FRONTEND_SETTINGS["custom-themes"].description}
         </p>
+        <Link
+          href="/themes"
+          className="text-link hover:text-link-hover mt-1 inline-block text-sm hover:underline"
+        >
+          Browse the theme marketplace
+        </Link>
       </div>
       {custom.isAuthenticated && (
         <Button

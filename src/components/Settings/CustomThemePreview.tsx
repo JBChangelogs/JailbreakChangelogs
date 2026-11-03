@@ -64,6 +64,7 @@ export default function CustomThemePreview({
   logoFilter,
   onPick,
   hideTooltips = false,
+  compact = false,
   className,
 }: {
   vars: Record<string, string>;
@@ -71,6 +72,7 @@ export default function CustomThemePreview({
   logoFilter: string | null;
   onPick?: (keys: string[], element: Element) => void;
   hideTooltips?: boolean;
+  compact?: boolean;
   className?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -82,6 +84,62 @@ export default function CustomThemePreview({
     width: number;
     height: number;
   } | null>(null);
+
+  const previewStyle = {
+    // Older themes lack the newer text colors; the page's would leak in.
+    ...marketThemeVars(withDefaultColors(vars), readableTextColor),
+    "--logo-filter": logoFilter || "none",
+    colorScheme: scheme,
+  } as CSSProperties;
+
+  if (compact) {
+    return (
+      <div
+        aria-hidden="true"
+        className={cn(
+          "bg-primary-bg text-primary-text border-border-card flex min-h-64 flex-col overflow-hidden rounded-xl border",
+          className,
+        )}
+        style={previewStyle}
+      >
+        <div className="bg-secondary-bg border-border-card flex items-center justify-between border-b px-3 py-2">
+          <Image
+            src="/logos/JBCL_Header.webp"
+            alt=""
+            width={256}
+            height={58}
+            className="header-logo h-5 w-auto"
+          />
+          <span className="text-secondary-text text-xs">Menu</span>
+        </div>
+        <div className="flex flex-1 flex-col gap-3 p-3">
+          <div>
+            <p className="text-primary-text text-sm font-bold">Page title</p>
+            <p className="text-secondary-text mt-1 text-xs">
+              A little preview of your theme.
+            </p>
+          </div>
+          <div className="bg-secondary-bg border-border-card shadow-card-shadow rounded-lg border p-3 shadow-sm">
+            <p className="text-card-headline text-sm font-semibold">
+              Card title
+            </p>
+            <p className="text-card-paragraph mt-1 text-xs">
+              Body text in a card.
+            </p>
+            <span className="bg-card-tag-bg text-card-tag-text mt-2 inline-block rounded-full px-2 py-0.5 text-[11px]">
+              Tag
+            </span>
+          </div>
+          <div className="mt-auto flex items-center gap-3 text-xs">
+            <span className="bg-button-info text-form-button-text rounded-md px-3 py-1.5 font-medium">
+              Button
+            </span>
+            <span className="text-link">Link</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const keysAt = (target: EventTarget) => {
     const el = (target as Element).closest?.("[data-color]");
@@ -125,14 +183,7 @@ export default function CustomThemePreview({
         onPick && "[&_[data-color]]:cursor-pointer",
         className,
       )}
-      style={
-        {
-          // Older themes lack the newer text colors; the page's would leak in.
-          ...marketThemeVars(withDefaultColors(vars), readableTextColor),
-          "--logo-filter": logoFilter || "none",
-          colorScheme: scheme,
-        } as CSSProperties
-      }
+      style={previewStyle}
     >
       {/* Header */}
       <div

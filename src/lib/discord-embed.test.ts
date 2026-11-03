@@ -4,6 +4,7 @@ import { buildDiscordEmbed, withDiscordEmbed } from "./discord-embed";
 import { GET } from "@/app/embeds/discord.json/route";
 import { metadata as valuesMetadata } from "@/app/values/layout";
 import { metadata as supportMetadata } from "@/app/supporting/layout";
+import { metadata as themesMetadata } from "@/app/themes/layout";
 import { NextRequest } from "next/server";
 import { proxy } from "@/proxy";
 
@@ -23,6 +24,41 @@ function embedUrl(metadata: Metadata) {
   expect(links[0]?.type).toBe("application/json");
   return new URL(String(links[0]?.url));
 }
+
+test("theme marketplace has route-specific canonical, social, and Discord metadata", () => {
+  expect(themesMetadata.alternates?.canonical).toBe("/themes");
+  expect(themesMetadata.openGraph).toMatchObject({
+    title: "Theme Marketplace",
+    description: themesMetadata.description,
+    url: "https://jailbreakchangelogs.com/themes",
+    type: "website",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        width: 2400,
+        height: 1260,
+      },
+    ],
+  });
+  expect(themesMetadata.twitter).toMatchObject({
+    title: "Theme Marketplace",
+    description: themesMetadata.description,
+    card: "summary_large_image",
+    images: [
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+    ],
+  });
+  const data = JSON.parse(embedUrl(themesMetadata).searchParams.get("data")!);
+  expect(data).toMatchObject({
+    title: "Theme Marketplace | Jailbreak Changelogs",
+    description: themesMetadata.description,
+    url: "https://jailbreakchangelogs.com/themes",
+    images: [
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
+    ],
+  });
+  expect(buildDiscordEmbed(data)).not.toBeNull();
+});
 
 test("each section links to related tools without repeating the current page", () => {
   for (const [path, labels] of [

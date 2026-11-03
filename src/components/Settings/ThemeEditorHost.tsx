@@ -50,11 +50,12 @@ export default function ThemeEditorHost() {
           });
         }
       }}
-      onSaved={() =>
+      onSaved={() => {
         void queryClient.invalidateQueries({
           queryKey: ["my-themes", user?.id],
-        })
-      }
+        });
+        void queryClient.invalidateQueries({ queryKey: ["theme-marketplace"] });
+      }}
     />
   );
 }

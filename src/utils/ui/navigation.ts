@@ -19,6 +19,7 @@ const sectionPaths = {
     "/servers",
     "/contributors",
     "/testimonials",
+    "/themes",
     "/supporting",
   ],
 };
