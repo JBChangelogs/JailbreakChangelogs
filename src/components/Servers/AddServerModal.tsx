@@ -382,6 +382,10 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                         mode="single"
                         selected={expires ?? undefined}
                         defaultMonth={initialCalendarMonth}
+                        startMonth={minSelectableDate}
+                        endMonth={
+                          new Date(minSelectableDate.getFullYear() + 100, 11)
+                        }
                         onSelect={(date) => {
                           setExpires(date ?? null);
                           setIsDatePickerOpen(false);

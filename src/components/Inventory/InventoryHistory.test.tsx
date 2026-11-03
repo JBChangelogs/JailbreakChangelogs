@@ -335,8 +335,7 @@ test("date selection uses UTC snapshots, ignores stale requests, and restores la
   modal.props.onClose!();
   view = page.render();
   nodes(view).find(
-    (node) =>
-      node.type === "button" && content(node).includes("Back to latest"),
+    (node) => node.type === "button" && content(node) === "Latest scan",
   )!.props.onClick!();
   view = page.render();
   expect(content(view)).toContain("Latest inventory");
@@ -504,7 +503,7 @@ test("shared item skeleton matches the card grid, market summary, owner and acti
   }
 });
 
-test("calendar allows today in UTC and disables future dates", () => {
+test("calendar disables dates before tracking and after today in UTC", () => {
   const { runner } = setup();
   const view = runner().render();
   const disabled = nodes(view).find((node) => node.type === "calendar")!.props
@@ -514,6 +513,8 @@ test("calendar allows today in UTC and disables future dates", () => {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
+  expect(disabled(new Date(2026, 9, 30))).toBe(true);
+  expect(disabled(new Date(2026, 9, 31))).toBe(false);
   expect(disabled(yesterday)).toBe(false);
   expect(disabled(today)).toBe(false);
   expect(disabled(tomorrow)).toBe(true);
@@ -557,8 +558,7 @@ test("historical lists paginate, search, filter and sort the dated items", async
   expect(cards()[0].props.title).toBe("Item 03");
   expect(selectedDates).toEqual(["2026-10-31"]);
   nodes(view).find(
-    (node) =>
-      node.type === "button" && content(node).includes("Back to latest"),
+    (node) => node.type === "button" && content(node) === "Latest scan",
   )!.props.onClick!();
   page.render();
   expect(selectedDates).toEqual(["2026-10-31", ""]);
@@ -612,8 +612,7 @@ test("date changes keep the preview mounted and restore calendar focus without s
   close();
   expect(focusCalls).toHaveLength(1);
   nodes(view).find(
-    (node) =>
-      node.type === "button" && content(node).includes("Back to latest"),
+    (node) => node.type === "button" && content(node) === "Latest scan",
   )!.props.onClick!();
   expect(content(page.render())).toContain("Inventory preview");
 });
@@ -686,6 +685,6 @@ test("scan highlights use UTC dates and history loads only when the picker opens
   expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 3))).toBe(true);
   expect(calendar.props.modifiers!.scanned(new Date(2026, 10, 1))).toBe(false);
   expect(
-    (calendar.props.disabled as (day: Date) => boolean)(new Date(2026, 9, 1)),
+    (calendar.props.disabled as (day: Date) => boolean)(new Date(2026, 10, 1)),
   ).toBe(false);
 });

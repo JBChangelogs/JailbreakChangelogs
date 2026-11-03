@@ -35,6 +35,8 @@ import {
 } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
+const INVENTORY_HISTORY_START_DATE = "2026-10-31";
+
 const formatUtc = (timestamp: number) =>
   new Date(timestamp * 1000)
     .toISOString()
@@ -221,7 +223,7 @@ export default function InventoryHistory({
         new Date(scan.created_at * 1000).toISOString().slice(0, 10),
       )
       // Inventory history tracking began on October 31, 2026 UTC.
-      .filter((scanDate) => scanDate >= "2026-10-31"),
+      .filter((scanDate) => scanDate >= INVENTORY_HISTORY_START_DATE),
   );
   const [result, setResult] = useState<{
     date: string;
@@ -301,97 +303,107 @@ export default function InventoryHistory({
           <h2 className="text-primary-text text-xl font-semibold">
             Inventory Items
           </h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <span
-              id="inventory-date-label"
-              className="text-secondary-text text-sm"
-            >
-              Inventory date (UTC)
-            </span>
-            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  ref={dateTriggerRef}
-                  type="button"
-                  variant="ghost"
-                  aria-label="Inventory date (UTC)"
-                  aria-describedby="inventory-date-label"
-                  style={{ backgroundColor: "var(--color-tertiary-bg)" }}
-                  className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus hover:bg-tertiary-bg! active:bg-tertiary-bg! h-10 justify-between gap-3 rounded-md border py-2 font-normal"
-                >
-                  <span>
-                    {date
-                      ? format(new Date(`${date}T00:00:00`), "PPP")
-                      : "Latest scan"}
-                  </span>
-                  <Icon icon="heroicons:chevron-down" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                collisionPadding={16}
-                onCloseAutoFocus={(event) => {
-                  if (!restoreDateFocusRef.current) return;
-                  event.preventDefault();
-                  restoreDateFocusRef.current = false;
-                  dateTriggerRef.current?.focus({ preventScroll: true });
-                }}
-                className="border-border-card bg-secondary-bg w-auto p-0"
+          <div className="flex w-full flex-col items-start gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex items-center gap-2">
+              <span
+                id="inventory-date-label"
+                className="text-secondary-text text-sm"
               >
-                <Calendar
-                  mode="single"
-                  modifiers={{
-                    scanned: (day) => scanDates.has(format(day, "yyyy-MM-dd")),
+                Viewing date (UTC)
+              </span>
+              <Popover
+                open={isDatePickerOpen}
+                onOpenChange={setIsDatePickerOpen}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    ref={dateTriggerRef}
+                    type="button"
+                    variant="ghost"
+                    aria-label="Viewing date (UTC)"
+                    aria-describedby="inventory-date-label"
+                    style={{ backgroundColor: "var(--color-tertiary-bg)" }}
+                    className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus hover:bg-tertiary-bg! active:bg-tertiary-bg! h-10 justify-between gap-3 rounded-md border py-2 font-normal"
+                  >
+                    <span>
+                      {date
+                        ? format(new Date(`${date}T00:00:00`), "MMM d, yyyy")
+                        : "Latest scan"}
+                    </span>
+                    <Icon icon="heroicons:chevron-down" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  collisionPadding={16}
+                  onCloseAutoFocus={(event) => {
+                    if (!restoreDateFocusRef.current) return;
+                    event.preventDefault();
+                    restoreDateFocusRef.current = false;
+                    dateTriggerRef.current?.focus({ preventScroll: true });
                   }}
-                  modifiersClassNames={{
-                    scanned:
-                      "[&_button]:relative [&_button]:after:absolute [&_button]:after:bottom-0.5 [&_button]:after:left-1/2 [&_button]:after:size-1 [&_button]:after:-translate-x-1/2 [&_button]:after:rounded-full [&_button]:after:bg-button-info [&_button]:after:content-[''] [&_button[data-selected-single=true]]:after:bg-form-button-text",
-                  }}
-                  className="[&_button[data-day]]:rounded-full!"
-                  classNames={{
-                    today: "bg-quaternary-bg text-primary-text rounded-full",
-                  }}
-                  selected={date ? new Date(`${date}T00:00:00`) : undefined}
-                  defaultMonth={date ? new Date(`${date}T00:00:00`) : undefined}
-                  onSelect={(day) => {
-                    if (!day) return;
-                    restoreDateFocusRef.current = true;
-                    changeDate(format(day, "yyyy-MM-dd"));
-                    setIsDatePickerOpen(false);
-                  }}
-                  disabled={(day) =>
-                    format(day, "yyyy-MM-dd") >
-                    new Date().toISOString().slice(0, 10)
-                  }
-                  initialFocus
-                />
-                <div
-                  className="text-secondary-text max-w-64 px-3 pb-2 text-xs"
-                  aria-live="polite"
+                  className="border-border-card bg-secondary-bg w-auto p-0"
                 >
-                  {scanHistoryQuery.isLoading ? (
-                    "Loading scan dates…"
-                  ) : scanHistoryQuery.isError ? (
-                    <>
-                      Scan dates could not be loaded.{" "}
-                      <button
-                        type="button"
-                        className="text-link underline"
-                        onClick={() => void scanHistoryQuery.refetch()}
-                      >
-                        Try again
-                      </button>
-                    </>
-                  ) : (
-                    "Dots mark recorded scan dates (latest 1,000 scans)."
-                  )}
-                </div>
-                <p className="text-secondary-text max-w-64 px-3 pb-3 text-xs">
-                  Dates unlock at midnight UTC. Recent scans may appear under
-                  yesterday’s date.
-                </p>
-              </PopoverContent>
-            </Popover>
+                  <Calendar
+                    mode="single"
+                    startMonth={
+                      new Date(`${INVENTORY_HISTORY_START_DATE}T00:00:00`)
+                    }
+                    modifiers={{
+                      scanned: (day) =>
+                        scanDates.has(format(day, "yyyy-MM-dd")),
+                    }}
+                    modifiersClassNames={{
+                      scanned:
+                        "[&_button]:relative [&_button]:after:absolute [&_button]:after:bottom-0.5 [&_button]:after:left-1/2 [&_button]:after:size-1 [&_button]:after:-translate-x-1/2 [&_button]:after:rounded-full [&_button]:after:bg-button-info [&_button]:after:content-[''] [&_button[data-selected-single=true]]:after:bg-form-button-text",
+                    }}
+                    selected={date ? new Date(`${date}T00:00:00`) : undefined}
+                    defaultMonth={
+                      date ? new Date(`${date}T00:00:00`) : undefined
+                    }
+                    onSelect={(day) => {
+                      if (!day) return;
+                      restoreDateFocusRef.current = true;
+                      changeDate(format(day, "yyyy-MM-dd"));
+                      setIsDatePickerOpen(false);
+                    }}
+                    disabled={(day) => {
+                      const dayString = format(day, "yyyy-MM-dd");
+                      return (
+                        dayString < INVENTORY_HISTORY_START_DATE ||
+                        dayString > new Date().toISOString().slice(0, 10)
+                      );
+                    }}
+                    initialFocus
+                  />
+                  <div
+                    className="text-secondary-text max-w-64 px-3 pb-2 text-xs"
+                    aria-live="polite"
+                  >
+                    {scanHistoryQuery.isLoading ? (
+                      "Loading scan dates…"
+                    ) : scanHistoryQuery.isError ? (
+                      <>
+                        Scan dates could not be loaded.{" "}
+                        <button
+                          type="button"
+                          className="text-link underline"
+                          onClick={() => void scanHistoryQuery.refetch()}
+                        >
+                          Try again
+                        </button>
+                      </>
+                    ) : (
+                      "Dots mark recorded scan dates (latest 1,000 scans)."
+                    )}
+                  </div>
+                  <p className="text-secondary-text max-w-64 px-3 pb-3 text-xs">
+                    Dates unlock at midnight UTC. Recent scans may appear under
+                    yesterday’s date.
+                  </p>
+                </PopoverContent>
+              </Popover>
+            </div>
             <InventoryHistoryTip
               isOwnInventory={isOwnInventory}
               anchorRef={dateTriggerRef}
@@ -404,7 +416,7 @@ export default function InventoryHistory({
                 variant="secondary"
                 onClick={() => changeDate("")}
               >
-                Back to latest inventory
+                Latest scan
               </Button>
             )}
           </div>

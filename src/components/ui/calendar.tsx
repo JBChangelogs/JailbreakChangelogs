@@ -1,17 +1,29 @@
 "use client";
 
 import * as React from "react";
-import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
+import {
+  DayButton,
+  DayPicker,
+  getDefaultClassNames,
+  type DropdownProps,
+} from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  captionLayout = "label",
+  captionLayout = "dropdown",
   buttonVariant = "ghost",
   formatters,
   components,
@@ -44,21 +56,21 @@ function Calendar({
         ),
         month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
         nav: cn(
-          "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
+          "pointer-events-none absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
           defaultClassNames.nav,
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50",
+          "pointer-events-auto size-8! select-none p-0! aria-disabled:opacity-50",
           defaultClassNames.button_previous,
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50",
+          "pointer-events-auto size-8! select-none p-0! aria-disabled:opacity-50",
           defaultClassNames.button_next,
         ),
         month_caption: cn(
-          "flex h-[--cell-size] w-full items-center justify-center px-[--cell-size]",
+          "flex h-10 w-full items-center justify-center px-8",
           defaultClassNames.month_caption,
         ),
         dropdowns: cn(
@@ -66,11 +78,11 @@ function Calendar({
           defaultClassNames.dropdowns,
         ),
         dropdown_root: cn(
-          "has-focus:border-ring border-input shadow-xs has-focus:ring-ring/50 has-focus:ring-[3px] relative rounded-md border",
+          "focus-within:ring-border-focus relative rounded-md focus-within:ring-2",
           defaultClassNames.dropdown_root,
         ),
         dropdown: cn(
-          "bg-popover absolute inset-0 opacity-0",
+          "bg-secondary-bg text-primary-text absolute inset-0 cursor-pointer opacity-0",
           defaultClassNames.dropdown,
         ),
         caption_label: cn(
@@ -109,7 +121,7 @@ function Calendar({
           defaultClassNames.range_end,
         ),
         today: cn(
-          "bg-quaternary-bg text-primary-text rounded-md data-[selected=true]:rounded-none",
+          "bg-quaternary-bg text-primary-text rounded-full",
           defaultClassNames.today,
         ),
         outside: cn(
@@ -161,6 +173,7 @@ function Calendar({
           );
         },
         DayButton: CalendarDayButton,
+        Dropdown: CalendarDropdown,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -174,6 +187,52 @@ function Calendar({
       }}
       {...props}
     />
+  );
+}
+
+function CalendarDropdown({
+  options,
+  value,
+  onChange,
+  disabled,
+  "aria-label": ariaLabel,
+}: DropdownProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={disabled}
+          aria-label={ariaLabel}
+          className="text-primary-text h-8 gap-1 px-2 font-medium"
+        >
+          {options?.find((option) => option.value === Number(value))?.label}
+          <Icon icon="lucide:chevron-down" className="size-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="max-h-64 min-w-24">
+        <DropdownMenuRadioGroup
+          value={String(value)}
+          onValueChange={(nextValue) =>
+            // DayPicker's navigation handlers read the selected value from target.
+            onChange?.({
+              target: { value: nextValue },
+            } as React.ChangeEvent<HTMLSelectElement>)
+          }
+        >
+          {options?.map((option) => (
+            <DropdownMenuRadioItem
+              key={option.value}
+              value={String(option.value)}
+              disabled={option.disabled}
+            >
+              {option.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -210,6 +269,10 @@ function CalendarDayButton({
       className={cn(
         "data-[selected-single=true]:bg-button-info data-[selected-single=true]:text-form-button-text! data-[range-middle=true]:bg-button-info/20 data-[range-middle=true]:text-primary-text data-[range-start=true]:bg-button-info data-[range-start=true]:text-form-button-text! data-[range-end=true]:bg-button-info data-[range-end=true]:text-form-button-text! group-data-[focused=true]/day:border-button-info group-data-[focused=true]/day:ring-button-info/40 flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
+        !modifiers.range_start &&
+          !modifiers.range_end &&
+          !modifiers.range_middle &&
+          "rounded-full!",
         !modifiers.selected &&
           "enabled:hover:bg-quaternary-bg! enabled:active:bg-quaternary-bg!",
         modifiers.range_middle &&
