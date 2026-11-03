@@ -35,13 +35,18 @@ test("comment authors stay visible and copied comment links preserve the target 
     currentUserId: "viewer",
     type: "changelog",
     changelogId: "root",
-    suggestion: { suggester: "target", upvoterIds: ["target"] },
+    suggestion: {
+      suggester: "target",
+      upvoterIds: ["root", "target"],
+      downvoterIds: ["sender"],
+    },
     isLoggedIn: true,
     canDeleteAnyComment: false,
     replyingToId: 1,
     replyingToReplyId: 2,
     expandedComments: new Set(),
     expandedReplies: new Set([1]),
+    toggleReplies: (id: number) => context.expandedReplies.add(id),
     emojiStringMap: {},
     availableEmojis: [],
   };
@@ -63,6 +68,17 @@ test("comment authors stay visible and copied comment links preserve the target 
     href: "https://example.com/changelogs/5?commentsPage=3&commentsSort=oldest#other",
   };
   let clipboardFails = false;
+  const frames: (() => void)[] = [];
+  const timers: (() => void)[] = [];
+  const scrolls: unknown[] = [];
+  const highlights = new Set<string>();
+  const targetElement = {
+    scrollIntoView: (options: unknown) => scrolls.push(options),
+    classList: {
+      add: (name: string) => highlights.add(name),
+      remove: (name: string) => highlights.delete(name),
+    },
+  };
   runInNewContext(
     transpileModule(
       readFileSync(new URL("./CommentItem.tsx", import.meta.url), "utf8"),
@@ -74,6 +90,14 @@ test("comment authors stay visible and copied comment links preserve the target 
       exports,
       URL,
       window: { location },
+      requestAnimationFrame: (callback: () => void) => frames.push(callback),
+      setTimeout: (callback: () => void) => timers.push(callback),
+      document: {
+        getElementById: (id: string) => {
+          expect(id).toBe("comment-2");
+          return context.expandedReplies.has(1) ? targetElement : null;
+        },
+      },
       navigator: {
         clipboard: {
           writeText: async (value: string) => {
@@ -114,6 +138,77 @@ test("comment authors stay visible and copied comment links preserve the target 
   const render = () => JSON.stringify(exports.CommentItem({ comment }));
   expect(render()).toContain("/users/target");
   expect(render()).toContain("Target name");
+
+  type PreviewNode = {
+    props?: {
+      href?: string;
+      children?: unknown;
+      onClick?: (event: unknown) => void;
+    };
+  };
+  const findPreview = (value: unknown): PreviewNode | undefined => {
+    if (Array.isArray(value)) {
+      return value.map(findPreview).find(Boolean);
+    }
+    if (!value || typeof value !== "object") return;
+    const node = value as PreviewNode;
+    if (node.props?.href === "#comment-2") return node;
+    return findPreview(node.props?.children);
+  };
+  for (const expanded of [true, false]) {
+    if (!expanded) context.expandedReplies.clear();
+    let prevented = false;
+    const preview = findPreview(exports.CommentItem({ comment }));
+    preview!.props!.onClick!({
+      preventDefault: () => {
+        prevented = true;
+      },
+    });
+    expect(prevented).toBe(true);
+    expect(context.expandedReplies.has(1)).toBe(true);
+    frames.shift()!();
+    expect(scrolls.at(-1)).toEqual({ behavior: "smooth", block: "nearest" });
+    expect(highlights.has("comment-link-highlight")).toBe(true);
+    expect(location.href).toBe(
+      "https://example.com/changelogs/5?commentsPage=3&commentsSort=oldest#other",
+    );
+    timers.shift()!();
+    expect(highlights.has("comment-link-highlight")).toBe(false);
+  }
+  findPreview(exports.CommentItem({ comment }))!.props!.onClick!({
+    ctrlKey: true,
+    preventDefault: () => {
+      throw new Error("Modified clicks should navigate normally");
+    },
+  });
+  expect(frames).toHaveLength(0);
+
+  context.type = "vsuggestion";
+  const voteOutput = render();
+  expect(
+    voteOutput.match(/"aria-label":"Upvoted this suggestion"/g),
+  ).toHaveLength(2);
+  expect(
+    voteOutput.match(/"aria-label":"Downvoted this suggestion"/g),
+  ).toHaveLength(1);
+  expect(voteOutput).toContain('"Upvoted"');
+  expect(voteOutput).toContain('"Downvoted"');
+  expect(voteOutput).toContain('"href":"#comment-2"');
+  expect(voteOutput).toContain(
+    '"aria-label":"Replying to Roblox target: Target message"',
+  );
+  expect(voteOutput.indexOf('"href":"#comment-2"')).toBeLessThan(
+    voteOutput.indexOf('"href":"/users/sender"'),
+  );
+  expect(voteOutput).not.toContain("↳");
+  expect(voteOutput).not.toContain("hidden sm:inline");
+  context.suggestion.upvoterIds = [];
+  context.suggestion.downvoterIds = [];
+  expect(render()).not.toContain("voted this suggestion");
+  context.suggestion.upvoterIds = ["root", "target"];
+  context.suggestion.downvoterIds = ["sender"];
+  context.type = "changelog";
+  expect(render()).not.toContain("voted this suggestion");
 
   for (const targetSettings of [
     { ...settings, show_recent_comments: false },
@@ -185,7 +280,7 @@ test("comment authors stay visible and copied comment links preserve the target 
   context.changelogId = "sender";
   expect(render()).toContain('"children":"Profile owner"');
   context.changelogId = "target";
-  expect((render().match(/"children":"Profile owner"/g) ?? []).length).toBe(2);
+  expect((render().match(/"children":"Profile owner"/g) ?? []).length).toBe(1);
   context.changelogId = "visitor";
   expect(render()).not.toContain('"children":"Profile owner"');
   context.changelogId = "root";

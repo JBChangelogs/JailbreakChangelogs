@@ -120,7 +120,10 @@ test("comment links show only their thread, and the list merges loaded pages", a
         if (thread && thread !== "42")
           return Response.json({
             id: Number(thread),
-            replies: [{ id: Number(thread) * 10 }],
+            replies: [
+              { id: Number(thread) * 10, date: "1700000000" },
+              { id: Number(thread) * 10 + 1, date: "1700000100" },
+            ],
           });
         return Response.json(
           { comment_id: 10, item_id: 5, item_type: "changelog", page: 3 },
@@ -334,7 +337,7 @@ test("comment links show only their thread, and the list merges loaded pages", a
   for (let i = 0; i < 5; i++) await Bun.sleep(0);
   const list = cache.get(JSON.stringify(listKey)) as {
     pages: {
-      comments: { id: number; replies?: { id: number }[] }[];
+      comments: { id: number; replies?: { id: number; date: string }[] }[];
       totalComments: number;
     }[];
   };
@@ -342,11 +345,57 @@ test("comment links show only their thread, and the list merges loaded pages", a
     [5, 7, 8],
     [11],
   ]);
-  expect(list.pages[0].comments[2].replies).toEqual([{ id: 80 }]);
+  expect(list.pages[0].comments[2].replies).toEqual([
+    { id: 81, date: "1700000100" },
+    { id: 80, date: "1700000000" },
+  ]);
   expect(list.pages[0].totalComments).toBe(25);
   expect(requests).not.toContain(
     "https://public-api.example.com/v2/comments/404",
   );
+
+  // Thread refreshes after posting/editing preserve newest-first replies in every list sort.
+  for (const sort of ["newest", "oldest", "activity"]) {
+    location.search = `?tab=comments&commentsSort=${sort}`;
+    const sortedKey = ["comments", "changelog", 5, "list", sort, null];
+    const sortedPage = page(sort === "oldest" ? [7, 8] : [8, 7]);
+    cache.set(JSON.stringify(sortedKey), {
+      pages: [sortedPage],
+      pageParams: [1],
+    });
+    state = render();
+    state.setComments((comments) =>
+      comments.map((comment) =>
+        comment.id === 8
+          ? {
+              ...comment,
+              replies: [
+                { id: 81, date: "1700000100" },
+                { id: 80, date: "1700000000" },
+              ],
+            }
+          : comment,
+      ),
+    );
+    render();
+    effects
+      .find((entry) => String(entry.callback).includes("realtimeComments"))!
+      .callback();
+    listeners.get("realtimeComments")!({
+      detail: { updates: [{ id: 81, type: "created", parent_id: 8 }] },
+    });
+    for (let i = 0; i < 5; i++) await Bun.sleep(0);
+    const refreshed = cache.get(JSON.stringify(sortedKey)) as typeof list;
+    expect(refreshed.pages[0].comments.map((comment) => comment.id)).toEqual(
+      sortedPage.comments.map((comment) => comment.id),
+    );
+    expect(
+      refreshed.pages[0].comments.find((comment) => comment.id === 8)?.replies,
+    ).toEqual([
+      { id: 81, date: "1700000100" },
+      { id: 80, date: "1700000000" },
+    ]);
+  }
 
   // Sort changes push history without a page param.
   render().handleSortChange("oldest");

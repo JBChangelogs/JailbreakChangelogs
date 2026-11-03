@@ -388,6 +388,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
         { items: [await response.json()] },
         currentUserId,
       );
+      // Single-thread responses use oldest first; comment lists always use newest first.
+      comments[0]?.replies?.sort((a, b) => Number(b.date) - Number(a.date));
       return { comment: comments[0], userMap };
     },
     [currentUserId],
