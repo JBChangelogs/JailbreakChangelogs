@@ -64,6 +64,9 @@ export interface HistoricalInventoryItem {
   title: string;
   category_title: string;
   held_since: number;
+  original_owner: string | null;
+  is_original_owner: boolean;
+  is_duplicated: boolean;
   history: Array<{
     from_user_id: string | null;
     to_user_id: string;

@@ -7,6 +7,7 @@ import InventoryItemsSkeleton from "./InventoryItemsSkeleton";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 
 interface Node {
   type: string | ((props: Record<string, unknown>) => Node);
@@ -190,6 +191,7 @@ function setup(
           return { default: "list-controls" };
         if (id.endsWith("/Pagination")) return { Pagination: "pagination" };
         if (id.endsWith("/itemSearch")) return { matchesTextSearch };
+        if (id.endsWith("/dupeComparisonUrl")) return { getDupeComparisonUrl };
         if (id === "./InventoryItemsSkeleton")
           return { default: "inventory-skeleton" };
         if (id === "./InventoryHistoryTip") return { default: "history-tip" };
@@ -274,6 +276,9 @@ const item = {
   title: "HyperPurple Level 5",
   category_title: "HyperChrome",
   held_since: 1791500000,
+  original_owner: "123",
+  is_original_owner: false,
+  is_duplicated: false,
   history: [
     {
       from_user_id: "5296890780",
@@ -283,6 +288,60 @@ const item = {
     },
   ],
 };
+
+test("historical cards use snapshot OG and dupe status with a comparison link", async () => {
+  const { runner, respond, select } = setup();
+  const page = runner();
+  select(page.render(), "2026-10-31");
+  page.render();
+  await respond(0, {
+    as_of: 1792000000,
+    items: [
+      { ...item, is_original_owner: true, is_duplicated: true },
+      { ...item, item_id: "normal", original_owner: null },
+      {
+        ...item,
+        item_id: "unknown-owner",
+        original_owner: null,
+        is_duplicated: true,
+      },
+      { ...item, item_id: "og-only", is_original_owner: true },
+    ],
+  });
+  const cards = nodes(page.render()).filter((node) => node.type === "article");
+  expect(cards).toHaveLength(4);
+  for (const index of [0, 3]) {
+    expect(cards[index].props.className).toContain("border-[#FFD700]");
+    expect(cards[index].props.className).toContain("bg-[#FFD700]/10");
+  }
+  for (const index of [1, 2]) {
+    expect(cards[index].props.className).toContain(
+      "border-border-card bg-tertiary-bg",
+    );
+    expect(cards[index].props.className).not.toContain("#FFD700");
+  }
+  for (const index of [1, 3]) {
+    expect(content(cards[index])).not.toContain("This item may be duped.");
+    expect(content(cards[index])).not.toContain("Comparison");
+  }
+  for (const index of [0, 2]) {
+    expect(content(cards[index])).toContain("This item may be duped.");
+    const link = nodes(cards[index]).find(
+      (node) => node.type === "a" && content(node) === "Comparison",
+    )!;
+    const url = new URL(link.props.href!, "https://inventory.test");
+    expect(url.pathname).toBe("/dupes/compare");
+    expect(url.searchParams.get("id")).toBe(
+      index === 0 ? item.item_id : "unknown-owner",
+    );
+    expect(url.searchParams.get("itemId")).toBe(String(item.catalog_item_id));
+    expect(url.searchParams.get("title")).toBe(item.title);
+    expect(url.searchParams.get("category")).toBe(item.category_title);
+    expect(url.searchParams.get("originalOwner")).toBe(
+      index === 0 ? "123" : null,
+    );
+  }
+});
 
 test("date selection uses UTC snapshots, ignores stale requests, and restores latest inventory", async () => {
   const { runner, requests, respond, select } = setup();

@@ -34,6 +34,7 @@ import {
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 
 const INVENTORY_HISTORY_START_DATE = "2026-10-31";
 
@@ -518,7 +519,11 @@ export default function InventoryHistory({
                       return (
                         <article
                           key={`${date}-${item.item_id}-${item.branch_id}`}
-                          className="text-primary-text border-border-card bg-tertiary-bg relative flex flex-col rounded-lg border p-3"
+                          className={`text-primary-text relative flex flex-col rounded-lg border p-3 transition-all duration-200 ${
+                            item.is_original_owner
+                              ? "hover:shadow-card-shadow border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
+                              : "border-border-card bg-tertiary-bg"
+                          }`}
                         >
                           <InventoryItemAppearance
                             title={item.title}
@@ -568,6 +573,35 @@ export default function InventoryHistory({
                               </Popover>
                             </div>
                           </div>
+                          {item.is_duplicated && (
+                            <div className="mt-3 flex flex-col items-center gap-1 text-center text-xs">
+                              <span className="text-secondary-text">
+                                This item may be duped.
+                              </span>
+                              <Link
+                                href={getDupeComparisonUrl({
+                                  id: item.item_id,
+                                  item_id: item.catalog_item_id,
+                                  title: item.title,
+                                  categoryTitle: item.category_title,
+                                  info: item.original_owner
+                                    ? [
+                                        {
+                                          title: "Original Owner",
+                                          value: item.original_owner,
+                                        },
+                                      ]
+                                    : undefined,
+                                })}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="View variant ownership histories in a new tab"
+                                className="text-link hover:text-link-hover font-bold hover:underline"
+                              >
+                                Comparison
+                              </Link>
+                            </div>
+                          )}
                         </article>
                       );
                     })}
