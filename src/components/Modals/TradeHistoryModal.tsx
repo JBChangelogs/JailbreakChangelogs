@@ -269,7 +269,7 @@ export default function TradeHistoryModal({
                       <>
                         <TradeAvatarImage userId={trade.from_user_id} />
                         <a
-                          className="text-link hover:underline"
+                          className="text-link hover:text-link-hover transition-colors"
                           href={`https://www.roblox.com/users/${trade.from_user_id}/profile`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -283,7 +283,7 @@ export default function TradeHistoryModal({
                     <span className="text-secondary-text">→</span>
                     <TradeAvatarImage userId={trade.to_user_id} />
                     <a
-                      className="text-link hover:underline"
+                      className="text-link hover:text-link-hover transition-colors"
                       href={`https://www.roblox.com/users/${trade.to_user_id}/profile`}
                       target="_blank"
                       rel="noopener noreferrer"
