@@ -364,7 +364,8 @@ test("comment links show only their thread, and the list merges loaded pages", a
     { id: 81, date: "1700000100" },
     { id: 80, date: "1700000000" },
   ]);
-  expect(list.pages[0].totalComments).toBe(25);
+  // Total counts replies too: thread 8 gained 80 and 81.
+  expect(list.pages[0].totalComments).toBe(27);
   expect(requests).not.toContain(
     "https://public-api.example.com/v2/comments/404",
   );

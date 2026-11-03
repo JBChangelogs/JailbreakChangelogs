@@ -423,6 +423,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (isReacting()) return;
       const result = await fetchThread(threadId).catch(() => undefined);
       if (result === undefined || isReacting()) return;
+      // API total counts replies, so live reply adds/removals shift it.
+      const before = commentsRef.current.find((c) => c.id === threadId);
+      if (before && result)
+        adjustTotal(
+          (result.comment.replies?.length ?? 0) - (before.replies?.length ?? 0),
+        );
       updateLoadedPages((pages) =>
         pages.map((p, i) => ({
           ...p,
@@ -434,7 +440,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         })),
       );
     },
-    [fetchThread, updateLoadedPages],
+    [fetchThread, updateLoadedPages, adjustTotal],
   );
   const hasNextPage = commentsQuery.hasNextPage;
   /** A removed top-level comment pulls the next unloaded one onto the last loaded page. */
@@ -476,9 +482,11 @@ export function useCommentState(props: ChangelogCommentsProps) {
   ]);
   const removeTopLevel = useCallback(
     (id: number) => {
-      if (!commentsRef.current.some((c) => c.id === id)) return;
+      const thread = commentsRef.current.find((c) => c.id === id);
+      if (!thread) return;
       setComments((prev) => prev.filter((c) => c.id !== id));
-      adjustTotal(-1);
+      // Replies cascade-delete with their parent.
+      adjustTotal(-1 - (thread.replies?.length ?? 0));
       void fillLastPage();
     },
     [setComments, adjustTotal, fillLastPage],
@@ -1480,9 +1488,10 @@ export function useCommentState(props: ChangelogCommentsProps) {
         throw new Error("Failed to delete comment");
       }
       if (isTopLevel) {
-        adjustTotal(-1);
+        adjustTotal(-1 - (removed.replies?.length ?? 0));
         void fillLastPage();
       } else if (threadId) {
+        adjustTotal(-1);
         void syncThread(threadId);
       }
       // Comment successfully deleted, track with analytics
@@ -1708,6 +1717,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         ),
       );
       setExpandedReplies((prev) => new Set([...prev, parentId]));
+      adjustTotal(1);
 
       void syncThread(parentId);
       return true;
