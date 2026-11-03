@@ -54,7 +54,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-6 pt-4 pb-6">
+        <div className="px-6 pt-1 pb-6">
           {children ? (
             children
           ) : (
