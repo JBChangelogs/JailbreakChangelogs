@@ -10,6 +10,7 @@ import { Icon } from "../ui/IconWrapper";
 import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { sortByValueSort } from "@/utils/trading/values";
+import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import { usePartialItems, useCatalogValues } from "@/hooks/usePartialItems";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 
@@ -307,7 +308,11 @@ export default function InventoryItems({
       return 0;
     };
 
-    const sortEntries = <E extends { item: InventoryItem }>(entries: E[]) => {
+    const sortEntries = <
+      E extends { item: InventoryItem; isDupedItem?: boolean },
+    >(
+      entries: E[],
+    ) => {
       if (sortOrder === "created-asc" || sortOrder === "created-desc") {
         const direction = sortOrder === "created-asc" ? 1 : -1;
         return [...entries].sort(
@@ -327,7 +332,9 @@ export default function InventoryItems({
           duped_value: values
             ? values.duped_value
             : snapshotValue(entry.item, "Duped Value"),
-          demand: values?.demand ?? null,
+          demand:
+            getTradeItemMarketDetails(values ?? {}, entry.isDupedItem).demand ??
+            null,
           trend: values?.trend ?? null,
           uniqueCirculation: entry.item.uniqueCirculation,
         };

@@ -9,6 +9,7 @@ test("inventory market summary shows current values and the catalog demand and t
     cash_value: "28m",
     duped_value: "14m",
     demand: "High",
+    duped_demand: "Low",
     trend: "Rising",
     is_limited: 1,
     is_seasonal: 0,
@@ -28,6 +29,22 @@ test("inventory market summary shows current values and the catalog demand and t
   expect(html).toContain("High");
   expect(html).toContain("bg-trend-rising");
   expect(html).toContain("Rising");
+  expect(html).not.toContain("bg-demand-low");
+
+  const dupedHtml = renderToStaticMarkup(
+    <InventoryMarketSummary data={data} isDuped />,
+  );
+  expect(dupedHtml).toContain("bg-demand-low");
+  expect(dupedHtml).toContain(">Low<");
+  expect(dupedHtml).not.toContain("bg-demand-high");
+
+  for (const duped_demand of [null, "", "N/A"]) {
+    const unknownHtml = renderToStaticMarkup(
+      <InventoryMarketSummary data={{ ...data, duped_demand }} isDuped />,
+    );
+    expect(unknownHtml).toContain(">Unknown<");
+    expect(unknownHtml).not.toContain("bg-demand-high");
+  }
 });
 
 test("unavailable market data stays unknown rather than displaying zero values", () => {

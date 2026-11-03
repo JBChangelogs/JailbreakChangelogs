@@ -132,6 +132,12 @@ test("card actions pass the original owner to the shared check and preserve hist
         element.type === "@/components/Inventory/InventoryMarketSummary",
     )?.props.data,
   ).toBe(props.itemData);
+  expect(
+    elements.find(
+      (element) =>
+        element.type === "@/components/Inventory/InventoryMarketSummary",
+    )?.props.isDuped,
+  ).toBe(true);
   const images = elements.filter((element) => element.type === "next/image");
   expect(images).toHaveLength(2);
   for (const image of images) {

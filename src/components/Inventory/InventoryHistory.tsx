@@ -542,6 +542,7 @@ export default function InventoryHistory({
                         />
                         <InventoryMarketSummary
                           data={catalogById.get(item.catalog_item_id)}
+                          isDuped={item.is_duplicated}
                         />
                         <div className="mt-auto space-y-3 pt-3">
                           <div className="flex min-w-0 items-center gap-2">

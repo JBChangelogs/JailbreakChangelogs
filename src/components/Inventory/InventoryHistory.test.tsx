@@ -36,6 +36,7 @@ interface Node {
     onCloseAutoFocus?: (event: { preventDefault: () => void }) => void;
     ref?: { current: { focus: (options: FocusOptions) => void } | null };
     data?: { cash_value?: string | null };
+    isDuped?: boolean;
     userId?: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
@@ -317,6 +318,13 @@ test("historical cards use snapshot OG and dupe status with a comparison link", 
   });
   const cards = nodes(page.render()).filter((node) => node.type === "article");
   expect(cards).toHaveLength(4);
+  expect(
+    cards.map(
+      (card) =>
+        nodes(card).find((node) => node.type === "market-summary")!.props
+          .isDuped,
+    ),
+  ).toEqual([true, false, true, false]);
   for (const index of [0, 3]) {
     expect(cards[index].props.className).toContain("border-[#FFD700]");
     expect(cards[index].props.className).toContain("bg-[#FFD700]/10");

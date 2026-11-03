@@ -182,6 +182,8 @@ for (const cardPath of ["./InventoryItemCard.tsx", "../OG/OGItemCard.tsx"]) {
             return { useState: (initial: unknown) => [initial, noop] };
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
           if (name === "@/components/ui/button") return { Button: "button" };
+          if (name.endsWith("/InventoryMarketSummary"))
+            return { default: "market-summary" };
           if (name === "next/image") return { default: "image" };
           if (name === "next/link") return { default: "link" };
           if (name === "@/app/fonts") return { bangers: { className: "" } };
@@ -219,6 +221,17 @@ for (const cardPath of ["./InventoryItemCard.tsx", "../OG/OGItemCard.tsx"]) {
       onCardClick: (selected: unknown) => opened.push(selected),
     };
     let view = descendants(exports.default(props));
+    if (cardPath === "./InventoryItemCard.tsx") {
+      expect(
+        view.find((node) => node.type === "market-summary")!.props.isDuped,
+      ).toBe(false);
+      const dupedView = descendants(
+        exports.default({ ...props, isDupedItem: true }),
+      );
+      expect(
+        dupedView.find((node) => node.type === "market-summary")!.props.isDuped,
+      ).toBe(true);
+    }
     expect(view.find((node) => node.type === "a")!.props.href).toBe(
       "https://www.roblox.com/users/123/profile",
     );

@@ -22,6 +22,7 @@ export type CatalogValues = {
   cash_value: string | null;
   duped_value: string | null;
   demand: string | null;
+  duped_demand: string | null;
   trend: string | null;
   is_limited: number | null;
   is_seasonal: number | null;
@@ -33,6 +34,7 @@ const CATALOG_VALUE_FIELDS = [
   "cash_value",
   "duped_value",
   "demand",
+  "duped_demand",
   "trend",
   "is_limited",
   "is_seasonal",

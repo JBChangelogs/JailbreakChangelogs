@@ -229,7 +229,7 @@ export default function DupeItemCard({
         <ItemSignatures signs={item.Sign} />
       </div>
 
-      <InventoryMarketSummary data={itemData} />
+      <InventoryMarketSummary data={itemData} isDuped />
 
       <div className="flex flex-1 flex-col gap-3">
         <div className="flex min-w-0 items-center gap-2">
