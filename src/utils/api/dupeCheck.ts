@@ -9,6 +9,7 @@ export interface DupeCheckResult {
 export async function checkDupe(
   originalOwner: string,
   itemId: number,
+  signal?: AbortSignal,
 ): Promise<DupeCheckResult> {
   if (
     !/^\d+$/.test(originalOwner) ||
@@ -23,6 +24,7 @@ export async function checkDupe(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: originalOwner, item_id: itemId }),
+    signal,
   });
   const data = await response.json().catch(() => null);
   if (!response.ok) {

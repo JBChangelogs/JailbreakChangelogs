@@ -28,7 +28,9 @@ test("checks the original owner and catalog ID using the dashboard endpoint", as
     request = { url: String(url), options };
     return Response.json(result);
   }) as unknown as typeof fetch;
-  expect(await checkDupe("235642012", 49)).toEqual(result);
+  const controller = new AbortController();
+  expect(await checkDupe("235642012", 49, controller.signal)).toEqual(result);
+  expect(request?.options?.signal).toBe(controller.signal);
   expect(request?.url).toBe("https://inventory.example/dupes/check");
   expect(request?.options?.method).toBe("POST");
   expect(JSON.parse(request?.options?.body as string)).toEqual({

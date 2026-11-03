@@ -20,6 +20,10 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   let stateIndex = 0;
   const checks: unknown[][] = [];
   let checkFails = false;
+  let deferChecks = false;
+  const pendingCheck = { current: null };
+  const deferred: Array<() => void> = [];
+  const signals: AbortSignal[] = [];
   let result = {
     ratio: 0.45,
     check: true,
@@ -38,9 +42,11 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
     ).outputText,
     {
       exports,
+      AbortController,
       require: (name: string) => {
         if (name === "react")
           return {
+            useRef: () => pendingCheck,
             useState: (initial: unknown) => {
               const index = stateIndex++;
               if (!(index in states)) states[index] = initial;
@@ -56,7 +62,10 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
         if (name === "@/utils/api/dupeCheck")
           return {
             checkDupe: async (...args: unknown[]) => {
-              checks.push(args);
+              checks.push(args.slice(0, 2));
+              signals.push(args[2] as AbortSignal);
+              if (deferChecks)
+                await new Promise<void>((resolve) => deferred.push(resolve));
               if (checkFails) throw new Error("Check failed");
               return result;
             },
@@ -325,4 +334,32 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   expect(
     flatten(withoutCategory).some((element) => element.type === "CategoryIcon"),
   ).toBe(false);
+  deferChecks = true;
+  button("Dupe check").props.onClick!();
+  stateIndex = 0;
+  const pending = exports.default(props);
+  const close = flatten(pending).find((element) => element.type === "Dialog")!
+    .props.onOpenChange as (open: boolean) => void;
+  close(false);
+  expect(signals.at(-1)?.aborted).toBe(true);
+  stateIndex = 0;
+  const closed = exports.default(props);
+  const resetButton = flatten(closed).find(
+    (element) =>
+      element.type === "Button" && element.props.children === "Dupe check",
+  )!;
+  expect(resetButton.props.disabled).toBe(false);
+  resetButton.props.onClick!();
+  deferred.shift()!();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  stateIndex = 0;
+  const reopened = exports.default(props);
+  expect(JSON.stringify(reopened)).toContain(
+    "Checking the recorded ownership history...",
+  );
+  expect(JSON.stringify(reopened)).not.toContain("Checks flagged:");
+  deferred.shift()!();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  stateIndex = 0;
+  expect(JSON.stringify(exports.default(props))).toContain("Checks flagged:");
 });

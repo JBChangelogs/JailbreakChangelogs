@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import type { DupeFinderItem } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -42,23 +42,36 @@ export default function DupeCheckButton({
   const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
   const [checkOpen, setCheckOpen] = useState(false);
+  const pendingCheck = useRef<AbortController | null>(null);
   const categoryIcon = item.categoryTitle
     ? getCategoryIcon(item.categoryTitle)
     : null;
   const runCheck = async () => {
-    if (checking) return;
+    if (pendingCheck.current) return;
+    const controller = new AbortController();
+    pendingCheck.current = controller;
     setCheckOpen(true);
     setChecking(true);
     setCheckError(null);
     setCheckResult(null);
     try {
-      setCheckResult(await checkDupe(originalOwner, item.item_id));
-    } catch (error) {
-      setCheckError(
-        error instanceof Error ? error.message : "Unable to check this dupe.",
+      const result = await checkDupe(
+        originalOwner,
+        item.item_id,
+        controller.signal,
       );
+      if (!controller.signal.aborted) setCheckResult(result);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setCheckError(
+          error instanceof Error ? error.message : "Unable to check this dupe.",
+        );
+      }
     } finally {
-      setChecking(false);
+      if (pendingCheck.current === controller) {
+        pendingCheck.current = null;
+        setChecking(false);
+      }
     }
   };
   const checkDetails = checkResult
@@ -95,7 +108,17 @@ export default function DupeCheckButton({
       >
         {checking ? "Checking..." : "Dupe check"}
       </Button>
-      <Dialog open={checkOpen} onOpenChange={setCheckOpen}>
+      <Dialog
+        open={checkOpen}
+        onOpenChange={(open) => {
+          setCheckOpen(open);
+          if (!open) {
+            pendingCheck.current?.abort();
+            pendingCheck.current = null;
+            setChecking(false);
+          }
+        }}
+      >
         <DialogContent className="w-[calc(100%_-_2rem)] max-w-3xl" showClose>
           <DialogHeader className="pr-5 text-left">
             <div className="flex flex-wrap items-center gap-3">
