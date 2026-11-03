@@ -13,6 +13,7 @@ import type { RobloxUser } from "@/types";
 import { getUserAvatar } from "@/utils/ui/images";
 import { TradeHistoryAvatar } from "./TradeHistoryList";
 import DupeComparisonLoading from "./DupeComparisonLoading";
+import { trackDupeEvent } from "@/utils/analytics/dupes";
 
 function OwnerIdentity({
   id,
@@ -168,7 +169,16 @@ function CopySegment({
           </div>
         )}
         {previousOwners.length > 0 && (
-          <details className="text-secondary-text mt-2 text-xs">
+          <details
+            className="text-secondary-text mt-2 text-xs"
+            onToggle={(event) => {
+              if (event.currentTarget.open) {
+                trackDupeEvent("dupe_tree_history_open", {
+                  owners: previousOwners.length,
+                });
+              }
+            }}
+          >
             <summary className="cursor-pointer py-1">
               Show {previousOwners.length}{" "}
               {previousOwners.length === 1

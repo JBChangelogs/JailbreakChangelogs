@@ -1,6 +1,8 @@
 "use client";
 
 import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { useEffect } from "react";
+import { trackDupeEvent } from "@/utils/analytics/dupes";
 import { useQuery } from "@tanstack/react-query";
 import type { DuplicateVariantsResponse } from "@/types";
 import { useBatchItems } from "@/hooks/useBatchItems";
@@ -35,6 +37,22 @@ export default function DupeComparisonLoader({
       .withDefault("simplified")
       .withOptions({ history: "push", shallow: true }),
   );
+  useEffect(() => {
+    trackDupeEvent("dupe_comparison_view", { view });
+  }, [id, view]);
+  const selectView = (
+    next: "simplified" | "copy-tree",
+    source: "tab" | "summary" | "check",
+  ) => {
+    if (next !== view) {
+      trackDupeEvent("dupe_comparison_switch", {
+        from: view,
+        to: next,
+        source,
+      });
+    }
+    void setView(next);
+  };
   const variantsQuery = useQuery({
     queryKey: ["duplicate-variants", id],
     queryFn: async ({ signal }): Promise<DuplicateVariantsResponse | null> => {
@@ -84,7 +102,7 @@ export default function DupeComparisonLoader({
         <DupeComparisonClient
           ogItem={variants.og}
           duplicateItem={variants.duplicate}
-          onExploreTree={() => void setView("copy-tree")}
+          onExploreTree={() => selectView("copy-tree", "summary")}
         />
       );
     }
@@ -97,7 +115,7 @@ export default function DupeComparisonLoader({
         id={id}
         reportItem={reportItem}
         originalOwner={originalOwner}
-        onExploreTree={() => void setView("copy-tree")}
+        onExploreTree={() => selectView("copy-tree", "check")}
       />
     );
   }
@@ -111,14 +129,14 @@ export default function DupeComparisonLoader({
           duplicateItem={variants.duplicate}
           itemsData={itemQuery.data ?? []}
           showOriginalOwner={view === "simplified"}
-          onExploreTree={() => void setView("copy-tree")}
+          onExploreTree={() => selectView("copy-tree", "check")}
         />
       )}
       <Tabs
         key={`views-${id}`}
         value={view}
         onValueChange={(view) =>
-          void setView(view === "copy-tree" ? "copy-tree" : "simplified")
+          selectView(view === "copy-tree" ? "copy-tree" : "simplified", "tab")
         }
       >
         <TabsList aria-label="Dupe history view" fullWidth>

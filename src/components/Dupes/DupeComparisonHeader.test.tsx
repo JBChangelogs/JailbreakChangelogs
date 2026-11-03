@@ -52,7 +52,13 @@ const item = {
 
 test("renders one shared header outside both tab panels with distinct sibling keys", () => {
   let selection: string | null = null;
+  const events: Array<{ name: string; props: unknown }> = [];
   const render = load("./DupeComparisonLoader.tsx", {
+    react: { useEffect: (callback: () => void) => callback() },
+    "@/utils/analytics/dupes": {
+      trackDupeEvent: (name: string, props: unknown) =>
+        events.push({ name, props }),
+    },
     nuqs: {
       parseAsStringLiteral,
       useQueryState: (
@@ -97,6 +103,12 @@ test("renders one shared header outside both tab panels with distinct sibling ke
   const root = render({ id: item.id });
   const children = root.props.children as Node[];
   const header = children[0];
+  (header.props.onExploreTree as () => void)();
+  expect(events).toContainEqual({
+    name: "dupe_comparison_switch",
+    props: { from: "simplified", to: "copy-tree", source: "check" },
+  });
+  selection = null;
   const tabs = children[1];
   expect(header.type).toBe("./DupeComparisonHeader");
   expect(tabs.type).toBe("Tabs");
@@ -114,6 +126,14 @@ test("renders one shared header outside both tab panels with distinct sibling ke
   ).toHaveLength(2);
   expect(header.props.showOriginalOwner).toBe(true);
   (tabs.props.onValueChange as (value: string) => void)("copy-tree");
+  expect(events).toContainEqual({
+    name: "dupe_comparison_view",
+    props: { view: "simplified" },
+  });
+  expect(events).toContainEqual({
+    name: "dupe_comparison_switch",
+    props: { from: "simplified", to: "copy-tree", source: "tab" },
+  });
   expect(
     nodes(render({ id: item.id })).find(
       (node) => node.type === "./DupeComparisonHeader",
@@ -134,6 +154,10 @@ test("renders one shared header outside both tab panels with distinct sibling ke
     (node) => node.type === "./DupeComparisonClient",
   )!;
   (simplified.props.onExploreTree as () => void)();
+  expect(events).toContainEqual({
+    name: "dupe_comparison_switch",
+    props: { from: "simplified", to: "copy-tree", source: "summary" },
+  });
   expect(
     nodes(render({ id: item.id })).find((node) => node.type === "Tabs")?.props
       .value,

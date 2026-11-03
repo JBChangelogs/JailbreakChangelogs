@@ -19,6 +19,7 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   const states: unknown[] = [];
   let stateIndex = 0;
   const checks: unknown[][] = [];
+  const events: unknown[] = [];
   let checkFails = false;
   let deferChecks = false;
   const pendingCheck = { current: null };
@@ -59,6 +60,11 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
             },
           };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "@/utils/analytics/dupes")
+          return {
+            trackDupeEvent: (name: string, props: unknown) =>
+              events.push({ name, props }),
+          };
         if (name === "@/utils/api/dupeCheck")
           return {
             checkDupe: async (...args: unknown[]) => {
@@ -256,6 +262,11 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   )!;
   expect(evidence.props.target).toBe("_blank");
   expect(evidence.props.rel).toBe("noopener noreferrer");
+  evidence.props.onClick!();
+  expect(events).toContainEqual({
+    name: "dupe_tree_open",
+    props: { source: "check", navigation: "new_tab" },
+  });
   expect(
     flatten(footer).find(
       (element) =>
@@ -338,6 +349,10 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   expect(treeButton.props.asChild).toBeUndefined();
   treeButton.props.onClick!();
   expect(treeViews).toBe(1);
+  expect(events).toContainEqual({
+    name: "dupe_tree_open",
+    props: { source: "check", navigation: "same_tab" },
+  });
   stateIndex = 0;
   expect(
     flatten(exports.default(props)).find((element) => element.type === "Dialog")

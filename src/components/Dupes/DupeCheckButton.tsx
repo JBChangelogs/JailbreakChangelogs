@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { checkDupe, type DupeCheckResult } from "@/utils/api/dupeCheck";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
+import { trackDupeEvent } from "@/utils/analytics/dupes";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import {
   formatShortDateTime,
@@ -285,6 +286,10 @@ export default function DupeCheckButton({
                 size="sm"
                 className="w-full sm:w-auto"
                 onClick={() => {
+                  trackDupeEvent("dupe_tree_open", {
+                    source: "check",
+                    navigation: "same_tab",
+                  });
                   setCheckOpen(false);
                   onViewTree();
                 }}
@@ -306,6 +311,12 @@ export default function DupeCheckButton({
                   target="_blank"
                   rel="noopener noreferrer"
                   title="View recorded copies in the dupe tree in a new tab"
+                  onClick={() =>
+                    trackDupeEvent("dupe_tree_open", {
+                      source: "check",
+                      navigation: "new_tab",
+                    })
+                  }
                 >
                   View dupe tree
                 </Link>

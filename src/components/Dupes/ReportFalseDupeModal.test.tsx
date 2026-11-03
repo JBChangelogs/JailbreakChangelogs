@@ -16,6 +16,7 @@ function nodes(value: unknown): Node[] {
 }
 
 test("false-dupe reports use the catalog ID in the URL and retain the original owner", async () => {
+  const events: unknown[] = [];
   const requests: { url: string; options: RequestInit }[] = [];
   let resolveReport!: (status: string) => void;
   const resolved = new Promise<string>((resolve) => {
@@ -44,12 +45,18 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
       require: (name: string) => {
         if (name === "react")
           return {
+            useEffect: (callback: () => void) => callback(),
             useState: (initial: unknown) => [
               initial === "" ? "Incorrect detection" : initial,
               () => {},
             ],
           };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "@/utils/analytics/dupes")
+          return {
+            trackDupeEvent: (name: string, props: unknown) =>
+              events.push({ name, props }),
+          };
         if (name === "next/link") return { default: "Link" };
         if (name === "@/components/ui/button") return { Button: "Button" };
         if (name === "@/utils/dupeComparisonUrl")
@@ -113,6 +120,15 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
   expect(link.props.rel).toBe("noopener noreferrer");
   expect(link.props.title).toBeUndefined();
   expect(link.props["aria-label"]).toBe("View dupe tree (opens in a new tab)");
+  (link.props.onClick as () => void)();
+  expect(events).toContainEqual({
+    name: "false_dupe_report_open",
+    props: undefined,
+  });
+  expect(events).toContainEqual({
+    name: "dupe_tree_open",
+    props: { source: "report", navigation: "new_tab" },
+  });
   expect(
     nodes(dialog).find((node) => node.type === "textarea")?.props.value,
   ).toBe("Incorrect detection");
@@ -121,6 +137,10 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
   expect(requests).toHaveLength(0);
   (dialog.props.onConfirm as () => void)();
   expect(await resolved).toBe("submitted");
+  expect(events).toContainEqual({
+    name: "false_dupe_report_submitted",
+    props: undefined,
+  });
   expect(requests).toHaveLength(1);
   expect(requests[0].url).toBe(
     "https://api.jailbreakchangelogs.com/v2/items/49/duplicate-reports",

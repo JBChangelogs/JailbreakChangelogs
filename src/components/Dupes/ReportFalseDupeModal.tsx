@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { createLogger } from "@/services/logger";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
+import { trackDupeEvent } from "@/utils/analytics/dupes";
 
 const log = createLogger("API");
 const MAX_REASON_LENGTH = 500;
@@ -42,6 +43,9 @@ export default function ReportFalseDupeModal({
 }: ReportFalseDupeModalProps) {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useEffect(() => {
+    if (open) trackDupeEvent("false_dupe_report_open");
+  }, [open]);
   const categoryIcon = item.categoryTitle
     ? getCategoryIcon(item.categoryTitle)
     : null;
@@ -90,6 +94,7 @@ export default function ReportFalseDupeModal({
         );
       }
 
+      trackDupeEvent("false_dupe_report_submitted");
       toast.success("False dupe report submitted", { id: toastId });
       setReason("");
       onReportResolved("submitted");
@@ -167,6 +172,12 @@ export default function ReportFalseDupeModal({
               rel="noopener noreferrer"
               prefetch={false}
               aria-label="View dupe tree (opens in a new tab)"
+              onClick={() =>
+                trackDupeEvent("dupe_tree_open", {
+                  source: "report",
+                  navigation: "new_tab",
+                })
+              }
             >
               View dupe tree ↗
             </Link>
