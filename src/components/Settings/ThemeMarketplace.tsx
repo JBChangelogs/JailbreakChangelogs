@@ -9,6 +9,11 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { UpdatePill } from "@/components/ui/UpdatePill";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Pagination } from "@/components/ui/Pagination";
 import { ReportReasonModal } from "@/components/ui/ReportReasonModal";
@@ -21,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
+import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -484,11 +490,13 @@ export default function ThemeMarketplace() {
                     />
                   )}
                   <div>
-                    <h2
-                      className="text-primary-text truncate text-lg font-semibold"
-                      title={theme.label}
-                    >
-                      {theme.label}
+                    <h2 className="text-primary-text flex items-center gap-2 text-lg font-semibold">
+                      <Icon
+                        icon={theme.icon ?? DEFAULT_THEME_ICON}
+                        className="h-5 w-5 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 truncate">{theme.label}</span>
                     </h2>
                     {theme.description && (
                       <p className="text-secondary-text mt-1 line-clamp-3 text-sm wrap-break-word whitespace-pre-line">
@@ -522,6 +530,42 @@ export default function ThemeMarketplace() {
                         )}
                       </p>
                     </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group mt-2 inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
+                          aria-label={`Copy share code ${theme.share_code}`}
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(
+                                theme.share_code,
+                              );
+                              toast.success(
+                                `Share code ${theme.share_code} copied!`,
+                                {
+                                  duration: 2000,
+                                },
+                              );
+                            } catch {
+                              toast.error("Couldn't copy the share code", {
+                                description: theme.share_code,
+                              });
+                            }
+                          }}
+                        >
+                          Code: {theme.share_code}
+                          <Icon
+                            icon="heroicons:clipboard-document"
+                            className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="left">
+                        Click to copy code
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Button

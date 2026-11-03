@@ -34,12 +34,15 @@ function marketplace({
   total = 25,
   previews = [] as ThemePreviewImage[],
   description = null as string | null,
+  icon = null as string | null,
+  clipboardError = false,
   scrolled = false,
 } = {}) {
   const theme: MarketplaceTheme = {
     share_code: "ABCDEFGH",
     label: "Midnight",
     description,
+    icon,
     scheme: "dark",
     vars: {},
     logo_filter: null,
@@ -53,6 +56,7 @@ function marketplace({
   const recent: string[] = [];
   const reports: unknown[] = [];
   const errors: unknown[] = [];
+  const copied: string[] = [];
   const updates: unknown[] = [];
   const invalidations: unknown[] = [];
   const searchRef = { current: null as { focus: () => void } | null };
@@ -103,6 +107,14 @@ function marketplace({
     {
       exports,
       Error,
+      navigator: {
+        clipboard: {
+          writeText: async (value: string) => {
+            if (clipboardError) throw new Error("Clipboard unavailable");
+            copied.push(value);
+          },
+        },
+      },
       window: {
         addEventListener: (
           name: string,
@@ -232,6 +244,8 @@ function marketplace({
             },
           };
         if (name === "next/link") return { default: "Link" };
+        if (name === "@/components/Settings/ThemeIconPicker")
+          return { DEFAULT_THEME_ICON: "lucide:palette" };
         if (name.startsWith("@/components/"))
           return new Proxy({}, { get: (_target, key) => String(key) });
         throw new Error(`Unexpected import: ${name}`);
@@ -266,6 +280,7 @@ function marketplace({
     recent,
     reports,
     errors,
+    copied,
     updates,
     invalidations,
     keydown: (event: Partial<KeyboardEvent>) =>
@@ -287,6 +302,31 @@ function marketplace({
     key: () => queryKey,
   };
 }
+
+test("marketplace cards show the theme icon and copy the share code", async () => {
+  for (const icon of [null, "lucide:moon"]) {
+    const view = marketplace({ icon });
+    const rendered = view.render();
+    const heading = rendered.find((node) => node.type === "h2")!;
+    expect(
+      nodes(heading).find((node) => node.type === "Icon")!.props.icon,
+    ).toBe(icon ?? "lucide:palette");
+    const copy = rendered.find(
+      (node) => node.props["aria-label"] === "Copy share code ABCDEFGH",
+    )!;
+    await (copy.props.onClick as () => Promise<void>)();
+    expect(view.copied).toEqual(["ABCDEFGH"]);
+  }
+});
+
+test("clipboard failures keep the share code available in the error", async () => {
+  const view = marketplace({ clipboardError: true });
+  const copy = view
+    .render()
+    .find((node) => node.props["aria-label"] === "Copy share code ABCDEFGH")!;
+  await (copy.props.onClick as () => Promise<void>)();
+  expect(view.errors).toEqual([{ description: "ABCDEFGH" }]);
+});
 
 test("search and sort reset pagination, and use theme applies and remembers the share code", () => {
   const view = marketplace();
