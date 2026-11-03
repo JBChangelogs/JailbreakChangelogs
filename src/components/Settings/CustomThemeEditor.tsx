@@ -947,22 +947,25 @@ export default function CustomThemeEditor({
                 <span className="text-primary-text text-sm font-medium">
                   Description (optional)
                 </span>
-                <Textarea
-                  id="theme-description"
-                  value={current.description ?? ""}
-                  maxLength={500}
-                  rows={3}
-                  onChange={(event) =>
-                    update({ description: event.target.value })
-                  }
-                  aria-describedby="theme-description-count"
-                  placeholder="Tell people about your theme…"
-                />
-                <span
-                  id="theme-description-count"
-                  className="text-secondary-text block text-right text-xs"
-                >
-                  {(current.description ?? "").length}/500
+                <span className="relative block">
+                  <Textarea
+                    id="theme-description"
+                    value={current.description ?? ""}
+                    maxLength={500}
+                    rows={3}
+                    onChange={(event) =>
+                      update({ description: event.target.value })
+                    }
+                    aria-describedby="theme-description-count"
+                    placeholder="Tell people about your theme…"
+                    className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text hover:border-border-focus focus:border-button-info min-h-30 resize-y rounded p-3 pb-7 shadow-none focus-visible:ring-0"
+                  />
+                  <span
+                    id="theme-description-count"
+                    className="text-secondary-text pointer-events-none absolute right-2 bottom-2 text-xs"
+                  >
+                    {(current.description ?? "").length}/500
+                  </span>
                 </span>
               </label>
 
