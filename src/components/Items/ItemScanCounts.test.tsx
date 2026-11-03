@@ -79,7 +79,7 @@ test("only the duped count requires experiment access and unavailable counts sta
       expect(markup).not.toContain(" title=");
       expect(markup).toContain("Inventory scans");
       expect(markup).toContain("Last 30 days");
-      expect(markup).toContain(">Signed<");
+      expect(markup).toContain(">Signed copies<");
       if (scanCount?.signedCounts?.length) {
         expect(markup).toContain("Copies by signer");
         expect(markup).toContain("epic_tank");
@@ -90,6 +90,12 @@ test("only the duped count requires experiment access and unavailable counts sta
             `href="https://www.roblox.com/users/${id}/profile"`,
           );
           expect(markup).toContain(`src="/proxy/users/${id}/avatar-headshot"`);
+          const link = markup.match(
+            new RegExp(
+              `<a[^>]*href="https://www.roblox.com/users/${id}/profile"[^>]*>(.*?)</a>`,
+            ),
+          )?.[1];
+          expect(link).toContain("copies signed by");
         }
         expect(markup).toContain("<span>unknown</span>");
         expect(markup).not.toContain("/undefined/profile");
@@ -101,13 +107,13 @@ test("only the duped count requires experiment access and unavailable counts sta
       }
       if (scanCount?.signedCopyCount === 0) expect(markup).toContain(">0<");
       if (scanCount !== undefined && scanCount?.signedCopyCount == null)
-        expect(markup).toContain("Signed unavailable");
-      expect(markup.includes(">Duped<")).toBe(enabled);
+        expect(markup).toContain("Signed copies unavailable");
+      expect(markup.includes(">Duped copies<")).toBe(enabled);
       if (scanCount === undefined) expect(markup).toContain("Loading");
       else if (scanCount === null) expect(markup).toContain("unavailable");
       else if (enabled)
         expect(markup).toContain(
-          scanCount.dupedCopyCount === 0 ? ">0<" : "Duped unavailable",
+          scanCount.dupedCopyCount === 0 ? ">0<" : "Duped copies unavailable",
         );
     }
     expect(

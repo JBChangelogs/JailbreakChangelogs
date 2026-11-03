@@ -679,14 +679,14 @@ export default function ItemDetailsClient({
                         enabled: true,
                       },
                       {
-                        label: "Duped",
+                        label: "Duped copies",
                         description:
                           "Individual duped copies observed in inventory scans",
                         count: scanCount?.dupedCopyCount,
                         enabled: dupedCopyCountsEnabled,
                       },
                       {
-                        label: "Signed",
+                        label: "Signed copies",
                         description:
                           "Unique signed copies observed in inventory scans. Copies signed by multiple people count toward each signer.",
                         count: scanCount?.signedCopyCount,
@@ -726,64 +726,62 @@ export default function ItemDetailsClient({
                             ) : (
                               count.toLocaleString("en-US")
                             )}
-                            {label === "Signed" &&
-                              !!scanCount?.signedCounts?.length && (
-                                <div
-                                  className="text-secondary-text flex flex-wrap justify-end gap-1.5 text-xs font-normal sm:justify-start"
-                                  aria-label="Copies by signer"
-                                >
-                                  {scanCount.signedCounts.map(
-                                    ({ sign, count }) => {
-                                      const profileId = (
-                                        {
-                                          epic_tank: 606723718,
-                                          asimo3089: 2837719,
-                                          badcc: 2025110,
-                                        } as Record<string, number>
-                                      )[sign.toLowerCase()];
-                                      return (
-                                        <span
-                                          key={sign}
-                                          className="border-border-card bg-secondary-bg inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2 pl-0.5"
-                                        >
-                                          {profileId ? (
-                                            <a
-                                              href={`https://www.roblox.com/users/${profileId}/profile`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-primary-text inline-flex items-center gap-1 hover:underline"
-                                            >
-                                              <UserAvatar
-                                                userId={String(profileId)}
-                                                username={sign}
-                                                avatarHash={null}
-                                                forceAvatarUrl={getUserAvatar(
-                                                  String(profileId),
-                                                )}
-                                                size={5}
-                                                showBadge={false}
-                                              />
-                                              {sign}
-                                            </a>
-                                          ) : (
-                                            <span>{sign}</span>
-                                          )}
-                                          <span
-                                            className="tabular-nums"
-                                            aria-label={`${count.toLocaleString("en-US")} copies signed by ${sign}`}
-                                          >
-                                            ×{count.toLocaleString("en-US")}
-                                          </span>
-                                        </span>
-                                      );
-                                    },
-                                  )}
-                                </div>
-                              )}
                           </div>
                         </div>
                       ))}
                   </div>
+                  {!!scanCount?.signedCounts?.length && (
+                    <div
+                      className="border-border-card text-secondary-text mt-2 flex flex-wrap items-center gap-1.5 border-t pt-2 text-xs"
+                      aria-label="Copies by signer"
+                    >
+                      <span className="mr-1">Signed by</span>
+                      {scanCount.signedCounts.map(({ sign, count }) => {
+                        const profileId = (
+                          {
+                            epic_tank: 606723718,
+                            asimo3089: 2837719,
+                            badcc: 2025110,
+                          } as Record<string, number>
+                        )[sign.toLowerCase()];
+                        const Chip = profileId ? "a" : "span";
+                        return (
+                          <Chip
+                            key={sign}
+                            href={
+                              profileId
+                                ? `https://www.roblox.com/users/${profileId}/profile`
+                                : undefined
+                            }
+                            target={profileId ? "_blank" : undefined}
+                            rel={profileId ? "noopener noreferrer" : undefined}
+                            className="border-border-card bg-tertiary-bg text-primary-text inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-2 pl-0.5 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                          >
+                            {profileId && (
+                              <UserAvatar
+                                userId={String(profileId)}
+                                username={sign}
+                                avatarHash={null}
+                                forceAvatarUrl={getUserAvatar(
+                                  String(profileId),
+                                )}
+                                size={6}
+                                showBadge={false}
+                                bgClassName="bg-quaternary-bg"
+                              />
+                            )}
+                            <span>{sign}</span>
+                            <span
+                              className="tabular-nums"
+                              aria-label={`${count.toLocaleString("en-US")} copies signed by ${sign}`}
+                            >
+                              ×{count.toLocaleString("en-US")}
+                            </span>
+                          </Chip>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
