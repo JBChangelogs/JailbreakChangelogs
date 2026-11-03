@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CopyTreeView, { CopyTree } from "./CopyTreeView";
@@ -391,7 +392,9 @@ test("shows view tabs above the default simplified panel without mounting the co
   const client = new QueryClient();
   const markup = renderToStaticMarkup(
     <QueryClientProvider client={client}>
-      <DupeComparisonLoader id="game-instance-id" />
+      <NuqsTestingAdapter>
+        <DupeComparisonLoader id="game-instance-id" />
+      </NuqsTestingAdapter>
     </QueryClientProvider>,
   );
   expect(markup).toContain('aria-label="Dupe history view"');
@@ -414,7 +417,9 @@ test("both history views use the same loading panel and spinner", () => {
   const client = new QueryClient();
   const simplified = renderToStaticMarkup(
     <QueryClientProvider client={client}>
-      <DupeComparisonLoader id="pending-item" />
+      <NuqsTestingAdapter>
+        <DupeComparisonLoader id="pending-item" />
+      </NuqsTestingAdapter>
     </QueryClientProvider>,
   );
   const tree = renderToStaticMarkup(
@@ -431,4 +436,26 @@ test("both history views use the same loading panel and spinner", () => {
     expect(markup).toContain("mx-auto h-8 w-8");
   }
   client.clear();
+});
+
+test("comparison deep links select the tree while missing or invalid views stay simplified", () => {
+  for (const view of ["", "invalid", "simplified", "copy-tree"]) {
+    const client = new QueryClient();
+    const markup = renderToStaticMarkup(
+      <QueryClientProvider client={client}>
+        <NuqsTestingAdapter searchParams={view ? `?view=${view}` : ""}>
+          <DupeComparisonLoader id="linked-instance" />
+        </NuqsTestingAdapter>
+      </QueryClientProvider>,
+    );
+    expect(markup).toMatch(
+      view === "copy-tree"
+        ? /aria-selected="true"[^>]*>Dupe Tree</
+        : /aria-selected="true"[^>]*>Simplified</,
+    );
+    expect(markup).toContain(
+      view === "copy-tree" ? "Loading dupe tree" : "Loading simplified history",
+    );
+    client.clear();
+  }
 });

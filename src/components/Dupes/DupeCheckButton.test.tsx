@@ -237,9 +237,9 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   expect(dialog.props.open).toBe(true);
   expect(
     flatten(checked).find(
-      (element) => element.props.children === "Compare histories",
+      (element) => element.props.children === "View dupe tree",
     )?.props.href,
-  ).toBe(getDupeComparisonUrl(item));
+  ).toBe(getDupeComparisonUrl(item, "copy-tree"));
   const footer = flatten(dialog).find(
     (element) => element.type === "DialogFooter",
   )!;
@@ -252,7 +252,7 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
     flatten(footer).some((element) => element.props.children === "Close"),
   ).toBe(false);
   const evidence = flatten(footer).find(
-    (element) => element.props.children === "Compare histories",
+    (element) => element.props.children === "View dupe tree",
   )!;
   expect(evidence.props.target).toBe("_blank");
   expect(evidence.props.rel).toBe("noopener noreferrer");
@@ -288,6 +288,8 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
     const scoredCard = exports.default(props);
     const scored = JSON.stringify(scoredCard);
     expect(scored).toContain(`Checks flagged: ${flaggedCount}/3`);
+    expect(scored).toContain("View dupe tree");
+    expect(scored).toContain("See where recorded copies branch apart.");
     expect(scored.includes("Report false dupe")).toBe(flaggedCount < 3);
     expect(
       scored.includes("Review the comparison before reporting a false dupe."),
@@ -322,10 +324,25 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   stateIndex = 0;
   expect(JSON.stringify(exports.default(props))).not.toContain("Try again");
   stateIndex = 0;
-  const comparisonView = exports.default({ ...props, showComparison: false });
-  expect(JSON.stringify(comparisonView)).not.toContain("Compare histories");
+  const comparisonView = exports.default(props);
+  expect(JSON.stringify(comparisonView)).toContain("View dupe tree");
   expect(JSON.stringify(comparisonView)).toContain("Dupe check:");
   expect(JSON.stringify(comparisonView)).toContain("Original Display");
+  let treeViews = 0;
+  stateIndex = 0;
+  const samePage = exports.default({ ...props, onViewTree: () => treeViews++ });
+  const treeButton = flatten(samePage).find(
+    (element) =>
+      element.type === "Button" && element.props.children === "View dupe tree",
+  )!;
+  expect(treeButton.props.asChild).toBeUndefined();
+  treeButton.props.onClick!();
+  expect(treeViews).toBe(1);
+  stateIndex = 0;
+  expect(
+    flatten(exports.default(props)).find((element) => element.type === "Dialog")
+      ?.props.open,
+  ).toBe(false);
   stateIndex = 0;
   const withoutCategory = exports.default({
     ...props,

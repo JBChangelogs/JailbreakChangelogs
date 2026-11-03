@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useQuery } from "@tanstack/react-query";
 import type { DuplicateVariantsResponse } from "@/types";
 import { useBatchItems } from "@/hooks/useBatchItems";
@@ -29,8 +29,12 @@ export default function DupeComparisonLoader({
   reportItem,
   originalOwner,
 }: DupeComparisonLoaderProps) {
-  const [selection, setSelection] = useState({ id, view: "simplified" });
-  const view = selection.id === id ? selection.view : "simplified";
+  const [view, setView] = useQueryState(
+    "view",
+    parseAsStringLiteral(["simplified", "copy-tree"])
+      .withDefault("simplified")
+      .withOptions({ history: "push", shallow: true }),
+  );
   const variantsQuery = useQuery({
     queryKey: ["duplicate-variants", id],
     queryFn: async ({ signal }): Promise<DuplicateVariantsResponse | null> => {
@@ -80,6 +84,7 @@ export default function DupeComparisonLoader({
         <DupeComparisonClient
           ogItem={variants.og}
           duplicateItem={variants.duplicate}
+          onExploreTree={() => void setView("copy-tree")}
         />
       );
     }
@@ -92,6 +97,7 @@ export default function DupeComparisonLoader({
         id={id}
         reportItem={reportItem}
         originalOwner={originalOwner}
+        onExploreTree={() => void setView("copy-tree")}
       />
     );
   }
@@ -105,12 +111,15 @@ export default function DupeComparisonLoader({
           duplicateItem={variants.duplicate}
           itemsData={itemQuery.data ?? []}
           showOriginalOwner={view === "simplified"}
+          onExploreTree={() => void setView("copy-tree")}
         />
       )}
       <Tabs
         key={`views-${id}`}
         value={view}
-        onValueChange={(view) => setSelection({ id, view })}
+        onValueChange={(view) =>
+          void setView(view === "copy-tree" ? "copy-tree" : "simplified")
+        }
       >
         <TabsList aria-label="Dupe history view" fullWidth>
           <TabsTrigger value="simplified" fullWidth>

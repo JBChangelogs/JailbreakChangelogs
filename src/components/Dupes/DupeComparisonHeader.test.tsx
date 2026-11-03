@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
+import { parseAsStringLiteral } from "nuqs";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 
 type Node = {
@@ -50,15 +51,31 @@ const item = {
 };
 
 test("renders one shared header outside both tab panels with distinct sibling keys", () => {
-  let selection: unknown = { id: item.id, view: "simplified" };
+  let selection: string | null = null;
   const render = load("./DupeComparisonLoader.tsx", {
-    react: {
-      useState: () => [
-        selection,
-        (value: unknown) => {
-          selection = value;
+    nuqs: {
+      parseAsStringLiteral,
+      useQueryState: (
+        key: string,
+        parser: {
+          parse: (value: string) => string | null;
+          defaultValue: string;
+          history: string;
+          shallow: boolean;
         },
-      ],
+      ) => {
+        expect(key).toBe("view");
+        expect(parser.history).toBe("push");
+        expect(parser.shallow).toBe(true);
+        return [
+          selection
+            ? (parser.parse(selection) ?? parser.defaultValue)
+            : parser.defaultValue,
+          (value: string) => {
+            selection = value;
+          },
+        ];
+      },
     },
     "@tanstack/react-query": {
       useQuery: () => ({
@@ -102,11 +119,25 @@ test("renders one shared header outside both tab panels with distinct sibling ke
       (node) => node.type === "./DupeComparisonHeader",
     )?.props.showOriginalOwner,
   ).toBe(false);
+  selection = null;
   expect(
     nodes(render({ id: "different-item" })).find(
       (node) => node.type === "./DupeComparisonHeader",
     )?.props.showOriginalOwner,
   ).toBe(true);
+  selection = "invalid";
+  expect(
+    nodes(render({ id: item.id })).find((node) => node.type === "Tabs")?.props
+      .value,
+  ).toBe("simplified");
+  const simplified = nodes(render({ id: item.id })).find(
+    (node) => node.type === "./DupeComparisonClient",
+  )!;
+  (simplified.props.onExploreTree as () => void)();
+  expect(
+    nodes(render({ id: item.id })).find((node) => node.type === "Tabs")?.props
+      .value,
+  ).toBe("copy-tree");
   (tabs.props.onValueChange as (value: string) => void)("simplified");
   expect(
     nodes(render({ id: item.id })).find(
@@ -163,6 +194,7 @@ test("shared header preserves the original owner, login guard, report payload, a
     "@/components/ui/button": { Button: "Button" },
     "@/components/ui/IconWrapper": { Icon: "Icon" },
   });
+  let treeViews = 0;
   const view = (showOriginalOwner = true) => {
     stateIndex = 0;
     return render({
@@ -170,15 +202,17 @@ test("shared header preserves the original owner, login guard, report payload, a
       duplicateItem: item,
       itemsData: [{ id: 49, name: "Proto-8", season: 8, level: 10 }],
       showOriginalOwner,
+      onExploreTree: () => treeViews++,
     });
   };
   const check = nodes(view()).find(
     (node) => node.type === "./DupeCheckButton",
   )!;
+  (check.props.onViewTree as () => void)();
+  expect(treeViews).toBe(1);
   expect(check.props.item).toBe(item);
   expect(check.props.originalOwner).toBe("123");
   expect(check.props.ownerName).toBe("Original Display");
-  expect(check.props.showComparison).toBe(false);
   (check.props.onReport as () => void)();
   expect(login).toEqual([{ open: true }]);
   login.length = 0;
@@ -237,4 +271,57 @@ test("shared header preserves the original owner, login guard, report payload, a
   (modal.props.onReportResolved as (status: string) => void)("submitted");
   expect(JSON.stringify(view())).toContain("False dupe report received");
   expect(reportButton()).toBeUndefined();
+});
+
+test("simplified summaries promote the tree without changing recorded history", () => {
+  const render = load("./DupeComparisonClient.tsx", {
+    "@/hooks/useBatchUserData": {
+      useBatchUserData: () => ({ robloxUsers: {} }),
+    },
+    "@/components/ui/button": { Button: "Button" },
+    "@/components/ui/IconWrapper": { Icon: "Icon" },
+  });
+  const origin = { UserId: 123, TradeTime: 100 };
+  const shared = { UserId: 456, TradeTime: 200 };
+  for (const scenario of ["shared", "immediate", "no-overlap", "capped"]) {
+    const history =
+      scenario === "capped"
+        ? [
+            origin,
+            ...Array.from({ length: 49 }, (_, i) => ({
+              UserId: i + 1000,
+              TradeTime: i + 1000,
+            })),
+          ]
+        : scenario === "shared"
+          ? [origin, shared, { UserId: 789, TradeTime: 300 }]
+          : [origin];
+    const otherHistory =
+      scenario === "shared"
+        ? [origin, shared, { UserId: 999, TradeTime: 400 }]
+        : scenario === "immediate"
+          ? [origin]
+          : [{ UserId: 123, TradeTime: 999 }];
+    let explored = 0;
+    const root = render({
+      ogItem: { ...item, history: otherHistory },
+      duplicateItem: { ...item, history },
+      onExploreTree: () => explored++,
+    });
+    const button = nodes(root).find(
+      (node) =>
+        node.type === "Button" && node.props.children === "Explore all copies",
+    )!;
+    (button.props.onClick as () => void)();
+    expect(explored).toBe(1);
+    const text = JSON.stringify(root);
+    expect(
+      text.includes("These two histories don't show the connection."),
+    ).toBe(scenario === "no-overlap" || scenario === "capped");
+    expect(nodes(root).some((node) => node.type === "details")).toBe(
+      scenario === "shared",
+    );
+    if (scenario === "capped")
+      expect(text).toContain("only keeps the latest 49");
+  }
 });

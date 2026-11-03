@@ -13,10 +13,12 @@ export default function DupeComparisonNotFound({
   id,
   reportItem,
   originalOwner,
+  onExploreTree,
 }: {
   id: string;
   reportItem?: { item_id?: number; title: string; categoryTitle?: string };
   originalOwner?: string;
+  onExploreTree: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [reportState, setReportState] = useState<
@@ -56,7 +58,7 @@ export default function DupeComparisonNotFound({
               originalOwner
             }
             onReport={openReportModal}
-            showComparison={false}
+            onViewTree={onExploreTree}
           />
         )}
         {reportState ? (

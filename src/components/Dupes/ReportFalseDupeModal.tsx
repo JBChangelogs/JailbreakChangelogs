@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
@@ -8,6 +10,7 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { createLogger } from "@/services/logger";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 
 const log = createLogger("API");
 const MAX_REASON_LENGTH = 500;
@@ -141,6 +144,34 @@ export default function ReportFalseDupeModal({
         <p className="text-secondary-text text-sm [overflow-wrap:anywhere]">
           Item instance ID: {item.id}
         </p>
+        <div className="space-y-2">
+          <p className="text-primary-text text-sm font-medium">
+            Review the dupe tree before reporting
+          </p>
+          <p className="text-secondary-text text-sm">
+            See where recorded copies branch apart. If you still believe the
+            flag is incorrect, explain why below.
+          </p>
+          <Button asChild variant="secondary" size="sm">
+            <Link
+              href={getDupeComparisonUrl(
+                {
+                  ...item,
+                  info: originalOwner
+                    ? [{ title: "Original Owner", value: originalOwner.id }]
+                    : undefined,
+                },
+                "copy-tree",
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              prefetch={false}
+              title="Review the dupe tree in a new tab without closing your report"
+            >
+              View dupe tree ↗
+            </Link>
+          </Button>
+        </div>
         <label
           htmlFor="false-dupe-report-reason"
           className="text-primary-text block text-sm font-medium"

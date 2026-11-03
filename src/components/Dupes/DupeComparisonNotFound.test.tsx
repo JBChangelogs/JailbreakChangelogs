@@ -21,7 +21,6 @@ type Node = {
     };
     originalOwner?: { id: string; displayName: string } | string;
     ownerName?: string;
-    showComparison?: boolean;
     onReportResolved?: (status: string) => void;
   };
 };
@@ -115,6 +114,23 @@ test("comparison links preserve symbols and known item details", () => {
   expect(params.get("itemId")).toBe("49");
   expect(params.get("title")).toBe("Laser Cannon");
   expect(params.get("originalOwner")).toBe("235642012");
+  expect(params.has("view")).toBe(false);
+  const treeParams = new URL(
+    getDupeComparisonUrl(
+      {
+        id,
+        item_id: 49,
+        title: "Laser Cannon",
+        categoryTitle: "Rim",
+        info: [{ title: "Original Owner", value: "235642012" }],
+      },
+      "copy-tree",
+    ),
+    "https://jailbreakchangelogs.com",
+  ).searchParams;
+  expect(treeParams.get("view")).toBe("copy-tree");
+  treeParams.delete("view");
+  expect(treeParams.toString()).toBe(params.toString());
 });
 
 test("missing comparison requires login before opening a report", () => {
@@ -146,7 +162,6 @@ test("reports preserve the instance, item and resolved owner and acknowledge sub
   expect(check.props.item).toEqual({ ...props.reportItem, id: props.id });
   expect(check.props.originalOwner).toBe(props.originalOwner);
   expect(check.props.ownerName).toBe("hamsterskyyy");
-  expect(check.props.showComparison).toBe(false);
   const actions = tree.find(
     (node) => node.props.className === "flex flex-wrap items-center gap-2",
   );

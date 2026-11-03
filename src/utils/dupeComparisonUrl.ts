@@ -1,10 +1,13 @@
-export function getDupeComparisonUrl(item: {
-  id?: string;
-  item_id?: number;
-  title: string;
-  categoryTitle?: string;
-  info?: { title: string; value: string }[];
-}) {
+export function getDupeComparisonUrl(
+  item: {
+    id?: string;
+    item_id?: number;
+    title: string;
+    categoryTitle?: string;
+    info?: { title: string; value: string }[];
+  },
+  view: "simplified" | "copy-tree" = "simplified",
+) {
   const params = new URLSearchParams({ id: item.id ?? "", title: item.title });
   if (item.item_id != null) params.set("itemId", String(item.item_id));
   if (item.categoryTitle) params.set("category", item.categoryTitle);
@@ -12,5 +15,6 @@ export function getDupeComparisonUrl(item: {
     (entry) => entry.title === "Original Owner",
   )?.value;
   if (owner) params.set("originalOwner", owner);
+  if (view === "copy-tree") params.set("view", view);
   return `/dupes/compare?${params}`;
 }

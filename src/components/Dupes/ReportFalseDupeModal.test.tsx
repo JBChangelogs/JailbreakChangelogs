@@ -1,7 +1,19 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
+import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+
+type Node = {
+  type: unknown;
+  props: Record<string, unknown> & { children?: unknown };
+};
+function nodes(value: unknown): Node[] {
+  if (Array.isArray(value)) return value.flatMap(nodes);
+  if (!value || typeof value !== "object" || !("props" in value)) return [];
+  const node = value as Node;
+  return [node, ...nodes(node.props.children)];
+}
 
 test("false-dupe reports use the catalog ID in the URL and retain the original owner", async () => {
   const requests: { url: string; options: RequestInit }[] = [];
@@ -10,7 +22,7 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
     resolveReport = resolve;
   });
   const exports = {} as {
-    default: (props: unknown) => { props: { onConfirm: () => void } };
+    default: (props: unknown) => Node;
   };
   const jsx = (type: unknown, props: unknown) => ({ type, props });
   runInNewContext(
@@ -38,6 +50,10 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
             ],
           };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "next/link") return { default: "Link" };
+        if (name === "@/components/ui/button") return { Button: "Button" };
+        if (name === "@/utils/dupeComparisonUrl")
+          return { getDupeComparisonUrl };
         if (name === "sonner")
           return {
             toast: {
@@ -70,9 +86,12 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
       },
     },
   );
+  let closed = 0;
   const dialog = exports.default({
     open: true,
-    onClose: () => {},
+    onClose: () => {
+      closed++;
+    },
     item: {
       id: "w4&H<P%N)ra$",
       item_id: 49,
@@ -82,7 +101,23 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
     originalOwner: { id: "235642012", displayName: "hamsterskyyy" },
     onReportResolved: resolveReport,
   });
-  dialog.props.onConfirm();
+  const link = nodes(dialog).find((node) => node.type === "Link")!;
+  const params = new URL(
+    link.props.href as string,
+    "https://jailbreakchangelogs.com",
+  ).searchParams;
+  expect(params.get("view")).toBe("copy-tree");
+  expect(params.get("id")).toBe("w4&H<P%N)ra$");
+  expect(params.get("originalOwner")).toBe("235642012");
+  expect(link.props.target).toBe("_blank");
+  expect(link.props.rel).toBe("noopener noreferrer");
+  expect(
+    nodes(dialog).find((node) => node.type === "textarea")?.props.value,
+  ).toBe("Incorrect detection");
+  expect(dialog.props.confirmDisabled).toBe(false);
+  expect(closed).toBe(0);
+  expect(requests).toHaveLength(0);
+  (dialog.props.onConfirm as () => void)();
   expect(await resolved).toBe("submitted");
   expect(requests).toHaveLength(1);
   expect(requests[0].url).toBe(

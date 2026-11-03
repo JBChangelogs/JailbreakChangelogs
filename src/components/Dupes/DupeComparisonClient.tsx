@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { DupeFinderItem, RobloxUser } from "@/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   formatMonthDayYear,
@@ -12,6 +13,7 @@ import TradeHistoryList, { TradeHistoryAvatar } from "./TradeHistoryList";
 interface DupeComparisonClientProps {
   ogItem: DupeFinderItem;
   duplicateItem: DupeFinderItem;
+  onExploreTree: () => void;
 }
 
 interface VariantColumnProps {
@@ -121,6 +123,7 @@ function VariantColumn({
 export default function DupeComparisonClient({
   ogItem,
   duplicateItem,
+  onExploreTree,
 }: DupeComparisonClientProps) {
   const originalOwnerId =
     ogItem.info?.find((i) => i.title === "Original Owner")?.value ||
@@ -242,13 +245,32 @@ export default function DupeComparisonClient({
 
   return (
     <div className="space-y-8">
-      {hasTrunk ? (
-        <details className="group bg-secondary-bg border-border-card rounded-lg border p-4">
-          <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
-            <p className="text-primary-text text-lg font-semibold">
-              {summary.title}
-            </p>
-            <span className="border-border-card text-primary-text group-hover:bg-tertiary-bg flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors">
+      <div className="bg-secondary-bg border-border-card rounded-lg border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-primary-text text-lg font-semibold">
+            {summary.title}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onExploreTree}
+          >
+            Explore all copies
+          </Button>
+        </div>
+        {summary.detail && (
+          <p className="text-secondary-text mt-1 text-sm">{summary.detail}</p>
+        )}
+        {!hasTrunk && sharedTrades !== 0 && (
+          <p className="text-secondary-text mt-2 text-sm">
+            These two histories don&apos;t show the connection. Explore the dupe
+            tree for other recorded branches.
+          </p>
+        )}
+        {hasTrunk && (
+          <details className="group mt-4">
+            <summary className="border-border-card text-primary-text hover:bg-tertiary-bg flex w-fit cursor-pointer list-none items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors [&::-webkit-details-marker]:hidden">
               <span>
                 <span className="group-open:hidden">Show</span>
                 <span className="hidden group-open:inline">Hide</span> the{" "}
@@ -258,29 +280,20 @@ export default function DupeComparisonClient({
                 icon="heroicons:chevron-down"
                 className="size-4 transition-transform group-open:rotate-180"
               />
-            </span>
-          </summary>
-          <div className="mt-4">
-            <TradeHistoryList
-              history={trunk.item.history || []}
-              endIndex={trunk.split - 1}
-              nested
-              usersData={robloxUsers}
-              showOriginalOwner={false}
-              showRecordNotes={false}
-            />
-          </div>
-        </details>
-      ) : (
-        <div className="bg-secondary-bg border-border-card rounded-lg border p-4">
-          <p className="text-primary-text text-lg font-semibold">
-            {summary.title}
-          </p>
-          {summary.detail && (
-            <p className="text-secondary-text mt-1 text-sm">{summary.detail}</p>
-          )}
-        </div>
-      )}
+            </summary>
+            <div className="mt-4">
+              <TradeHistoryList
+                history={trunk.item.history || []}
+                endIndex={trunk.split - 1}
+                nested
+                usersData={robloxUsers}
+                showOriginalOwner={false}
+                showRecordNotes={false}
+              />
+            </div>
+          </details>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <VariantColumn

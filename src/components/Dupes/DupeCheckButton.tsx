@@ -28,7 +28,7 @@ export default function DupeCheckButton({
   ownerName,
   onReport,
   className,
-  showComparison = true,
+  onViewTree,
 }: {
   item: Pick<DupeFinderItem, "id" | "item_id" | "title"> &
     Partial<Pick<DupeFinderItem, "categoryTitle" | "info">>;
@@ -36,7 +36,7 @@ export default function DupeCheckButton({
   ownerName: string;
   onReport: () => void;
   className?: string;
-  showComparison?: boolean;
+  onViewTree?: () => void;
 }) {
   const [checking, setChecking] = useState(false);
   const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
@@ -267,6 +267,9 @@ export default function DupeCheckButton({
                     </div>
                   </dl>
                 </div>
+                <p className="text-secondary-text text-sm">
+                  See where recorded copies branch apart.
+                </p>
                 {canReport && (
                   <p className="text-secondary-text text-sm">
                     Review the comparison before reporting a false dupe.
@@ -276,16 +279,35 @@ export default function DupeCheckButton({
             ) : null}
           </div>
           <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end sm:space-x-0">
-            {checkResult && showComparison && (
+            {checkResult && onViewTree && (
+              <Button
+                type="button"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={() => {
+                  setCheckOpen(false);
+                  onViewTree();
+                }}
+              >
+                View dupe tree
+              </Button>
+            )}
+            {checkResult && !onViewTree && (
               <Button asChild size="sm" className="w-full sm:w-auto">
                 <Link
-                  href={getDupeComparisonUrl(item)}
+                  href={getDupeComparisonUrl(
+                    {
+                      ...item,
+                      info: [{ title: "Original Owner", value: originalOwner }],
+                    },
+                    "copy-tree",
+                  )}
                   prefetch={false}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Compare copies’ trade histories in a new tab"
+                  title="View recorded copies in the dupe tree in a new tab"
                 >
-                  Compare histories
+                  View dupe tree
                 </Link>
               </Button>
             )}

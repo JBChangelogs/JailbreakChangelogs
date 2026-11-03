@@ -29,11 +29,13 @@ export default function DupeComparisonHeader({
   duplicateItem,
   itemsData,
   showOriginalOwner = true,
+  onExploreTree,
 }: {
   ogItem: DupeFinderItem;
   duplicateItem: DupeFinderItem;
   itemsData: Item[];
   showOriginalOwner?: boolean;
+  onExploreTree: () => void;
 }) {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportState, setReportState] = useState<
@@ -216,7 +218,7 @@ export default function DupeComparisonHeader({
                     normalizedOriginalOwnerId
                   }
                   onReport={openReportModal}
-                  showComparison={false}
+                  onViewTree={onExploreTree}
                 />
               )}
               {reportState ? (
