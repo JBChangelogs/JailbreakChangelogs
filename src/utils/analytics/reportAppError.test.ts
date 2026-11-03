@@ -104,7 +104,6 @@ test("global fallback reports the crash and recovers without app providers", () 
       exports,
       process: { env: { NODE_ENV: "production" } },
       window: {
-        history: { length: 2, back: () => actions.push("back") },
         location: { reload: () => actions.push("reload") },
       },
       require: (name: string) => {
@@ -135,5 +134,5 @@ test("global fallback reports the crash and recovers without app providers", () 
   nodes
     .filter((node) => node.type === "button")
     .forEach((node) => node.props.onClick?.());
-  expect(actions).toEqual(["reload", "back"]);
+  expect(actions).toEqual(["reload"]);
 });

@@ -11,80 +11,148 @@ export default function GlobalError({
 }) {
   useEffect(() => reportAppError(error, "global"), [error]);
 
+  useEffect(() => {
+    const buildTime = Number(process.env.NEXT_PUBLIC_BUILD_TIME);
+    if (
+      process.env.NODE_ENV !== "production" ||
+      !Number.isFinite(buildTime) ||
+      buildTime <= 0
+    )
+      return;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 5000);
+    const recover = async () => {
+      try {
+        const response = await fetch("/api/version", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const { date } = await response.json();
+        if (
+          controller.signal.aborted ||
+          typeof date !== "number" ||
+          !Number.isFinite(date) ||
+          date <= buildTime
+        )
+          return;
+
+        const key = "global-error-reload-build";
+        const lastAttempt = Number(window.sessionStorage.getItem(key)) || 0;
+        if (date <= lastAttempt) return;
+        window.sessionStorage.setItem(key, String(date));
+        window.location.reload();
+      } catch {
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    };
+    void recover();
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, []);
+
   return (
     <html lang="en">
       <head>
-        <title>This page couldn’t load | Jailbreak Changelogs</title>
+        <title>Site error | Jailbreak Changelogs</title>
+        <style>{`
+          body {
+            margin: 0;
+            background: #121317;
+            color: #fffffa;
+            font-family: system-ui, sans-serif;
+            line-height: 1.5;
+          }
+          .global-error {
+            box-sizing: border-box;
+            min-height: 100vh;
+            min-height: 100svh;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 48px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+          }
+          .global-error p { margin: 0; color: #95a2b2; }
+          .global-error .eyebrow { font-size: 14px; font-weight: 500; }
+          .global-error h1 { margin: 12px 0 16px; font-size: 24px; line-height: 1.25; font-weight: 600; }
+          .global-error .actions { display: flex; justify-content: center; margin-top: 24px; }
+          .global-error button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            border: 0;
+            border-radius: 8px;
+            padding: 8px 16px;
+            background: hsl(212, 14%, 22%);
+            color: #fffffa;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+          .global-error button:hover { background: hsl(212, 14%, 28%); }
+          .global-error button.primary { background: hsl(210, 99%, 35%); }
+          .global-error button.primary:hover { background: hsl(210, 99%, 30%); }
+          .global-error button:focus-visible { outline: 2px solid #0284fe; outline-offset: 4px; }
+          .global-error .support { margin-top: 24px; }
+          .global-error a { color: hsl(210, 100%, 70%); text-underline-offset: 4px; }
+          .global-error a:hover { color: hsl(210, 100%, 75%); }
+          .global-error .reference, .global-error details { margin-top: 24px; font-size: 14px; overflow-wrap: anywhere; }
+          .global-error .reference code { background: var(--color-secondary-bg, #17181d); padding: 2px 6px; border-radius: 4px; }
+          .global-error summary { cursor: pointer; color: #95a2b2; }
+          .global-error pre { white-space: pre-wrap; }
+          @media (min-width: 768px) {
+            .global-error h1 { font-size: 30px; }
+          }
+        `}</style>
       </head>
-      <body
-        style={{
-          margin: 0,
-          background: "#0a0a0a",
-          color: "#ededed",
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        <main
-          style={{
-            minHeight: "100vh",
-            display: "grid",
-            alignItems: "center",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
-            gap: 48,
-            maxWidth: 1024,
-            margin: "0 auto",
-            padding: "24px",
-          }}
-        >
-          <div>
-            <h1 style={{ fontSize: 30, fontWeight: 600 }}>
-              This page couldn’t load
-            </h1>
-            <p>Reload to try again, or go back.</p>
-            <div style={{ display: "flex", gap: 12 }}>
+      <body>
+        <main className="global-error">
+          <div className="content">
+            <p className="eyebrow">Site-wide error</p>
+            <h1>Something went wrong.</h1>
+            <p>Try reloading the page.</p>
+            <div className="actions">
               <button
-                style={{
-                  background: "#292929",
-                  color: "#ededed",
-                  border: 0,
-                  borderRadius: 8,
-                  padding: "10px 16px",
-                  cursor: "pointer",
-                }}
+                type="button"
+                className="primary"
                 onClick={() => window.location.reload()}
               >
-                Reload
-              </button>
-              <button
-                style={{
-                  background: "#ededed",
-                  color: "#0a0a0a",
-                  border: 0,
-                  borderRadius: 8,
-                  padding: "10px 16px",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  if (window.history.length > 1) window.history.back();
-                  else window.location.assign("/");
-                }}
-              >
-                Back
+                Reload page
               </button>
             </div>
-            {error.digest && <p>Error reference: {error.digest}</p>}
+            <p className="support">
+              Still having trouble?{" "}
+              <a
+                href="https://discord.jailbreakchangelogs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Join our Discord
+              </a>{" "}
+              and share the page URL
+              {error.digest ? " and error reference" : ""}.
+            </p>
+            {error.digest && (
+              <p className="reference">
+                Error reference: <code>{error.digest}</code>
+              </p>
+            )}
+            {process.env.NODE_ENV === "development" && (
+              <details>
+                <summary>Developer error details</summary>
+                <pre>{error.stack || error.message}</pre>
+              </details>
+            )}
           </div>
-          <div
-            role="img"
-            aria-label="Error illustration"
-            style={{
-              width: "100%",
-              aspectRatio: "1500 / 700",
-              backgroundColor: "currentColor",
-              mask: "url(/assets/images/404.png) center / contain no-repeat",
-            }}
-          />
         </main>
         {process.env.NODE_ENV === "production" && (
           <Script

@@ -1,3 +1,28 @@
+import type { Instrumentation } from "next";
+
+export const onRequestError: Instrumentation.onRequestError = (
+  error,
+  request,
+  context,
+) => {
+  console.error(
+    JSON.stringify({
+      level: "error",
+      event: "next-request-error",
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      digest:
+        typeof error === "object" && error !== null && "digest" in error
+          ? String(error.digest)
+          : undefined,
+      pathname: request.path.split("?")[0],
+      method: request.method,
+      route: context.routePath,
+      routeType: context.routeType,
+    }),
+  );
+};
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     if (
