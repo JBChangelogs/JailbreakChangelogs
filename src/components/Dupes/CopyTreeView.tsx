@@ -129,7 +129,7 @@ function CopySegment({
         </div>
       )}
       <div
-        className={`rounded-lg border p-3 ${isRoot ? "border-border-focus bg-secondary-bg" : isCopy ? "border-border-card border-l-status-warning bg-tertiary-bg border-l-2" : "border-border-card bg-secondary-bg"}`}
+        className={`rounded-lg border p-3 ${isRoot ? "border-[#FFD700] bg-[#FFD700]/10" : isCopy ? "border-border-card border-l-status-warning bg-tertiary-bg border-l-2" : "border-border-card bg-secondary-bg"}`}
       >
         {isRoot && (
           <p className="text-primary-text mb-2 text-xs font-semibold">
@@ -248,9 +248,13 @@ export function CopyTree({
     <div className="space-y-4">
       <div>
         <p className="text-primary-text text-sm">
-          {tree.copies.toLocaleString()} copies ·{" "}
-          {tree.history_entries.toLocaleString()} history entries ·{" "}
-          {tree.splits.toLocaleString()} dupe points
+          {tree.copies.toLocaleString()} {tree.copies === 1 ? "copy" : "copies"}{" "}
+          · {tree.history_entries.toLocaleString()} history{" "}
+          {tree.history_entries === 1 ? "entry" : "entries"} ·{" "}
+          <span className="text-status-warning">
+            {tree.splits.toLocaleString()} dupe{" "}
+            {tree.splits === 1 ? "point" : "points"}
+          </span>
         </p>
         <p className="text-secondary-text mt-2 text-sm">
           See every recorded dupe and where its trade history splits. History

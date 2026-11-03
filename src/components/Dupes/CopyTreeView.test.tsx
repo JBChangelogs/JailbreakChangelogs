@@ -25,6 +25,31 @@ const branch = (overrides: Partial<CopyTreeSegment> = {}): CopyTreeSegment => ({
   ...overrides,
 });
 
+test("tree summary uses singular labels only for one", () => {
+  for (const count of [0, 1, 2]) {
+    const markup = renderToStaticMarkup(
+      <CopyTree
+        users={{}}
+        tree={{
+          title: "Test",
+          copies: count,
+          history_entries: count,
+          splits: count,
+          roots: [],
+        }}
+      />,
+    );
+    expect(markup.replace(/<[^>]*>/g, "")).toContain(
+      count === 1
+        ? "1 copy · 1 history entry · 1 dupe point"
+        : `${count} copies · ${count} history entries · ${count} dupe points`,
+    );
+    expect(markup).toContain(
+      `<span class="text-status-warning">${count} dupe ${count === 1 ? "point" : "points"}</span>`,
+    );
+  }
+});
+
 test("marks holders seen in the past 30 days, including retained copies, without marking old, missing, or future dates", () => {
   const now = 1793541678;
   const clock = spyOn(Date, "now").mockReturnValue(now * 1000);
@@ -96,6 +121,7 @@ test("renders multiple roots, splits, gap uncertainty, and holders on branching 
   const markup = renderToStaticMarkup(<CopyTree tree={tree} users={{}} />);
   expect(markup).not.toContain("HyperPurple Level 5");
   expect(markup).not.toContain("· Dupe Tree");
+  expect(markup).toContain("border-[#FFD700] bg-[#FFD700]/10");
   expect(markup).toContain("21 copies");
   expect(markup).toContain("385 history entries");
   expect(markup).toContain("2 dupe points");
