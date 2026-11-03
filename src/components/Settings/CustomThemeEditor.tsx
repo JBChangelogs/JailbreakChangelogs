@@ -39,6 +39,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseThemeCss, themeToCss } from "@/utils/ui/themeCss";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
+import ThemePreviewUploader from "@/components/Settings/ThemePreviewUploader";
 import ThemeIconPicker from "@/components/Settings/ThemeIconPicker";
 import { ThemeCard } from "@/components/Settings/ThemeSettings";
 import { customThemeOption } from "@/components/Settings/CustomThemeSettings";
@@ -225,6 +226,7 @@ export default function CustomThemeEditor({
       : null,
   );
   const [saving, setSaving] = useState(false);
+  const [updatingPreviews, setUpdatingPreviews] = useState(false);
   // Problems from a save rejected as unreadable, for the colors it sent.
   const [rejected, setRejected] = useState<{
     colors: string;
@@ -387,7 +389,7 @@ export default function CustomThemeEditor({
 
   // Saves without closing. Returns the saved theme, or null if it failed.
   const save = async (): Promise<UserTheme | null> => {
-    if (!current || saving) return null;
+    if (!current || saving || updatingPreviews) return null;
     // icon is sent only when it changed, so themes without one save on
     // API versions that don't know the field yet.
     const { icon = null, ...rest } = current;
@@ -856,6 +858,17 @@ export default function CustomThemeEditor({
                   onCheckedChange={(published) => update({ published })}
                 />
               </div>
+              <ThemePreviewUploader
+                theme={savedTheme}
+                disabled={saving}
+                onBusyChange={setUpdatingPreviews}
+                onChange={(previews) => {
+                  if (!savedTheme) return;
+                  const updated = { ...savedTheme, previews };
+                  setSavedTheme(updated);
+                  onSaved(updated);
+                }}
+              />
               {/* On phones: name and icon side by side, "Start from a theme"
                   full width below them. */}
               <div className="flex flex-wrap items-end gap-3">
@@ -1466,7 +1479,7 @@ export default function CustomThemeEditor({
             <Button
               size="md"
               onClick={() => void save()}
-              disabled={!current || saving}
+              disabled={!current || saving || updatingPreviews}
             >
               {saving ? "Saving…" : "Save"}
             </Button>
@@ -1476,7 +1489,7 @@ export default function CustomThemeEditor({
             <Button
               size="md"
               onClick={() => void save()}
-              disabled={!current || saving}
+              disabled={!current || saving || updatingPreviews}
               title="Save (Ctrl+S)"
               className="w-full"
             >

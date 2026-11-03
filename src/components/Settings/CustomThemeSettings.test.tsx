@@ -113,6 +113,7 @@ function settings({ published = false, own = true, fail = false } = {}) {
         if (name === "sonner")
           return {
             toast: {
+              loading: () => 1,
               success() {},
               error: (message: string, options: unknown) =>
                 errors.push({ message, options }),
@@ -175,7 +176,7 @@ test("failed publication preserves the state and displays the backend message", 
   expect(view.errors).toEqual([
     {
       message: "Couldn't publish the theme",
-      options: { description: "Choose another theme name." },
+      options: { id: 1, description: "Choose another theme name." },
     },
   ]);
 });

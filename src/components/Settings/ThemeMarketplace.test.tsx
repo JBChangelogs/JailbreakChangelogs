@@ -2,7 +2,11 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
-import { ThemeApiError, type MarketplaceTheme } from "@/utils/api/userThemes";
+import {
+  ThemeApiError,
+  type MarketplaceTheme,
+  type ThemePreviewImage,
+} from "@/utils/api/userThemes";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 
 interface Node {
@@ -26,6 +30,7 @@ function marketplace({
   pending = false,
   fetching = false,
   total = 25,
+  previews = [] as ThemePreviewImage[],
 } = {}) {
   const theme: MarketplaceTheme = {
     share_code: "ABCDEFGH",
@@ -34,6 +39,7 @@ function marketplace({
     vars: {},
     logo_filter: null,
     user: { id: author, username: "author" },
+    previews,
   };
   const states: unknown[] = [];
   let cursor = 0;
@@ -181,6 +187,7 @@ function marketplace({
         if (name === "sonner")
           return {
             toast: {
+              loading: () => 1,
               success: () => {},
               error: (_title: string, detail: unknown) => errors.push(detail),
             },
@@ -292,6 +299,26 @@ test("fetching themes replaces the search icon with a spinner", () => {
   ).toBe(true);
 });
 
+test("uploaded screenshots replace the generated marketplace preview", () => {
+  const previews: ThemePreviewImage[] = [
+    {
+      id: "abc",
+      url: "https://uploads.jailbreakchangelogs.com/theme-previews/ABCDEFGH/abc.webp",
+      kind: "mobile",
+    },
+  ];
+  const rendered = marketplace({ previews }).render();
+  expect(
+    rendered.find((node) => node.props.previews === previews)?.props.label,
+  ).toBe("Midnight");
+  expect(rendered.some((node) => node.props.compact === true)).toBe(false);
+  expect(
+    marketplace()
+      .render()
+      .some((node) => node.props.compact === true),
+  ).toBe(true);
+});
+
 test("report is hidden for visitors and owners; another user's theme can be reported", async () => {
   for (const options of [{ signedIn: false }, { author: "me" }]) {
     expect(marketplace(options).button("Report")).toBeUndefined();
@@ -340,7 +367,7 @@ test("failed marketplace removal leaves the card available and shows the API err
   await new Promise((resolve) => setImmediate(resolve));
   expect(view.invalidations).toEqual([]);
   expect(view.button("Remove from marketplace").props.disabled).toBe(false);
-  expect(view.errors).toEqual([{ description: "API unavailable" }]);
+  expect(view.errors).toEqual([{ id: 1, description: "API unavailable" }]);
 });
 
 test("search and clear actions live inside the field, and clearing resets results and focus", () => {

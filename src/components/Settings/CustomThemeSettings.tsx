@@ -165,6 +165,9 @@ export function useCustomThemes() {
     if (publishing || !checkAccess()) return;
     const published = theme.published_at == null;
     setPublishing(true);
+    const toastId = toast.loading(
+      published ? "Publishing theme…" : "Removing theme from marketplace…",
+    );
     try {
       await updateMyTheme(theme.id, { published });
       await Promise.all([
@@ -175,6 +178,7 @@ export function useCustomThemes() {
         published
           ? "Theme published to marketplace"
           : "Theme removed from marketplace",
+        { id: toastId },
       );
     } catch (err) {
       toast.error(
@@ -182,6 +186,7 @@ export function useCustomThemes() {
           ? "Couldn't publish the theme"
           : "Couldn't unpublish the theme",
         {
+          id: toastId,
           description: err instanceof Error ? err.message : undefined,
         },
       );

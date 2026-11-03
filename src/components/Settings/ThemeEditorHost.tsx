@@ -50,11 +50,14 @@ export default function ThemeEditorHost() {
           });
         }
       }}
-      onSaved={() => {
+      onSaved={(saved) => {
         void queryClient.invalidateQueries({
           queryKey: ["my-themes", user?.id],
         });
         void queryClient.invalidateQueries({ queryKey: ["theme-marketplace"] });
+        void queryClient.invalidateQueries({
+          queryKey: ["shared-theme", saved.share_code],
+        });
       }}
     />
   );

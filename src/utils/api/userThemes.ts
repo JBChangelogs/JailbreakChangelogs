@@ -7,6 +7,12 @@ import {
   type SiteTheme,
 } from "@/utils/ui/themeOptions";
 
+export interface ThemePreviewImage {
+  id: string;
+  url: string;
+  kind: "desktop" | "mobile";
+}
+
 /** A custom color theme: colors, a logo filter and an optional icon. */
 export interface CustomTheme {
   /** 8 characters; anyone can look the theme up with it. */
@@ -18,6 +24,7 @@ export interface CustomTheme {
   /** An Iconify name, or null for the default palette. Older themes lack it. */
   icon?: string | null;
   published_at?: number | null;
+  previews?: ThemePreviewImage[];
 }
 
 /** One of the signed-in user's own themes. */
@@ -86,7 +93,9 @@ async function request<T>(
     ...init,
     headers: {
       ...headers,
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(init.body && !(init.body instanceof FormData)
+        ? { "Content-Type": "application/json" }
+        : {}),
     },
     credentials: "include",
     cache: "no-store",
@@ -110,6 +119,34 @@ async function request<T>(
 const VAR_KEY = /^--[a-z0-9-]+$/;
 const ICON = /^[a-z0-9-]+:[a-z0-9-]+$/;
 
+export function sanitizeThemePreviews(value: unknown): ThemePreviewImage[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((preview): preview is ThemePreviewImage => {
+      if (
+        !preview ||
+        typeof preview.id !== "string" ||
+        !preview.id ||
+        typeof preview.url !== "string" ||
+        (preview.kind !== "desktop" && preview.kind !== "mobile")
+      )
+        return false;
+      try {
+        const url = new URL(preview.url);
+        return (
+          url.protocol === "https:" &&
+          url.hostname === "uploads.jailbreakchangelogs.com" &&
+          url.pathname.startsWith("/theme-previews/") &&
+          !url.username &&
+          !url.password
+        );
+      } catch {
+        return false;
+      }
+    })
+    .slice(0, 3);
+}
+
 /**
  * Keeps only what's safe to apply: the same checks site themes get. Custom
  * themes come from other people (shared codes, synced preferences), and a
@@ -118,6 +155,9 @@ const ICON = /^[a-z0-9-]+:[a-z0-9-]+$/;
 export function sanitizeCustomTheme<T extends CustomTheme>(theme: T): T {
   return {
     ...theme,
+    ...("previews" in theme
+      ? { previews: sanitizeThemePreviews(theme.previews) }
+      : {}),
     scheme: theme.scheme === "light" ? "light" : "dark",
     vars: Object.fromEntries(
       Object.entries(marketThemeVars(theme.vars ?? {})).filter(
@@ -223,3 +263,21 @@ export const reportMarketplaceTheme = (code: string, reason: string) =>
     `/v2/themes/marketplace/${encodeURIComponent(code)}/reports`,
     { method: "POST", body: JSON.stringify({ reason: reason.trim() }) },
   );
+
+export async function uploadThemePreview(id: number, image: File) {
+  const body = new FormData();
+  body.append("image", image);
+  const data = await request<{ previews: ThemePreviewImage[] }>(
+    `/v2/users/me/themes/${id}/previews`,
+    { method: "POST", body },
+  );
+  return sanitizeThemePreviews(data.previews);
+}
+
+export async function deleteThemePreview(id: number, previewId: string) {
+  const data = await request<{ previews: ThemePreviewImage[] }>(
+    `/v2/users/me/themes/${id}/previews/${encodeURIComponent(previewId)}`,
+    { method: "DELETE" },
+  );
+  return sanitizeThemePreviews(data.previews);
+}

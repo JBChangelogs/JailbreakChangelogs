@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
+import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -73,6 +74,7 @@ export default function ThemeMarketplace() {
     if (!isAuthenticated || !user || theme.user?.id !== user.id || unpublishing)
       return;
     setUnpublishing(theme.share_code);
+    const toastId = toast.loading("Removing theme from marketplace…");
     try {
       // Marketplace entries have share codes; owner updates require the private numeric ID.
       const { themes } = await listMyThemes();
@@ -85,9 +87,10 @@ export default function ThemeMarketplace() {
         queryClient.invalidateQueries({ queryKey: ["my-themes", user.id] }),
         queryClient.invalidateQueries({ queryKey: ["theme-marketplace"] }),
       ]);
-      toast.success("Theme removed from marketplace");
+      toast.success("Theme removed from marketplace", { id: toastId });
     } catch (err) {
       toast.error("Couldn't remove the theme from marketplace", {
+        id: toastId,
         description: err instanceof Error ? err.message : undefined,
       });
     } finally {
@@ -340,12 +343,19 @@ export default function ThemeMarketplace() {
                   key={theme.share_code}
                   className="border-border-card bg-secondary-bg min-w-0 space-y-3 rounded-xl border p-4"
                 >
-                  <CustomThemePreview
-                    vars={theme.vars}
-                    scheme={theme.scheme}
-                    logoFilter={theme.logo_filter}
-                    compact
-                  />
+                  {theme.previews?.length ? (
+                    <ThemePreviewImages
+                      previews={theme.previews}
+                      label={theme.label}
+                    />
+                  ) : (
+                    <CustomThemePreview
+                      vars={theme.vars}
+                      scheme={theme.scheme}
+                      logoFilter={theme.logo_filter}
+                      compact
+                    />
+                  )}
                   <div>
                     <h2
                       className="text-primary-text truncate text-lg font-semibold"

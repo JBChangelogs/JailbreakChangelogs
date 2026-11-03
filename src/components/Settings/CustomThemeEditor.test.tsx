@@ -216,6 +216,31 @@ for (const published of [false, true]) {
   });
 }
 
+test("screenshots update the saved theme without saving draft colors and block concurrent saves", async () => {
+  const view = editor({ existing: true, collapsed: false });
+  const upload = () =>
+    view
+      .render()
+      .find((node) => node.type === "default" && node.props.onBusyChange)!;
+  // The test imports components as their exported name; the uploader is a default export.
+  const props = upload().props;
+  (props.onBusyChange as (busy: boolean) => void)(true);
+  await view.save();
+  expect(view.requests).toEqual([]);
+  const previews = [
+    {
+      id: "abc",
+      url: "https://uploads.jailbreakchangelogs.com/theme-previews/ABCDEFGH/abc.webp",
+      kind: "desktop" as const,
+    },
+  ];
+  (props.onChange as (previews: unknown) => void)(previews);
+  (props.onBusyChange as (busy: boolean) => void)(false);
+  expect(view.savedEvents[0].previews).toEqual(previews);
+  expect((upload().props.theme as UserTheme).previews).toEqual(previews);
+  expect(view.requests).toEqual([]);
+});
+
 for (const mobile of [true, false]) {
   test(`${mobile ? "mobile" : "desktop"} preview picks open an inline color bubble without scrolling or filtering the grid`, () => {
     const view = editor({ mobile, collapsed: false });

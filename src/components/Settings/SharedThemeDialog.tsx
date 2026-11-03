@@ -17,6 +17,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { useBottomPanel } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
+import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCustomThemeAccess } from "@/components/Settings/CustomThemeSettings";
@@ -263,6 +264,12 @@ export default function SharedThemeDialog() {
                 Copy link
               </Button>
             </div>
+            {!!theme.previews?.length && (
+              <ThemePreviewImages
+                previews={theme.previews}
+                label={theme.label}
+              />
+            )}
             <details>
               <summary className="text-link cursor-pointer text-sm font-medium">
                 All colors
