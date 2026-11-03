@@ -26,6 +26,7 @@ function editor({
   fail = false,
   collapsed = true,
   published = false,
+  description = null as string | null,
   vars = {
     "--color-primary-bg": "#111111",
     "--color-secondary-bg": "#222222",
@@ -35,6 +36,7 @@ function editor({
     id: 1,
     share_code: "K7QM4XRP",
     label: "Mine",
+    description,
     scheme: "dark",
     vars,
     logo_filter: null,
@@ -238,6 +240,30 @@ test("screenshots update the saved theme without saving draft colors and block c
   expect(view.savedEvents[0].previews).toEqual(previews);
   expect((upload().props.theme as UserTheme).previews).toEqual(previews);
   expect(view.requests).toEqual([]);
+});
+
+test("description loads, counts characters, saves edits, and can be cleared", async () => {
+  const view = editor({
+    existing: true,
+    collapsed: false,
+    description: "Soft accents",
+  });
+  const field = () =>
+    view.render().find((node) => node.props.id === "theme-description")!.props;
+  expect(field().value).toBe("Soft accents");
+  expect(field().maxLength).toBe(500);
+  (field().onChange as (event: unknown) => void)({
+    target: { value: "x".repeat(500) },
+  });
+  expect(
+    view.render().find((node) => node.props.id === "theme-description-count")!
+      .props.children,
+  ).toEqual([500, "/500"]);
+  await view.save();
+  expect(view.inputs[0].description).toBe("x".repeat(500));
+  (field().onChange as (event: unknown) => void)({ target: { value: "" } });
+  await view.save();
+  expect(view.inputs[1].description).toBe("");
 });
 
 for (const mobile of [true, false]) {

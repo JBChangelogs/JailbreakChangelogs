@@ -31,10 +31,12 @@ function marketplace({
   fetching = false,
   total = 25,
   previews = [] as ThemePreviewImage[],
+  description = null as string | null,
 } = {}) {
   const theme: MarketplaceTheme = {
     share_code: "ABCDEFGH",
     label: "Midnight",
+    description,
     scheme: "dark",
     vars: {},
     logo_filter: null,
@@ -266,6 +268,20 @@ test("search and sort reset pagination, and use theme applies and remembers the 
   expect(view.applied[0].share_code).toBe("ABCDEFGH");
   expect(view.recent).toEqual(["ABCDEFGH"]);
   expect(view.button("In use").props.disabled).toBe(true);
+});
+
+test("marketplace descriptions are clamped and absent for null descriptions", () => {
+  const description = "Soft purple accents";
+  const rendered = marketplace({ description }).render();
+  expect(
+    rendered.find((node) => node.props.children === description)!.props
+      .className,
+  ).toContain("line-clamp-3");
+  expect(
+    marketplace()
+      .render()
+      .some((node) => String(node.props.className).includes("line-clamp-3")),
+  ).toBe(false);
 });
 
 test("typing searches after the debounce, resets pagination, and shows a waiting spinner", () => {

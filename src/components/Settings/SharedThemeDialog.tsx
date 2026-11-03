@@ -117,6 +117,7 @@ export default function SharedThemeDialog() {
     try {
       const saved = await createMyTheme({
         label: theme.label,
+        description: theme.description ?? null,
         scheme: theme.scheme,
         vars: theme.vars,
         logo_filter: theme.logo_filter,
@@ -244,6 +245,11 @@ export default function SharedThemeDialog() {
               collapsed && "hidden",
             )}
           >
+            {theme.description && (
+              <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
+                {theme.description}
+              </p>
+            )}
             <p className="text-secondary-text text-sm">
               You&apos;re trying this theme on. Browse around the site to see it
               anywhere; closing this puts your own theme back.

@@ -18,6 +18,7 @@ export interface CustomTheme {
   /** 8 characters; anyone can look the theme up with it. */
   share_code: string;
   label: string;
+  description?: string | null;
   scheme: "dark" | "light";
   vars: Record<string, string>;
   logo_filter: string | null;
@@ -40,7 +41,7 @@ export interface SharedTheme extends CustomTheme {
 
 export type CustomThemeInput = Pick<
   CustomTheme,
-  "label" | "scheme" | "vars" | "logo_filter" | "icon"
+  "label" | "description" | "scheme" | "vars" | "logo_filter" | "icon"
 > & { published?: boolean };
 
 export interface MarketplaceTheme extends CustomTheme {

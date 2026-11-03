@@ -139,8 +139,8 @@ export default function ThemeMarketplace() {
               ref={searchInputRef}
               type="text"
               aria-keyshortcuts="/"
-              aria-label="Search themes by name, author, or id:CODE"
-              placeholder="Theme name, author, or id:ABCDEFGH"
+              aria-label="Search themes by name, description, author, or id:CODE"
+              placeholder="Name, description, author, or id:ABCDEFGH"
               value={input}
               onChange={(event) => setInput(event.target.value)}
               className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-24 transition-all duration-300 focus:outline-none"
@@ -286,7 +286,7 @@ export default function ThemeMarketplace() {
           </h2>
           <p className="text-secondary-text mx-auto max-w-md text-sm">
             {query
-              ? `No themes match “${query}”. Try another theme name, author, or share code.`
+              ? `No themes match “${query}”. Try another name, description, author, or share code.`
               : "Community themes will appear here once published. You can share a custom theme from your theme settings."}
           </p>
           {query ? (
@@ -363,6 +363,11 @@ export default function ThemeMarketplace() {
                     >
                       {theme.label}
                     </h2>
+                    {theme.description && (
+                      <p className="text-secondary-text mt-1 line-clamp-3 text-sm wrap-break-word whitespace-pre-line">
+                        {theme.description}
+                      </p>
+                    )}
                     <div className="text-secondary-text mt-1 flex items-center gap-2 text-sm">
                       {theme.user?.id && (
                         <UserAvatar

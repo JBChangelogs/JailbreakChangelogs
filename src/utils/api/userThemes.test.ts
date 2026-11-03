@@ -269,3 +269,38 @@ test("preview API errors retain moderation and retry codes", async () => {
     expect(error.status).toBe(status);
   }
 });
+
+test("create and patch preserve descriptions, including both clear values", async () => {
+  const inputs: unknown[] = [];
+  globalThis.fetch = (async (_url: string, init?: RequestInit) => {
+    const input = JSON.parse(String(init?.body));
+    inputs.push(input);
+    return Response.json({ ...theme, ...input, id: 1, share_code: "ABCDEFGH" });
+  }) as unknown as typeof fetch;
+  expect(
+    (await createMyTheme({ ...theme, description: "Soft accents" }))
+      .description,
+  ).toBe("Soft accents");
+  await updateMyTheme(1, { description: "" });
+  await updateMyTheme(1, { description: null });
+  expect(inputs).toEqual([
+    { ...theme, description: "Soft accents" },
+    { description: "" },
+    { description: null },
+  ]);
+});
+
+test("description word-filter errors retain the backend message", async () => {
+  const message = "Please choose a different description.";
+  globalThis.fetch = (async () =>
+    Response.json(
+      { error: "profanity", message },
+      { status: 400 },
+    )) as unknown as typeof fetch;
+  const error = await updateMyTheme(1, {
+    description: "Rejected text",
+    published: true,
+  }).catch((error) => error);
+  expect(error).toBeInstanceOf(ThemeApiError);
+  expect(error.message).toBe(message);
+});

@@ -217,6 +217,7 @@ export default function CustomThemeEditor({
     theme
       ? {
           label: theme.label,
+          description: theme.description ?? "",
           scheme: theme.scheme,
           vars: withDefaultColors({ ...theme.vars }),
           logo_filter: theme.logo_filter,
@@ -262,7 +263,10 @@ export default function CustomThemeEditor({
       ? fromSiteTheme(base)
       : null;
   const current: CustomThemeInput | null =
-    draft ?? (start ? { label: "My theme", published: false, ...start } : null);
+    draft ??
+    (start
+      ? { label: "My theme", description: "", published: false, ...start }
+      : null);
   // What the theme was when the editor opened or last saved, to tell
   // whether closing would lose changes.
   const snapshot = current && JSON.stringify(current);
@@ -628,6 +632,9 @@ export default function CustomThemeEditor({
     setDraft({
       // A new theme takes the imported name; an existing one keeps its own.
       label: savedTheme ? current.label : loaded.label,
+      description: savedTheme
+        ? current.description
+        : (loaded.description ?? ""),
       scheme: loaded.scheme,
       vars: withDefaultColors({ ...loaded.vars }),
       logo_filter: loaded.logo_filter,
@@ -935,6 +942,29 @@ export default function CustomThemeEditor({
                   onChange={(icon) => update({ icon })}
                 />
               </div>
+
+              <label htmlFor="theme-description" className="block space-y-1">
+                <span className="text-primary-text text-sm font-medium">
+                  Description (optional)
+                </span>
+                <Textarea
+                  id="theme-description"
+                  value={current.description ?? ""}
+                  maxLength={500}
+                  rows={3}
+                  onChange={(event) =>
+                    update({ description: event.target.value })
+                  }
+                  aria-describedby="theme-description-count"
+                  placeholder="Tell people about your theme…"
+                />
+                <span
+                  id="theme-description-count"
+                  className="text-secondary-text block text-right text-xs"
+                >
+                  {(current.description ?? "").length}/500
+                </span>
+              </label>
 
               <div className="space-y-2">
                 <div>
