@@ -265,7 +265,8 @@ function marketplace({
   };
   const button = (label: string) =>
     render().find(
-      (node) => node.type === "Button" && node.props.children === label,
+      (node) =>
+        node.type === "Button" && [node.props.children].flat().includes(label),
     )!;
   const click = (label: string) =>
     (button(label).props.onClick as () => void)();

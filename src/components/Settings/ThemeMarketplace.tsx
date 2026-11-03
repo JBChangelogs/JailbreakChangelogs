@@ -612,6 +612,7 @@ export default function ThemeMarketplace() {
                             setReporting(theme);
                           }}
                         >
+                          <Icon icon="heroicons:flag" className="h-4 w-4" />
                           Report
                         </Button>
                       )}
@@ -635,7 +636,26 @@ export default function ThemeMarketplace() {
         setReportReason={setReason}
         subject="theme"
         title={`Report ${reporting?.label ?? "theme"}`}
-      />
+      >
+        {reporting?.user?.id && (
+          <div className="text-secondary-text flex min-w-0 items-center gap-2 text-sm">
+            <span className="shrink-0">Created by</span>
+            <UserAvatar
+              userId={reporting.user.id}
+              avatarHash={reporting.user.avatar ?? null}
+              username={reporting.user.username}
+              custom_avatar={reporting.user.custom_avatar}
+              premiumType={reporting.user.premiumtype}
+              settings={reporting.user.settings}
+              size={6}
+              showBadge={false}
+            />
+            <span className="text-primary-text min-w-0 truncate font-medium">
+              {reporting.user.username}
+            </span>
+          </div>
+        )}
+      </ReportReasonModal>
     </div>
   );
 }
