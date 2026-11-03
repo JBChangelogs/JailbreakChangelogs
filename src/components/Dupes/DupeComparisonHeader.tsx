@@ -22,15 +22,18 @@ import {
 import DupeCheckButton from "./DupeCheckButton";
 import ReportFalseDupeModal from "./ReportFalseDupeModal";
 import { OriginalOwnerCard } from "./TradeHistoryList";
+import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 
 export default function DupeComparisonHeader({
   ogItem,
   duplicateItem,
   itemsData,
+  showOriginalOwner = true,
 }: {
   ogItem: DupeFinderItem;
   duplicateItem: DupeFinderItem;
   itemsData: Item[];
+  showOriginalOwner?: boolean;
 }) {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportState, setReportState] = useState<
@@ -168,6 +171,10 @@ export default function DupeComparisonHeader({
                 onError={handleImageError}
               />
             )}
+            <ItemUnlockBadges
+              season={sharedItemData.season}
+              level={sharedItemData.level}
+            />
           </div>
           <div className="min-w-0 flex-1 space-y-2">
             <Link
@@ -242,7 +249,7 @@ export default function DupeComparisonHeader({
             </div>
           </div>
         </div>
-        {sharedOrigin && (
+        {showOriginalOwner && sharedOrigin && (
           <OriginalOwnerCard
             entry={sharedOrigin}
             user={robloxUsers[sharedOrigin.UserId.toString()]}

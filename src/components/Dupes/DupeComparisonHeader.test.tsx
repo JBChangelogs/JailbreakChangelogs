@@ -50,7 +50,16 @@ const item = {
 };
 
 test("renders one shared header outside both tab panels with distinct sibling keys", () => {
+  let selection: unknown = { id: item.id, view: "simplified" };
   const render = load("./DupeComparisonLoader.tsx", {
+    react: {
+      useState: () => [
+        selection,
+        (value: unknown) => {
+          selection = value;
+        },
+      ],
+    },
     "@tanstack/react-query": {
       useQuery: () => ({
         data: { og: item, duplicate: item },
@@ -86,6 +95,24 @@ test("renders one shared header outside both tab panels with distinct sibling ke
   expect(
     nodes(tabs).filter((node) => node.type === "TabsContent"),
   ).toHaveLength(2);
+  expect(header.props.showOriginalOwner).toBe(true);
+  (tabs.props.onValueChange as (value: string) => void)("copy-tree");
+  expect(
+    nodes(render({ id: item.id })).find(
+      (node) => node.type === "./DupeComparisonHeader",
+    )?.props.showOriginalOwner,
+  ).toBe(false);
+  expect(
+    nodes(render({ id: "different-item" })).find(
+      (node) => node.type === "./DupeComparisonHeader",
+    )?.props.showOriginalOwner,
+  ).toBe(true);
+  (tabs.props.onValueChange as (value: string) => void)("simplified");
+  expect(
+    nodes(render({ id: item.id })).find(
+      (node) => node.type === "./DupeComparisonHeader",
+    )?.props.showOriginalOwner,
+  ).toBe(true);
 });
 
 test("shared header preserves the original owner, login guard, report payload, and acknowledgement", () => {
@@ -130,15 +157,19 @@ test("shared header preserves the original owner, login guard, report payload, a
       isDriftItem: () => false,
     },
     "./TradeHistoryList": { OriginalOwnerCard: "OriginalOwnerCard" },
+    "@/components/Items/ItemUnlockBadges": {
+      ItemUnlockBadges: "ItemUnlockBadges",
+    },
     "@/components/ui/button": { Button: "Button" },
     "@/components/ui/IconWrapper": { Icon: "Icon" },
   });
-  const view = () => {
+  const view = (showOriginalOwner = true) => {
     stateIndex = 0;
     return render({
       ogItem: item,
       duplicateItem: item,
-      itemsData: [{ id: 49, name: "Proto-8" }],
+      itemsData: [{ id: 49, name: "Proto-8", season: 8, level: 10 }],
+      showOriginalOwner,
     });
   };
   const check = nodes(view()).find(
@@ -160,6 +191,14 @@ test("shared header preserves the original owner, login guard, report payload, a
     nodes(view()).find((node) => node.type === "OriginalOwnerCard")?.props
       .entry,
   ).toEqual(item.history[0]);
+  expect(
+    nodes(view(false)).some((node) => node.type === "OriginalOwnerCard"),
+  ).toBe(false);
+  const badges = nodes(view()).find(
+    (node) => node.type === "ItemUnlockBadges",
+  )!;
+  expect(badges.props.season).toBe(8);
+  expect(badges.props.level).toBe(10);
   expect(
     nodes(view()).find((node) => node.props.href === "/dupes/123"),
   ).toBeDefined();

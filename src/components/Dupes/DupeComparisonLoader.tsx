@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { DuplicateVariantsResponse } from "@/types";
 import { useBatchItems } from "@/hooks/useBatchItems";
@@ -28,6 +29,8 @@ export default function DupeComparisonLoader({
   reportItem,
   originalOwner,
 }: DupeComparisonLoaderProps) {
+  const [selection, setSelection] = useState({ id, view: "simplified" });
+  const view = selection.id === id ? selection.view : "simplified";
   const variantsQuery = useQuery({
     queryKey: ["duplicate-variants", id],
     queryFn: async ({ signal }): Promise<DuplicateVariantsResponse | null> => {
@@ -101,9 +104,14 @@ export default function DupeComparisonLoader({
           ogItem={variants.og}
           duplicateItem={variants.duplicate}
           itemsData={itemQuery.data ?? []}
+          showOriginalOwner={view === "simplified"}
         />
       )}
-      <Tabs key={`views-${id}`} defaultValue="simplified">
+      <Tabs
+        key={`views-${id}`}
+        value={view}
+        onValueChange={(view) => setSelection({ id, view })}
+      >
         <TabsList aria-label="Dupe history view" fullWidth>
           <TabsTrigger value="simplified" fullWidth>
             Simplified
