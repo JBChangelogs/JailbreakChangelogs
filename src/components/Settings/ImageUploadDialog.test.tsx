@@ -17,9 +17,16 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children)];
 }
 
-test("image uploads validate files and preview banner and background display crops", () => {
+test("image uploads validate files, preview crops, and retain images after review failures", async () => {
   let allowed = true;
   let stateIndex = 0;
+  let refIndex = 0;
+  const refs: { current: unknown }[] = [];
+  let uploadFailure: string | null = null;
+  const uploads: File[] = [];
+  const uploaded: string[] = [];
+  const descriptions: string[] = [];
+  const revoked: string[] = [];
   let drop: (files: File[]) => void;
   let clicks = 0;
   let sources = 0;
@@ -41,12 +48,13 @@ test("image uploads validate files and preview banner and background display cro
     ).outputText,
     {
       exports,
+      Error,
       URL: {
         createObjectURL: () => {
           sources++;
           return "blob:image";
         },
-        revokeObjectURL: () => {},
+        revokeObjectURL: (source: string) => revoked.push(source),
       },
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
@@ -57,7 +65,10 @@ test("image uploads validate files and preview banner and background display cro
             lazy: () => "lazy-cropper",
             useCallback: (callback: unknown) => callback,
             useEffect: () => {},
-            useRef: (current: unknown) => ({ current }),
+            useRef: (current: unknown) => {
+              const index = refIndex++;
+              return (refs[index] ??= { current });
+            },
             useState: (initial: unknown) => {
               const index = stateIndex++;
               return [
@@ -99,11 +110,43 @@ test("image uploads validate files and preview banner and background display cro
             useProfileBackgroundAspectRatio: (enabled: boolean) =>
               enabled ? backgroundRatio : null,
           };
-        if (name === "@/services/logger") return { createLogger: () => ({}) };
+        if (name === "@/services/logger")
+          return { createLogger: () => ({ error: () => {} }) };
+        if (name === "@/services/settingsService") {
+          const upload = async (file: File) => {
+            uploads.push(file);
+            if (uploadFailure) throw new Error(uploadFailure);
+            return "https://example.com/profile.png";
+          };
+          return {
+            uploadCustomAvatar: upload,
+            uploadCustomBanner: upload,
+            uploadCustomBackground: upload,
+          };
+        }
+        if (name === "@/utils/images/cropImage") {
+          const crop = async (file: File) => file;
+          return {
+            cropAvatarImage: crop,
+            cropBannerImage: crop,
+            cropBackgroundImage: crop,
+          };
+        }
+        if (name === "@/utils/analytics/rybbit")
+          return { trackEvent: () => {} };
         if (name === "@/utils/storage/fileValidation") return { validateFile };
         if (name === "sonner")
           return {
-            toast: { error: (message: string) => errors.push(message) },
+            toast: {
+              error: (
+                message: string,
+                options: { description?: string } = {},
+              ) => {
+                errors.push(message);
+                if (options.description) descriptions.push(options.description);
+              },
+              success: () => {},
+            },
           };
         return {};
       },
@@ -117,13 +160,15 @@ test("image uploads validate files and preview banner and background display cro
     let openPrompt: () => void;
     const element = exports[`${type}UploadDialog`]({
       userData: { premiumtype: 3 },
-      onUploaded: () => {},
+      onUploaded: (url: string) => uploaded.push(url),
       children: (open: () => void) => {
         openPrompt = open;
         return null;
       },
     });
     stateIndex = 0;
+    refIndex = 0;
+    refs.length = 0;
     updates.clear();
     const tree = nodes(
       (element.type as (props: unknown) => unknown)(element.props),
@@ -180,6 +225,7 @@ test("image uploads validate files and preview banner and background display cro
     }
     const cropStyle = () => {
       stateIndex = 0;
+      refIndex = 0;
       const edited = nodes(
         (element.type as (props: unknown) => unknown)(element.props),
       );
@@ -325,6 +371,51 @@ test("image uploads validate files and preview banner and background display cro
         });
       }
     }
+    const render = () => {
+      stateIndex = 0;
+      refIndex = 0;
+      return nodes(
+        (element.type as (props: unknown) => unknown)(element.props),
+      );
+    };
+    const area = { x: 0, y: 0, width: 100, height: 100 };
+    (
+      render().find((node) => node.type === "lazy-cropper")!.props
+        .onCropComplete as (area: unknown, pixels: unknown) => void
+    )(area, area);
+    const upload = async () => {
+      const button = render().find(
+        (node) =>
+          Array.isArray(node.props.children) &&
+          node.props.children.includes(`Upload ${type}`),
+      )!;
+      expect(button.props.disabled).toBe(false);
+      (button.props.onClick as () => void)();
+      await new Promise((resolve) => setImmediate(resolve));
+    };
+    for (const message of [
+      "This image was flagged by automatic review and can't be used.",
+      "Image review is unavailable right now, try again shortly.",
+    ]) {
+      uploadFailure = message;
+      const previousRevoked = revoked.length;
+      const previousUploaded = uploaded.length;
+      await upload();
+      expect(descriptions.at(-1)).toBe(message);
+      expect(uploads.at(-1)).toBe(image);
+      expect(revoked.length).toBe(previousRevoked);
+      expect(uploaded.length).toBe(previousUploaded);
+      expect(updates.get(0)).toBeNull();
+      expect(updates.get(2)).toBe(true);
+      expect(updates.get(3)).toBe("blob:image");
+      expect(updates.get(8)).toEqual(area);
+    }
+    uploadFailure = null;
+    await upload();
+    expect(uploads.at(-1)).toBe(image);
+    expect(uploaded.at(-1)).toBe("https://example.com/profile.png");
+    expect(updates.get(2)).toBe(false);
+    expect(updates.get(3)).toBeNull();
   }
   expect(sources).toBe(6);
 });

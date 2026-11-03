@@ -13,6 +13,7 @@ runInNewContext(
   ).outputText,
   {
     exports: service,
+    FormData,
     require: (name: string) =>
       name === "@/utils/api/api"
         ? { ...require(name), PUBLIC_API_URL: "https://api.example.com" }
@@ -79,4 +80,45 @@ test("surfaces supporter and rate limit failures when saving", async () => {
   await expect(saveAccentColor(accent)).rejects.toThrow(
     "Try again in a minute",
   );
+});
+
+test("profile image uploads preserve API review and upload failure messages", async () => {
+  const fetchMock = spyOn(globalThis, "fetch");
+  const file = new File(["image"], "profile.png", { type: "image/png" });
+  for (const [type, upload] of [
+    ["avatar", service.uploadCustomAvatar],
+    ["banner", service.uploadCustomBanner],
+    ["background", service.uploadCustomBackground],
+  ] as const) {
+    for (const [error, status, message] of [
+      ["upload_failed", 400, "Image must be non-empty."],
+      [
+        "image_rejected",
+        400,
+        "This image was flagged by automatic review and can't be used.",
+      ],
+      [
+        "review_unavailable",
+        503,
+        "Image review is unavailable right now, try again shortly.",
+      ],
+    ] as const) {
+      fetchMock.mockResolvedValueOnce(
+        Response.json(
+          {
+            error,
+            message,
+            ...(error === "image_rejected" ? { categories: ["sexual"] } : {}),
+          },
+          { status },
+        ),
+      );
+      await expect(upload(file)).rejects.toThrow(message);
+      const [url, options] = fetchMock.mock.calls.at(-1)!;
+      expect(String(url)).toEndWith(`/v2/users/me/${type}`);
+      expect(options?.method).toBe("PUT");
+      expect(options?.credentials).toBe("include");
+      expect((options?.body as FormData).get(type)).toBeInstanceOf(File);
+    }
+  }
 });
