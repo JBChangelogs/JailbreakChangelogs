@@ -19,6 +19,7 @@ import {
   getVideoPath,
   handleImageError,
 } from "@/utils/ui/images";
+import DupeCheckButton from "./DupeCheckButton";
 import ReportFalseDupeModal from "./ReportFalseDupeModal";
 import { OriginalOwnerCard } from "./TradeHistoryList";
 
@@ -196,34 +197,49 @@ export default function DupeComparisonHeader({
                 {duplicateItem.categoryTitle}
               </span>
             </div>
-            {reportState ? (
-              <div className="text-primary-text flex items-start gap-2 text-sm">
-                <Icon
-                  icon="mdi:check-circle-outline"
-                  className="text-button-success mt-0.5 size-5 shrink-0"
+            <div className="flex flex-wrap items-center gap-2">
+              {normalizedOriginalOwnerId && (
+                <DupeCheckButton
+                  item={duplicateItem}
+                  originalOwner={normalizedOriginalOwnerId}
+                  ownerName={
+                    robloxUsers[normalizedOriginalOwnerId]?.displayName ||
+                    robloxUsers[normalizedOriginalOwnerId]?.name ||
+                    normalizedOriginalOwnerId
+                  }
+                  onReport={openReportModal}
+                  showComparison={false}
                 />
-                <div>
-                  <p className="font-semibold">
-                    {reportState === "submitted"
-                      ? "False dupe report received"
-                      : "False dupe already reported"}
-                  </p>
-                  <p className="text-secondary-text mt-1">
-                    This item is queued for review. You don&apos;t need to
-                    submit another report.
-                  </p>
+              )}
+              {reportState ? (
+                <div className="text-primary-text flex items-start gap-2 text-sm">
+                  <Icon
+                    icon="mdi:check-circle-outline"
+                    className="text-button-success mt-0.5 size-5 shrink-0"
+                  />
+                  <div>
+                    <p className="font-semibold">
+                      {reportState === "submitted"
+                        ? "False dupe report received"
+                        : "False dupe already reported"}
+                    </p>
+                    <p className="text-secondary-text mt-1">
+                      This item is queued for review. You don&apos;t need to
+                      submit another report.
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                className="shrink-0"
-                onClick={openReportModal}
-              >
-                Report False Dupe
-              </Button>
-            )}
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={openReportModal}
+                >
+                  Report False Dupe
+                </Button>
+              )}
+            </div>
           </div>
         </div>
         {sharedOrigin && (

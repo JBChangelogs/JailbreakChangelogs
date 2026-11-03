@@ -141,6 +141,16 @@ test("shared header preserves the original owner, login guard, report payload, a
       itemsData: [{ id: 49, name: "Proto-8" }],
     });
   };
+  const check = nodes(view()).find(
+    (node) => node.type === "./DupeCheckButton",
+  )!;
+  expect(check.props.item).toBe(item);
+  expect(check.props.originalOwner).toBe("123");
+  expect(check.props.ownerName).toBe("Original Display");
+  expect(check.props.showComparison).toBe(false);
+  (check.props.onReport as () => void)();
+  expect(login).toEqual([{ open: true }]);
+  login.length = 0;
   const reportButton = () =>
     nodes(view()).find(
       (node) =>

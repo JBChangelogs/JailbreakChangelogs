@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { Button } from "@/components/ui/button";
+import DupeCheckButton from "./DupeCheckButton";
 import ReportFalseDupeModal from "./ReportFalseDupeModal";
 
 export default function DupeComparisonNotFound({
@@ -26,6 +27,15 @@ export default function DupeComparisonNotFound({
     originalOwner ? [originalOwner] : [],
   );
 
+  const openReportModal = () => {
+    if (!isAuthenticated) {
+      toast.info("You must be logged in to report a false dupe.");
+      setLoginModal({ open: true });
+      return;
+    }
+    setOpen(true);
+  };
+
   return (
     <div className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-5">
       <div>
@@ -36,6 +46,19 @@ export default function DupeComparisonNotFound({
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        {originalOwner && reportItem?.item_id && (
+          <DupeCheckButton
+            item={{ ...reportItem, id, item_id: reportItem.item_id }}
+            originalOwner={originalOwner}
+            ownerName={
+              robloxUsers[originalOwner]?.displayName ||
+              robloxUsers[originalOwner]?.name ||
+              originalOwner
+            }
+            onReport={openReportModal}
+            showComparison={false}
+          />
+        )}
         {reportState ? (
           <p className="text-primary-text text-sm">
             {reportState === "submitted"
@@ -49,14 +72,7 @@ export default function DupeComparisonNotFound({
             type="button"
             size="sm"
             disabled={!reportItem?.item_id}
-            onClick={() => {
-              if (!isAuthenticated) {
-                toast.info("You must be logged in to report a false dupe.");
-                setLoginModal({ open: true });
-                return;
-              }
-              setOpen(true);
-            }}
+            onClick={openReportModal}
           >
             Report False Dupe
           </Button>

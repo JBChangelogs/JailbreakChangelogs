@@ -19,7 +19,9 @@ type Node = {
       title?: string;
       categoryTitle?: string;
     };
-    originalOwner?: { id: string; displayName: string };
+    originalOwner?: { id: string; displayName: string } | string;
+    ownerName?: string;
+    showComparison?: boolean;
     onReportResolved?: (status: string) => void;
   };
 };
@@ -84,6 +86,7 @@ function setup(authenticated: boolean) {
             }),
           };
         if (name === "@/components/ui/button") return { Button: "Button" };
+        if (name === "./DupeCheckButton") return { default: "DupeCheckButton" };
         if (name === "./ReportFalseDupeModal") return { default: "Modal" };
         throw new Error(`Unexpected import: ${name}`);
       },
@@ -139,6 +142,11 @@ test("reports preserve the instance, item and resolved owner and acknowledge sub
     originalOwner: "235642012",
   };
   let tree = render(props);
+  const check = tree.find((node) => node.type === "DupeCheckButton")!;
+  expect(check.props.item).toEqual({ ...props.reportItem, id: props.id });
+  expect(check.props.originalOwner).toBe(props.originalOwner);
+  expect(check.props.ownerName).toBe("hamsterskyyy");
+  expect(check.props.showComparison).toBe(false);
   const actions = tree.find(
     (node) => node.props.className === "flex flex-wrap items-center gap-2",
   );
@@ -152,8 +160,12 @@ test("reports preserve the instance, item and resolved owner and acknowledge sub
   const modal = tree.find((node) => node.type === "Modal")!;
   expect(modal.props.open).toBe(true);
   expect(modal.props.item).toEqual({ ...props.reportItem, id: props.id });
-  expect(modal.props.originalOwner?.id).toBe(props.originalOwner);
-  expect(modal.props.originalOwner?.displayName).toBe("hamsterskyyy");
+  expect((modal.props.originalOwner as { id: string })?.id).toBe(
+    props.originalOwner,
+  );
+  expect(
+    (modal.props.originalOwner as { displayName: string })?.displayName,
+  ).toBe("hamsterskyyy");
   modal.props.onReportResolved?.("submitted");
   tree = render(props);
   expect(
@@ -164,6 +176,14 @@ test("reports preserve the instance, item and resolved owner and acknowledge sub
   ).toBe(true);
   const standalone = setup(true).render({ id: props.id });
   expect(standalone.find((node) => node.type === "Modal")).toBeUndefined();
+  expect(
+    standalone.find((node) => node.type === "DupeCheckButton"),
+  ).toBeUndefined();
+  expect(
+    setup(true)
+      .render({ id: props.id, reportItem: props.reportItem })
+      .find((node) => node.type === "DupeCheckButton"),
+  ).toBeUndefined();
   expect(
     standalone.find((node) => node.type === "Button" && node.props.onClick)
       ?.props.disabled,
