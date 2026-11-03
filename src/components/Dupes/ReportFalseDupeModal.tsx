@@ -166,7 +166,7 @@ export default function ReportFalseDupeModal({
               target="_blank"
               rel="noopener noreferrer"
               prefetch={false}
-              title="Review the dupe tree in a new tab without closing your report"
+              aria-label="View dupe tree (opens in a new tab)"
             >
               View dupe tree ↗
             </Link>

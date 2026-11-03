@@ -111,6 +111,8 @@ test("false-dupe reports use the catalog ID in the URL and retain the original o
   expect(params.get("originalOwner")).toBe("235642012");
   expect(link.props.target).toBe("_blank");
   expect(link.props.rel).toBe("noopener noreferrer");
+  expect(link.props.title).toBeUndefined();
+  expect(link.props["aria-label"]).toBe("View dupe tree (opens in a new tab)");
   expect(
     nodes(dialog).find((node) => node.type === "textarea")?.props.value,
   ).toBe("Incorrect detection");
