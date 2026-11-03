@@ -165,7 +165,12 @@ function setup(
               batchUserIds.push(ids);
               return {
                 robloxUsers: {
-                  "111": { displayName: "Owner One", name: "owner_one" },
+                  "111": {
+                    displayName: "Owner One",
+                    name: "owner_one",
+                    hasVerifiedBadge: true,
+                  },
+                  "222": { username: "owner_two" },
                 },
               };
             },
@@ -192,6 +197,8 @@ function setup(
         if (id.endsWith("/Pagination")) return { Pagination: "pagination" };
         if (id.endsWith("/itemSearch")) return { matchesTextSearch };
         if (id.endsWith("/dupeComparisonUrl")) return { getDupeComparisonUrl };
+        if (id.endsWith("/VerifiedBadgeIcon"))
+          return { VerifiedBadgeIcon: "verified-badge" };
         if (id === "./InventoryItemsSkeleton")
           return { default: "inventory-skeleton" };
         if (id === "./InventoryHistoryTip") return { default: "history-tip" };
@@ -343,6 +350,43 @@ test("historical cards use snapshot OG and dupe status with a comparison link", 
   }
 });
 
+test("historical cards resolve original owners with profile links and safe fallbacks", async () => {
+  const { runner, respond, select, batchUserIds } = setup();
+  const page = runner();
+  page.render();
+  expect(batchUserIds.at(-1)).toEqual([]);
+  select(page.render(), "2026-10-31");
+  page.render();
+  await respond(0, {
+    as_of: 1792000000,
+    items: ["111", "222", "333", null].map((owner, index) => ({
+      ...item,
+      item_id: `copy-${index}`,
+      original_owner: owner,
+    })),
+  });
+  const cards = nodes(page.render()).filter((node) => node.type === "article");
+  expect(batchUserIds.at(-1)).toEqual(["111", "222", "333"]);
+  for (const [index, name] of ["Owner One", "owner_two", "333"].entries()) {
+    expect(content(cards[index])).toContain("Original owner");
+    const link = nodes(cards[index]).find((node) => node.type === "a")!;
+    expect(content(link)).toBe(name);
+    expect(link.props.href).toBe(
+      `https://www.roblox.com/users/${["111", "222", "333"][index]}/profile`,
+    );
+    expect(
+      nodes(cards[index]).find((node) => node.type === "avatar")!.props.userId,
+    ).toBe(["111", "222", "333"][index]);
+    expect(
+      nodes(cards[index]).some((node) => node.type === "verified-badge"),
+    ).toBe(index === 0);
+  }
+  expect(content(cards[3])).toContain("Unknown");
+  expect(
+    nodes(cards[3]).some((node) => node.type === "avatar" || node.type === "a"),
+  ).toBe(false);
+});
+
 test("date selection uses UTC snapshots, ignores stale requests, and restores latest inventory", async () => {
   const { runner, requests, respond, select } = setup();
   const page = runner();
@@ -385,12 +429,14 @@ test("date selection uses UTC snapshots, ignores stale requests, and restores la
     nodes(view).find((node) => node.type === "item-appearance")!.props.title,
   ).toBe(item.title);
   expect(nodes(view).some((node) => node.type === "trade-modal")).toBe(false);
+  expect(content(view)).not.toContain("Held since");
   expect(content(view)).not.toContain("Trade history through");
   nodes(view).find(
     (node) => node.type === "button" && content(node) === "History",
   )!.props.onClick!();
   view = page.render();
   const modal = nodes(view).find((node) => node.type === "trade-modal")!;
+  expect(content(modal)).toContain("Held since");
   expect(modal.props.transfers).toEqual(item.history);
   expect(modal.props.historyDate).toBe("2026-10-15");
   modal.props.onClose!();
@@ -589,7 +635,7 @@ test("calendar allows recorded scan dates only within the tracking period and UT
 });
 
 test("historical lists paginate, search, filter and sort the dated items", async () => {
-  const { runner, respond, select, selectedDates } = setup();
+  const { runner, respond, select, selectedDates, batchUserIds } = setup();
   const page = runner();
   select(page.render(), "2026-10-31");
   page.render();
@@ -599,6 +645,7 @@ test("historical lists paginate, search, filter and sort the dated items", async
     title: `Item ${String(index).padStart(2, "0")}`,
     category_title: index % 2 ? "Rim" : "Vehicle",
     held_since: item.held_since + index,
+    original_owner: `owner-${index}`,
   }));
   await respond(0, { as_of: 1792000000, items });
   let view = page.render();
@@ -606,11 +653,18 @@ test("historical lists paginate, search, filter and sort the dated items", async
     nodes(view).filter((node) => node.type === "item-appearance");
   expect(cards()).toHaveLength(16);
   expect(cards()[0].props.title).toBe("Item 18");
+  expect(batchUserIds.at(-1)).toEqual(
+    items
+      .slice(3)
+      .reverse()
+      .map((item) => item.original_owner),
+  );
   const pagination = nodes(view).find((node) => node.type === "pagination")!;
   expect(pagination.props.count).toBe(2);
   pagination.props.onChange!(null, 2);
   view = page.render();
   expect(cards()).toHaveLength(3);
+  expect(batchUserIds.at(-1)).toEqual(["owner-2", "owner-1", "owner-0"]);
   let controls = nodes(view).find((node) => node.type === "list-controls")!;
   expect(controls.props.availableCategories).toEqual(["Rim", "Vehicle"]);
   controls.props.setSelectedCategories!(["Rim"]);

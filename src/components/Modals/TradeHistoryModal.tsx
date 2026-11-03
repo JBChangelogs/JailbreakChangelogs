@@ -215,6 +215,7 @@ export default function TradeHistoryModal({
                   Trade history through {historyDate} (UTC)
                 </p>
               )}
+              {children}
             </div>
           </div>
 
@@ -584,7 +585,6 @@ export default function TradeHistoryModal({
               );
             })()
           )}
-          {children}
         </div>
 
         <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">

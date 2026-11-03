@@ -110,6 +110,13 @@ test("history modal batches transfer participants and preserves gaps, unknown se
   expect(text(view)).toContain("Gap in recorded history");
   expect(text(view)).toContain("time-200");
   expect(nodes(view).some((node) => node.type === "owner-content")).toBe(true);
+  const header = nodes(view).find((node) => node.type === "DialogHeader")!;
+  expect(nodes(header).some((node) => node.type === "owner-content")).toBe(
+    true,
+  );
+  expect(
+    nodes(view).filter((node) => node.type === "owner-content"),
+  ).toHaveLength(1);
   expect(text(exports.default({ ...props, transfers: [] }))).toContain(
     "No recorded trades through this date.",
   );

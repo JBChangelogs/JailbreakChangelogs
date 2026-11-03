@@ -35,6 +35,7 @@ import {
 } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
+import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const INVENTORY_HISTORY_START_DATE = "2026-10-31";
 
@@ -287,6 +288,15 @@ export default function InventoryHistory({
     });
   const totalPages = Math.ceil(filteredItems.length / 16);
   const currentPage = Math.min(page, Math.max(1, totalPages));
+  const displayedItems = filteredItems.slice(
+    (currentPage - 1) * 16,
+    currentPage * 16,
+  );
+  const { robloxUsers } = useBatchUserData(
+    displayedItems.flatMap((item) =>
+      item.original_owner ? [item.original_owner] : [],
+    ),
+  );
   const pagination = totalPages > 1 && (
     <div className="my-4 flex justify-center">
       <Pagination
@@ -511,100 +521,132 @@ export default function InventoryHistory({
                   </p>
                 )}
                 <div className="mt-4 mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-                  {filteredItems
-                    .slice((currentPage - 1) * 16, currentPage * 16)
-                    .map((item) => {
-                      const ownerKey = `${item.item_id}-${item.branch_id}`;
-                      const ownerExpanded = ownerPopover === ownerKey;
-                      return (
-                        <article
-                          key={`${date}-${item.item_id}-${item.branch_id}`}
-                          className={`text-primary-text relative flex flex-col rounded-lg border p-3 transition-all duration-200 ${
-                            item.is_original_owner
-                              ? "hover:shadow-card-shadow border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
-                              : "border-border-card bg-tertiary-bg"
-                          }`}
-                        >
-                          <InventoryItemAppearance
-                            title={item.title}
-                            categoryTitle={item.category_title}
-                          />
-                          <InventoryMarketSummary
-                            data={catalogById.get(item.catalog_item_id)}
-                          />
-                          <div className="mt-auto space-y-3 pt-3">
-                            <p className="text-secondary-text text-sm">
-                              Held since {formatUtc(item.held_since)}
-                            </p>
-                            <div className="flex flex-wrap justify-end gap-2">
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => setHistoryItem(item)}
-                              >
-                                History
-                              </Button>
-                              <Popover
-                                open={ownerExpanded}
-                                onOpenChange={(open) =>
-                                  setOwnerPopover(open ? ownerKey : null)
-                                }
-                              >
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                  >
-                                    Current owner
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  align="end"
-                                  collisionPadding={16}
-                                  aria-label={`Current owner of ${item.title}`}
-                                  className="bg-secondary-bg max-h-[min(24rem,var(--radix-popover-content-available-height))] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
+                  {displayedItems.map((item) => {
+                    const ownerKey = `${item.item_id}-${item.branch_id}`;
+                    const ownerExpanded = ownerPopover === ownerKey;
+                    const originalOwner = item.original_owner
+                      ? robloxUsers[item.original_owner]
+                      : undefined;
+                    return (
+                      <article
+                        key={`${date}-${item.item_id}-${item.branch_id}`}
+                        className={`text-primary-text relative flex flex-col rounded-lg border p-3 transition-all duration-200 ${
+                          item.is_original_owner
+                            ? "hover:shadow-card-shadow border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
+                            : "border-border-card bg-tertiary-bg"
+                        }`}
+                      >
+                        <InventoryItemAppearance
+                          title={item.title}
+                          categoryTitle={item.category_title}
+                        />
+                        <InventoryMarketSummary
+                          data={catalogById.get(item.catalog_item_id)}
+                        />
+                        <div className="mt-auto space-y-3 pt-3">
+                          <div className="flex min-w-0 items-center gap-2">
+                            {item.original_owner && (
+                              <div className="shrink-0">
+                                <TradeAvatarImage
+                                  userId={item.original_owner}
+                                />
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-secondary-text text-xs">
+                                Original owner
+                              </p>
+                              {item.original_owner ? (
+                                <a
+                                  href={`https://www.roblox.com/users/${encodeURIComponent(item.original_owner)}/profile`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-link hover:text-link-hover flex items-center gap-1 text-sm font-medium hover:underline"
                                 >
-                                  {ownerExpanded && (
-                                    <CurrentOwner item={item} />
+                                  <span className="truncate">
+                                    {originalOwner?.displayName ||
+                                      originalOwner?.name ||
+                                      originalOwner?.username ||
+                                      item.original_owner}
+                                  </span>
+                                  {originalOwner?.hasVerifiedBadge && (
+                                    <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
                                   )}
-                                </PopoverContent>
-                              </Popover>
+                                </a>
+                              ) : (
+                                <p className="text-secondary-text text-sm">
+                                  Unknown
+                                </p>
+                              )}
                             </div>
                           </div>
-                          {item.is_duplicated && (
-                            <div className="mt-3 flex flex-col items-center gap-1 text-center text-xs">
-                              <span className="text-secondary-text">
-                                This item may be duped.
-                              </span>
-                              <Link
-                                href={getDupeComparisonUrl({
-                                  id: item.item_id,
-                                  item_id: item.catalog_item_id,
-                                  title: item.title,
-                                  categoryTitle: item.category_title,
-                                  info: item.original_owner
-                                    ? [
-                                        {
-                                          title: "Original Owner",
-                                          value: item.original_owner,
-                                        },
-                                      ]
-                                    : undefined,
-                                })}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="View variant ownership histories in a new tab"
-                                className="text-link hover:text-link-hover font-bold hover:underline"
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setHistoryItem(item)}
+                            >
+                              History
+                            </Button>
+                            <Popover
+                              open={ownerExpanded}
+                              onOpenChange={(open) =>
+                                setOwnerPopover(open ? ownerKey : null)
+                              }
+                            >
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                >
+                                  Current owner
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                align="end"
+                                collisionPadding={16}
+                                aria-label={`Current owner of ${item.title}`}
+                                className="bg-secondary-bg max-h-[min(24rem,var(--radix-popover-content-available-height))] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto p-4"
                               >
-                                Comparison
-                              </Link>
-                            </div>
-                          )}
-                        </article>
-                      );
-                    })}
+                                {ownerExpanded && <CurrentOwner item={item} />}
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </div>
+                        {item.is_duplicated && (
+                          <div className="mt-3 flex flex-col items-center gap-1 text-center text-xs">
+                            <span className="text-secondary-text">
+                              This item may be duped.
+                            </span>
+                            <Link
+                              href={getDupeComparisonUrl({
+                                id: item.item_id,
+                                item_id: item.catalog_item_id,
+                                title: item.title,
+                                categoryTitle: item.category_title,
+                                info: item.original_owner
+                                  ? [
+                                      {
+                                        title: "Original Owner",
+                                        value: item.original_owner,
+                                      },
+                                    ]
+                                  : undefined,
+                              })}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="View variant ownership histories in a new tab"
+                              className="text-link hover:text-link-hover font-bold hover:underline"
+                            >
+                              Comparison
+                            </Link>
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
                 </div>
                 {historyItem && (
                   <TradeHistoryModal
@@ -618,7 +660,7 @@ export default function InventoryHistory({
                     transfers={historyItem.history}
                     historyDate={date}
                   >
-                    <p className="text-secondary-text mt-4 text-sm">
+                    <p className="text-secondary-text mt-1 text-sm">
                       Held since {formatUtc(historyItem.held_since)}
                     </p>
                   </TradeHistoryModal>
