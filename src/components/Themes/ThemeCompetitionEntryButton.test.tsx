@@ -51,17 +51,19 @@ function harness(
     loading?: boolean;
     queryError?: Error;
     submitError?: Error;
+    onInvalidate?: () => Promise<void>;
   } = {},
 ) {
   const current =
     options.competition === undefined ? competition : options.competition;
   const value = options.theme ?? theme;
   const userId = options.userId === undefined ? "123" : options.userId;
-  let busy = false;
+  let busy: string | null = null;
   let button:
     | { children: ReactNode; disabled?: boolean; onClick: () => Promise<void> }
     | undefined;
   const submitted: unknown[][] = [];
+  const withdrawn: unknown[][] = [];
   const invalidated: unknown[] = [];
   const success: string[] = [];
   const errors: string[] = [];
@@ -78,7 +80,7 @@ function harness(
         return {
           useState: () => [
             busy,
-            (next: boolean) => {
+            (next: string | null) => {
               busy = next;
             },
           ],
@@ -120,6 +122,10 @@ function harness(
             submitted.push(args);
             if (options.submitError) throw options.submitError;
           },
+          withdrawFromCompetition: async (...args: unknown[]) => {
+            withdrawn.push(args);
+            if (options.submitError) throw options.submitError;
+          },
         };
       if (name === "@tanstack/react-query")
         return {
@@ -130,6 +136,7 @@ function harness(
               queryKey: unknown[];
             }) => {
               invalidated.push(queryKey);
+              await options.onInvalidate?.();
             },
           }),
           useQuery: (query: (typeof queries)[number]) => {
@@ -158,6 +165,7 @@ function harness(
       return button;
     },
     submitted,
+    withdrawn,
     invalidated,
     success,
     errors,
@@ -205,26 +213,73 @@ test("no active competition hides submission and unpublished themes explain publ
   expect(view.queries[1].enabled).toBe(false);
 });
 
-test("already entered themes and full entry limits prevent submission", async () => {
+test("owners can withdraw at the entry limit and submit again after refreshing", async () => {
+  const current = {
+    ...competition,
+    items: [
+      {
+        theme: { ...theme, user: { id: "123", username: "creator" } },
+        entered_at: 1,
+      },
+    ],
+  };
+  const view = harness({ competition: current });
+  expect(view.render()).toContain("Withdraw from competition");
+  expect(view.button?.disabled).toBe(false);
+  const pending = view.button!.onClick();
+  expect(view.render()).toContain("Withdrawing…");
+  expect(view.button?.disabled).toBe(true);
+  await pending;
+  expect(view.withdrawn).toEqual([[7, "THEME001"]]);
+  expect(view.submitted).toEqual([]);
+  expect(view.success).toEqual(["Submission withdrawn"]);
+  expect(view.invalidated).toEqual([
+    ["theme-competition", 7],
+    ["theme-competition-current"],
+  ]);
+  current.items = [];
+  expect(view.render()).toContain("Submit to competition");
+  expect(view.button?.disabled).toBe(false);
+});
+
+test("full entry limits prevent submitting another theme", async () => {
   const entry = {
     theme: { ...theme, user: { id: "123", username: "creator" } },
     entered_at: 1,
   };
-  for (const [code, label] of [
-    [theme.share_code, "Submitted to competition"],
-    ["ANOTHER1", "Competition entry limit reached"],
-  ]) {
-    const view = harness({
-      competition: {
-        ...competition,
-        items: [{ ...entry, theme: { ...entry.theme, share_code: code } }],
-      },
-    });
-    expect(view.render()).toContain(label);
-    expect(view.button?.disabled).toBe(true);
-    await view.button!.onClick();
-    expect(view.submitted).toEqual([]);
-  }
+  const view = harness({
+    competition: {
+      ...competition,
+      items: [{ ...entry, theme: { ...entry.theme, share_code: "ANOTHER1" } }],
+    },
+  });
+  expect(view.render()).toContain("Competition entry limit reached");
+  expect(view.button?.disabled).toBe(true);
+  await view.button!.onClick();
+  expect(view.submitted).toEqual([]);
+  expect(view.withdrawn).toEqual([]);
+});
+
+test("failed withdrawals preserve the entry and allow retry", async () => {
+  const view = harness({
+    competition: {
+      ...competition,
+      items: [
+        {
+          theme: { ...theme, user: { id: "123", username: "creator" } },
+          entered_at: 1,
+        },
+      ],
+    },
+    submitError: new Error("Entries are closed"),
+  });
+  view.render();
+  await view.button!.onClick();
+  expect(view.errors).toEqual(["Entries are closed"]);
+  expect(view.success).toEqual([]);
+  expect(view.invalidated).toEqual([]);
+  expect(view.render()).toContain("Withdraw from competition");
+  expect(view.button?.disabled).toBe(false);
 });
 
 test("loading and errors do not submit, and failed mutations allow retry", async () => {
@@ -240,4 +295,35 @@ test("loading and errors do not submit, and failed mutations allow retry", async
   expect(failed.success).toEqual([]);
   expect(failed.render()).toContain("Submit to competition");
   expect(failed.button?.disabled).toBe(false);
+});
+
+test("pending labels keep the clicked action when refreshed entry data arrives", async () => {
+  const entry = {
+    theme: { ...theme, user: { id: "123", username: "creator" } },
+    entered_at: 1,
+  };
+  for (const entered of [false, true]) {
+    const current = { ...competition, items: entered ? [entry] : [] };
+    let finish!: () => void;
+    const refreshing = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    const view = harness({
+      competition: current,
+      onInvalidate: async () => {
+        current.items = entered ? [] : [entry];
+        await refreshing;
+      },
+    });
+    view.render();
+    const pending = view.button!.onClick();
+    await Promise.resolve();
+    expect(view.render()).toContain(entered ? "Withdrawing…" : "Submitting…");
+    expect(view.button?.disabled).toBe(true);
+    finish();
+    await pending;
+    expect(view.render()).toContain(
+      entered ? "Submit to competition" : "Withdraw from competition",
+    );
+  }
 });

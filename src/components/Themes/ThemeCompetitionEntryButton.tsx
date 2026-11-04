@@ -11,6 +11,7 @@ import {
   enterCompetition,
   fetchCompetition,
   fetchCurrentCompetition,
+  withdrawFromCompetition,
   type SharedTheme,
 } from "@/utils/api/userThemes";
 
@@ -21,7 +22,7 @@ export default function ThemeCompetitionEntryButton({
 }) {
   const { user, isAuthenticated } = useAuthContext();
   const owner = isAuthenticated && user?.id === theme.user_id;
-  const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { data: competition } = useQuery({
     queryKey: ["theme-competition-current"],
@@ -71,20 +72,24 @@ export default function ThemeCompetitionEntryButton({
   return (
     <Button
       variant="secondary"
-      disabled={!data || entered || full || submitting}
+      disabled={!data || (!entered && full) || !!submitting}
       onClick={async () => {
         if (
           !data ||
-          entered ||
-          full ||
+          (!entered && full) ||
           submitting ||
           competitionStatus(competition) !== "running"
         )
           return;
-        setSubmitting(true);
+        setSubmitting(entered ? "Withdrawing…" : "Submitting…");
         try {
-          await enterCompetition(competition.id, theme.share_code);
-          toast.success(`Submitted to ${competition.title}`);
+          if (entered) {
+            await withdrawFromCompetition(competition.id, theme.share_code);
+            toast.success("Submission withdrawn");
+          } else {
+            await enterCompetition(competition.id, theme.share_code);
+            toast.success(`Submitted to ${competition.title}`);
+          }
           await Promise.all([
             queryClient.invalidateQueries({
               queryKey: ["theme-competition", competition.id],
@@ -95,22 +100,25 @@ export default function ThemeCompetitionEntryButton({
           ]);
         } catch (err) {
           toast.error(
-            err instanceof Error ? err.message : "Couldn't submit your theme",
+            err instanceof Error
+              ? err.message
+              : entered
+                ? "Couldn't withdraw your theme"
+                : "Couldn't submit your theme",
           );
         } finally {
-          setSubmitting(false);
+          setSubmitting(null);
         }
       }}
     >
-      {submitting
-        ? "Submitting…"
-        : !data
+      {submitting ??
+        (!data
           ? "Loading competition…"
           : entered
-            ? "Submitted to competition"
+            ? "Withdraw from competition"
             : full
               ? "Competition entry limit reached"
-              : "Submit to competition"}
+              : "Submit to competition")}
     </Button>
   );
 }

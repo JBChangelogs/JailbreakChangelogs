@@ -328,7 +328,10 @@ function EnterPicker({ competition }: { competition: Competition }) {
   const queryClient = useQueryClient();
   const { user, isAuthenticated, isLoading, setShowLoginModal } =
     useAuthContext();
-  const [busy, setBusy] = useState<string | null>(null);
+  const [busy, setBusy] = useState<{
+    code: string;
+    withdrawing: boolean;
+  } | null>(null);
   const { data: myThemes } = useQuery({
     queryKey: ["my-themes", user?.id],
     queryFn: listMyThemes,
@@ -345,7 +348,10 @@ function EnterPicker({ competition }: { competition: Competition }) {
     action: () => Promise<unknown>,
     success: string,
   ) => {
-    setBusy(code);
+    setBusy({
+      code,
+      withdrawing: entered.has(code),
+    });
     try {
       await action();
       toast.success(success);
@@ -428,6 +434,8 @@ function EnterPicker({ competition }: { competition: Competition }) {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {published.map((theme) => {
             const isIn = entered.has(theme.share_code);
+            const withdrawing =
+              busy?.code === theme.share_code ? busy.withdrawing : isIn;
             return (
               <article
                 key={theme.share_code}
@@ -475,19 +483,21 @@ function EnterPicker({ competition }: { competition: Competition }) {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 p-3">
-                  <Icon
-                    icon={theme.icon ?? DEFAULT_THEME_ICON}
-                    className="size-5 shrink-0"
-                    aria-hidden="true"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      href={`/themes/${theme.share_code}`}
-                      className="hover:text-link focus-visible:after:ring-button-info block truncate font-medium transition-colors after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2"
-                    >
-                      {theme.label}
-                    </Link>
+                <div className="flex flex-1 flex-col items-start gap-3 p-3">
+                  <div className="w-full min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Icon
+                        icon={theme.icon ?? DEFAULT_THEME_ICON}
+                        className="size-5 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <Link
+                        href={`/themes/${theme.share_code}`}
+                        className="hover:text-link focus-visible:after:ring-button-info block min-w-0 truncate font-medium transition-colors after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2"
+                      >
+                        {theme.label}
+                      </Link>
+                    </div>
                     {theme.description && (
                       <p className="text-secondary-text line-clamp-2 text-xs wrap-break-word">
                         {theme.description}
@@ -495,7 +505,7 @@ function EnterPicker({ competition }: { competition: Competition }) {
                     )}
                     <ThemeShareCode code={theme.share_code} />
                   </div>
-                  {isIn ? (
+                  {withdrawing ? (
                     <Button
                       size="sm"
                       variant="secondary"
@@ -513,7 +523,9 @@ function EnterPicker({ competition }: { competition: Competition }) {
                         )
                       }
                     >
-                      {busy === theme.share_code ? "Withdrawing…" : "Withdraw"}
+                      {busy?.code === theme.share_code
+                        ? "Withdrawing…"
+                        : "Withdraw"}
                     </Button>
                   ) : (
                     <Button
@@ -532,7 +544,9 @@ function EnterPicker({ competition }: { competition: Competition }) {
                         )
                       }
                     >
-                      {busy === theme.share_code ? "Submitting…" : "Submit"}
+                      {busy?.code === theme.share_code
+                        ? "Submitting…"
+                        : "Submit"}
                     </Button>
                   )}
                 </div>
