@@ -227,7 +227,7 @@ export default function ThemeMarketplace() {
         </UpdatePill>
       )}
       <div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <form
             className="relative min-w-0 flex-1"
             onSubmit={(event) => {
@@ -241,7 +241,8 @@ export default function ThemeMarketplace() {
               type="text"
               aria-keyshortcuts="/"
               aria-label="Search themes by name, description, author, or id:CODE"
-              placeholder="Name, description, author, or id:ABCDEFGH"
+              aria-describedby="theme-search-hint"
+              placeholder="Search themes…"
               value={input}
               onChange={(event) => setInput(event.target.value)}
               className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-24 transition-all duration-300 focus:outline-none"
@@ -335,6 +336,9 @@ export default function ThemeMarketplace() {
           </DropdownMenu>
         </div>
 
+        <p id="theme-search-hint" className="text-secondary-text mt-2 text-xs">
+          Search by name, description, author, or share code (id:CODE).
+        </p>
         <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
           <Icon
             icon="emojione:light-bulb"
