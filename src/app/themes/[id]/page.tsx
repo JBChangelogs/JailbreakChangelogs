@@ -96,19 +96,17 @@ export default async function ThemeDetailsPage({ params }: Props) {
             )}
           </div>
           <div className="space-y-6 lg:py-4">
-            <div className="bg-button-info/15 text-button-info flex size-14 items-center justify-center rounded-2xl">
-              <Icon
-                icon={theme.icon ?? "lucide:palette"}
-                className="size-8"
-                aria-hidden="true"
-              />
-            </div>
             <div>
               <p className="text-secondary-text mb-2 text-xs font-semibold tracking-widest uppercase">
                 Community theme
               </p>
-              <h1 className="text-3xl font-bold wrap-break-word">
-                {theme.label}
+              <h1 className="flex items-center gap-2 text-3xl font-bold">
+                <Icon
+                  icon={theme.icon ?? "lucide:palette"}
+                  className="size-7 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="min-w-0 wrap-break-word">{theme.label}</span>
               </h1>
               <div className="text-secondary-text mt-3 flex items-center gap-2 text-sm">
                 {creator && (
