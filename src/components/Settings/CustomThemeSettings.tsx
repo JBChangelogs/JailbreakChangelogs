@@ -48,37 +48,15 @@ export const customThemeOption = (theme: CustomTheme): ThemeOption => ({
 });
 
 /**
- * Checks the user can make or save custom themes (Supporter II). If not, a
- * toast says so and links to the supporting page.
- */
-export function useCustomThemeAccess() {
-  const router = useRouter();
-  const { user } = useAuthContext();
-  return () => {
-    // Premium types above 3 are treated as free, as elsewhere.
-    const tier = user?.premiumtype ?? 0;
-    if ((tier > 3 ? 0 : tier) >= 2) return true;
-    toast.error("Custom themes need Supporter II", {
-      description: "Support the site to make and save your own themes.",
-      action: {
-        label: "View supporting",
-        onClick: () => router.push("/supporting"),
-      },
-    });
-    return false;
-  };
-}
-
-/**
  * The user's own custom themes plus shared ones they've used, and the actions on
  * them. Render `dialogs` once; the picker and controls share this state.
  */
 export function useCustomThemes() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { isAuthenticated, user } = useAuthContext();
   const { customTheme } = useTheme();
-  const checkAccess = useCustomThemeAccess();
-  const queryKey = ["my-themes", user?.id];
+  const queryKey = ["my-themes", user?.id, user?.premiumtype];
   const { data } = useQuery({
     queryKey,
     queryFn: listMyThemes,
@@ -142,10 +120,18 @@ export function useCustomThemes() {
   ];
 
   const openEditor = (theme: UserTheme | "new") => {
-    if (!checkAccess()) return;
     if (theme === "new" && mine.length >= limit) {
+      const maxed = (user?.premiumtype ?? 0) >= 3;
       toast.error(`You can have up to ${limit} custom themes.`, {
-        description: "Delete one to make another.",
+        description: maxed
+          ? "Delete one to make another."
+          : "Delete one, or become a supporter for more slots.",
+        action: maxed
+          ? undefined
+          : {
+              label: "View supporting",
+              onClick: () => router.push("/supporting"),
+            },
       });
       return;
     }
@@ -162,7 +148,7 @@ export function useCustomThemes() {
   };
 
   const togglePublished = async (theme: UserTheme) => {
-    if (publishing || !checkAccess()) return;
+    if (publishing) return;
     const published = theme.published_at == null;
     setPublishing(true);
     const toastId = toast.loading(
@@ -382,7 +368,7 @@ export function CustomThemeMenu({
 
 /**
  * Above the picker: open a theme by its share code (anyone), or make a new
- * one (Supporter II). Custom themes show in the picker after the site's.
+ * one. Custom themes show in the picker after the site's.
  */
 export default function CustomThemeControls({
   custom,

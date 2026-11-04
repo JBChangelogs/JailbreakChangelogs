@@ -158,7 +158,7 @@ for (const published of [false, true]) {
     await new Promise((resolve) => setImmediate(resolve));
     expect(view.updates).toEqual([{ id: 1, input: { published: !published } }]);
     expect(view.invalidations).toEqual([
-      ["my-themes", "me"],
+      ["my-themes", "me", 2],
       ["theme-marketplace"],
     ]);
     expect(view.render().publishAction?.props.disabled).toBe(false);

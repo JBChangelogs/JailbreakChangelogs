@@ -432,11 +432,9 @@ export default function CustomThemeEditor({
       toast.error("Couldn't save your theme", {
         description: unreadable
           ? "Some colors are hard to read. See the list in the editor."
-          : err instanceof ThemeApiError && err.code === "supporter_required"
-            ? "Custom themes need Supporter II."
-            : err instanceof Error
-              ? err.message
-              : undefined,
+          : err instanceof Error
+            ? err.message
+            : undefined,
       });
       return null;
     } finally {

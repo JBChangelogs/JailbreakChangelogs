@@ -20,7 +20,6 @@ import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useCustomThemeAccess } from "@/components/Settings/CustomThemeSettings";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import { createMyTheme, fetchSharedTheme } from "@/utils/api/userThemes";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
@@ -37,7 +36,7 @@ import {
  * Opens on any page with ?theme=CODE: a side sheet that shows the shared
  * theme on the whole site, so the visitor can browse around in it. It stays
  * open across pages until they close it (their own theme comes back) or use
- * the theme. Anyone can use it; Supporter II can save a copy.
+ * the theme. Anyone can use it; signed-in users can save a copy.
  */
 export default function SharedThemeDialog() {
   const searchParams = useSearchParams();
@@ -46,7 +45,6 @@ export default function SharedThemeDialog() {
   const queryClient = useQueryClient();
   const { isAuthenticated, setLoginModal } = useAuthContext();
   const { customTheme } = useTheme();
-  const checkAccess = useCustomThemeAccess();
   const [saving, setSaving] = useState(false);
   // The code being previewed; "" for a link with a bad code. This lives in
   // the layout, so it outlasts the ?theme= param while browsing.
@@ -112,7 +110,6 @@ export default function SharedThemeDialog() {
       setLoginModal({ open: true });
       return;
     }
-    if (!checkAccess()) return;
     setSaving(true);
     try {
       const saved = await createMyTheme({
