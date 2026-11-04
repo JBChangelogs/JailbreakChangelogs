@@ -26,7 +26,6 @@ function nodes(value: unknown): Node[] {
 function marketplace({
   signedIn = true,
   author = "other",
-  reportError = false,
   unpublishError = false,
   empty = false,
   pending = false,
@@ -54,7 +53,6 @@ function marketplace({
   let queryKey: unknown[] = [];
   const applied: MarketplaceTheme[] = [];
   const recent: string[] = [];
-  const reports: unknown[] = [];
   const errors: unknown[] = [];
   const copied: string[] = [];
   const updates: unknown[] = [];
@@ -207,15 +205,6 @@ function marketplace({
               updates.push({ id, input });
               if (unpublishError) throw new Error("API unavailable");
             },
-            reportMarketplaceTheme: async (code: string, reason: string) => {
-              reports.push({ code, reason });
-              if (reportError)
-                throw new ThemeApiError(
-                  400,
-                  "report_exists",
-                  "Already reported",
-                );
-            },
           };
         if (name === "@/utils/ui/customTheme")
           return {
@@ -244,6 +233,10 @@ function marketplace({
             },
           };
         if (name === "next/link") return { default: "Link" };
+        if (name === "@/components/Settings/ThemeShareCode")
+          return { default: "ThemeShareCode" };
+        if (name === "@/components/Settings/ReportThemeButton")
+          return { default: "ReportThemeButton" };
         if (name === "@/components/Settings/ThemeIconPicker")
           return { DEFAULT_THEME_ICON: "lucide:palette" };
         if (name.startsWith("@/components/"))
@@ -270,16 +263,12 @@ function marketplace({
     )!;
   const click = (label: string) =>
     (button(label).props.onClick as () => void)();
-  const dialog = () =>
-    render().find((node) => node.type === "ReportReasonModal")!.props;
   return {
     render,
     button,
     click,
-    dialog,
     applied,
     recent,
-    reports,
     errors,
     copied,
     updates,
@@ -304,7 +293,7 @@ function marketplace({
   };
 }
 
-test("marketplace cards show the theme icon and copy the share code", async () => {
+test("marketplace cards show the theme icon and share code", () => {
   for (const icon of [null, "lucide:moon"]) {
     const view = marketplace({ icon });
     const rendered = view.render();
@@ -312,21 +301,10 @@ test("marketplace cards show the theme icon and copy the share code", async () =
     expect(
       nodes(heading).find((node) => node.type === "Icon")!.props.icon,
     ).toBe(icon ?? "lucide:palette");
-    const copy = rendered.find(
-      (node) => node.props["aria-label"] === "Copy share code ABCDEFGH",
-    )!;
-    await (copy.props.onClick as () => Promise<void>)();
-    expect(view.copied).toEqual(["ABCDEFGH"]);
+    expect(
+      rendered.find((node) => node.type === "ThemeShareCode")?.props.code,
+    ).toBe("ABCDEFGH");
   }
-});
-
-test("clipboard failures keep the share code available in the error", async () => {
-  const view = marketplace({ clipboardError: true });
-  const copy = view
-    .render()
-    .find((node) => node.props["aria-label"] === "Copy share code ABCDEFGH")!;
-  await (copy.props.onClick as () => Promise<void>)();
-  expect(view.errors).toEqual([{ description: "ABCDEFGH" }]);
 });
 
 test("search and sort reset pagination, and use theme applies and remembers the share code", () => {
@@ -551,11 +529,12 @@ test("marketplace detail links cover the card while its controls stay above the 
     (node) => node.type === "Link" && node.props.href === "/users/other",
   )!;
   expect(author.props.className).toContain("relative z-10");
-  for (const label of ["Use theme", "Report"]) {
-    expect(marketplace().button(label).props.className).toContain(
-      "relative z-10",
-    );
-  }
+  expect(marketplace().button("Use theme").props.className).toContain(
+    "relative z-10",
+  );
+  const report = rendered.find((node) => node.type === "ReportThemeButton")!;
+  expect(report.props.className).toContain("relative z-10");
+  expect((report.props.theme as MarketplaceTheme).share_code).toBe("ABCDEFGH");
   expect(
     marketplace({ author: "me" }).button("Remove from marketplace").props
       .className,
@@ -580,22 +559,6 @@ test("uploaded screenshots replace the generated marketplace preview", () => {
       .render()
       .some((node) => node.props.compact === true),
   ).toBe(true);
-});
-
-test("report is hidden for visitors and owners; another user's theme can be reported", async () => {
-  for (const options of [{ signedIn: false }, { author: "me" }]) {
-    expect(marketplace(options).button("Report")).toBeUndefined();
-  }
-  const view = marketplace();
-  view.click("Report");
-  expect(view.dialog().open).toBe(true);
-  await (view.dialog().onSubmit as (reason: string) => Promise<void>)(
-    "Offensive name",
-  );
-  expect(view.reports).toEqual([
-    { code: "ABCDEFGH", reason: "Offensive name" },
-  ]);
-  expect(view.dialog().open).toBe(false);
 });
 
 test("owners can unpublish a marketplace card without deleting or stopping their theme", async () => {
@@ -664,18 +627,6 @@ test("search and clear actions live inside the field, and clearing resets result
   );
   expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
   expect(focused).toBe(true);
-});
-
-test("report failure keeps the dialog open and explains duplicate reports", async () => {
-  const view = marketplace({ reportError: true });
-  view.click("Report");
-  await (view.dialog().onSubmit as (reason: string) => Promise<void>)(
-    "Offensive name",
-  );
-  expect(view.dialog().open).toBe(true);
-  expect(view.errors).toEqual([
-    { description: "You've already reported this theme." },
-  ]);
 });
 
 test("empty marketplace explains publishing and links to theme settings", () => {

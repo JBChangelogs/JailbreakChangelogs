@@ -67,6 +67,11 @@ function page(
           UserAvatar: (props: { userId: string }) =>
             createElement("div", { "data-avatar-user": props.userId }),
         };
+      if (name.endsWith("UserProfilePopover"))
+        return {
+          UserProfilePopover: ({ children }: { children?: ReactNode }) =>
+            createElement("span", { "data-popover": true }, children),
+        };
       if (name.endsWith("ChangelogComments"))
         return {
           default: (props: {

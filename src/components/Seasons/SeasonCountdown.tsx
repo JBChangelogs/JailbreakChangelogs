@@ -31,7 +31,7 @@ interface SeasonCountdownProps {
   viewedSeason?: number;
 }
 
-interface TimeLeft {
+export interface TimeLeft {
   days: number;
   hours: number;
   minutes: number;
@@ -194,7 +194,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
   );
 };
 
-function TimeBlocks({ time }: { time: TimeLeft }) {
+export function TimeBlocks({ time }: { time: TimeLeft }) {
   // tensMax caps the tens digit so 00 -> 59 rolls 0 -> 5, not through 9..6
   const units = [
     [time.days, "day", "days", undefined],

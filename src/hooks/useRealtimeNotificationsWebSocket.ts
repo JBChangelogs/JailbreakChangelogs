@@ -1157,7 +1157,10 @@ export function useRealtimeNotificationsWebSocket(
             if (
               payload.action === "marketplace_theme_published" ||
               payload.action === "marketplace_theme_updated" ||
-              payload.action === "marketplace_theme_removed"
+              payload.action === "marketplace_theme_removed" ||
+              payload.action === "competition_entry_added" ||
+              payload.action === "competition_entry_removed" ||
+              payload.action === "competition_finalized"
             ) {
               window.dispatchEvent(
                 new CustomEvent("realtimeThemeMarketplace", {

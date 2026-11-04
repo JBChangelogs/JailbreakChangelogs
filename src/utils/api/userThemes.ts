@@ -284,3 +284,107 @@ export async function deleteThemePreview(id: number, previewId: string) {
   );
   return sanitizeThemePreviews(data.previews);
 }
+
+export type CompetitionStatus = "upcoming" | "running" | "ended";
+
+export const competitionStatus = (
+  c: Pick<ThemeCompetition, "starts_at" | "ends_at">,
+  now = Date.now() / 1000,
+): CompetitionStatus =>
+  now < c.starts_at ? "upcoming" : now < c.ends_at ? "running" : "ended";
+
+export interface CompetitionStanding {
+  theme: MarketplaceTheme;
+  entered_at: number;
+  /** One point per user per day with the theme applied. */
+  user_days: number;
+  current_users: number;
+  rank: number;
+}
+
+export interface ThemeCompetition {
+  id: number;
+  title: string;
+  description: string;
+  style: string;
+  max_entries_per_user: number;
+  entries: number;
+  starts_at: number;
+  ends_at: number;
+  status: CompetitionStatus;
+  winner: CompetitionStanding | null;
+}
+
+export interface CompetitionStandings {
+  competition: ThemeCompetition;
+  interval: number;
+  standings: CompetitionStanding[];
+  /** Users per share code, one row per day. */
+  daily: { timestamp: number; users: Record<string, number> }[];
+}
+
+const sanitizeStanding = <T extends { theme: MarketplaceTheme }>(entry: T) => ({
+  ...entry,
+  theme: sanitizeCustomTheme(entry.theme),
+});
+
+const sanitizeCompetition = <T extends ThemeCompetition>(c: T): T => ({
+  ...c,
+  winner: c.winner && sanitizeStanding(c.winner),
+});
+
+export const fetchCurrentCompetition = async () => {
+  const { competition } = await request<{
+    competition: ThemeCompetition | null;
+  }>("/v2/themes/competitions/current");
+  return competition && sanitizeCompetition(competition);
+};
+
+export const fetchCompetitions = async (baseUrl?: string) => {
+  const data = await request<{ competitions: ThemeCompetition[] }>(
+    "/v2/themes/competitions",
+    {},
+    baseUrl,
+  );
+  return data.competitions.map(sanitizeCompetition);
+};
+
+export const fetchCompetition = async (id: number, baseUrl?: string) => {
+  const data = await request<
+    ThemeCompetition & {
+      items: { theme: MarketplaceTheme; entered_at: number }[];
+    }
+  >(`/v2/themes/competitions/${id}`, {}, baseUrl);
+  return {
+    ...sanitizeCompetition(data),
+    items: data.items.map(sanitizeStanding),
+  };
+};
+
+export const fetchCompetitionStandings = async (
+  id: number,
+  baseUrl?: string,
+) => {
+  const data = await request<CompetitionStandings>(
+    `/v2/themes/competitions/${id}/standings`,
+    {},
+    baseUrl,
+  );
+  return {
+    ...data,
+    competition: sanitizeCompetition(data.competition),
+    standings: data.standings.map(sanitizeStanding),
+  };
+};
+
+export const enterCompetition = (id: number, shareCode: string) =>
+  request<{ success: boolean }>(`/v2/themes/competitions/${id}/entries`, {
+    method: "POST",
+    body: JSON.stringify({ share_code: shareCode }),
+  });
+
+export const withdrawFromCompetition = (id: number, shareCode: string) =>
+  request<{ success: boolean }>(
+    `/v2/themes/competitions/${id}/entries/${encodeURIComponent(shareCode)}`,
+    { method: "DELETE" },
+  );

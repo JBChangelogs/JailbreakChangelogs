@@ -9,14 +9,8 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { UpdatePill } from "@/components/ui/UpdatePill";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Pagination } from "@/components/ui/Pagination";
-import { ReportReasonModal } from "@/components/ui/ReportReasonModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,15 +20,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
+import ReportThemeButton from "@/components/Settings/ReportThemeButton";
+import ThemeShareCode from "@/components/Settings/ThemeShareCode";
 import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   fetchMarketplaceThemes,
-  reportMarketplaceTheme,
   listMyThemes,
   updateMyTheme,
-  ThemeApiError,
   type MarketplaceSort,
   type MarketplaceTheme,
   type MarketplaceThemesPage,
@@ -57,8 +51,6 @@ export default function ThemeMarketplace() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<MarketplaceSort>("newest");
-  const [reporting, setReporting] = useState<MarketplaceTheme | null>(null);
-  const [reason, setReason] = useState("");
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
   const [pendingNew, setPendingNew] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -197,31 +189,6 @@ export default function ThemeMarketplace() {
       });
     } finally {
       setUnpublishing(null);
-    }
-  };
-
-  const submitReport = async (reportReason: string) => {
-    if (!reporting || !isAuthenticated || reporting.user?.id === user?.id)
-      return;
-    try {
-      await reportMarketplaceTheme(reporting.share_code, reportReason);
-      toast.success("Report submitted");
-      setReporting(null);
-      setReason("");
-    } catch (err) {
-      const message =
-        err instanceof ThemeApiError
-          ? err.code === "report_exists"
-            ? "You've already reported this theme."
-            : err.code === "self_report"
-              ? "You can't report your own theme."
-              : err.status === 404
-                ? "This theme is no longer published."
-                : err.message
-          : err instanceof Error
-            ? err.message
-            : undefined;
-      toast.error("Couldn't report the theme", { description: message });
     }
   };
 
@@ -474,7 +441,7 @@ export default function ThemeMarketplace() {
               return (
                 <article
                   key={theme.share_code}
-                  className="border-border-card bg-secondary-bg relative isolate min-w-0 space-y-3 rounded-xl border p-4"
+                  className="border-border-card bg-secondary-bg relative isolate flex min-w-0 flex-col gap-3 rounded-xl border p-4"
                 >
                   {theme.previews?.length ? (
                     <div className="relative z-10">
@@ -537,85 +504,42 @@ export default function ThemeMarketplace() {
                         )}
                       </p>
                     </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group relative z-10 mt-2 inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
-                          aria-label={`Copy share code ${theme.share_code}`}
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(
-                                theme.share_code,
-                              );
-                              toast.success(
-                                `Share code ${theme.share_code} copied!`,
-                                {
-                                  duration: 2000,
-                                },
-                              );
-                            } catch {
-                              toast.error("Couldn't copy the share code", {
-                                description: theme.share_code,
-                              });
-                            }
-                          }}
-                        >
-                          Code: {theme.share_code}
-                          <Icon
-                            icon="heroicons:clipboard-document"
-                            className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100"
-                            aria-hidden="true"
-                          />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="left">
-                        Click to copy code
-                      </TooltipContent>
-                    </Tooltip>
+                    <ThemeShareCode code={theme.share_code} />
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      className="relative z-10"
-                      disabled={inUse}
-                      onClick={() => {
-                        setCustomTheme(theme);
-                        rememberSharedTheme(theme.share_code);
-                        toast.success(`Using ${theme.label}`);
-                      }}
-                    >
-                      {inUse ? "In use" : "Use theme"}
-                    </Button>
-                    {isAuthenticated && user && theme.user?.id === user.id && (
+                  <div className="mt-auto flex flex-wrap gap-2">
+                    <div className="contents">
                       <Button
                         size="sm"
-                        variant="secondary"
                         className="relative z-10"
-                        disabled={unpublishing !== null}
-                        onClick={() => void unpublishTheme(theme)}
+                        disabled={inUse}
+                        onClick={() => {
+                          setCustomTheme(theme);
+                          rememberSharedTheme(theme.share_code);
+                          toast.success(`Using ${theme.label}`);
+                        }}
                       >
-                        {unpublishing === theme.share_code
-                          ? "Removing…"
-                          : "Remove from marketplace"}
+                        {inUse ? "In use" : "Use theme"}
                       </Button>
-                    )}
-                    {isAuthenticated &&
-                      theme.user?.id &&
-                      theme.user.id !== user?.id && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="relative z-10"
-                          onClick={() => {
-                            setReason("");
-                            setReporting(theme);
-                          }}
-                        >
-                          <Icon icon="heroicons:flag" className="h-4 w-4" />
-                          Report
-                        </Button>
-                      )}
+                      {isAuthenticated &&
+                        user &&
+                        theme.user?.id === user.id && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="relative z-10"
+                            disabled={unpublishing !== null}
+                            onClick={() => void unpublishTheme(theme)}
+                          >
+                            {unpublishing === theme.share_code
+                              ? "Removing…"
+                              : "Remove from marketplace"}
+                          </Button>
+                        )}
+                      <ReportThemeButton
+                        theme={theme}
+                        className="relative z-10"
+                      />
+                    </div>
                   </div>
                 </article>
               );
@@ -628,34 +552,6 @@ export default function ThemeMarketplace() {
           onChange={(_event, value) => setPage(value)}
         />
       )}
-      <ReportReasonModal
-        open={reporting !== null}
-        onClose={() => setReporting(null)}
-        onSubmit={submitReport}
-        reportReason={reason}
-        setReportReason={setReason}
-        subject="theme"
-        title={`Report ${reporting?.label ?? "theme"}`}
-      >
-        {reporting?.user?.id && (
-          <div className="text-secondary-text flex min-w-0 items-center gap-2 text-sm">
-            <span className="shrink-0">Created by</span>
-            <UserAvatar
-              userId={reporting.user.id}
-              avatarHash={reporting.user.avatar ?? null}
-              username={reporting.user.username}
-              custom_avatar={reporting.user.custom_avatar}
-              premiumType={reporting.user.premiumtype}
-              settings={reporting.user.settings}
-              size={6}
-              showBadge={false}
-            />
-            <span className="text-primary-text min-w-0 truncate font-medium">
-              {reporting.user.username}
-            </span>
-          </div>
-        )}
-      </ReportReasonModal>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import {
   type MarketplaceTheme,
   type MarketplaceThemesPage,
   type MarketplaceSort,
+  type ThemeCompetition,
 } from "@/utils/api/userThemes";
 import { SHARE_CODE } from "@/utils/ui/customTheme";
 
@@ -13,24 +14,12 @@ export type MarketplaceEvent =
     }
   | { action: "marketplace_theme_removed"; data: { share_code: string } };
 
-export function parseMarketplaceEvent(value: unknown): MarketplaceEvent | null {
+function parseMarketplaceTheme(value: unknown): MarketplaceTheme | null {
   if (!value || typeof value !== "object") return null;
-  const { action, data } = value as { action?: unknown; data?: unknown };
-  if (!data || typeof data !== "object") return null;
-  const theme = data as MarketplaceTheme;
+  const theme = value as MarketplaceTheme;
   if (
     typeof theme.share_code !== "string" ||
-    !SHARE_CODE.test(theme.share_code)
-  )
-    return null;
-  if (action === "marketplace_theme_removed")
-    return { action, data: { share_code: theme.share_code } };
-  if (
-    action !== "marketplace_theme_published" &&
-    action !== "marketplace_theme_updated"
-  )
-    return null;
-  if (
+    !SHARE_CODE.test(theme.share_code) ||
     typeof theme.label !== "string" ||
     (theme.description != null && typeof theme.description !== "string") ||
     (theme.scheme !== "dark" && theme.scheme !== "light") ||
@@ -50,7 +39,100 @@ export function parseMarketplaceEvent(value: unknown): MarketplaceEvent | null {
       (user.global_name != null && typeof user.global_name !== "string"))
   )
     return null;
-  return { action, data: sanitizeCustomTheme(theme) };
+  return sanitizeCustomTheme(theme);
+}
+
+export function parseMarketplaceEvent(value: unknown): MarketplaceEvent | null {
+  if (!value || typeof value !== "object") return null;
+  const { action, data } = value as { action?: unknown; data?: unknown };
+  if (!data || typeof data !== "object") return null;
+  const shareCode = (data as { share_code?: unknown }).share_code;
+  if (typeof shareCode !== "string" || !SHARE_CODE.test(shareCode)) return null;
+  if (action === "marketplace_theme_removed")
+    return { action, data: { share_code: shareCode } };
+  if (
+    action !== "marketplace_theme_published" &&
+    action !== "marketplace_theme_updated"
+  )
+    return null;
+  const theme = parseMarketplaceTheme(data);
+  return theme && { action, data: theme };
+}
+
+export type CompetitionEvent =
+  | {
+      action: "competition_entry_added";
+      competitionId: number;
+      entry: { theme: MarketplaceTheme; entered_at: number };
+    }
+  | {
+      action: "competition_entry_removed";
+      competitionId: number;
+      shareCode: string;
+    }
+  | { action: "competition_finalized"; competition: ThemeCompetition }
+  /** A theme entered in these competitions was published, edited or unlisted. */
+  | {
+      action: "competition_theme_changed";
+      competitionIds: number[];
+      event: MarketplaceEvent;
+    };
+
+export function parseCompetitionEvent(value: unknown): CompetitionEvent | null {
+  if (!value || typeof value !== "object") return null;
+  const { action, data } = value as {
+    action?: unknown;
+    data?: Record<string, unknown>;
+  };
+  if (!data || typeof data !== "object") return null;
+  const competitionId = data.competition_id;
+  if (action === "competition_entry_added") {
+    const theme = parseMarketplaceTheme(data.theme);
+    if (
+      !theme ||
+      typeof competitionId !== "number" ||
+      typeof data.entered_at !== "number"
+    )
+      return null;
+    return {
+      action,
+      competitionId,
+      entry: { theme, entered_at: data.entered_at },
+    };
+  }
+  if (action === "competition_entry_removed") {
+    if (
+      typeof competitionId !== "number" ||
+      typeof data.share_code !== "string" ||
+      !SHARE_CODE.test(data.share_code)
+    )
+      return null;
+    return { action, competitionId, shareCode: data.share_code };
+  }
+  if (action === "competition_finalized") {
+    const competition = data.competition as ThemeCompetition | undefined;
+    if (!competition || typeof competition.id !== "number") return null;
+    const winner = competition.winner
+      ? parseMarketplaceTheme(competition.winner.theme)
+      : null;
+    return {
+      action,
+      competition: {
+        ...competition,
+        winner:
+          competition.winner && winner
+            ? { ...competition.winner, theme: winner }
+            : null,
+      },
+    };
+  }
+  const event = parseMarketplaceEvent(value);
+  const ids = Array.isArray(data.competitions)
+    ? data.competitions.filter((id): id is number => typeof id === "number")
+    : [];
+  return event && ids.length
+    ? { action: "competition_theme_changed", competitionIds: ids, event }
+    : null;
 }
 
 export function marketplaceMatchesSearch(

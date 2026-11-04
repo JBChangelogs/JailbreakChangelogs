@@ -5,11 +5,18 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { useTheme } from "@/contexts/ThemeContext";
-import type { SharedTheme } from "@/utils/api/userThemes";
+import ReportThemeButton from "@/components/Settings/ReportThemeButton";
+import type { MarketplaceTheme, SharedTheme } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
 
-export default function ThemeDetailsActions({ theme }: { theme: SharedTheme }) {
+export default function ThemeDetailsActions({
+  theme,
+  author,
+}: {
+  theme: SharedTheme;
+  author: MarketplaceTheme["user"];
+}) {
   const { customTheme } = useTheme();
   const inUse = customTheme?.share_code === theme.share_code;
 
@@ -45,6 +52,7 @@ export default function ThemeDetailsActions({ theme }: { theme: SharedTheme }) {
         <Icon icon="lucide:share-2" aria-hidden="true" />
         Share theme
       </Button>
+      <ReportThemeButton theme={{ ...theme, user: author }} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { BASE_API_URL, fetchUserById } from "@/utils/api/api";
 import { fetchSharedTheme, ThemeApiError } from "@/utils/api/userThemes";
 import { normalizeShareCode, SHARE_CODE } from "@/utils/ui/customTheme";
 import { UserAvatar } from "@/utils/ui/avatar";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -124,16 +125,41 @@ export default async function ThemeDetailsPage({ params }: Props) {
                 )}
                 <p className="min-w-0 truncate">
                   Created by{" "}
-                  <Link
-                    href={`/users/${theme.user_id}`}
-                    className="text-link hover:text-link-hover"
-                  >
-                    {author}
-                  </Link>
+                  {creator ? (
+                    <UserProfilePopover user={creator}>
+                      <Link
+                        href={`/users/${theme.user_id}`}
+                        prefetch={false}
+                        className="text-link hover:text-link-hover"
+                      >
+                        {author}
+                      </Link>
+                    </UserProfilePopover>
+                  ) : (
+                    <Link
+                      href={`/users/${theme.user_id}`}
+                      className="text-link hover:text-link-hover"
+                    >
+                      {author}
+                    </Link>
+                  )}
                 </p>
               </div>
             </div>
-            <ThemeDetailsActions theme={theme} />
+            <ThemeDetailsActions
+              theme={theme}
+              author={
+                creator && {
+                  id: theme.user_id,
+                  username: creator.username,
+                  global_name: creator.global_name,
+                  avatar: creator.avatar,
+                  custom_avatar: creator.custom_avatar,
+                  premiumtype: creator.premiumtype,
+                  settings: creator.settings_v2,
+                }
+              }
+            />
             <p className="text-secondary-text text-center text-xs">
               Anyone can use this theme. Change it anytime in Settings.
             </p>

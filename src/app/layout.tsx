@@ -18,6 +18,7 @@ import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import LatestReleaseDialog from "@/components/Changelogs/LatestReleaseDialog";
 import SharedThemeDialog from "@/components/Settings/SharedThemeDialog";
 import ThemeEditorHost from "@/components/Settings/ThemeEditorHost";
+import CompetitionBanner from "@/components/Themes/CompetitionBanner";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import OfflineNavigationRecovery from "@/components/Layout/OfflineNavigationRecovery";
@@ -418,6 +419,9 @@ export default async function RootLayout({
                         />
                       </HideOnAccessDenied>
                     </Suspense>
+                    <HideOnAccessDenied>
+                      <CompetitionBanner />
+                    </HideOnAccessDenied>
                     <main className="min-h-screen flex-1">
                       <NuqsAdapter>
                         <Suspense>{children}</Suspense>
