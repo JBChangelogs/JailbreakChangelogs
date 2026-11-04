@@ -22,6 +22,7 @@ import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import ReportThemeButton from "@/components/Settings/ReportThemeButton";
 import ThemeShareCode from "@/components/Settings/ThemeShareCode";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -493,12 +494,15 @@ export default function ThemeMarketplace() {
                       <p className="min-w-0 truncate">
                         Created by{" "}
                         {theme.user?.id ? (
-                          <Link
-                            href={`/users/${theme.user.id}`}
-                            className="text-link hover:text-link-hover relative z-10 transition-colors"
-                          >
-                            {author}
-                          </Link>
+                          <UserProfilePopover user={theme.user}>
+                            <Link
+                              href={`/users/${theme.user.id}`}
+                              prefetch={false}
+                              className="text-link hover:text-link-hover relative z-10 transition-colors"
+                            >
+                              {author}
+                            </Link>
+                          </UserProfilePopover>
                         ) : (
                           author
                         )}

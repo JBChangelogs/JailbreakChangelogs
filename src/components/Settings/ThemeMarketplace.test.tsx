@@ -215,6 +215,8 @@ function marketplace({
         if (name === "@/utils/ui/searchShortcut")
           return { isItemSearchShortcut };
         if (name === "@/utils/ui/avatar") return { UserAvatar: "UserAvatar" };
+        if (name === "@/components/Users/UserProfilePopover")
+          return { UserProfilePopover: "UserProfilePopover" };
         if (name === "@/utils/ui/marketplaceRealtime")
           return marketplaceRealtime;
         if (name === "@/hooks/useDebounce")
@@ -529,6 +531,10 @@ test("marketplace detail links cover the card while its controls stay above the 
     (node) => node.type === "Link" && node.props.href === "/users/other",
   )!;
   expect(author.props.className).toContain("relative z-10");
+  expect(author.props.prefetch).toBe(false);
+  const popover = rendered.find((node) => node.type === "UserProfilePopover")!;
+  expect((popover.props.user as MarketplaceTheme["user"])?.id).toBe("other");
+  expect(nodes(popover.props.children)).toContain(author);
   expect(marketplace().button("Use theme").props.className).toContain(
     "relative z-10",
   );

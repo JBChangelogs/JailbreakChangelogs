@@ -8,6 +8,7 @@ import {
 } from "@/components/Themes/CompetitionDetails";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { BASE_API_URL } from "@/utils/api/api";
 import {
   competitionStatus,
@@ -90,10 +91,7 @@ export default async function CompetitionsPage() {
             {competitions.map((c) => {
               return (
                 <li key={c.id}>
-                  <Link
-                    href={`/themes/competitions/${c.id}`}
-                    className="border-border-card bg-secondary-bg hover:border-border-focus group flex h-full flex-col gap-4 rounded-xl border p-5 transition-colors"
-                  >
+                  <article className="border-border-card bg-secondary-bg hover:border-border-focus group relative isolate flex h-full flex-col gap-4 rounded-xl border p-5 transition-colors">
                     <div className="min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-secondary-text text-xs font-semibold tracking-widest uppercase">
@@ -102,7 +100,12 @@ export default async function CompetitionsPage() {
                         <CompetitionStatusBadge status={competitionStatus(c)} />
                       </div>
                       <h2 className="group-hover:text-link mt-1 text-lg font-semibold transition-colors">
-                        {c.title}
+                        <Link
+                          href={`/themes/competitions/${c.id}`}
+                          className="focus-visible:after:ring-button-info after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2"
+                        >
+                          {c.title}
+                        </Link>
                       </h2>
                       {c.description && (
                         <p className="text-secondary-text mt-1 line-clamp-2 text-sm">
@@ -138,7 +141,20 @@ export default async function CompetitionsPage() {
                             aria-hidden="true"
                           />
                           <span className="truncate">
-                            Won by {winnerName(c.winner.theme.user)}
+                            Won by{" "}
+                            {c.winner.theme.user?.id ? (
+                              <UserProfilePopover user={c.winner.theme.user}>
+                                <Link
+                                  href={`/users/${c.winner.theme.user.id}`}
+                                  prefetch={false}
+                                  className="text-link hover:text-link-hover relative z-10 transition-colors"
+                                >
+                                  {winnerName(c.winner.theme.user)}
+                                </Link>
+                              </UserProfilePopover>
+                            ) : (
+                              winnerName(c.winner.theme.user)
+                            )}
                             <span className="text-secondary-text">
                               {" "}
                               · {c.winner.theme.label}
@@ -147,7 +163,7 @@ export default async function CompetitionsPage() {
                         </span>
                       )}
                     </div>
-                  </Link>
+                  </article>
                 </li>
               );
             })}
