@@ -69,6 +69,7 @@ test("cursor toggle applies immediately, saves locally and notifies subscribers"
     {
       exports,
       Event,
+      CustomEvent,
       document: { documentElement: { dataset } },
       window: events,
       require: () => ({

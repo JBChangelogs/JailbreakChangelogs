@@ -425,6 +425,9 @@ export default function ThemeSettings({
             </label>
             <p className="text-secondary-text mt-1 text-sm">
               {FRONTEND_SETTINGS["theme-cursor"].description}
+              {isAuthenticated
+                ? " Syncs with your account."
+                : " Saved on this browser."}
             </p>
           </div>
           <Switch
@@ -449,6 +452,9 @@ export default function ThemeSettings({
             </label>
             <p className="text-secondary-text mt-1 text-sm">
               {FRONTEND_SETTINGS["theme-shortcut"].description}
+              {isAuthenticated
+                ? " Syncs with your account."
+                : " Saved on this browser."}
             </p>
           </div>
           <Switch

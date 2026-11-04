@@ -3,6 +3,7 @@
 import { useEffect, useReducer, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   competitionStatus,
@@ -10,6 +11,7 @@ import {
 } from "@/utils/api/userThemes";
 import {
   getThemeCompetitionBannerEnabled,
+  setThemeCompetitionBannerEnabled,
   subscribeThemeCompetitionBanner,
   syncThemeCompetitionBannerPreferences,
 } from "@/utils/ui/themeCompetitionBanner";
@@ -64,7 +66,7 @@ export default function CompetitionBanner() {
   const href = `/themes/competitions/${competition.id}`;
 
   return (
-    <div className="bg-button-info/10 border-button-info/30 text-primary-text flex items-center justify-center gap-2 border-b px-4 py-2 text-center text-sm">
+    <div className="bg-button-info/10 border-button-info/30 text-primary-text relative flex items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm">
       <Icon
         icon="heroicons:trophy"
         className="text-button-info size-4 shrink-0"
@@ -97,6 +99,21 @@ export default function CompetitionBanner() {
           .
         </p>
       )}
+      <button
+        type="button"
+        aria-label="Hide theme competition banner"
+        title="Hide banner. Turn it back on in Settings or global search."
+        className="text-secondary-text hover:text-primary-text hover:bg-button-info/10 focus-visible:ring-button-info absolute top-1/2 right-2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        onClick={() => {
+          setThemeCompetitionBannerEnabled(false);
+          toast.success("Competition banner hidden", {
+            description:
+              "Turn it back on in Settings → Themes or global search.",
+          });
+        }}
+      >
+        <Icon icon="heroicons:x-mark" className="size-4" aria-hidden="true" />
+      </button>
     </div>
   );
 }

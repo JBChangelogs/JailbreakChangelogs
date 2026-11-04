@@ -1,4 +1,8 @@
 import { safeLocalStorage } from "@/utils/storage/safeStorage";
+import {
+  getCachedPreference,
+  hasSyncedPreferences,
+} from "@/utils/preferences/realtimePreferencesCache";
 
 /** A theme as GET /v2/themes returns it; the dashboard edits these. */
 export interface SiteTheme {
@@ -153,18 +157,64 @@ export function themeInitScript(
 
 const SHORTCUT_HIDDEN_KEY = "theme-shortcut-hidden";
 const SHORTCUT_EVENT = "themeShortcutChanged";
+const SHORTCUT_PREFERENCE_KEY = "theme_shortcut_hidden";
 
-/** Whether the header's theme button is turned off on this browser. */
 export function getThemeShortcutHidden(): boolean {
   return safeLocalStorage.getItem(SHORTCUT_HIDDEN_KEY) === "true";
 }
 
-export function setThemeShortcutHidden(hidden: boolean) {
+function applyThemeShortcutHidden(hidden: boolean) {
   safeLocalStorage.setItem(SHORTCUT_HIDDEN_KEY, String(hidden));
   window.dispatchEvent(new Event(SHORTCUT_EVENT));
+}
+
+export function setThemeShortcutHidden(hidden: boolean) {
+  applyThemeShortcutHidden(hidden);
+  window.dispatchEvent(
+    new CustomEvent("sendRealtimePreference", {
+      detail: { key: SHORTCUT_PREFERENCE_KEY, value: hidden },
+    }),
+  );
 }
 
 export function subscribeThemeShortcut(onChange: () => void) {
   window.addEventListener(SHORTCUT_EVENT, onChange);
   return () => window.removeEventListener(SHORTCUT_EVENT, onChange);
+}
+
+export function syncThemeShortcutPreferences() {
+  const apply = (value: unknown) => {
+    if (value === undefined || typeof value === "boolean")
+      applyThemeShortcutHidden(value ?? false);
+  };
+  const onSet = (event: Event) => {
+    const { key, value } = (
+      event as CustomEvent<{ key: string; value?: unknown }>
+    ).detail;
+    if (key === SHORTCUT_PREFERENCE_KEY) apply(value);
+  };
+  const onSnapshot = (event: Event) => {
+    apply(
+      (event as CustomEvent<Record<string, unknown>>).detail[
+        SHORTCUT_PREFERENCE_KEY
+      ],
+    );
+  };
+  const onDelete = (event: Event) => {
+    if (
+      (event as CustomEvent<{ key: string }>).detail.key ===
+      SHORTCUT_PREFERENCE_KEY
+    )
+      apply(false);
+  };
+  window.addEventListener("realtimePreference", onSet);
+  window.addEventListener("realtimePreferences", onSnapshot);
+  window.addEventListener("realtimePreferenceDeleted", onDelete);
+  if (hasSyncedPreferences())
+    apply(getCachedPreference(SHORTCUT_PREFERENCE_KEY));
+  return () => {
+    window.removeEventListener("realtimePreference", onSet);
+    window.removeEventListener("realtimePreferences", onSnapshot);
+    window.removeEventListener("realtimePreferenceDeleted", onDelete);
+  };
 }

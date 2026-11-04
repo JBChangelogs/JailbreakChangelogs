@@ -54,14 +54,12 @@ export const FRONTEND_SETTINGS: Record<string, FrontendSetting> = {
   },
   "theme-cursor": {
     title: "Use theme cursor",
-    description:
-      "Match your cursor to your selected theme. Saved on this browser.",
+    description: "Match your cursor to your selected theme.",
     target: "themes",
   },
   "theme-shortcut": {
     title: "Theme button in header",
-    description:
-      "Show a button in the header that opens these settings. Saved on this browser.",
+    description: "Show a button in the header that opens these settings.",
     target: "themes",
   },
   "theme-competition-banner": {
