@@ -59,8 +59,6 @@ test("feature maintenance overrides apply only in development and otherwise use 
                     return railwayValue;
                   },
                 };
-              if (name === "@/utils/deployment")
-                return { isTestingDeploy: () => false };
               throw new Error(`Unexpected import: ${name}`);
             },
           });
@@ -95,13 +93,10 @@ test("maintenance metadata uses one branded title without inheriting a duplicate
       exports,
       URL,
       process: { env: { NODE_ENV: "production" } },
-      require: (name: string) =>
-        name === "@/utils/api/runtimeFlags"
-          ? {
-              getBooleanFlag: (key: string) =>
-                key === "maintenance-mode" ? globalEnabled : !globalEnabled,
-            }
-          : { isTestingDeploy: () => false },
+      require: () => ({
+        getBooleanFlag: (key: string) =>
+          key === "maintenance-mode" ? globalEnabled : !globalEnabled,
+      }),
     });
     for (const getter of [
       "getInventoryMaintenanceMetadata",

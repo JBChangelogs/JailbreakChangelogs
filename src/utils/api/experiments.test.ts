@@ -85,8 +85,8 @@ test("rejected overrides identify the exact key and accepted overrides preserve 
   ).not.toThrow();
 });
 
-test("only enabled tester and owner flags permit overrides", () => {
-  for (const flag of ["is_tester", "is_owner"]) {
+test("only enabled owner flags permit overrides", () => {
+  for (const flag of ["is_owner"]) {
     expect(
       canOverrideExperiments({
         flags: [{ flag, enabled: true, created_at: 0 }],
@@ -133,12 +133,12 @@ test("headers use validated per-account preferences only in the browser and only
   const setUser = (id: string, enabled = true) =>
     items.set(
       "user",
-      JSON.stringify({ id, flags: [{ flag: "is_tester", enabled }] }),
+      JSON.stringify({ id, flags: [{ flag: "is_owner", enabled }] }),
     );
   try {
-    setUser("tester-a");
+    setUser("user-a");
     expect(
-      saveExperimentOverrides("tester-a", {
+      saveExperimentOverrides("user-a", {
         search: "treatment",
         other: "control",
       }),
@@ -154,27 +154,27 @@ test("headers use validated per-account preferences only in the browser and only
       ],
     ).toBeUndefined();
 
-    setUser("tester-b");
+    setUser("user-b");
     expect(getExperimentHeader()).toBe("");
-    setUser("tester-a", false);
+    setUser("user-a", false);
     expect(getExperimentHeader()).toBe("");
     items.delete("user");
     expect(getExperimentHeader()).toBe("");
 
-    setUser("tester-a");
+    setUser("user-a");
     items.set(
-      "experiment-overrides:tester-a",
+      "experiment-overrides:user-a",
       JSON.stringify({
         valid: "treatment",
         "bad,other=control": "treatment",
         unknown: "other",
       }),
     );
-    expect(readExperimentOverrides("tester-a")).toEqual({ valid: "treatment" });
+    expect(readExperimentOverrides("user-a")).toEqual({ valid: "treatment" });
     expect(getExperimentHeader()).toBe("valid=treatment");
-    items.set("experiment-overrides:tester-a", "[]");
-    expect(readExperimentOverrides("tester-a")).toEqual({});
-    expect(saveExperimentOverrides("tester-a", {})).toBe(true);
+    items.set("experiment-overrides:user-a", "[]");
+    expect(readExperimentOverrides("user-a")).toEqual({});
+    expect(saveExperimentOverrides("user-a", {})).toBe(true);
     expect(
       buildApiFetchRequest("https://api.example.com", "/v2/items/search")
         .headers["X-Experiment"],

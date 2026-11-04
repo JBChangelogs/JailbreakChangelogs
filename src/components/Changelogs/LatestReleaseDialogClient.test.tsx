@@ -156,7 +156,6 @@ test("seen releases, disabled announcements, and excluded routes do not show ban
   for (const options of [
     { seen: release.slug },
     { disabled: true },
-    { pathname: "/access-denied" },
     { pathname: "/dev/changelogs" },
     { pathname: `/dev/changelogs/${release.slug}` },
   ]) {

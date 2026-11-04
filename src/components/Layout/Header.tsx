@@ -29,7 +29,6 @@ import { useEscapeLogin } from "@/utils/auth/escapeLogin";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { canOverrideExperiments } from "@/utils/api/experiments";
 import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOverridesIndicator";
 import type { UserData } from "@/types/auth";
 import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
@@ -289,40 +288,36 @@ const MobileDrawer = memo(function MobileDrawer({
                 Settings
               </span>
             </Link>
-            {(canOverrideExperiments(userData) || isOwner) && (
+            {isOwner && (
               <details className="group/tools">
                 <summary className="text-primary-text hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
                   <Icon
                     icon="mdi:flask-outline"
                     className="text-secondary-text h-5 w-5 shrink-0"
                   />
-                  <span className="flex-1">
-                    {isOwner ? "Owner tools" : "Tester tools"}
-                  </span>
+                  <span className="flex-1">Owner tools</span>
                   <Icon
                     icon="mdi:chevron-down"
                     className="text-secondary-text h-4 w-4 shrink-0 transition-transform duration-300 group-open/tools:rotate-180 motion-reduce:transition-none"
                   />
                 </summary>
                 <div className="space-y-0.5 pl-3">
-                  {canOverrideExperiments(userData) && (
-                    <Link
-                      href="/experiments"
-                      onClick={onClose}
-                      className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                        <Icon
-                          icon="mdi:flask-outline"
-                          className="text-secondary-text h-5 w-5"
-                          inline={true}
-                        />
-                      </div>
-                      <span className="text-primary-text text-sm font-semibold">
-                        Experiments
-                      </span>
-                    </Link>
-                  )}
+                  <Link
+                    href="/experiments"
+                    onClick={onClose}
+                    className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                      <Icon
+                        icon="mdi:flask-outline"
+                        className="text-secondary-text h-5 w-5"
+                        inline={true}
+                      />
+                    </div>
+                    <span className="text-primary-text text-sm font-semibold">
+                      Experiments
+                    </span>
+                  </Link>
                   {isOwner && (
                     <>
                       <button

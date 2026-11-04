@@ -34,7 +34,7 @@ test("login validates directly and stores a browser session only after success",
     "localhost",
     "127.0.0.1",
     "jailbreakchangelogs.com",
-    "testing.jailbreakchangelogs.com",
+    "www.jailbreakchangelogs.com",
     "jailbreakchangelogs.com.example.org",
   ]) {
     const calls: { url: string; options: RequestInit }[] = [];
@@ -106,7 +106,7 @@ test("login validates directly and stores a browser session only after success",
     expect(writes[0]!.includes("Secure")).toBe(protocol === "https:");
     expect(writes[0]!.includes("Domain=.jailbreakchangelogs.com")).toBe(
       hostname === "jailbreakchangelogs.com" ||
-        hostname === "testing.jailbreakchangelogs.com",
+        hostname === "www.jailbreakchangelogs.com",
     );
     expect(
       buildApiFetchRequest("https://api.example.com", "/v2/users/me").headers

@@ -93,7 +93,7 @@ test("fails independently when only the public API connection breaks", async () 
 });
 
 test("uses the public API outside production and fails on missing configuration", async () => {
-  process.env.RAILWAY_ENVIRONMENT_NAME = "testing";
+  process.env.RAILWAY_ENVIRONMENT_NAME = "development";
   fetchSpy.mockImplementation(async () => Response.json({ status: "ok" }));
   expect((await GET()).status).toBe(200);
   expect(fetchSpy.mock.calls.map(([url]) => url)).toEqual([

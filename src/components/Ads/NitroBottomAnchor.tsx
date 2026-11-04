@@ -19,7 +19,6 @@ export default function NitroBottomAnchor() {
   const pathname = usePathname();
   const createdRef = useRef(false);
   const generationRef = useRef(0);
-  const isAccessDeniedRoute = pathname === "/access-denied";
   const isMessagesRoute =
     pathname === "/messages" || pathname.startsWith("/messages/");
 
@@ -37,7 +36,7 @@ export default function NitroBottomAnchor() {
 
     if (isLoading) return;
 
-    if (isAccessDeniedRoute || isMessagesRoute) {
+    if (isMessagesRoute) {
       generationRef.current++;
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
@@ -124,7 +123,7 @@ export default function NitroBottomAnchor() {
       log.warn(`[Nitro Ad] Error initializing bottom anchor ad:`, error);
       createdRef.current = false;
     }
-  }, [user?.premiumtype, isLoading, isAccessDeniedRoute, isMessagesRoute]);
+  }, [user?.premiumtype, isLoading, isMessagesRoute]);
 
   return null;
 }

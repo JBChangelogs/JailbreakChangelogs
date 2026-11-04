@@ -34,10 +34,10 @@ const sharedEnv = {
   VGY_ME_USERKEY: preserve(),
 };
 
-function frontend(testing: boolean) {
-  return service(testing ? "(Testing) FrontEnd" : "(Prod) FrontEnd", {
+function frontend() {
+  return service("(Prod) FrontEnd", {
     source: github("JBChangelogs/JailbreakChangelogs", {
-      branch: testing ? "testing" : "main",
+      branch: "main",
       checkSuites: true,
     }),
     build: {
@@ -57,27 +57,17 @@ function frontend(testing: boolean) {
     },
     env: {
       ...sharedEnv,
-      ...(testing
-        ? {
-            BUN_INSTALL_CACHE_DIR: preserve(),
-            GEMINI_API_KEY: preserve(),
-            GITHUB_API_RELEASES_URL: preserve(),
-            NEXT_PUBLIC_INVENTORY_API_ISSUES: preserve(),
-            NEXT_PUBLIC_SHOW_LIVE_EVENT_COUNTDOWN: preserve(),
-            OPEN_ROUTER_API_KEY: preserve(),
-          }
-        : { GITHUB_API_RELEASES_URL: preserve() }),
+      GITHUB_API_RELEASES_URL: preserve(),
     },
   });
 }
 
-// Testing and production both run as services in the "production" environment.
 export default defineRailway((ctx) => {
   if (ctx.environment !== "production") {
     throw new Error(`No frontend Railway configuration for environment: ${ctx.environment}`);
   }
 
   return project("Jailbreak Changelogs", {
-    resources: group("Frontend", [frontend(false), frontend(true)]),
+    resources: group("Frontend", [frontend()]),
   });
 });

@@ -8,7 +8,7 @@ test("logout revokes directly, clears locally, and reports incomplete revocation
     "localhost",
     "127.0.0.1",
     "jailbreakchangelogs.com",
-    "testing.jailbreakchangelogs.com",
+    "www.jailbreakchangelogs.com",
     "jailbreakchangelogs.com.example.org",
   ]) {
     for (const status of [
@@ -116,7 +116,7 @@ test("logout revokes directly, clears locally, and reports incomplete revocation
         const expired = "jbcl_token=; Path=/; Max-Age=0; SameSite=Lax";
         expect(cookieWrites).toEqual(
           hostname === "jailbreakchangelogs.com" ||
-            hostname === "testing.jailbreakchangelogs.com"
+            hostname === "www.jailbreakchangelogs.com"
             ? [expired, `${expired}; Domain=.jailbreakchangelogs.com`]
             : [expired],
         );

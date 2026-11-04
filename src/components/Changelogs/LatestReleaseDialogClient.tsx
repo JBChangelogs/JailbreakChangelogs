@@ -63,8 +63,6 @@ export default function LatestReleaseDialogClient({
     };
     if (isAuthenticated && (!preferencesSynced || disabled)) return hide();
 
-    if (pathname === "/access-denied") return hide();
-
     if (
       pathname === "/dev/changelogs" ||
       pathname.startsWith("/dev/changelogs/")

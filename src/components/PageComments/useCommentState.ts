@@ -1857,13 +1857,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const containerBgClass =
     type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
 
-  const isTester =
-    (user as UserData | null)?.flags?.some(
-      (f) =>
-        (f.flag === "is_tester" || f.flag === "website_moderator") &&
-        f.enabled === true,
-    ) ?? false;
-
   const canDeleteAnyComment =
     (user as UserData | null)?.flags?.some(
       (f) =>
@@ -1958,7 +1951,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
     toggleCommentExpand,
     getStableReactionOrder,
     setLoginModal,
-    isTester,
     canDeleteAnyComment,
   };
 }

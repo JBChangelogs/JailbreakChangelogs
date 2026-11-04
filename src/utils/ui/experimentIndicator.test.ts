@@ -58,14 +58,14 @@ test("persists badge placement and notifies tabs without changing experiments or
     expect(getExperimentIndicatorPlacement()).toBe("floating");
     items.set("experiment-indicator-placement", "invalid");
     expect(getExperimentIndicatorPlacement()).toBe("floating");
-    saveExperimentOverrides("tester", { search: "treatment" });
+    saveExperimentOverrides("user-a", { search: "treatment" });
     setOverrideSyncEnabled(true);
     changes = 0;
     for (const placement of ["hidden", "header", "floating"] as const) {
       setExperimentIndicatorPlacement(placement);
       expect(getExperimentIndicatorPlacement()).toBe(placement);
       expect(items.get("experiment-indicator-placement")).toBe(placement);
-      expect(readExperimentOverrides("tester")).toEqual({
+      expect(readExperimentOverrides("user-a")).toEqual({
         search: "treatment",
       });
       expect(isOverrideSyncEnabled()).toBe(true);
@@ -119,7 +119,7 @@ test("persists badge placement and notifies tabs without changing experiments or
     );
     expect(getExperimentIndicatorPlacement()).toBe("floating");
     expect(outgoing).toHaveLength(3);
-    expect(readExperimentOverrides("tester")).toEqual({ search: "treatment" });
+    expect(readExperimentOverrides("user-a")).toEqual({ search: "treatment" });
     expect(isOverrideSyncEnabled()).toBe(true);
     stopSync();
     changes = 0;

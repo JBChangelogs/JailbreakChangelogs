@@ -9,7 +9,7 @@ export async function fetchAppAccess(signal?: AbortSignal): Promise<boolean> {
     process.env.NEXT_PUBLIC_API_URL,
     "/v2/users/me/experiments",
   );
-  // Keeps X-Experiment, so a tester forcing app_available Off sees what
+  // Keeps X-Experiment, so an owner forcing app_available Off sees what
   // someone without access sees.
   const response = await fetch(url, {
     headers,

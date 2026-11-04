@@ -1,6 +1,6 @@
 /**
  * Feature flags utility for controlling feature availability
- * across different environments (testing vs production)
+ * across different environments (development vs production)
  */
 
 export const FEATURE_FLAGS = {

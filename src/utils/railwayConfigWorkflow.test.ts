@@ -15,24 +15,15 @@ test("Railway jobs reference only named secrets and use the production token onl
   expect(expressions).toHaveLength(2);
 
   for (const [, expression] of expressions) {
-    for (const branch of ["testing", "main", "unexpected"]) {
-      for (const missing of [
-        undefined,
-        "RAILWAY_TOKEN_TESTING",
-        "RAILWAY_TOKEN_PRODUCTION",
-      ]) {
-        const secrets = {
-          RAILWAY_TOKEN_TESTING:
-            missing === "RAILWAY_TOKEN_TESTING" ? "" : "testing-token",
-          RAILWAY_TOKEN_PRODUCTION:
-            missing === "RAILWAY_TOKEN_PRODUCTION" ? "" : "production-token",
-        };
+    for (const branch of ["main", "unexpected"]) {
+      for (const productionToken of ["production-token", ""]) {
+        const secrets = { RAILWAY_TOKEN_PRODUCTION: productionToken };
         const token = runInNewContext(expression, {
           github: { base_ref: branch, ref_name: branch },
           secrets,
         });
         const expected =
-          branch === "unexpected" ? "" : secrets.RAILWAY_TOKEN_PRODUCTION;
+          branch === "main" ? secrets.RAILWAY_TOKEN_PRODUCTION : "";
         expect(token).toBe(expected);
       }
     }

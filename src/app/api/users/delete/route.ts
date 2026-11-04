@@ -34,11 +34,7 @@ export async function DELETE(request: NextRequest) {
     const res = NextResponse.json({ ok: true });
     const envName = process.env.RAILWAY_ENVIRONMENT_NAME;
     const isProd = envName === "production";
-    const useSharedDomainCookie =
-      envName === "production" || envName === "testing";
-    const cookieDomain = useSharedDomainCookie
-      ? ".jailbreakchangelogs.com"
-      : undefined;
+    const cookieDomain = isProd ? ".jailbreakchangelogs.com" : undefined;
     const cookieParts = [
       "jbcl_token=",
       "SameSite=Lax",

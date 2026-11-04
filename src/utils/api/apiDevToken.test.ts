@@ -85,7 +85,7 @@ test("a fresh local login replaces a revoked env token for HTTP, WebSockets, and
 
 test("linking URLs never include tokens outside local development", () => {
   process.env.NEXT_PUBLIC_DEV_TOKEN = "development-token";
-  for (const environment of ["production", "testing"]) {
+  for (const environment of ["production", "staging"]) {
     process.env.NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME = environment;
     for (const path of ["/oauth/roblox", "/email/link"]) {
       const redirect =

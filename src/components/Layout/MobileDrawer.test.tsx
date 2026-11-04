@@ -5,9 +5,8 @@ import * as React from "react";
 import * as jsxRuntime from "react/jsx-runtime";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ModuleKind, transpileModule } from "typescript";
-import { canOverrideExperiments } from "@/utils/api/experiments";
 
-test("mobile tools start collapsed and retain owner and tester access", () => {
+test("mobile tools start collapsed and retain owner access", () => {
   // Isolate the drawer from the header's network and authentication effects.
   const source = readFileSync(new URL("./Header.tsx", import.meta.url), "utf8");
   const drawer = source.slice(
@@ -25,7 +24,6 @@ test("mobile tools start collapsed and retain owner and tester access", () => {
       useAuthContext: () => ({ setLoginModal() {} }),
       usePathname: () => "/seasons",
       getNavigationHref: () => "/seasons",
-      canOverrideExperiments,
       navigationSections: [],
       Link: ({
         href,
@@ -42,8 +40,6 @@ test("mobile tools start collapsed and retain owner and tester access", () => {
 
   for (const [flag, enabled, label] of [
     ["is_owner", true, "Owner tools"],
-    ["is_tester", true, "Tester tools"],
-    ["is_tester", false, null],
     ["regular", true, null],
   ] as const) {
     const markup = renderToStaticMarkup(

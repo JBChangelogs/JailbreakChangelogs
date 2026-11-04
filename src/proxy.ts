@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDevToken } from "@/utils/api/apiDevToken";
-import { isTestingDeploy } from "@/utils/deployment";
 import { getHumanVerificationHeaders } from "@/utils/api/verificationHeaders";
 
 interface UserFlag {
@@ -39,10 +38,6 @@ const legacyItemTypeSegments = new Set([
   "furnitures",
 ]);
 
-function isRoleRestricted(): boolean {
-  return isTestingDeploy();
-}
-
 function getApiBaseUrl(): string | null {
   const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const usePublicApi =
@@ -70,24 +65,6 @@ function toCanonicalItemPath(itemType: string, itemName: string) {
   return `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`;
 }
 
-function isAllowedWithoutTesterRole(request: NextRequest): boolean {
-  const { pathname, searchParams } = request.nextUrl;
-
-  if (pathname === "/access-denied") return true;
-  if (pathname === "/api/healthcheck") return true;
-  if (pathname === "/api/health") return true;
-  // Called by the API; the route checks its own secret.
-  if (pathname === "/api/revalidate-themes") return true;
-  if (pathname.startsWith("/api/auth/")) return true;
-  if (pathname.startsWith("/api/oauth/")) return true;
-  if (/\.[^/]+$/.test(pathname)) return true;
-
-  // Allow auth callback URLs to pass through before session cookie exists.
-  if (searchParams.has("token")) return true;
-
-  return false;
-}
-
 function getSessionToken(request: NextRequest): string | undefined {
   const token = request.cookies.get("jbcl_token")?.value;
   if (token && token !== "undefined") return token;
@@ -95,12 +72,10 @@ function getSessionToken(request: NextRequest): string | undefined {
   return isDevEnv ? injectedToken : undefined;
 }
 
-function hasTestingAccess(user: ProxyUser | null): boolean {
+function isOwner(user: ProxyUser | null): boolean {
   if (!user || !Array.isArray(user.flags)) return false;
   return user.flags.some(
-    (flag) =>
-      (flag.flag === "is_owner" || flag.flag === "is_tester") &&
-      flag.enabled === true,
+    (flag) => flag.flag === "is_owner" && flag.enabled === true,
   );
 }
 
@@ -205,46 +180,12 @@ async function getLegacyItemRedirectResponse(
 }
 
 export async function proxy(request: NextRequest) {
-  const isTestingRestricted = isRoleRestricted();
-  const isAccessDeniedPath = request.nextUrl.pathname === "/access-denied";
-  const isExperimentsPath =
-    request.nextUrl.pathname === "/experiments" ||
-    request.nextUrl.pathname.startsWith("/experiments/");
-
-  if (isAccessDeniedPath && !isTestingRestricted) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  if (isTestingRestricted && isAccessDeniedPath) {
+  const { pathname } = request.nextUrl;
+  if (pathname === "/experiments" || pathname.startsWith("/experiments/")) {
     const token = getSessionToken(request);
-    if (token) {
-      const user = await fetchCurrentUser(token, request);
-      if (hasTestingAccess(user)) {
-        return NextResponse.redirect(new URL("/", request.url));
-      }
-    }
-    return NextResponse.next();
-  }
-
-  if (
-    isExperimentsPath ||
-    (isTestingRestricted && !isAllowedWithoutTesterRole(request))
-  ) {
-    const deniedPath = isTestingRestricted ? "/access-denied" : "/";
-    const token = getSessionToken(request);
-    if (!token) {
-      if (request.nextUrl.pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "forbidden" }, { status: 403 });
-      }
-      return NextResponse.redirect(new URL(deniedPath, request.url));
-    }
-
-    const user = await fetchCurrentUser(token, request);
-    if (!hasTestingAccess(user)) {
-      if (request.nextUrl.pathname.startsWith("/api/")) {
-        return NextResponse.json({ error: "forbidden" }, { status: 403 });
-      }
-      return NextResponse.redirect(new URL(deniedPath, request.url));
+    const user = token ? await fetchCurrentUser(token, request) : null;
+    if (!isOwner(user)) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

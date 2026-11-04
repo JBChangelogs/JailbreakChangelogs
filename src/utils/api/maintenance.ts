@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getBooleanFlag } from "@/utils/api/runtimeFlags";
-import { isTestingDeploy } from "@/utils/deployment";
 
 const MAINTENANCE_TITLE = "Under Maintenance | Jailbreak Changelogs";
 
@@ -18,11 +17,6 @@ function getMaintenanceFlag(name: string): boolean {
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
 }> {
-  // Testing deployments use tester-role proxy gating instead of maintenance UI.
-  if (isTestingDeploy()) {
-    return { isMaintenanceMode: false };
-  }
-
   return {
     isMaintenanceMode: getMaintenanceFlag("maintenance-mode"),
   };

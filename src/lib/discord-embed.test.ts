@@ -5,8 +5,6 @@ import { GET } from "@/app/embeds/discord.json/route";
 import { metadata as valuesMetadata } from "@/app/values/layout";
 import { metadata as supportMetadata } from "@/app/supporting/layout";
 import { metadata as themesMetadata } from "@/app/themes/layout";
-import { NextRequest } from "next/server";
-import { proxy } from "@/proxy";
 
 function embedUrl(metadata: Metadata) {
   const icons = metadata.icons;
@@ -373,18 +371,5 @@ test("the public endpoint rejects malformed inputs and unsafe page URLs", () => 
     const url = new URL("https://jailbreakchangelogs.com/embeds/discord.json");
     url.searchParams.set("data", raw);
     expect(GET(new Request(url)).status).toBe(400);
-  }
-});
-
-test("the testing gate allows Discord to fetch the linked JSON without a session", async () => {
-  const originalService = process.env.RAILWAY_SERVICE_NAME;
-  process.env.RAILWAY_SERVICE_NAME = "(Testing) FrontEnd";
-  try {
-    const response = await proxy(new NextRequest(embedUrl(valuesMetadata)));
-    expect(response.headers.get("x-middleware-next")).toBe("1");
-    expect(response.headers.has("location")).toBe(false);
-  } finally {
-    if (originalService === undefined) delete process.env.RAILWAY_SERVICE_NAME;
-    else process.env.RAILWAY_SERVICE_NAME = originalService;
   }
 });

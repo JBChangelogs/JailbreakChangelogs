@@ -7,7 +7,6 @@ const originalFetch = globalThis.fetch;
 const envKeys = [
   "RAILWAY_ENVIRONMENT_NAME",
   "RAILWAY_INTERNAL_API_URL",
-  "RAILWAY_SERVICE_NAME",
   "NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME",
   "NEXT_PUBLIC_DEV_TOKEN",
   "NEXT_PUBLIC_API_URL",
@@ -33,7 +32,7 @@ test("local development signs in to experiments with the dev token", async () =>
   process.env.NEXT_PUBLIC_DEV_TOKEN = "dev-token";
   process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
   const fetchMock = spyOn(globalThis, "fetch").mockResolvedValueOnce(
-    Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
+    Response.json({ flags: [{ flag: "is_owner", enabled: true }] }),
   );
   const response = await proxy(
     new NextRequest("http://localhost:5500/experiments"),
@@ -49,7 +48,7 @@ test("local experiments access prefers the newly signed-in session over the env 
   process.env.NEXT_PUBLIC_DEV_TOKEN = "revoked-env-token";
   process.env.NEXT_PUBLIC_API_URL = "https://api.example.com";
   const fetchMock = spyOn(globalThis, "fetch").mockResolvedValueOnce(
-    Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
+    Response.json({ flags: [{ flag: "is_owner", enabled: true }] }),
   );
   const response = await proxy(
     new NextRequest("http://localhost:5500/experiments", {
@@ -90,12 +89,10 @@ test("production experiments access uses enabled flags from the backend, not the
       headers: { cookie: "jbcl_token=session" },
     });
   for (const [flag, enabled, allowed] of [
-    ["is_tester", true, true],
     ["is_owner", true, true],
-    ["is_tester", false, false],
     ["is_owner", false, false],
     ["website_moderator", true, false],
-    ["is_tester", undefined, false],
+    ["is_owner", undefined, false],
   ] as const) {
     fetchMock.mockResolvedValueOnce(
       Response.json({ flags: [{ flag, enabled }] }),
@@ -127,7 +124,7 @@ test("production experiments access uses enabled flags from the backend, not the
   );
 });
 
-test("other production routes remain public and testing deployments keep their access-denied redirect", async () => {
+test("other production routes remain public", async () => {
   process.env.RAILWAY_ENVIRONMENT_NAME = "production";
   const fetchMock = spyOn(globalThis, "fetch");
   expect(
@@ -135,14 +132,6 @@ test("other production routes remain public and testing deployments keep their a
       await proxy(new NextRequest("https://jailbreakchangelogs.com/users"))
     ).headers.get("x-middleware-next"),
   ).toBe("1");
-  process.env.RAILWAY_SERVICE_NAME = "(Testing) FrontEnd";
-  expect(
-    (
-      await proxy(
-        new NextRequest("https://jailbreakchangelogs.com/experiments"),
-      )
-    ).headers.get("location"),
-  ).toBe("https://jailbreakchangelogs.com/access-denied");
   expect(fetchMock).not.toHaveBeenCalled();
 });
 
@@ -152,7 +141,7 @@ test("proxy forwards each visitor's verification cookie without forwarding stale
   for (const verification of ["visitor-one", "visitor-two", undefined]) {
     const cookie = `jbcl_token=session; analytics=private${verification ? `; jbcl_verified_human=${verification}` : ""}`;
     fetchMock.mockResolvedValueOnce(
-      Response.json({ flags: [{ flag: "is_tester", enabled: true }] }),
+      Response.json({ flags: [{ flag: "is_owner", enabled: true }] }),
     );
     await proxy(
       new NextRequest("https://jailbreakchangelogs.com/experiments", {

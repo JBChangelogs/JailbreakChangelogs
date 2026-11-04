@@ -26,7 +26,7 @@
 > This is a fan-made project operated by Jailbreak Changelogs LLC and is not affiliated with or endorsed by Badimo — the development team behind Roblox Jailbreak.
 
 > [!CAUTION]
-> The only websites associated with this repository are [jailbreakchangelogs.com](https://jailbreakchangelogs.com) and [testing.jailbreakchangelogs.com](https://testing.jailbreakchangelogs.com). Any other websites claiming to represent this project are not controlled by us.
+> The only websites associated with this repository are [jailbreakchangelogs.com](https://jailbreakchangelogs.com). Any other websites claiming to represent this project are not controlled by us.
 
 ---
 

@@ -123,8 +123,7 @@ export default function ExperimentsClient() {
     queryKey: ["user-experiments", userId],
     enabled: !isLoading && allowed && !!userId,
     queryFn: async ({ signal }) => {
-      if (!allowed || !userId)
-        throw new Error("Tester or owner access is required.");
+      if (!allowed || !userId) throw new Error("Owner access is required.");
       const overrides = readExperimentOverrides(userId);
       const natural = fetchAssignments({}, signal);
       const [assigned, current] = await Promise.all([
@@ -264,7 +263,7 @@ export default function ExperimentsClient() {
       action: "key" | "toggle" | "reset" | "clear";
     }) => {
       if (!allowed || accountId !== userId)
-        throw new Error("Tester or owner access is required.");
+        throw new Error("Owner access is required.");
       await queryClient.cancelQueries({
         queryKey: ["user-experiments", accountId],
       });
@@ -412,13 +411,13 @@ export default function ExperimentsClient() {
         ) : !user ? (
           <div className="mt-6">
             <p className="text-secondary-text mb-4">
-              Sign in with a tester or owner account to continue.
+              Sign in with an owner account to continue.
             </p>
             <Button onClick={() => setShowLoginModal(true)}>Sign in</Button>
           </div>
         ) : !allowed ? (
           <p className="text-secondary-text mt-6">
-            This page is available to testers and owners.
+            This page is available to owners.
           </p>
         ) : (
           <>

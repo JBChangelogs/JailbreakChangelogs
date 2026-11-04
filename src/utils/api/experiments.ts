@@ -6,7 +6,7 @@ export type ExperimentOverrides = Record<string, "treatment" | "control">;
 export class ExperimentOverrideRejectedError extends Error {
   constructor(key: string) {
     super(
-      `The experiment key “${key}” wasn't accepted. Check the exact key, that it's running, and your tester access.`,
+      `The experiment key “${key}” wasn't accepted. Check the exact key, that it's running, and your owner access.`,
     );
     this.name = "ExperimentOverrideRejectedError";
   }
@@ -57,8 +57,7 @@ export function parseExperimentsResponse(data: unknown): ExperimentsResponse {
 export function canOverrideExperiments(user: Pick<UserData, "flags"> | null) {
   return (
     user?.flags?.some(
-      ({ flag, enabled }) =>
-        (flag === "is_tester" || flag === "is_owner") && enabled === true,
+      ({ flag, enabled }) => flag === "is_owner" && enabled === true,
     ) ?? false
   );
 }

@@ -10,7 +10,6 @@ import { DESKTOP_NAVIGATION_INIT_SCRIPT } from "@/utils/ui/desktopNavigation";
 import { TAB_STYLE_INIT_SCRIPT } from "@/utils/ui/tabStyle";
 import { CUSTOM_THEME_INIT_SCRIPT } from "@/utils/ui/customTheme";
 import Header from "@/components/Layout/Header";
-import HideOnAccessDenied from "@/components/Layout/HideOnAccessDenied";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
 import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
@@ -127,9 +126,8 @@ export default async function RootLayout({
     </>
   );
   const githubUrl = getGitHubUrl();
-  const isRailwayDeployed = ["production", "testing"].includes(
-    process.env.RAILWAY_ENVIRONMENT_NAME ?? "",
-  );
+  const isRailwayDeployed =
+    process.env.RAILWAY_ENVIRONMENT_NAME === "production";
   if (isMaintenanceMode) {
     return (
       <html
@@ -255,31 +253,27 @@ export default async function RootLayout({
                             />
                           }
                         >
-                          <HideOnAccessDenied>
-                            <Header
-                              releaseAnnouncement={
-                                <Suspense fallback={null}>
-                                  <LatestReleaseDialog />
-                                </Suspense>
-                              }
-                            />
-                          </HideOnAccessDenied>
+                          <Header
+                            releaseAnnouncement={
+                              <Suspense fallback={null}>
+                                <LatestReleaseDialog />
+                              </Suspense>
+                            }
+                          />
                         </Suspense>
                         <main className="min-h-screen flex-1">
                           <NuqsAdapter>
                             <Suspense>{children}</Suspense>
                           </NuqsAdapter>
                         </main>
-                        <HideOnAccessDenied>
-                          <Footer
-                            githubUrl={githubUrl}
-                            versionInfo={
-                              <Suspense fallback={<VersionInfoSkeleton />}>
-                                <VersionInfoWrapper />
-                              </Suspense>
-                            }
-                          />
-                        </HideOnAccessDenied>
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={
+                            <Suspense fallback={<VersionInfoSkeleton />}>
+                              <VersionInfoWrapper />
+                            </Suspense>
+                          }
+                        />
                       </div>
                     </SiteBanGate>
                   </AuthProvider>
@@ -409,34 +403,28 @@ export default async function RootLayout({
                         />
                       }
                     >
-                      <HideOnAccessDenied>
-                        <Header
-                          releaseAnnouncement={
-                            <Suspense fallback={null}>
-                              <LatestReleaseDialog />
-                            </Suspense>
-                          }
-                        />
-                      </HideOnAccessDenied>
+                      <Header
+                        releaseAnnouncement={
+                          <Suspense fallback={null}>
+                            <LatestReleaseDialog />
+                          </Suspense>
+                        }
+                      />
                     </Suspense>
-                    <HideOnAccessDenied>
-                      <CompetitionBanner />
-                    </HideOnAccessDenied>
+                    <CompetitionBanner />
                     <main className="min-h-screen flex-1">
                       <NuqsAdapter>
                         <Suspense>{children}</Suspense>
                       </NuqsAdapter>
                     </main>
-                    <HideOnAccessDenied>
-                      <Footer
-                        githubUrl={githubUrl}
-                        versionInfo={
-                          <Suspense fallback={<VersionInfoSkeleton />}>
-                            <VersionInfoWrapper />
-                          </Suspense>
-                        }
-                      />
-                    </HideOnAccessDenied>
+                    <Footer
+                      githubUrl={githubUrl}
+                      versionInfo={
+                        <Suspense fallback={<VersionInfoSkeleton />}>
+                          <VersionInfoWrapper />
+                        </Suspense>
+                      }
+                    />
                   </div>
                 </SiteBanGate>
               </AuthProvider>
