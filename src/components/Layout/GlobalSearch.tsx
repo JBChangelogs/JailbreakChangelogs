@@ -44,6 +44,10 @@ import {
 } from "@/utils/ui/desktopNavigation";
 import { getTabStyle, setTabStyle } from "@/utils/ui/tabStyle";
 import {
+  getThemeCompetitionBannerEnabled,
+  setThemeCompetitionBannerEnabled,
+} from "@/utils/ui/themeCompetitionBanner";
+import {
   getThemeCursorEnabled,
   setThemeCursorEnabled,
 } from "@/utils/ui/themeCursor";
@@ -433,6 +437,11 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
     switch (id) {
       case "theme-cursor":
         return { on: getThemeCursorEnabled(), set: setThemeCursorEnabled };
+      case "theme-competition-banner":
+        return {
+          on: getThemeCompetitionBannerEnabled(),
+          set: setThemeCompetitionBannerEnabled,
+        };
       case "theme-shortcut":
         return {
           on: !getThemeShortcutHidden(),

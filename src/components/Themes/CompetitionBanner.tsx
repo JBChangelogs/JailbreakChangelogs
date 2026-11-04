@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -8,6 +8,11 @@ import {
   competitionStatus,
   fetchCurrentCompetition,
 } from "@/utils/api/userThemes";
+import {
+  getThemeCompetitionBannerEnabled,
+  subscribeThemeCompetitionBanner,
+  syncThemeCompetitionBannerPreferences,
+} from "@/utils/ui/themeCompetitionBanner";
 
 const formatDate = (ts: number) =>
   new Date(ts * 1000).toLocaleDateString(undefined, {
@@ -16,11 +21,18 @@ const formatDate = (ts: number) =>
   });
 
 export default function CompetitionBanner() {
+  const enabled = useSyncExternalStore(
+    subscribeThemeCompetitionBanner,
+    getThemeCompetitionBannerEnabled,
+    () => true,
+  );
+  useEffect(syncThemeCompetitionBannerPreferences, []);
   const queryClient = useQueryClient();
   const [, tick] = useReducer((n: number) => n + 1, 0);
   const { data: competition } = useQuery({
     queryKey: ["theme-competition-current"],
     queryFn: fetchCurrentCompetition,
+    enabled,
     staleTime: 5 * 60_000,
     retry: false,
   });
@@ -34,7 +46,7 @@ export default function CompetitionBanner() {
         : undefined;
 
   useEffect(() => {
-    if (boundary === undefined) return;
+    if (!enabled || boundary === undefined) return;
     const timer = setTimeout(
       () => {
         tick();
@@ -46,9 +58,9 @@ export default function CompetitionBanner() {
       Math.min(Math.max(boundary * 1000 - Date.now(), 0) + 250, 2 ** 31 - 1),
     );
     return () => clearTimeout(timer);
-  }, [queryClient, boundary, status]);
+  }, [queryClient, boundary, status, enabled]);
 
-  if (!competition || status === "ended") return null;
+  if (!enabled || !competition || status === "ended") return null;
   const href = `/themes/competitions/${competition.id}`;
 
   return (

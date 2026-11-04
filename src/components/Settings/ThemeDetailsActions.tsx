@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { useTheme } from "@/contexts/ThemeContext";
 import ReportThemeButton from "@/components/Settings/ReportThemeButton";
+import ThemeCompetitionEntryButton from "@/components/Themes/ThemeCompetitionEntryButton";
 import type { MarketplaceTheme, SharedTheme } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
@@ -36,6 +37,7 @@ export default function ThemeDetailsActions({
       <Button asChild variant="secondary">
         <Link href={`/?theme=${theme.share_code}`}>Try on the site</Link>
       </Button>
+      <ThemeCompetitionEntryButton theme={theme} />
       <Button
         variant="ghost"
         onClick={async () => {

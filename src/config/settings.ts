@@ -64,6 +64,12 @@ export const FRONTEND_SETTINGS: Record<string, FrontendSetting> = {
       "Show a button in the header that opens these settings. Saved on this browser.",
     target: "themes",
   },
+  "theme-competition-banner": {
+    title: "Theme competition banner",
+    description:
+      "Show the site-wide banner for upcoming and live theme competitions.",
+    target: "themes",
+  },
   "navigation-layout": {
     title: "Desktop navigation",
     description: "Choose between sidebar and top bar navigation.",

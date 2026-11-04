@@ -101,18 +101,20 @@ test("logged-out settings search offers only the locally available display contr
   expect(getGlobalSearchResults(index, "tab style")).toContainEqual(
     expect.objectContaining({ group: "Settings", title: "Tab style" }),
   );
+  expect(getGlobalSearchResults(index, "banner")).toContainEqual(
+    expect.objectContaining({
+      group: "Settings",
+      title: "Theme competition banner",
+      preference: "theme-competition-banner",
+      href: "/settings?highlight=themes#themes",
+    }),
+  );
   expect(
     getGlobalSearchResults(index, "email notifications").some(
       (result) => result.title === "Email Notifications",
     ),
   ).toBe(false);
-  for (const query of [
-    "banner",
-    "privacy",
-    "supporter",
-    "accent color",
-    "gifts",
-  ])
+  for (const query of ["privacy", "supporter", "accent color", "gifts"])
     expect(
       getGlobalSearchResults(index, query).some(
         (result) => result.group === "Settings",

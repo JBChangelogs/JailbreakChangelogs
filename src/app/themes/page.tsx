@@ -1,5 +1,6 @@
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ThemeMarketplace from "@/components/Settings/ThemeMarketplace";
+import CompetitionCard from "@/components/Themes/CompetitionCard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -19,6 +20,7 @@ export default function ThemeMarketplacePage() {
             <Link href="/settings?highlight=themes#themes">Theme settings</Link>
           </Button>
         </div>
+        <CompetitionCard />
         <ThemeMarketplace />
       </div>
     </main>

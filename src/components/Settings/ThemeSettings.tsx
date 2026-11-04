@@ -43,6 +43,11 @@ import {
   subscribeThemeCursor,
 } from "@/utils/ui/themeCursor";
 import {
+  getThemeCompetitionBannerEnabled,
+  setThemeCompetitionBannerEnabled,
+  subscribeThemeCompetitionBanner,
+} from "@/utils/ui/themeCompetitionBanner";
+import {
   getThemeShortcutHidden,
   setThemeShortcutHidden,
   subscribeThemeShortcut,
@@ -375,6 +380,11 @@ export default function ThemeSettings({
     () => false,
   );
   const current = allItems.find((item) => item.checked)?.option.label;
+  const competitionBannerEnabled = useSyncExternalStore(
+    subscribeThemeCompetitionBanner,
+    getThemeCompetitionBannerEnabled,
+    () => true,
+  );
 
   return (
     <>
@@ -445,6 +455,32 @@ export default function ThemeSettings({
             id={`${id}-shortcut`}
             checked={!shortcutHidden}
             onCheckedChange={(show) => setThemeShortcutHidden(!show)}
+          />
+        </div>
+        <div
+          className={cn(
+            SETTING_HIGHLIGHT,
+            "flex items-center justify-between gap-4",
+          )}
+        >
+          <div>
+            <label
+              htmlFor={`${id}-competition-banner`}
+              className="text-primary-text font-medium"
+            >
+              {FRONTEND_SETTINGS["theme-competition-banner"].title}
+            </label>
+            <p className="text-secondary-text mt-1 text-sm">
+              {FRONTEND_SETTINGS["theme-competition-banner"].description}
+              {isAuthenticated
+                ? " Syncs with your account."
+                : " Saved on this browser."}
+            </p>
+          </div>
+          <Switch
+            id={`${id}-competition-banner`}
+            checked={competitionBannerEnabled}
+            onCheckedChange={setThemeCompetitionBannerEnabled}
           />
         </div>
       </div>

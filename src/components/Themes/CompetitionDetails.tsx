@@ -957,9 +957,11 @@ export default function CompetitionDetails({
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
-                {competition.items.map(({ theme }) => (
-                  <EntryCard key={theme.share_code} theme={theme} />
-                ))}
+                {competition.items
+                  .toSorted((a, b) => b.entered_at - a.entered_at)
+                  .map(({ theme }) => (
+                    <EntryCard key={theme.share_code} theme={theme} />
+                  ))}
               </div>
             )}
           </section>
