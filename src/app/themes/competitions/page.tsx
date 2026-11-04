@@ -123,12 +123,10 @@ export default async function CompetitionsPage() {
                         <LocalDate ts={c.starts_at} /> –{" "}
                         <LocalDate ts={c.ends_at} />
                       </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <Icon
-                          icon="heroicons:swatch"
-                          className="size-4"
-                          aria-hidden="true"
-                        />
+                      <span>
+                        <span aria-hidden="true" className="mr-4">
+                          ·
+                        </span>
                         {c.entries}{" "}
                         {c.entries === 1 ? "submission" : "submissions"}
                       </span>
