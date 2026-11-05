@@ -1201,7 +1201,7 @@ export default function InventoryCheckerClient({
                     robloxId && (
                       <ChangelogComments
                         changelogId={robloxId}
-                        changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
+                        changelogTitle={`${getUsername(robloxId)}'s Inventory`}
                         type="inventory"
                         inventory={{ owner: robloxId }}
                         initialComments={initialComments}

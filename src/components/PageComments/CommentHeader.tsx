@@ -22,9 +22,6 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
     changelogId,
     changelogTitle,
     itemType,
-    sortOrder,
-    sortGroups,
-    handleSortChange,
     containerBgClass,
     pinnedTitle,
   } = useCommentsContext();
@@ -32,34 +29,46 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
   return (
     <>
       <div
-        className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
+        className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 -mb-4 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:mb-0 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
       >
-        <h2 className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl">
-          <span>
-            <NumberFlow translate="no" value={totalComments} />{" "}
-            {totalComments === 1 ? "Comment for" : "Comments for"}
-          </span>{" "}
-          <span>
-            {type === "changelog" ? (
-              `Changelog ${changelogId}: ${changelogTitle}`
-            ) : type === "season" ? (
-              `Season ${changelogId}: ${changelogTitle}`
-            ) : type === "tradev2" ? (
-              `Trade #${changelogId}`
-            ) : type === "inventory" || type === "user" ? (
-              changelogTitle
-            ) : type === "theme" ? (
-              `${changelogTitle} Community Theme`
-            ) : type === "vsuggestion" ? (
-              changelogTitle
-            ) : (
-              <>
-                <span>{changelogTitle} </span>
-                <span className="text-secondary-text">({itemType})</span>
-              </>
-            )}
-          </span>
-        </h2>
+        <div className="grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4">
+          <h2 className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl">
+            <span>
+              <NumberFlow translate="no" value={totalComments} />{" "}
+              {totalComments === 1 ? "Comment for" : "Comments for"}
+            </span>{" "}
+            <span>
+              {type === "changelog" ? (
+                `Changelog ${changelogId}: ${changelogTitle}`
+              ) : type === "season" ? (
+                `Season ${changelogId}: ${changelogTitle}`
+              ) : type === "tradev2" ? (
+                `Trade #${changelogId}`
+              ) : type === "inventory" || type === "user" ? (
+                changelogTitle
+              ) : type === "theme" ? (
+                `${changelogTitle} Community Theme`
+              ) : type === "vsuggestion" ? (
+                changelogTitle
+              ) : (
+                <>
+                  <span>{changelogTitle} </span>
+                  <span className="text-secondary-text">({itemType})</span>
+                </>
+              )}
+            </span>
+          </h2>
+          <p className="text-secondary-text flex items-start gap-1 text-xs sm:order-2 sm:col-span-2">
+            <Icon
+              icon="heroicons:information-circle"
+              className="mt-0.5 h-3.5 w-3.5 shrink-0"
+            />
+            <span>Comments are user-submitted and unverified.</span>
+          </p>
+          <div className="flex justify-end sm:order-1">
+            <CommentSort />
+          </div>
+        </div>
         {/* Rides along under the stuck title. Where the title isn't sticky,
           ChangelogComments shows the fixed pill instead. */}
         {pill && (
@@ -70,67 +79,57 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
           </div>
         )}
       </div>
-      <div className="-mt-2">
-        {/* Disclaimer */}
-        <p className="text-secondary-text flex items-start gap-1 text-xs">
-          <Icon
-            icon="heroicons:information-circle"
-            className="mt-0.5 h-3.5 w-3.5 shrink-0"
-          />
-          <span>
-            Comments are posted by users and are not verified. Some information
-            may be incorrect or misleading
-          </span>
-        </p>
-        {/* Sort row */}
-        <div className="mt-2 flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="text-secondary-text flex items-center gap-1 text-xs">
-                <span>Sorted by:</span>
-                <button
-                  type="button"
-                  className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
-                >
-                  <span>{getSortLabel(sortGroups, sortOrder)}</span>
-                  <Icon
-                    icon="heroicons:chevron-down"
-                    className="h-3.5 w-3.5 shrink-0"
-                    inline={true}
-                  />
-                </button>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
-            >
-              <DropdownMenuRadioGroup
-                value={sortOrder ?? ""}
-                onValueChange={handleSortChange}
-              >
-                {sortGroups.map((group, index) => (
-                  <Fragment key={group.label}>
-                    {index > 0 && <DropdownMenuSeparator />}
-                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                      {group.label}
-                    </DropdownMenuLabel>
-                    {group.options.map((option) => (
-                      <DropdownMenuRadioItem
-                        key={option.value}
-                        value={option.value}
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        {option.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </Fragment>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
     </>
+  );
+}
+
+function CommentSort() {
+  const { sortOrder, sortGroups, handleSortChange } = useCommentsContext();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Sort comments"
+          className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-9 w-full cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-all duration-300 focus:ring-1 focus:outline-none sm:w-auto"
+        >
+          <span className="text-secondary-text">Sort by:</span>
+          <span>{getSortLabel(sortGroups, sortOrder)}</span>
+          <Icon
+            icon="heroicons:chevron-down"
+            className="text-secondary-text ml-auto h-4 w-4 shrink-0"
+            inline={true}
+          />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="border-border-card bg-secondary-bg text-primary-text w-(--radix-dropdown-menu-trigger-width) rounded-xl border p-1 shadow-lg"
+      >
+        <DropdownMenuRadioGroup
+          value={sortOrder ?? ""}
+          onValueChange={handleSortChange}
+        >
+          {sortGroups.map((group, index) => (
+            <Fragment key={group.label}>
+              {index > 0 && <DropdownMenuSeparator />}
+              <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                {group.label}
+              </DropdownMenuLabel>
+              {group.options.map((option) => (
+                <DropdownMenuRadioItem
+                  key={option.value}
+                  value={option.value}
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </Fragment>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

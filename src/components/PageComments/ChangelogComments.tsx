@@ -176,7 +176,7 @@ function CommentsLayout() {
           {isRefreshingComments ? (
             <CommentSkeletonList />
           ) : filteredComments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
+            <div className="flex flex-col items-center justify-center py-8 text-center sm:py-10">
               <div className="relative mb-6">
                 <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
                 <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
