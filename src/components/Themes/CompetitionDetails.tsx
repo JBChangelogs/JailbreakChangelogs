@@ -596,25 +596,59 @@ function Standings({
             Users with each theme applied, per day
           </p>
           <ChartContainer config={config} className="h-64 w-full">
-            <LineChart data={points} margin={{ left: 0, right: 8 }}>
-              <CartesianGrid vertical={false} />
+            <LineChart
+              accessibilityLayer
+              data={points}
+              margin={{ left: 6, right: 6 }}
+            >
+              <CartesianGrid
+                vertical={false}
+                stroke="var(--color-border-card)"
+                strokeOpacity={0.5}
+              />
               <XAxis
                 dataKey="t"
                 type="number"
+                scale="time"
                 domain={["dataMin", "dataMax"]}
+                ticks={points.map((point) => point.t)}
                 tickFormatter={formatShortDate}
                 tickLine={false}
                 axisLine={false}
+                tickMargin={8}
+                minTickGap={48}
+                tick={{ fill: "var(--color-secondary-text)", fontSize: 12 }}
               />
               <YAxis
                 allowDecimals={false}
-                width={32}
+                width={40}
                 tickLine={false}
                 axisLine={false}
+                tickMargin={8}
+                tick={{ fill: "var(--color-secondary-text)", fontSize: 12 }}
               />
               <ChartTooltip
+                cursor={false}
                 content={
                   <ChartTooltipContent
+                    className="min-w-48 px-3 py-2"
+                    formatter={(value, name, item) => (
+                      <div className="flex w-full items-center justify-between gap-3">
+                        <span className="text-secondary-text flex items-center gap-2">
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                            style={{
+                              backgroundColor:
+                                config[String(item.dataKey)]?.color,
+                            }}
+                          />
+                          {config[String(item.dataKey)]?.label ?? name}
+                        </span>
+                        <span className="text-primary-text font-mono font-semibold tabular-nums">
+                          {Number(value).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
                     labelFormatter={(_, payload) =>
                       formatShortDate(Number(payload?.[0]?.payload?.t))
                     }

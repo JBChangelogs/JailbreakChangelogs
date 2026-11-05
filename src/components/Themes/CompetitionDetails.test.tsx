@@ -24,6 +24,96 @@ function submissions(value: unknown): string[] {
   return submissions(node.props.children);
 }
 
+test("standings chart ticks use recorded days instead of repeated intraday labels", () => {
+  type ChartNode = {
+    type: string;
+    props: Record<string, unknown> & { children?: unknown };
+  };
+  const exports = {} as { Standings: (props: object) => ChartNode };
+  const jsx = (type: string, props: ChartNode["props"]) => ({ type, props });
+  runInNewContext(
+    transpileModule(
+      readFileSync(
+        new URL("./CompetitionDetails.tsx", import.meta.url),
+        "utf8",
+      ) + "\nexports.Standings = Standings;",
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      require: (name: string) => {
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "@/components/ui/chart")
+          return { ChartTooltip: "ChartTooltip" };
+        if (name === "recharts")
+          return Object.fromEntries(
+            ["LineChart", "CartesianGrid", "XAxis", "YAxis", "Line"].map(
+              (name) => [name, name],
+            ),
+          );
+        return {};
+      },
+    },
+  );
+  const daily = [
+    { timestamp: Date.UTC(2026, 10, 4) / 1000, users: { THEME001: 0 } },
+    { timestamp: Date.UTC(2026, 10, 5) / 1000, users: { THEME001: 4 } },
+  ];
+  const tree = exports.Standings({
+    status: "running",
+    data: {
+      daily,
+      standings: [
+        {
+          theme: { share_code: "THEME001", label: "Autumn" },
+          rank: 1,
+          user_days: 4,
+          current_users: 4,
+        },
+      ],
+    },
+  });
+  function nodes(value: unknown): ChartNode[] {
+    if (Array.isArray(value)) return value.flatMap(nodes);
+    if (!value || typeof value !== "object" || !("props" in value)) return [];
+    const node = value as ChartNode;
+    return [node, ...nodes(node.props.children)];
+  }
+  const chart = nodes(tree);
+  const axis = chart.find((node) => node.type === "XAxis")!;
+  expect(axis.props.ticks).toEqual(daily.map((day) => day.timestamp * 1000));
+  expect(axis.props.scale).toBe("time");
+  expect(axis.props.minTickGap).toBe(48);
+  expect(chart.find((node) => node.type === "LineChart")!.props.data).toEqual([
+    { t: daily[0].timestamp * 1000, THEME001: 0 },
+    { t: daily[1].timestamp * 1000, THEME001: 4 },
+  ]);
+  expect(
+    chart.find((node) => node.type === "CartesianGrid")!.props.stroke,
+  ).toBe("var(--color-border-card)");
+  const tooltip = chart.find((node) => node.type === "ChartTooltip")!.props
+    .content as ChartNode;
+  const format = tooltip.props.formatter as (
+    value: number,
+    name: string,
+    item: { dataKey: string },
+  ) => ChartNode;
+  const row = nodes(format(0, "THEME001", { dataKey: "THEME001" }));
+  expect(
+    row.some(
+      (node) =>
+        Array.isArray(node.props.children) &&
+        node.props.children.includes("Autumn"),
+    ),
+  ).toBe(true);
+  expect(row.some((node) => node.props.children === "0")).toBe(true);
+  expect(row.find((node) => node.props.style)!.props.style).toEqual({
+    backgroundColor: "var(--color-chart-1)",
+  });
+});
+
 test("submissions show newest entries first without changing cached order, including appended live entries", () => {
   const initial = {
     id: 7,
