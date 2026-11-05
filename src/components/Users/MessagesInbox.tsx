@@ -1344,6 +1344,15 @@ export default function MessagesInbox() {
               </div>
             </div>
           )}
+          <div className="bg-button-info/10 border-button-info rounded-lg border p-3 text-sm shadow-sm">
+            <span className="text-primary-text font-semibold">
+              Staff will see the surrounding chat
+            </span>
+            <p className="text-secondary-text mt-1">
+              Along with this message, staff can see up to 5 messages before and
+              after it to understand what happened.
+            </p>
+          </div>
           <p className="text-secondary-text text-sm">
             Please describe why you are reporting this message.
           </p>
