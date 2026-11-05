@@ -132,6 +132,6 @@
     "node": "24.x"
   },
   "patchedDependencies": {
-    "@iconify/react@6.0.3": "patches/@iconify%2Freact@6.0.3.patch"
+    "@iconify/react@6.0.4": "patches/@iconify%2Freact@6.0.4.patch"
   }
 }
