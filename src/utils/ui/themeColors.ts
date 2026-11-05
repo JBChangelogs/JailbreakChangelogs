@@ -50,6 +50,10 @@ export const FOLLOWS: Record<string, [key: string, value: string][]> = {
     ["--color-button-info-hover", shade("--color-button-info", 85)],
     ["--color-button-info-active", shade("--color-button-info", 75)],
     ["--color-border-focus", "var(--color-button-info)"],
+    [
+      "--color-menu-badge-bg",
+      "color-mix(in srgb, var(--color-button-info) 20%, transparent)",
+    ],
   ],
   "--color-button-secondary": [
     ["--color-button-secondary-hover", shade("--color-button-secondary", 85)],
@@ -58,6 +62,7 @@ export const FOLLOWS: Record<string, [key: string, value: string][]> = {
   "--color-link": [
     ["--color-link-hover", shade("--color-link", 80)],
     ["--color-link-active", shade("--color-link", 70)],
+    ["--color-menu-badge-text", "var(--color-link)"],
   ],
 };
 
@@ -125,7 +130,7 @@ const NEWER_COLORS: [
   ["--color-button-danger-text", (v) => v["--color-form-button-text"]],
   ["--color-button-success-text", (v) => v["--color-form-button-text"]],
   ["--color-icon-tile", (v) => v["--color-link"]],
-  ["--color-menu-badge-text", (v) => v["--color-link"]],
+  ["--color-menu-badge-text", (v) => v["--color-link"] && "var(--color-link)"],
   [
     "--color-tab-active",
     (v) => v["--color-button-info"] && "var(--color-button-info)",
@@ -152,7 +157,7 @@ const NEWER_COLORS: [
     "--color-menu-badge-bg",
     (v) =>
       v["--color-button-info"] &&
-      `color-mix(in srgb, ${v["--color-button-info"]} 20%, transparent)`,
+      "color-mix(in srgb, var(--color-button-info) 20%, transparent)",
   ],
 ];
 

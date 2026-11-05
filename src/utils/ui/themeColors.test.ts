@@ -76,3 +76,14 @@ test("older themes gain chart defaults without overwriting custom series colors"
   }
   expect(saved).not.toHaveProperty("--color-chart-1");
 });
+
+test("missing menu badge colors reference the theme palette instead of copying fixed colors", () => {
+  const filled = withDefaultColors({
+    "--color-link": "#ff8800",
+    "--color-button-info": "#ff6600",
+  });
+  expect(filled["--color-menu-badge-text"]).toBe("var(--color-link)");
+  expect(filled["--color-menu-badge-bg"]).toBe(
+    "color-mix(in srgb, var(--color-button-info) 20%, transparent)",
+  );
+});
