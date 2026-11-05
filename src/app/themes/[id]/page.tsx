@@ -102,10 +102,11 @@ export default async function ThemeDetailsPage({ params }: Props) {
               <p className="text-secondary-text mb-2 text-xs font-semibold tracking-widest uppercase">
                 Community theme
               </p>
-              <h1 className="flex items-center gap-2 text-3xl font-bold">
+              <h1 className="flex items-start gap-2 text-3xl font-bold">
                 <Icon
                   icon={theme.icon ?? "lucide:palette"}
-                  className="size-7 shrink-0"
+                  // Level with the first line when a long name wraps.
+                  className="mt-1 size-7 shrink-0"
                   aria-hidden="true"
                 />
                 <span className="min-w-0 wrap-break-word">{theme.label}</span>
@@ -173,9 +174,28 @@ export default async function ThemeDetailsPage({ params }: Props) {
                 <dd className="font-mono">{theme.share_code}</dd>
               </div>
             </dl>
-            <ThemePackSection theme={theme} />
+            {!!Object.keys(theme.pack ?? {}).length && (
+              <p className="text-secondary-text flex items-start gap-1.5 text-sm">
+                <Icon
+                  icon="lucide:sparkles"
+                  className="text-link mt-0.5 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>
+                  Includes a customization pack.{" "}
+                  <a
+                    href="#customization-pack"
+                    className="text-link hover:text-link-hover"
+                  >
+                    See what&apos;s in it
+                  </a>
+                </span>
+              </p>
+            )}
           </div>
-          {(theme.description || !!theme.previews?.length) && (
+          {(theme.description ||
+            !!theme.previews?.length ||
+            !!Object.keys(theme.pack ?? {}).length) && (
             <div className="min-w-0 space-y-4">
               {theme.description && (
                 <section className="space-y-4">
@@ -185,6 +205,7 @@ export default async function ThemeDetailsPage({ params }: Props) {
                   </p>
                 </section>
               )}
+              <ThemePackSection theme={theme} variant="page" />
               {!!theme.previews?.length && (
                 <details className="pt-4">
                   <summary className="text-link cursor-pointer font-medium">

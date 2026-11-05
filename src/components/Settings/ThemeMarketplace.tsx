@@ -22,7 +22,6 @@ import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import ReportThemeButton from "@/components/Settings/ReportThemeButton";
 import ThemeShareCode from "@/components/Settings/ThemeShareCode";
-import { ThemePackSummary } from "@/components/Settings/ThemePack";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -514,7 +513,16 @@ export default function ThemeMarketplace() {
                       </p>
                     </div>
                     <ThemeShareCode code={theme.share_code} />
-                    <ThemePackSummary pack={theme.pack} className="mt-2" />
+                    {!!Object.keys(theme.pack ?? {}).length && (
+                      <p className="text-secondary-text mt-2 flex items-center gap-1.5 text-sm">
+                        <Icon
+                          icon="lucide:sparkles"
+                          className="text-link size-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                        Includes a customization pack
+                      </p>
+                    )}
                   </div>
                   <div className="mt-auto flex flex-wrap gap-2">
                     <div className="contents">

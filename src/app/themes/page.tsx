@@ -29,7 +29,9 @@ export default function ThemeMarketplacePage() {
         <div className="mb-4">
           <h2 className="text-xl font-semibold">All marketplace themes</h2>
           <p className="text-secondary-text mt-1 text-sm">
-            Share any style of theme. Enter competitions separately.
+            Share any style of theme. Enter competitions separately. Open a
+            theme to try it on the site, see all its colors, or preview its
+            customization pack on your profile.
           </p>
         </div>
         <ThemeMarketplace />

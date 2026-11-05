@@ -79,9 +79,11 @@ export default function ThemeDetailsActions({
 export function ThemePackSection({
   theme,
   onPreview,
+  variant,
 }: {
   theme: SharedTheme;
   onPreview?: () => void;
+  variant?: "page";
 }) {
   const { user } = useAuthContext();
   const { banner, background, ...rest } = theme.pack ?? {};
@@ -95,24 +97,42 @@ export function ThemePackSection({
     alt: `${theme.label} pack ${label.toLowerCase()}`,
   }));
   return (
-    <section className="space-y-2">
-      <div>
-        <h3 className="text-primary-text text-sm font-medium">
-          Customization pack
-        </h3>
-        <p className="text-secondary-text text-xs">
-          For your profile, so anyone visiting it sees them.
-        </p>
-      </div>
+    <section
+      id={variant === "page" ? "customization-pack" : undefined}
+      className={variant === "page" ? "scroll-mt-24 space-y-4" : "space-y-2"}
+    >
+      {variant === "page" ? (
+        <div>
+          <h2 className="text-lg font-semibold">Customization pack</h2>
+          <p className="text-secondary-text text-sm">
+            For your profile, so anyone visiting it sees them.
+          </p>
+        </div>
+      ) : (
+        <div>
+          <h3 className="text-primary-text text-sm font-medium">
+            Customization pack
+          </h3>
+          <p className="text-secondary-text text-xs">
+            For your profile, so anyone visiting it sees them.
+          </p>
+        </div>
+      )}
       {!!images.length && (
-        <div className="grid grid-cols-2 gap-2">
+        <div
+          className={
+            variant === "page"
+              ? "grid max-w-xl grid-cols-2 gap-3"
+              : "grid grid-cols-2 gap-2"
+          }
+        >
           {images.map(({ label, src }, index) => (
             <figure key={label} className="min-w-0 space-y-1">
               <ImageLightbox
                 images={lightbox}
                 initialIndex={index}
                 alt={lightbox[index].alt}
-                className="border-border-card bg-primary-bg aspect-video w-full border"
+                className="border-border-card bg-secondary-bg aspect-video w-full border"
               >
                 <Image
                   src={src}
@@ -253,11 +273,19 @@ export function ApplyPackButton({
                 </li>
               ))}
             </ul>
+            {/* A new tab, so a pack preview or open sheet isn't lost. */}
             <Link
               href="/supporting"
-              className="text-link hover:text-link-hover inline-block text-sm"
+              target="_blank"
+              rel="noopener"
+              className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm"
             >
               View supporter plans
+              <Icon
+                icon="lucide:external-link"
+                className="size-3.5"
+                aria-label="(opens in a new tab)"
+              />
             </Link>
           </div>
         )}
