@@ -84,6 +84,7 @@ interface User {
   custom_accent_color?: string | null;
   accent_gradient?: number | null; // 0xRRGGBB, like accent_color
   accent_style?: string; // "solid" | "glass" | "transparent"
+  underglow?: number | null; // 0xRRGGBB, like accent_color
   global_name: string; // Can be "None"
   locale: string;
   created_at: string;

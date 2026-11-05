@@ -6,7 +6,11 @@ import {
 } from "@/components/Users/Friends";
 import { FriendButton } from "@/components/Users/UserProfilePopover";
 import { FRIENDS_KEY, FRIEND_REQUESTS_KEY } from "@/hooks/useFriendship";
-import { accentCardTheme, userCardAccent } from "@/utils/ui/accentColor";
+import {
+  accentCardTheme,
+  accentColorToHex,
+  userCardAccent,
+} from "@/utils/ui/accentColor";
 
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -71,6 +75,7 @@ interface User {
   accent_color: string;
   custom_accent_color?: string | null;
   accent_gradient?: number | null;
+  underglow?: number | null;
   accent_style?: string;
   custom_avatar?: string;
   banner?: string;
@@ -750,10 +755,13 @@ export default function UserProfileClient({
   const isOwnProfile = currentUserId === user.id;
   // Accent colors only recolor profile cards when the owner opts in.
   const accent = userCardAccent(user);
+  const underglow = accentColorToHex(user.underglow);
 
-  // Shown only when the owner switched it on; never gated on supporter tier.
+  // Tier 2, like custom banners, so it hides after a downgrade.
   const hasVisibleBackground =
-    user.settings_v2?.custom_background === true && !!user.custom_background;
+    user.settings_v2?.custom_background === true &&
+    (user.premiumtype ?? 0) >= 2 &&
+    !!user.custom_background;
 
   const profileActionButtonClassName =
     "md:h-10! md:gap-2! md:px-5! md:text-base! md:[&_svg]:size-5!";
@@ -762,7 +770,11 @@ export default function UserProfileClient({
     <main
       className="relative isolate min-h-screen pb-8"
       data-accent-cards={accent?.style}
-      style={accent ? accentCardTheme(accent) : undefined}
+      data-underglow={underglow ? "" : undefined}
+      style={{
+        ...(accent && accentCardTheme(accent)),
+        ...(underglow && { "--underglow": underglow }),
+      }}
     >
       {hasVisibleBackground && user.custom_background && (
         <ProfileBackground src={user.custom_background} />

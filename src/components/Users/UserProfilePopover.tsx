@@ -273,7 +273,9 @@ export function UserProfilePopover({
     },
   });
   const background =
-    settings?.custom_background === true ? profile.custom_background : null;
+    settings?.custom_background === true && (profile.premiumtype ?? 0) >= 2
+      ? profile.custom_background
+      : null;
   // The avatar's ring is cut out in whatever the card is filled with.
   const surface = accent
     ? "bg-secondary-bg"

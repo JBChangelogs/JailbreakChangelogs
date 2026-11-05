@@ -14,6 +14,7 @@ import { fetchCustomBackground } from "@/services/settingsService";
 import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { AccentColorSetting } from "@/components/Settings/AccentColorSetting";
+import { UnderglowSetting } from "@/components/Settings/UnderglowSetting";
 import { AppearancePreview } from "@/components/Settings/AppearancePreview";
 import { BackgroundSettings } from "@/components/Settings/BackgroundSettings";
 import DesktopNavigationSettings from "@/components/Settings/DesktopNavigationSettings";
@@ -120,11 +121,13 @@ export default function SettingsPage() {
   // The custom background shows behind settings like it does on the
   // profile, so changes to it are seen in place. Same query as the uploader,
   // so a new upload shows here at once.
-  const customBackgroundOn = Object.values(settings ?? {}).some((cat) =>
-    cat.settings.some(
-      (entry) => entry.name === "custom_background" && entry.value === true,
-    ),
-  );
+  const customBackgroundOn =
+    (userData?.premiumtype ?? 0) >= 2 &&
+    Object.values(settings ?? {}).some((cat) =>
+      cat.settings.some(
+        (entry) => entry.name === "custom_background" && entry.value === true,
+      ),
+    );
   const { data: customBackground } = useQuery({
     queryKey: ["custom-background", userData?.id],
     queryFn: fetchCustomBackground,
@@ -494,6 +497,9 @@ export default function SettingsPage() {
                     onReset={() => void accentColor.reset()}
                     userData={userData}
                   />
+                  <div className="mt-6">
+                    <UnderglowSetting userData={userData} />
+                  </div>
                 </div>
               );
               return (

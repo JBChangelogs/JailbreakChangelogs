@@ -404,6 +404,30 @@ export const saveAccentColor = async (accent: Accent | null): Promise<void> => {
   }
 };
 
+/** Sets the profile underglow ("#rrggbb"), or turns it off with null. */
+export const saveUnderglow = async (color: string | null): Promise<void> => {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/users/me/underglow",
+  );
+  const response = await fetch(url, {
+    method: color ? "PUT" : "DELETE",
+    credentials: "include",
+    headers: color
+      ? { ...headers, "Content-Type": "application/json" }
+      : headers,
+    body: color ? JSON.stringify({ color }) : undefined,
+  });
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("Underglow needs a supporter tier.");
+    }
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to save underglow"),
+    );
+  }
+};
+
 export const uploadCustomAvatar = async (file: File): Promise<string> => {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,

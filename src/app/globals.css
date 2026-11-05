@@ -799,6 +799,15 @@ img.twemoji {
   backdrop-filter: blur(14px) saturate(180%);
 }
 
+/* Underglow: a soft colored light under each profile card, wide and blurred
+   so its edges fade out instead of ending in a ring. */
+.underglow,
+[data-underglow] .bg-secondary-bg.border-border-card {
+  box-shadow:
+    0 18px 60px -18px color-mix(in srgb, var(--underglow) 75%, transparent),
+    0 8px 28px -10px color-mix(in srgb, var(--underglow) 45%, transparent);
+}
+
 @keyframes nav-sidebar-in {
   from {
     transform: translateX(-100%);
