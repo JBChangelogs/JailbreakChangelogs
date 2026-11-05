@@ -842,180 +842,193 @@ export default function CustomThemeEditor({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <label
-                    htmlFor="publish-theme"
-                    className="text-primary-text text-sm font-medium"
-                  >
-                    Publish to marketplace
-                  </label>
-                  <p
-                    id="publish-theme-description"
-                    className="text-secondary-text text-xs"
-                  >
-                    Your theme and author name will be public after saving. Any
-                    style is welcome. This does not enter a competition.
-                  </p>
-                  <Link
-                    href="/themes"
-                    className="text-link hover:text-link-hover mt-1 inline-block text-xs hover:underline"
-                  >
-                    Browse marketplace
-                  </Link>
-                </div>
-                <Switch
-                  id="publish-theme"
-                  aria-describedby="publish-theme-description"
-                  checked={current.published ?? false}
-                  disabled={saving}
-                  onCheckedChange={(published) => update({ published })}
-                />
-              </div>
-              <ThemePreviewUploader
-                theme={savedTheme}
-                disabled={saving}
-                onBusyChange={setUpdatingPreviews}
-                onChange={(previews) => {
-                  if (!savedTheme) return;
-                  const updated = { ...savedTheme, previews };
-                  setSavedTheme(updated);
-                  onSaved(updated);
-                }}
-              />
-              <ThemePackEditor
-                pack={current.pack ?? {}}
-                images={savedTheme?.pack ?? {}}
-                themeId={savedTheme?.id}
-                disabled={saving}
-                onChange={(pack) => update({ pack })}
-                onBusyChange={setUpdatingPreviews}
-                onImagesChange={(pack) => {
-                  if (!savedTheme) return;
-                  const updated = { ...savedTheme, pack };
-                  setSavedTheme(updated);
-                  onSaved(updated);
-                }}
-              />
-              {/* On phones: name and icon side by side, "Start from a theme"
-                  full width below them. */}
-              <div className="flex flex-wrap items-end gap-3">
-                <label
-                  className={cn("flex-1", isMobile ? "min-w-0" : "min-w-48")}
-                >
-                  <span className="text-primary-text text-sm font-medium">
-                    Name
-                  </span>
-                  <Input
-                    value={current.label}
-                    maxLength={64}
-                    onChange={(event) => update({ label: event.target.value })}
-                    className="mt-1"
+              {mode === "visual" && (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <label
+                        htmlFor="publish-theme"
+                        className="text-primary-text text-sm font-medium"
+                      >
+                        Publish to marketplace
+                      </label>
+                      <p
+                        id="publish-theme-description"
+                        className="text-secondary-text text-xs"
+                      >
+                        Your theme and author name will be public after saving.
+                        Any style is welcome. This does not enter a competition.
+                      </p>
+                      <Link
+                        href="/themes"
+                        className="text-link hover:text-link-hover mt-1 inline-block text-xs hover:underline"
+                      >
+                        Browse marketplace
+                      </Link>
+                    </div>
+                    <Switch
+                      id="publish-theme"
+                      aria-describedby="publish-theme-description"
+                      checked={current.published ?? false}
+                      disabled={saving}
+                      onCheckedChange={(published) => update({ published })}
+                    />
+                  </div>
+                  <ThemePreviewUploader
+                    theme={savedTheme}
+                    disabled={saving}
+                    onBusyChange={setUpdatingPreviews}
+                    onChange={(previews) => {
+                      if (!savedTheme) return;
+                      const updated = { ...savedTheme, previews };
+                      setSavedTheme(updated);
+                      onSaved(updated);
+                    }}
                   />
-                </label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      size="md"
+                  <ThemePackEditor
+                    pack={current.pack ?? {}}
+                    images={savedTheme?.pack ?? {}}
+                    themeId={savedTheme?.id}
+                    disabled={saving}
+                    onChange={(pack) => update({ pack })}
+                    onBusyChange={setUpdatingPreviews}
+                    onImagesChange={(pack) => {
+                      if (!savedTheme) return;
+                      const updated = { ...savedTheme, pack };
+                      setSavedTheme(updated);
+                      onSaved(updated);
+                    }}
+                  />
+                  {/* On phones: name and icon side by side, "Start from a theme"
+                  full width below them. */}
+                  <div className="flex flex-wrap items-end gap-3">
+                    <label
                       className={cn(
-                        isMobile && "order-last w-full justify-between",
+                        "flex-1",
+                        isMobile ? "min-w-0" : "min-w-48",
                       )}
                     >
-                      <span className="flex items-center gap-2">
-                        <Icon icon="lucide:copy" aria-hidden="true" />
-                        Start from a theme
+                      <span className="text-primary-text text-sm font-medium">
+                        Name
                       </span>
-                      <Icon icon="lucide:chevron-down" aria-hidden="true" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className={cn(
-                      "border-border-card bg-secondary-bg text-primary-text max-h-80 overflow-y-auto rounded-xl border p-1 shadow-lg",
-                      // As wide as the full-width button on phones.
-                      isMobile && "w-(--radix-popper-anchor-width)",
-                    )}
-                  >
-                    {siteThemes?.map((t) => (
-                      <DropdownMenuItem
-                        key={t.slug}
-                        onSelect={() => {
-                          setMatchLogo(false);
-                          update(fromSiteTheme(t));
-                        }}
-                        // pl-[11px] + the menu's 1px border and p-1 = the button's px-4,
-                        // so each icon lines up under its icon.
-                        className="focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 pl-[11px] text-sm"
+                      <Input
+                        value={current.label}
+                        maxLength={64}
+                        onChange={(event) =>
+                          update({ label: event.target.value })
+                        }
+                        className="mt-1"
+                      />
+                    </label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          className={cn(
+                            isMobile && "order-last w-full justify-between",
+                          )}
+                        >
+                          <span className="flex items-center gap-2">
+                            <Icon icon="lucide:copy" aria-hidden="true" />
+                            Start from a theme
+                          </span>
+                          <Icon icon="lucide:chevron-down" aria-hidden="true" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className={cn(
+                          "border-border-card bg-secondary-bg text-primary-text max-h-80 overflow-y-auto rounded-xl border p-1 shadow-lg",
+                          // As wide as the full-width button on phones.
+                          isMobile && "w-(--radix-popper-anchor-width)",
+                        )}
                       >
-                        <Icon
-                          icon={t.icon}
-                          aria-hidden="true"
-                          className="text-secondary-text size-4 shrink-0"
-                        />
-                        {t.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <ThemeIconPicker
-                  value={current.icon ?? null}
-                  onChange={(icon) => update({ icon })}
-                />
-              </div>
+                        {siteThemes?.map((t) => (
+                          <DropdownMenuItem
+                            key={t.slug}
+                            onSelect={() => {
+                              setMatchLogo(false);
+                              update(fromSiteTheme(t));
+                            }}
+                            // pl-[11px] + the menu's 1px border and p-1 = the button's px-4,
+                            // so each icon lines up under its icon.
+                            className="focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 pl-[11px] text-sm"
+                          >
+                            <Icon
+                              icon={t.icon}
+                              aria-hidden="true"
+                              className="text-secondary-text size-4 shrink-0"
+                            />
+                            {t.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <ThemeIconPicker
+                      value={current.icon ?? null}
+                      onChange={(icon) => update({ icon })}
+                    />
+                  </div>
 
-              <label htmlFor="theme-description" className="block space-y-1">
-                <span className="text-primary-text text-sm font-medium">
-                  Description (optional)
-                </span>
-                <span className="relative block">
-                  <Textarea
-                    id="theme-description"
-                    value={current.description ?? ""}
-                    maxLength={500}
-                    rows={3}
-                    onChange={(event) =>
-                      update({ description: event.target.value })
-                    }
-                    aria-describedby="theme-description-count"
-                    placeholder="Tell people about your theme…"
-                    className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text hover:border-border-focus focus:border-button-info min-h-30 resize-y rounded p-3 pb-7 shadow-none focus-visible:ring-0"
-                  />
-                  <span
-                    id="theme-description-count"
-                    className="text-secondary-text pointer-events-none absolute right-2 bottom-2 text-xs"
+                  <label
+                    htmlFor="theme-description"
+                    className="block space-y-1"
                   >
-                    {(current.description ?? "").length}/500
-                  </span>
-                </span>
-              </label>
+                    <span className="text-primary-text text-sm font-medium">
+                      Description (optional)
+                    </span>
+                    <span className="relative block">
+                      <Textarea
+                        id="theme-description"
+                        value={current.description ?? ""}
+                        maxLength={500}
+                        rows={3}
+                        onChange={(event) =>
+                          update({ description: event.target.value })
+                        }
+                        aria-describedby="theme-description-count"
+                        placeholder="Tell people about your theme…"
+                        className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text hover:border-border-focus focus:border-button-info min-h-30 resize-y rounded p-3 pb-7 shadow-none focus-visible:ring-0"
+                      />
+                      <span
+                        id="theme-description-count"
+                        className="text-secondary-text pointer-events-none absolute right-2 bottom-2 text-xs"
+                      >
+                        {(current.description ?? "").length}/500
+                      </span>
+                    </span>
+                  </label>
 
-              <div className="space-y-2">
-                <div>
-                  <h3 className="text-primary-text text-sm font-medium">
-                    Light or dark
-                  </h3>
-                  <p className="text-secondary-text text-xs">
-                    Matches scrollbars and other browser parts to your colors.
-                  </p>
-                </div>
-                <Tabs
-                  radio
-                  value={current.scheme}
-                  onValueChange={(scheme) =>
-                    update({ scheme: scheme as "dark" | "light" })
-                  }
-                >
-                  <TabsList aria-label="Light or dark" fullWidth>
-                    <TabsTrigger value="dark" fullWidth>
-                      Dark
-                    </TabsTrigger>
-                    <TabsTrigger value="light" fullWidth>
-                      Light
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+                  <div className="space-y-2">
+                    <div>
+                      <h3 className="text-primary-text text-sm font-medium">
+                        Light or dark
+                      </h3>
+                      <p className="text-secondary-text text-xs">
+                        Matches scrollbars and other browser parts to your
+                        colors.
+                      </p>
+                    </div>
+                    <Tabs
+                      radio
+                      value={current.scheme}
+                      onValueChange={(scheme) =>
+                        update({ scheme: scheme as "dark" | "light" })
+                      }
+                    >
+                      <TabsList aria-label="Light or dark" fullWidth>
+                        <TabsTrigger value="dark" fullWidth>
+                          Dark
+                        </TabsTrigger>
+                        <TabsTrigger value="light" fullWidth>
+                          Light
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                </>
+              )}
 
               {problemGroups.length > 0 && (
                 <div
@@ -1240,13 +1253,6 @@ export default function CustomThemeEditor({
               ) : mode === "import" ? (
                 <div className="space-y-5">
                   <div className="flex items-start gap-3">
-                    <div className="bg-icon-tile-bg flex size-10 shrink-0 items-center justify-center rounded-lg">
-                      <Icon
-                        icon="lucide:download"
-                        aria-hidden="true"
-                        className="text-icon-tile size-5"
-                      />
-                    </div>
                     <div>
                       <h3 className="text-primary-text text-sm font-medium">
                         Import a theme
@@ -1359,13 +1365,6 @@ export default function CustomThemeEditor({
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="bg-icon-tile-bg flex size-10 shrink-0 items-center justify-center rounded-lg">
-                      <Icon
-                        icon="lucide:code"
-                        aria-hidden="true"
-                        className="text-icon-tile size-5"
-                      />
-                    </div>
                     <div>
                       <h3 className="text-primary-text text-sm font-medium">
                         Edit as CSS
