@@ -318,7 +318,7 @@ function TradeItemSummary({
               "bg-button-info text-form-button-text",
             ],
             [
-              isDuped ? "Duped Demand" : "Demand",
+              "Demand",
               demand ?? "Unknown",
               getDemandColor(status === "ready" ? demand : undefined),
             ],

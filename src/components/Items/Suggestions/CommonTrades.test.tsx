@@ -33,7 +33,7 @@ test("detail common trades show values and use duped demand while unresolved ite
     "30,000,000",
     "Duped Value",
     "20,000,000",
-    "Duped Demand",
+    "Demand",
     "Low",
     "Rising",
     "×2",
@@ -42,6 +42,7 @@ test("detail common trades show values and use duped demand while unresolved ite
     expect(markup).toContain(text);
   }
   expect(markup).not.toContain("High");
+  expect(markup).not.toContain("Duped Demand");
   expect(markup).toContain("bg-button-info text-form-button-text");
   expect(markup).toContain(getDemandColor("Low"));
   expect(markup).toContain(getTrendColor("Rising"));

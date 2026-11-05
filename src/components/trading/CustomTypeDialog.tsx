@@ -109,15 +109,15 @@ export function CustomTypeDialog({
                 disabled={selectedOnOffering}
                 className="w-full"
               >
-                Offering
+                Offer
               </Button>
               <Button
-                variant="default"
+                variant="destructive"
                 onClick={() => handleSelect("requesting")}
                 disabled={selectedOnRequesting}
                 className="w-full"
               >
-                Requesting
+                Request
               </Button>
             </div>
           </div>

@@ -5,13 +5,12 @@ import {
   formatTradeValue,
 } from "@/components/Values/Calculator/calculatorUtils";
 import React, { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,9 @@ import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { INVENTORY_API_URL } from "@/utils/api/api";
+import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
 import {
   isInventoryNotFound,
   userInventoryQueryOptions,
@@ -220,6 +221,41 @@ export function MakeOfferDialog({
     isLoading: isAuthLoading,
     setLoginModal,
   } = useAuthContext();
+  const queryClient = useQueryClient();
+  const favoritesQuery = useUserFavorites(user?.id);
+  const favoriteIds =
+    favoritesQuery.data?.map((favorite) => favorite.item.id) ?? [];
+
+  const handleToggleFavorite = async (itemId: number, isFavorited: boolean) => {
+    if (!isAuthenticated) {
+      toast.error(
+        "You must be logged in to favorite items. Please log in and try again.",
+      );
+      setLoginModal({ open: true });
+      return;
+    }
+    try {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/v2/users/me/favorites/${encodeURIComponent(String(itemId))}`,
+      );
+      const response = await fetch(url, {
+        method: isFavorited ? "DELETE" : "PUT",
+        headers,
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to update favorite status");
+      await queryClient.invalidateQueries({
+        queryKey: ["user-favorites", user?.id],
+      });
+      toast.success(
+        isFavorited ? "Removed from favorites" : "Added to favorites",
+      );
+    } catch {
+      toast.error("Failed to update favorite status");
+    }
+  };
+
   const [showCustom, setShowCustom] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
@@ -596,10 +632,10 @@ export function MakeOfferDialog({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent
-        className="bg-secondary-bg flex max-h-[90vh] max-w-3xl flex-col rounded-lg p-0 backdrop-blur-none"
+        className="bg-secondary-bg flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-6xl flex-col overflow-hidden rounded-2xl p-0 backdrop-blur-none"
         aria-describedby={undefined}
       >
-        <div className="border-border-card flex shrink-0 items-start justify-between gap-3 px-6 pt-6 pb-4">
+        <div className="border-border-card flex shrink-0 items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
           <div className="flex min-w-0 items-start gap-3">
             <div
               className={`border-border-card bg-primary-bg relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden border ${
@@ -651,7 +687,7 @@ export function MakeOfferDialog({
           </button>
         </div>
 
-        <div className="overflow-y-auto px-6 pt-4 pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
           <RateLimitBanner
             until={rateLimitUntil}
             label="You're sending offers too fast."
@@ -698,22 +734,7 @@ export function MakeOfferDialog({
           {showCustom && (
             <div>
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h3 className="text-primary-text text-sm font-semibold">
-                    Custom Offer Details
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => void sendCustomOffer()}
-                      disabled={submitting || !!rateLimitUntil}
-                      size="sm"
-                    >
-                      {submitting ? "Sending..." : "Send Offer"}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mt-4">
+                <div>
                   <label
                     htmlFor="make-offer-note"
                     className="text-secondary-text mb-1 block text-xs font-medium"
@@ -732,10 +753,10 @@ export function MakeOfferDialog({
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                   <p className="text-secondary-text mb-3 text-sm font-medium">
-                    Your Offering ({offeringItems.length}/8)
+                    You offer ({offeringItems.length}/8)
                   </p>
                   <p className="text-secondary-text/70 mb-3 text-xs">
                     Pre-filled with what the trade owner is requesting. Edit if
@@ -744,7 +765,12 @@ export function MakeOfferDialog({
                   <ItemGrid
                     items={offeringItems}
                     title="Offering"
+                    showTitle={false}
                     onRemove={(item) => handleRemoveItem(item, "offering")}
+                    onAdd={(item) => handleAddItem(item, "offering")}
+                    quickAddItems={pickerItems}
+                    quickAddUseCatalogApi={itemsInputMode === "values"}
+                    onQuickAdd={(item) => handleAddItem(item, "offering")}
                     disableInteraction={submitting}
                     variant="compact"
                   />
@@ -752,7 +778,7 @@ export function MakeOfferDialog({
                 </div>
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                   <p className="text-secondary-text mb-3 text-sm font-medium">
-                    Your Requesting (optional)
+                    You request ({requestingItems.length}/8)
                   </p>
                   <p className="text-secondary-text/70 mb-3 text-xs">
                     Pre-filled with what the trade owner is offering. Edit if
@@ -761,7 +787,12 @@ export function MakeOfferDialog({
                   <ItemGrid
                     items={requestingItems}
                     title="Requesting"
+                    showTitle={false}
                     onRemove={(item) => handleRemoveItem(item, "requesting")}
+                    onAdd={(item) => handleAddItem(item, "requesting")}
+                    quickAddItems={pickerItems}
+                    quickAddUseCatalogApi={itemsInputMode === "values"}
+                    onQuickAdd={(item) => handleAddItem(item, "requesting")}
                     disableInteraction={submitting}
                     variant="compact"
                   />
@@ -852,8 +883,11 @@ export function MakeOfferDialog({
                       useCatalogApi
                       selectedItems={[...offeringItems, ...requestingItems]}
                       onSelect={handleAddItem}
+                      showOfferRequestButtons
+                      favoriteIds={favoriteIds}
+                      onToggleFavorite={handleToggleFavorite}
+                      variant="modal"
                       onAddCustomType={handleAddCustomType}
-                      variant="compact"
                       cardBackground="tertiary"
                       customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
                         id: t.id,
@@ -871,8 +905,11 @@ export function MakeOfferDialog({
                       items={pickerItems}
                       selectedItems={[...offeringItems, ...requestingItems]}
                       onSelect={handleAddItem}
+                      showOfferRequestButtons
+                      favoriteIds={favoriteIds}
+                      onToggleFavorite={handleToggleFavorite}
+                      variant="modal"
                       onAddCustomType={handleAddCustomType}
-                      variant="compact"
                       cardBackground="tertiary"
                       customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
                         id: t.id,
@@ -883,14 +920,20 @@ export function MakeOfferDialog({
               </div>
             </div>
           )}
-          <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
-            <DialogClose asChild>
-              <Button variant="ghost" size="sm" disabled={submitting}>
-                Cancel
-              </Button>
-            </DialogClose>
-          </DialogFooter>
         </div>
+        <DialogFooter className="border-border-card shrink-0 gap-2 border-t px-4 py-4 sm:px-6">
+          <Button variant="ghost" onClick={handleClose} disabled={submitting}>
+            {showCustom ? "Back" : "Cancel"}
+          </Button>
+          {showCustom && (
+            <Button
+              onClick={() => void sendCustomOffer()}
+              disabled={submitting || !!rateLimitUntil}
+            >
+              {submitting ? "Sending..." : "Send Offer"}
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

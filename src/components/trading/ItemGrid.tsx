@@ -118,7 +118,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
     return renderAddControl(
       <button
         type="button"
-        className={`bg-tertiary-bg w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
+        className={`w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${variant === "compact" ? "bg-secondary-bg/50 hover:bg-secondary-bg" : "bg-tertiary-bg"} ${borderColor} ${
           disableInteraction
             ? "cursor-not-allowed opacity-60"
             : "cursor-pointer"
@@ -159,7 +159,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   }
 
   return (
-    <div className="rounded-lg">
+    <div className="@container rounded-lg">
       {showTitle ? (
         <h4 className="text-primary-text mb-2 text-sm">{title}</h4>
       ) : null}
@@ -170,7 +170,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
         <div
           className={
             variant === "compact"
-              ? "grid grid-cols-2 gap-3 sm:grid-cols-3"
+              ? "grid grid-cols-1 gap-3 @min-[16rem]:grid-cols-2 @min-[24rem]:grid-cols-3"
               : "grid grid-cols-2 gap-3 md:grid-cols-3"
           }
         >
@@ -331,7 +331,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             return (
               <div
                 key={`${item.id}:${item.name}:${item.isDuped ? "duped" : "clean"}:${item.isOG ? "og" : "regular"}`}
-                className={`group border-border-card bg-tertiary-bg/50 relative rounded-xl border p-2.5 ${
+                className={`group border-border-card relative rounded-xl border p-2.5 ${variant === "compact" ? "bg-secondary-bg" : "bg-tertiary-bg/50"} ${
                   disableInteraction ? "cursor-not-allowed opacity-60" : ""
                 }`}
               >
@@ -364,7 +364,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               type="button"
               onClick={onQuickAdd ? undefined : activateAdd}
               disabled={disableInteraction}
-              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex aspect-video w-full flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors ${borderColor} ${
+              className={`border-border-card hover:border-border-focus flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition-colors ${variant === "compact" ? "bg-secondary-bg/50 hover:bg-secondary-bg h-full min-h-32" : "bg-tertiary-bg aspect-video"} ${borderColor} ${
                 disableInteraction
                   ? "cursor-not-allowed opacity-60"
                   : "cursor-pointer"
