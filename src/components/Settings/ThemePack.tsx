@@ -119,7 +119,8 @@ export function ThemePackSummary({
   );
 }
 
-const DEFAULT_COLOR = "#ffffff";
+// The accent picker's default, as in profile settings.
+const DEFAULT_COLOR = "#2462cd";
 
 /** `pack` saves with the theme; images upload right away, like screenshots. */
 export function ThemePackEditor({
@@ -180,7 +181,8 @@ export function ThemePackEditor({
           field.type === "accent"
             ? { color: DEFAULT_COLOR, gradient: null }
             : field.type === "color"
-              ? DEFAULT_COLOR
+              ? // Like profile underglow: start from the pack's accent.
+                (pack.accent?.color ?? DEFAULT_COLOR)
               : field.type === "enum"
                 ? (field.options?.[0] ?? null)
                 : true,
@@ -261,13 +263,22 @@ export function ThemePackEditor({
               onChange={(color) => set(name, { ...accent, color })}
             />
             {accent.gradient ? (
-              <ColorSwatch
-                label="Gradient"
-                value={accent.gradient}
-                canOpen={() => !disabled}
-                onChange={(gradient) => set(name, { ...accent, gradient })}
-                onReset={() => set(name, { ...accent, gradient: null })}
-              />
+              <>
+                <ColorSwatch
+                  label="Gradient"
+                  value={accent.gradient}
+                  canOpen={() => !disabled}
+                  onChange={(gradient) => set(name, { ...accent, gradient })}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={disabled}
+                  onClick={() => set(name, { ...accent, gradient: null })}
+                >
+                  Remove gradient
+                </Button>
+              </>
             ) : (
               <Button
                 variant="ghost"
