@@ -15,7 +15,7 @@ function nodes(value: unknown): Node[] {
   return [node, ...nodes(node.props.children)];
 }
 
-test("theme comment headings keep the theme name without an empty item category", () => {
+test("theme comment headings append Community Theme without an empty item category", () => {
   const state = {
     totalComments: 0,
     type: "theme",
@@ -52,6 +52,11 @@ test("theme comment headings keep the theme name without an empty item category"
   };
   const heading = () =>
     text(nodes(exports.CommentHeader({})).find((node) => node.type === "h2"));
+  expect(heading()).toBe(" Comments for Fall Theme (Light) Community Theme");
+  state.totalComments = 1;
+  expect(heading()).toBe(" Comment for Fall Theme (Light) Community Theme");
+  state.totalComments = 0;
+  state.type = "vsuggestion";
   expect(heading()).toBe(" Comments for Fall Theme (Light)");
   state.type = "item";
   state.itemType = "vehicle";

@@ -139,9 +139,14 @@ test("uploaded previews appear in the hero and theme links get their own metadat
   expect(markup).toContain("About this theme");
   expect(markup).toContain("Soft colors");
   expect(await view.metadata()).toMatchObject({
+    title: "Midnight Community Theme",
     description: "Soft colors",
     alternates: { canonical: "/themes/8V8RN337" },
-    openGraph: { images: [{ url, alt: "Midnight" }] },
+    openGraph: {
+      title: "Midnight Community Theme",
+      images: [{ url, alt: "Midnight" }],
+    },
+    twitter: { title: "Midnight Community Theme" },
   });
 });
 

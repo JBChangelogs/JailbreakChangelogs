@@ -48,7 +48,9 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
               `Trade #${changelogId}`
             ) : type === "inventory" || type === "user" ? (
               changelogTitle
-            ) : type === "vsuggestion" || type === "theme" ? (
+            ) : type === "theme" ? (
+              `${changelogTitle} Community Theme`
+            ) : type === "vsuggestion" ? (
               changelogTitle
             ) : (
               <>

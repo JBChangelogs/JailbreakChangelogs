@@ -30,7 +30,7 @@ const getTheme = cache(async (id: string) => {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const theme = await getTheme((await params).id);
-  const title = `${theme.label} | Community Theme`;
+  const title = `${theme.label} Community Theme`;
   const description =
     theme.description ||
     `Preview and use ${theme.label} on Jailbreak Changelogs.`;
