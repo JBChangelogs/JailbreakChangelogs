@@ -18,6 +18,7 @@ import { useBottomPanel } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
+import { ThemePackSummary } from "@/components/Settings/ThemePack";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
@@ -267,6 +268,7 @@ export default function SharedThemeDialog() {
                 Copy link
               </Button>
             </div>
+            <ThemePackSummary pack={theme.pack} />
             {!!theme.previews?.length && (
               <ThemePreviewImages
                 previews={theme.previews}

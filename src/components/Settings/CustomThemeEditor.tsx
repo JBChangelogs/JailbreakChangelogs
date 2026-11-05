@@ -40,6 +40,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseThemeCss, themeToCss } from "@/utils/ui/themeCss";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewUploader from "@/components/Settings/ThemePreviewUploader";
+import { ThemePackEditor } from "@/components/Settings/ThemePack";
 import ThemeIconPicker from "@/components/Settings/ThemeIconPicker";
 import { ThemeCard } from "@/components/Settings/ThemeSettings";
 import { customThemeOption } from "@/components/Settings/CustomThemeSettings";
@@ -58,6 +59,7 @@ import {
   updateMyTheme,
   type CustomThemeInput,
   type UserTheme,
+  type ThemePack,
 } from "@/utils/api/userThemes";
 import {
   endCustomThemePreview,
@@ -173,6 +175,10 @@ function ThemeColor({
   );
 }
 
+// The draft's pack: images upload on their own, so they stay out of it.
+const packDraft = ({ banner: _b, background: _bg, ...rest }: ThemePack = {}) =>
+  rest;
+
 const fromSiteTheme = (theme: SiteTheme): Omit<CustomThemeInput, "label"> => ({
   scheme: theme.scheme,
   vars: withDefaultColors({ ...theme.vars }),
@@ -223,6 +229,7 @@ export default function CustomThemeEditor({
           logo_filter: theme.logo_filter,
           icon: theme.icon ?? null,
           published: theme.published_at != null,
+          pack: packDraft(theme.pack),
         }
       : null,
   );
@@ -638,6 +645,7 @@ export default function CustomThemeEditor({
       logo_filter: loaded.logo_filter,
       icon: loaded.icon ?? null,
       published: current.published,
+      pack: current.pack,
     });
     // current and theme are read when a new theme arrives, not tracked.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -871,6 +879,20 @@ export default function CustomThemeEditor({
                 onChange={(previews) => {
                   if (!savedTheme) return;
                   const updated = { ...savedTheme, previews };
+                  setSavedTheme(updated);
+                  onSaved(updated);
+                }}
+              />
+              <ThemePackEditor
+                pack={current.pack ?? {}}
+                images={savedTheme?.pack ?? {}}
+                themeId={savedTheme?.id}
+                disabled={saving}
+                onChange={(pack) => update({ pack })}
+                onBusyChange={setUpdatingPreviews}
+                onImagesChange={(pack) => {
+                  if (!savedTheme) return;
+                  const updated = { ...savedTheme, pack };
                   setSavedTheme(updated);
                   onSaved(updated);
                 }}

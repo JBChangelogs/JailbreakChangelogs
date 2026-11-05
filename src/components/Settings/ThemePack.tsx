@@ -1,0 +1,450 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { ColorSwatch } from "@/components/ui/color-picker";
+import { Icon } from "@/components/ui/IconWrapper";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import {
+  deleteThemePackImage,
+  fetchPackFields,
+  uploadThemePackImage,
+  type PackField,
+  type PackPart,
+  type ThemePack,
+} from "@/utils/api/userThemes";
+
+export const PART_LABELS: Record<PackPart, string> = {
+  banner: "Banner",
+  background: "Background",
+  accent: "Accent color",
+  card_style: "Card style",
+  colored_profile_cards: "Colored profile cards",
+  underglow: "Underglow",
+};
+
+export const usePackFields = (enabled = true) =>
+  useQuery({
+    queryKey: ["theme-pack-fields"],
+    queryFn: fetchPackFields,
+    enabled,
+    staleTime: Infinity,
+  });
+
+export const SupporterTier = ({ tier }: { tier: number }) => (
+  <span className="text-secondary-text inline-flex items-center gap-1 text-xs">
+    <Image
+      src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${tier}.svg`}
+      alt=""
+      width={14}
+      height={14}
+      className="shrink-0 object-contain"
+    />
+    Tier {tier}+
+  </span>
+);
+
+const Swatch = ({ color }: { color: string }) => (
+  <span
+    aria-hidden="true"
+    className="inline-block size-3.5 rounded-sm border border-black/20"
+    style={{ backgroundColor: color }}
+  />
+);
+
+export function ThemePackSummary({
+  pack,
+  className,
+}: {
+  pack?: ThemePack;
+  className?: string;
+}) {
+  const parts = (Object.keys(PART_LABELS) as PackPart[]).filter(
+    (part) => pack?.[part] != null,
+  );
+  if (!pack || !parts.length) return null;
+  const detail = (part: PackPart) => {
+    switch (part) {
+      case "banner":
+      case "background":
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={pack[part]!}
+            alt=""
+            className="h-4 w-7 rounded-sm object-cover"
+          />
+        );
+      case "accent":
+        return (
+          <>
+            <Swatch color={pack.accent!.color} />
+            {pack.accent!.gradient && <Swatch color={pack.accent!.gradient} />}
+          </>
+        );
+      case "underglow":
+        return <Swatch color={pack.underglow!} />;
+      case "card_style":
+        return <span className="capitalize">{pack.card_style}</span>;
+      case "colored_profile_cards":
+        return pack.colored_profile_cards ? "On" : "Off";
+    }
+  };
+  return (
+    <ul
+      aria-label="Customization pack"
+      className={cn("flex flex-wrap gap-1.5", className)}
+    >
+      {parts.map((part) => (
+        <li
+          key={part}
+          className="border-border-card bg-tertiary-bg text-primary-text flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs"
+        >
+          {PART_LABELS[part]}
+          <span className="text-secondary-text flex items-center gap-1">
+            {detail(part)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const DEFAULT_COLOR = "#ffffff";
+
+/** `pack` saves with the theme; images upload right away, like screenshots. */
+export function ThemePackEditor({
+  pack,
+  images,
+  themeId,
+  disabled,
+  onChange,
+  onImagesChange,
+  onBusyChange,
+}: {
+  pack: ThemePack;
+  images: ThemePack;
+  themeId?: number;
+  disabled: boolean;
+  onChange: (pack: ThemePack) => void;
+  onImagesChange: (pack: ThemePack) => void;
+  onBusyChange: (busy: boolean) => void;
+}) {
+  const { data: fields } = usePackFields();
+  const [busy, setBusy] = useState<PackPart | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [opened, setOpened] = useState<Set<PackPart>>(new Set());
+  const [expanded] = useState(
+    () =>
+      Object.keys(pack).some((k) => pack[k as PackPart] != null) ||
+      !!images.banner ||
+      !!images.background,
+  );
+  if (!fields?.length) return null;
+
+  const set = (part: PackPart, value: ThemePack[PackPart]) =>
+    onChange({ ...pack, [part]: value });
+  const toggleOpened = (part: PackPart, on: boolean) =>
+    setOpened((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(part);
+      else next.delete(part);
+      return next;
+    });
+  const added = (field: PackField) =>
+    field.type === "image"
+      ? !!images[field.name] || opened.has(field.name)
+      : pack[field.name] != null;
+  const add = (field: PackField) =>
+    field.type === "image"
+      ? toggleOpened(field.name, true)
+      : set(
+          field.name,
+          field.type === "accent"
+            ? { color: DEFAULT_COLOR, gradient: null }
+            : field.type === "color"
+              ? DEFAULT_COLOR
+              : field.type === "enum"
+                ? (field.options?.[0] ?? null)
+                : true,
+        );
+
+  const changeImage = async (
+    kind: "banner" | "background",
+    image: File | null,
+  ) => {
+    if (!themeId) return;
+    setBusy(kind);
+    onBusyChange(true);
+    setError(null);
+    try {
+      onImagesChange(
+        image
+          ? await uploadThemePackImage(themeId, kind, image)
+          : await deleteThemePackImage(themeId, kind),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't update it.");
+    } finally {
+      setBusy(null);
+      onBusyChange(false);
+    }
+  };
+
+  const control = (field: PackField) => {
+    const { name } = field;
+    if (field.type === "image") {
+      const kind = name as "banner" | "background";
+      const url = images[kind];
+      return (
+        <PackImageDrop
+          label={PART_LABELS[name]}
+          url={url ?? null}
+          busy={busy === kind}
+          disabled={disabled || busy !== null}
+          onUpload={(image) => void changeImage(kind, image)}
+          onRemove={() =>
+            url ? void changeImage(kind, null) : toggleOpened(name, false)
+          }
+        />
+      );
+    }
+
+    const value = pack[name];
+    const remove = (
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label={`Remove ${PART_LABELS[name]}`}
+        disabled={disabled}
+        onClick={() => set(name, null)}
+      >
+        <Icon icon="lucide:x" aria-hidden="true" />
+      </Button>
+    );
+    const accent = pack.accent;
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        {field.type === "accent" && accent && (
+          <>
+            <ColorSwatch
+              label="Color"
+              value={accent.color}
+              canOpen={() => !disabled}
+              onChange={(color) => set(name, { ...accent, color })}
+            />
+            {accent.gradient ? (
+              <ColorSwatch
+                label="Gradient"
+                value={accent.gradient}
+                canOpen={() => !disabled}
+                onChange={(gradient) => set(name, { ...accent, gradient })}
+                onReset={() => set(name, { ...accent, gradient: null })}
+              />
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={disabled}
+                onClick={() => set(name, { ...accent, gradient: accent.color })}
+              >
+                Add gradient
+              </Button>
+            )}
+          </>
+        )}
+        {field.type === "color" && (
+          <ColorSwatch
+            label={PART_LABELS[name]}
+            value={value as string}
+            canOpen={() => !disabled}
+            onChange={(color) => set(name, color)}
+          />
+        )}
+        {field.type === "enum" &&
+          field.options?.map((option) => (
+            <Button
+              key={option}
+              size="sm"
+              variant={value === option ? "default" : "secondary"}
+              aria-pressed={value === option}
+              disabled={disabled}
+              className="capitalize"
+              onClick={() => set(name, option)}
+            >
+              {option}
+            </Button>
+          ))}
+        {field.type === "boolean" && (
+          <Switch
+            aria-label={PART_LABELS[name]}
+            checked={value === true}
+            disabled={disabled}
+            onCheckedChange={(checked) => set(name, checked)}
+          />
+        )}
+        {remove}
+      </div>
+    );
+  };
+
+  const missing = fields.filter((field) => !added(field));
+  return (
+    <details open={expanded} className="group space-y-3">
+      <summary className="flex cursor-pointer list-none items-start gap-2">
+        <Icon
+          icon="lucide:chevron-right"
+          className="text-secondary-text mt-0.5 size-4 shrink-0 transition-transform group-open:rotate-90"
+          aria-hidden="true"
+        />
+        <span>
+          <span className="text-primary-text block text-sm font-medium">
+            Customization pack
+          </span>
+          <span className="text-secondary-text block text-xs">
+            Profile extras people can copy along with your theme. Anyone can add
+            them; some need a supporter tier to apply to a profile.
+          </span>
+        </span>
+      </summary>
+      <ul className="mt-3 space-y-3">
+        {fields.filter(added).map((field) => (
+          <li key={field.name} className="space-y-1">
+            <p className="text-primary-text text-sm">
+              {PART_LABELS[field.name] ?? field.name}
+            </p>
+            {control(field)}
+          </li>
+        ))}
+      </ul>
+      {!!missing.length && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {missing.map((field) => (
+            <Button
+              key={field.name}
+              variant="secondary"
+              size="sm"
+              disabled={disabled || (field.type === "image" && !themeId)}
+              onClick={() => add(field)}
+            >
+              <Icon icon="lucide:plus" aria-hidden="true" />
+              {PART_LABELS[field.name] ?? field.name}
+            </Button>
+          ))}
+        </div>
+      )}
+      {!themeId && (
+        <p className="text-secondary-text text-xs">
+          Save the theme to add a banner or background.
+        </p>
+      )}
+      {error && (
+        <p role="alert" className="text-status-error text-xs">
+          {error}
+        </p>
+      )}
+    </details>
+  );
+}
+
+/** Paste goes to the hovered or focused zone, ahead of the screenshot uploader. */
+function PackImageDrop({
+  label,
+  url,
+  busy,
+  disabled,
+  onUpload,
+  onRemove,
+}: {
+  label: string;
+  url: string | null;
+  busy: boolean;
+  disabled: boolean;
+  onUpload: (image: File) => void;
+  onRemove: () => void;
+}) {
+  const zone = useRef<HTMLDivElement>(null);
+  const hovered = useRef(false);
+  const { getRootProps, getInputProps, isDragActive, isDragReject } =
+    useDropzone({
+      multiple: false,
+      accept: { "image/*": [] },
+      disabled,
+      onDrop: ([image]) => image && onUpload(image),
+    });
+
+  const upload = useRef(onUpload);
+  upload.current = onUpload;
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      const here =
+        hovered.current || zone.current?.contains(document.activeElement);
+      if (disabled || !here) return;
+      for (const item of event.clipboardData?.items ?? []) {
+        const image = item.type.startsWith("image/") && item.getAsFile();
+        if (!image) continue;
+        event.preventDefault();
+        upload.current(image);
+        return;
+      }
+    };
+    // Capture, so it runs before the screenshot uploader's listener.
+    window.addEventListener("paste", onPaste, true);
+    return () => window.removeEventListener("paste", onPaste, true);
+  }, [disabled]);
+
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        {...getRootProps({
+          ref: zone,
+          role: "button",
+          "aria-label": `${url ? "Replace" : "Upload"} the ${label.toLowerCase()}`,
+          onMouseEnter: () => (hovered.current = true),
+          onMouseLeave: () => (hovered.current = false),
+        })}
+        className={cn(
+          "flex min-w-0 flex-1 items-center gap-3 rounded-lg border-2 border-dashed p-4 text-sm transition-colors",
+          isDragActive
+            ? isDragReject
+              ? "border-status-error bg-status-error/10"
+              : "border-button-info bg-button-info/10"
+            : "border-border-card hover:border-border-focus bg-secondary-bg",
+          disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+        )}
+      >
+        <input {...getInputProps()} />
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={url} alt="" className="h-10 w-16 rounded object-cover" />
+        ) : (
+          <Icon
+            icon="material-symbols:cloud-upload"
+            className="text-secondary-text size-6 shrink-0"
+            aria-hidden="true"
+          />
+        )}
+        <span className="text-primary-text min-w-0">
+          {busy
+            ? "Uploading…"
+            : isDragActive
+              ? "Drop to upload"
+              : `Click, drop, or paste ${url ? "a new" : "a"} ${label.toLowerCase()} (Ctrl+V / ⌘V)`}
+        </span>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label={`Remove the ${label.toLowerCase()}`}
+        disabled={disabled}
+        onClick={onRemove}
+      >
+        <Icon icon="lucide:x" aria-hidden="true" />
+      </Button>
+    </div>
+  );
+}

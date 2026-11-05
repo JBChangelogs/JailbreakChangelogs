@@ -22,6 +22,7 @@ import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import ReportThemeButton from "@/components/Settings/ReportThemeButton";
 import ThemeShareCode from "@/components/Settings/ThemeShareCode";
+import { ThemePackSummary } from "@/components/Settings/ThemePack";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -513,6 +514,7 @@ export default function ThemeMarketplace() {
                       </p>
                     </div>
                     <ThemeShareCode code={theme.share_code} />
+                    <ThemePackSummary pack={theme.pack} className="mt-2" />
                   </div>
                   <div className="mt-auto flex flex-wrap gap-2">
                     <div className="contents">

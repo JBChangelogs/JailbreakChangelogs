@@ -26,6 +26,33 @@ export interface CustomTheme {
   icon?: string | null;
   published_at?: number | null;
   previews?: ThemePreviewImage[];
+  /** Profile customizations that come with the theme; {} when none. */
+  pack?: ThemePack;
+}
+
+export type PackPart =
+  | "banner"
+  | "background"
+  | "accent"
+  | "card_style"
+  | "colored_profile_cards"
+  | "underglow";
+
+/** null in an update removes that part. Images are uploaded separately. */
+export interface ThemePack {
+  banner?: string | null;
+  background?: string | null;
+  accent?: { color: string; gradient?: string | null } | null;
+  card_style?: string | null;
+  colored_profile_cards?: boolean | null;
+  underglow?: string | null;
+}
+
+export interface PackField {
+  name: PackPart;
+  type: "image" | "accent" | "enum" | "boolean" | "color";
+  options?: string[];
+  tier: number;
 }
 
 /** One of the signed-in user's own themes. */
@@ -39,10 +66,19 @@ export interface SharedTheme extends CustomTheme {
   user_id: string;
 }
 
+export const fetchPackFields = () =>
+  request<PackField[]>("/v2/themes/pack-fields");
+
+export const applyThemePack = (code: string, parts: PackPart[]) =>
+  request<{ applied: PackPart[] }>(
+    `/v2/themes/shared/${encodeURIComponent(code)}/pack/apply`,
+    { method: "POST", body: JSON.stringify({ parts }) },
+  );
+
 export type CustomThemeInput = Pick<
   CustomTheme,
   "label" | "description" | "scheme" | "vars" | "logo_filter" | "icon"
-> & { published?: boolean };
+> & { published?: boolean; pack?: ThemePack };
 
 export interface MarketplaceTheme extends CustomTheme {
   user:
@@ -148,6 +184,47 @@ export function sanitizeThemePreviews(value: unknown): ThemePreviewImage[] {
     .slice(0, 3);
 }
 
+const HEX = /^#[0-9a-f]{6}$/i;
+const hex = (value: unknown) =>
+  typeof value === "string" && HEX.test(value) ? value : undefined;
+const packImage = (value: unknown) => {
+  if (typeof value !== "string") return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" &&
+      url.hostname === "uploads.jailbreakchangelogs.com" &&
+      url.pathname.startsWith("/theme-packs/")
+      ? value
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/** Drops pack values that aren't safe to show (other people's URLs, colors). */
+export function sanitizeThemePack(value: unknown): ThemePack {
+  if (!value || typeof value !== "object") return {};
+  const pack = value as Record<string, unknown>;
+  const accent = pack.accent as { color?: unknown; gradient?: unknown } | null;
+  const clean: ThemePack = {
+    banner: packImage(pack.banner),
+    background: packImage(pack.background),
+    accent: hex(accent?.color)
+      ? { color: hex(accent!.color)!, gradient: hex(accent!.gradient) ?? null }
+      : undefined,
+    card_style:
+      typeof pack.card_style === "string" ? pack.card_style : undefined,
+    colored_profile_cards:
+      typeof pack.colored_profile_cards === "boolean"
+        ? pack.colored_profile_cards
+        : undefined,
+    underglow: hex(pack.underglow),
+  };
+  return Object.fromEntries(
+    Object.entries(clean).filter(([, v]) => v !== undefined),
+  ) as ThemePack;
+}
+
 /**
  * Keeps only what's safe to apply: the same checks site themes get. Custom
  * themes come from other people (shared codes, synced preferences), and a
@@ -159,6 +236,7 @@ export function sanitizeCustomTheme<T extends CustomTheme>(theme: T): T {
     ...("previews" in theme
       ? { previews: sanitizeThemePreviews(theme.previews) }
       : {}),
+    ...("pack" in theme ? { pack: sanitizeThemePack(theme.pack) } : {}),
     scheme: theme.scheme === "light" ? "light" : "dark",
     vars: Object.fromEntries(
       Object.entries(marketThemeVars(theme.vars ?? {})).filter(
@@ -283,6 +361,31 @@ export async function deleteThemePreview(id: number, previewId: string) {
     { method: "DELETE" },
   );
   return sanitizeThemePreviews(data.previews);
+}
+
+export async function uploadThemePackImage(
+  id: number,
+  kind: "banner" | "background",
+  image: File,
+) {
+  const body = new FormData();
+  body.append("image", image);
+  const data = await request<{ pack: ThemePack }>(
+    `/v2/users/me/themes/${id}/pack/${kind}`,
+    { method: "PUT", body },
+  );
+  return sanitizeThemePack(data.pack);
+}
+
+export async function deleteThemePackImage(
+  id: number,
+  kind: "banner" | "background",
+) {
+  const data = await request<{ pack: ThemePack }>(
+    `/v2/users/me/themes/${id}/pack/${kind}`,
+    { method: "DELETE" },
+  );
+  return sanitizeThemePack(data.pack);
 }
 
 export type CompetitionStatus = "upcoming" | "running" | "ended";
