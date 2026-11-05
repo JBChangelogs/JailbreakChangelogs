@@ -280,9 +280,10 @@ export default function CustomThemeEditor({
   const baselineRef = useRef<string | null>(null);
   if (baselineRef.current === null && snapshot) baselineRef.current = snapshot;
   const dirty = snapshot !== baselineRef.current;
-  const originalVars: Record<string, string> = baselineRef.current
-    ? (JSON.parse(baselineRef.current) as CustomThemeInput).vars
-    : {};
+  const original = baselineRef.current
+    ? (JSON.parse(baselineRef.current) as CustomThemeInput)
+    : null;
+  const originalVars: Record<string, string> = original?.vars ?? {};
   const update = (change: Partial<CustomThemeInput>) =>
     current && setDraft({ ...current, ...change });
 
@@ -328,8 +329,6 @@ export default function CustomThemeEditor({
   };
   // With "Match buttons" on, the logo follows the button color. A saved
   // theme starts matched if its logo already is.
-  // "css" shows the theme as editable CSS. Until it's edited, the text
-  // follows the theme; once edited, Apply or Reset decides.
   const [mode, setMode] = useState<"visual" | "css" | "import">("visual");
   const [importInput, setImportInput] = useState("");
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -382,28 +381,51 @@ export default function CustomThemeEditor({
     }
   };
 
-  // Applies what's valid; anything skipped stays in the text to fix.
-  const applyCss = () => {
-    if (!current || cssDraft === null) return;
+  const applyCss = (css: string) => {
+    if (!current) return null;
     const { theme: parsed, errors } = parseThemeCss(
-      cssDraft,
+      css,
       Object.keys(current.vars),
     );
-    if ("logo_filter" in parsed) setMatchLogo(false);
-    update({ ...parsed, vars: { ...current.vars, ...parsed.vars } });
+    if ("logo_filter" in parsed && parsed.logo_filter !== current.logo_filter)
+      setMatchLogo(false);
     setCssErrors(errors);
-    if (!errors.length) {
-      setCssDraft(null);
-      toast.success("CSS applied");
-    }
+    const next = {
+      ...current,
+      ...parsed,
+      vars: { ...current.vars, ...parsed.vars },
+    };
+    setDraft(next);
+    return next;
+  };
+  // Typing applies after a short pause, so half-typed values don't flash.
+  useEffect(() => {
+    if (cssDraft === null) return;
+    const id = setTimeout(() => applyCss(cssDraft), 400);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cssDraft]);
+  const cssChanged =
+    !!original && !!current && themeToCss(current) !== themeToCss(original);
+  const resetCss = () => {
+    setCssDraft(null);
+    setCssErrors([]);
+    if (!original) return;
+    const { scheme, vars, logo_filter } = original;
+    setMatchLogo(
+      !!logo_filter && logo_filter === matchLogoFilter(buttonHex(vars)),
+    );
+    update({ scheme, vars, logo_filter });
   };
 
   // Saves without closing. Returns the saved theme, or null if it failed.
   const save = async (): Promise<UserTheme | null> => {
     if (!current || saving || updatingPreviews) return null;
+    // CSS typed in the last moment hasn't applied yet; include it.
+    const theme = (cssDraft !== null && applyCss(cssDraft)) || current;
     // icon is sent only when it changed, so themes without one save on
     // API versions that don't know the field yet.
-    const { icon = null, ...rest } = current;
+    const { icon = null, ...rest } = theme;
     const input =
       icon !== (savedTheme?.icon ?? null)
         ? { ...rest, icon, label: rest.label.trim() }
@@ -424,7 +446,7 @@ export default function CustomThemeEditor({
       }
       toast.success(savedTheme ? "Theme saved" : "Theme created");
       setSavedTheme(saved);
-      baselineRef.current = JSON.stringify(current);
+      baselineRef.current = JSON.stringify(theme);
       onSaved(saved);
       return saved;
     } catch (err) {
@@ -826,9 +848,14 @@ export default function CustomThemeEditor({
             >
               <Tabs
                 value={mode}
-                onValueChange={(value) =>
-                  setMode(value as "visual" | "css" | "import")
-                }
+                onValueChange={(value) => {
+                  // Leaving CSS applies what's pending; the text then
+                  // follows the theme again, so it can't go stale.
+                  if (cssDraft !== null) applyCss(cssDraft);
+                  setCssDraft(null);
+                  setCssErrors([]);
+                  setMode(value as "visual" | "css" | "import");
+                }}
               >
                 <TabsList fullWidth>
                   <TabsTrigger value="visual" fullWidth>
@@ -1378,17 +1405,6 @@ export default function CustomThemeEditor({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    {cssDraft === null ? (
-                      <span className="text-status-success flex items-center gap-1.5 text-xs font-medium">
-                        <Icon icon="lucide:check" aria-hidden="true" />
-                        Matches your theme
-                      </span>
-                    ) : (
-                      <span className="text-warning flex items-center gap-1.5 text-xs font-medium">
-                        <Icon icon="lucide:pencil" aria-hidden="true" />
-                        Edited, not applied
-                      </span>
-                    )}
                     <div className="ml-auto flex flex-wrap gap-2">
                       <Button
                         variant="secondary"
@@ -1409,26 +1425,10 @@ export default function CustomThemeEditor({
                         />
                         Paste
                       </Button>
-                      {cssDraft !== null && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setCssDraft(null);
-                              setCssErrors([]);
-                            }}
-                          >
-                            Reset
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={applyCss}
-                            title="Apply (Ctrl+Enter)"
-                          >
-                            Apply
-                          </Button>
-                        </>
+                      {(cssDraft !== null || cssChanged) && (
+                        <Button variant="ghost" size="sm" onClick={resetCss}>
+                          Reset
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -1457,15 +1457,6 @@ export default function CustomThemeEditor({
                             event.currentTarget.scrollTop;
                         }
                       }}
-                      onKeyDown={(event) => {
-                        if (
-                          (event.ctrlKey || event.metaKey) &&
-                          event.key === "Enter"
-                        ) {
-                          event.preventDefault();
-                          applyCss();
-                        }
-                      }}
                       spellCheck={false}
                       wrap="off"
                       aria-label="Theme CSS"
@@ -1476,8 +1467,8 @@ export default function CustomThemeEditor({
                     />
                   </div>
                   <p className="text-tertiary-text text-xs">
-                    Ctrl+Enter applies. Lines that aren&apos;t theme colors are
-                    skipped and listed.
+                    Changes apply as you type. Lines that aren&apos;t theme
+                    colors are skipped and listed.
                   </p>
 
                   {cssErrors.length > 0 && (
