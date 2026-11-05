@@ -345,6 +345,7 @@ export default function CustomThemeEditor({
     if (!current) return;
     // Show the new value in the CSS text instead of overwriting it later.
     setCssDraft(null);
+    setCssErrors([]);
     const vars = { ...current.vars, [key]: value };
     // Hover, active and focus colors follow their main color unless they
     // were changed since the editor opened or last saved.
