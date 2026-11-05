@@ -70,17 +70,19 @@ function TopThemes({ id }: { id: number }) {
                 : (theme.user?.username ?? "Unknown author");
             return (
               <li key={theme.share_code}>
-                <div className="border-border-card bg-tertiary-bg hover:border-border-focus relative isolate flex h-full min-w-0 items-center gap-3 rounded-lg border p-3 transition-colors">
-                  <span
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ${medal ? "text-black" : "text-primary-text"}`}
-                    style={medal ? { background: `hsl(${medal})` } : undefined}
-                  >
-                    #{rank}
-                  </span>
-                  <div className="min-w-0">
+                <div className="border-border-card bg-tertiary-bg hover:border-border-focus relative isolate h-full min-w-0 rounded-lg border p-3 transition-colors">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${medal ? "text-black" : "text-primary-text"}`}
+                      style={
+                        medal ? { background: `hsl(${medal})` } : undefined
+                      }
+                    >
+                      #{rank}
+                    </span>
                     <Link
                       href={`/themes/${theme.share_code}`}
-                      className="focus-visible:after:ring-button-info flex items-center gap-2 font-medium after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2"
+                      className="focus-visible:after:ring-button-info flex min-w-0 items-center gap-2 font-medium after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2"
                     >
                       <Icon
                         icon={theme.icon ?? DEFAULT_THEME_ICON}
@@ -89,55 +91,55 @@ function TopThemes({ id }: { id: number }) {
                       />
                       <span className="truncate">{theme.label}</span>
                     </Link>
-                    <div className="text-secondary-text mt-1 flex min-w-0 items-center gap-2 text-xs">
-                      {theme.user?.id && (
-                        <UserAvatar
-                          userId={theme.user.id}
-                          avatarHash={theme.user.avatar ?? null}
-                          username={theme.user.username}
-                          custom_avatar={theme.user.custom_avatar}
-                          premiumType={theme.user.premiumtype}
-                          settings={theme.user.settings}
-                          size={6}
-                          showBadge={false}
-                        />
-                      )}
-                      <p className="min-w-0 truncate">
-                        Created by{" "}
-                        {theme.user?.id ? (
-                          <UserProfilePopover user={theme.user}>
-                            <Link
-                              href={`/users/${theme.user.id}`}
-                              prefetch={false}
-                              className="text-link hover:text-link-hover relative z-10 transition-colors"
-                            >
-                              {author}
-                            </Link>
-                          </UserProfilePopover>
-                        ) : (
-                          author
-                        )}
-                      </p>
-                    </div>
-                    <p className="text-secondary-text mt-1 text-xs tabular-nums">
-                      {user_days.toLocaleString()} points ·{" "}
-                      {current_users.toLocaleString()} users today
-                    </p>
-                    <Button
-                      size="sm"
-                      className="relative z-10 mt-2"
-                      disabled={customTheme?.share_code === theme.share_code}
-                      onClick={() => {
-                        setCustomTheme(theme);
-                        rememberSharedTheme(theme.share_code);
-                        toast.success(`Using ${theme.label}`);
-                      }}
-                    >
-                      {customTheme?.share_code === theme.share_code
-                        ? "In use"
-                        : "Use theme"}
-                    </Button>
                   </div>
+                  <div className="text-secondary-text mt-2 flex min-w-0 items-center gap-2 text-xs">
+                    {theme.user?.id && (
+                      <UserAvatar
+                        userId={theme.user.id}
+                        avatarHash={theme.user.avatar ?? null}
+                        username={theme.user.username}
+                        custom_avatar={theme.user.custom_avatar}
+                        premiumType={theme.user.premiumtype}
+                        settings={theme.user.settings}
+                        size={6}
+                        showBadge={false}
+                      />
+                    )}
+                    <p className="min-w-0 truncate">
+                      Created by{" "}
+                      {theme.user?.id ? (
+                        <UserProfilePopover user={theme.user}>
+                          <Link
+                            href={`/users/${theme.user.id}`}
+                            prefetch={false}
+                            className="text-link hover:text-link-hover relative z-10 transition-colors"
+                          >
+                            {author}
+                          </Link>
+                        </UserProfilePopover>
+                      ) : (
+                        author
+                      )}
+                    </p>
+                  </div>
+                  <p className="text-secondary-text mt-1 text-xs tabular-nums">
+                    {user_days.toLocaleString()} points ·{" "}
+                    {current_users.toLocaleString()} users today
+                  </p>
+                  <Button
+                    size="sm"
+                    className="relative z-10 mt-2"
+                    disabled={customTheme?.share_code === theme.share_code}
+                    onClick={() => {
+                      setCustomTheme(theme);
+                      rememberSharedTheme(theme.share_code);
+                      toast.success(`Using ${theme.label}`);
+                    }}
+                  >
+                    {customTheme?.share_code === theme.share_code
+                      ? "In use"
+                      : "Use theme"}
+                  </Button>
                 </div>
               </li>
             );
