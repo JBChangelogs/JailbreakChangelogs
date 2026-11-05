@@ -128,9 +128,10 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   props.isFetching = true;
   view = render();
   expect(
-    nodes(view.tree).find((node) => node.type === button && node.props.disabled)
-      ?.props.disabled,
-  ).toBe(true);
+    nodes(view.tree).some(
+      (node) => node.type === button && node.props.children === "Loading more…",
+    ),
+  ).toBe(false);
   expect(observed).toBe(1);
   props.isFetching = false;
   props.loadMoreError = true;
