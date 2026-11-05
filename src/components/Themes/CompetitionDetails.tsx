@@ -375,9 +375,10 @@ function EnterPicker({ competition }: { competition: Competition }) {
     <section id="submit" className="scroll-mt-24 space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Submit your theme</h2>
+          <h2 className="text-xl font-semibold">Enter competition</h2>
           <p className="text-secondary-text text-sm">
-            Pick from themes you&apos;ve published to the marketplace.
+            Choose a published theme that follows this competition&apos;s style.
+            Publishing to the marketplace does not automatically enter it.
           </p>
         </div>
         {isAuthenticated && (
@@ -407,7 +408,7 @@ function EnterPicker({ competition }: { competition: Competition }) {
       ) : !isAuthenticated ? (
         <div className="border-border-card bg-secondary-bg flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
           <p className="text-secondary-text text-sm">
-            Log in to submit up to {limit} {limit === 1 ? "theme" : "themes"}.
+            Log in to enter up to {limit} {limit === 1 ? "theme" : "themes"}.
           </p>
           <Button onClick={() => setShowLoginModal(true)}>Log in</Button>
         </div>
@@ -422,7 +423,7 @@ function EnterPicker({ competition }: { competition: Competition }) {
             No published themes yet
           </p>
           <p className="text-secondary-text mt-1 text-sm">
-            Publish one to the marketplace, then come back to submit it.
+            Publish one to the marketplace, then come back to enter it.
           </p>
           <Button asChild className="mt-4">
             <Link href="/settings?highlight=themes#themes">
@@ -532,9 +533,7 @@ function EnterPicker({ competition }: { competition: Competition }) {
                       size="sm"
                       className="relative z-10"
                       disabled={busy !== null || full}
-                      title={
-                        full ? `You can submit up to ${limit}.` : undefined
-                      }
+                      title={full ? `You can enter up to ${limit}.` : undefined}
                       onClick={() =>
                         void run(
                           theme.share_code,
@@ -545,8 +544,8 @@ function EnterPicker({ competition }: { competition: Competition }) {
                       }
                     >
                       {busy?.code === theme.share_code
-                        ? "Submitting…"
-                        : "Submit"}
+                        ? "Entering…"
+                        : "Enter competition"}
                     </Button>
                   )}
                 </div>

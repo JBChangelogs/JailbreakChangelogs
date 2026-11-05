@@ -16,11 +16,22 @@ export default function ThemeMarketplacePage() {
               Find a community theme and make it yours. Anyone can use a theme.
             </p>
           </div>
-          <Button asChild variant="secondary">
-            <Link href="/settings?highlight=themes#themes">Theme settings</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/settings?highlight=themes#themes">Create theme</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href="/themes/competitions">Competitions</Link>
+            </Button>
+          </div>
         </div>
         <CompetitionCard />
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">All marketplace themes</h2>
+          <p className="text-secondary-text mt-1 text-sm">
+            Share any style of theme. Enter competitions separately.
+          </p>
+        </div>
         <ThemeMarketplace />
       </div>
     </main>

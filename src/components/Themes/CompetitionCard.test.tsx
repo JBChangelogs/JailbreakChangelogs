@@ -169,7 +169,7 @@ test("marketplace card shows the top three ranked entries and links to the compe
   expect(html).toContain("Share your autumn colors.");
   expect(html).toContain('href="/themes/competitions/7"');
   expect(html).toContain('href="/themes/competitions/7#submit"');
-  expect(html).toContain("View more");
+  expect(html).toContain("Rules &amp; prizes");
   expect(html).toContain('href="/themes/THEME002"');
   expect(html).not.toContain("Theme 4");
   expect(html).toContain("#1");
@@ -246,8 +246,8 @@ test("upcoming competitions show information without fetching standings or offer
   });
   expect(html).toContain("Upcoming theme competition");
   expect(html).toContain("Starts");
-  expect(html).toContain("View more");
-  expect(html).not.toContain("Submit your theme");
+  expect(html).toContain("Rules &amp; prizes");
+  expect(html).not.toContain("Enter competition");
   expect(queries).toHaveLength(1);
 });
 
@@ -270,7 +270,7 @@ test("loading, empty and failed standings keep the competition link available", 
   ] satisfies [Parameters<typeof render>[0], string][]) {
     const { html } = render(options);
     expect(html).toContain(message);
-    expect(html).toContain("View more");
+    expect(html).toContain("Rules &amp; prizes");
     expect(html).not.toContain("Theme 1");
   }
 });

@@ -77,17 +77,17 @@ function TopThemes({ id }: { id: number }) {
                   >
                     #{rank}
                   </span>
-                  <Icon
-                    icon={theme.icon ?? DEFAULT_THEME_ICON}
-                    className="size-5 shrink-0"
-                    aria-hidden="true"
-                  />
                   <div className="min-w-0">
                     <Link
                       href={`/themes/${theme.share_code}`}
-                      className="focus-visible:after:ring-button-info block truncate font-medium after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2"
+                      className="focus-visible:after:ring-button-info flex items-center gap-2 font-medium after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:ring-2"
                     >
-                      {theme.label}
+                      <Icon
+                        icon={theme.icon ?? DEFAULT_THEME_ICON}
+                        className="size-5 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{theme.label}</span>
                     </Link>
                     <div className="text-secondary-text mt-1 flex min-w-0 items-center gap-2 text-xs">
                       {theme.user?.id && (
@@ -189,6 +189,11 @@ export default function CompetitionCard() {
           >
             {competition.title}
           </h2>
+          <p className="text-secondary-text text-sm">
+            Optional competition. You can publish marketplace themes in any
+            style; enter here only if your theme follows this competition&apos;s
+            style.
+          </p>
           {competition.description && (
             <p className="text-secondary-text line-clamp-2 text-sm">
               {competition.description}
@@ -210,13 +215,13 @@ export default function CompetitionCard() {
         <div className="flex flex-wrap gap-2">
           {status === "running" && (
             <Button asChild size="sm">
-              <Link href={`${href}#submit`}>Submit your theme</Link>
+              <Link href={`${href}#submit`}>Enter competition</Link>
             </Button>
           )}
           <Button asChild size="sm" variant="secondary">
             <Link href={href}>
-              View more
-              <span className="sr-only"> about {competition.title}</span>
+              Rules &amp; prizes
+              <span className="sr-only"> for {competition.title}</span>
             </Link>
           </Button>
         </div>

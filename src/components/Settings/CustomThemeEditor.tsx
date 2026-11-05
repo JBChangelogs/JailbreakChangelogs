@@ -846,7 +846,8 @@ export default function CustomThemeEditor({
                     id="publish-theme-description"
                     className="text-secondary-text text-xs"
                   >
-                    Your theme and author name will be public after saving.
+                    Your theme and author name will be public after saving. Any
+                    style is welcome. This does not enter a competition.
                   </p>
                   <Link
                     href="/themes"

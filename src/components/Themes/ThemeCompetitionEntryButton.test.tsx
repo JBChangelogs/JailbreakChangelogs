@@ -175,10 +175,10 @@ function harness(
 
 test("owners submit a published theme directly and refresh competition caches", async () => {
   const view = harness();
-  expect(view.render()).toContain("Submit to competition");
+  expect(view.render()).toContain("Enter competition");
   expect(view.button?.disabled).toBe(false);
   const pending = view.button!.onClick();
-  expect(view.render()).toContain("Submitting…");
+  expect(view.render()).toContain("Entering…");
   expect(view.button?.disabled).toBe(true);
   await pending;
   expect(view.submitted).toEqual([[7, "THEME001"]]);
@@ -238,7 +238,7 @@ test("owners can withdraw at the entry limit and submit again after refreshing",
     ["theme-competition-current"],
   ]);
   current.items = [];
-  expect(view.render()).toContain("Submit to competition");
+  expect(view.render()).toContain("Enter competition");
   expect(view.button?.disabled).toBe(false);
 });
 
@@ -293,7 +293,7 @@ test("loading and errors do not submit, and failed mutations allow retry", async
   await failed.button!.onClick();
   expect(failed.errors).toEqual(["Submissions are closed"]);
   expect(failed.success).toEqual([]);
-  expect(failed.render()).toContain("Submit to competition");
+  expect(failed.render()).toContain("Enter competition");
   expect(failed.button?.disabled).toBe(false);
 });
 
@@ -318,12 +318,12 @@ test("pending labels keep the clicked action when refreshed entry data arrives",
     view.render();
     const pending = view.button!.onClick();
     await Promise.resolve();
-    expect(view.render()).toContain(entered ? "Withdrawing…" : "Submitting…");
+    expect(view.render()).toContain(entered ? "Withdrawing…" : "Entering…");
     expect(view.button?.disabled).toBe(true);
     finish();
     await pending;
     expect(view.render()).toContain(
-      entered ? "Submit to competition" : "Withdraw from competition",
+      entered ? "Enter competition" : "Withdraw from competition",
     );
   }
 });

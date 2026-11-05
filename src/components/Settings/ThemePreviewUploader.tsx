@@ -71,13 +71,13 @@ export default function ThemePreviewUploader({
           id="theme-screenshots-description"
           className="text-secondary-text mt-1 text-xs"
         >
-          Upload up to 3 screenshots in any aspect ratio, up to 10 MB each.
-          Screenshots are saved immediately.
+          Up to 3 screenshots, 10 MB each. Uploads are saved immediately.
         </p>
       </div>
       {!theme ? (
         <p className="text-secondary-text text-sm">
-          Save your theme before adding screenshots.
+          Save your theme to enable screenshot uploads here. You can also add
+          screenshots later through Edit.
         </p>
       ) : (
         <>

@@ -169,13 +169,15 @@ test("submit and withdraw keep their labels and colors until competition data re
     render().props.onClick!();
     await Promise.resolve();
     expect(render().props.children).toBe(
-      entered ? "Withdrawing…" : "Submitting…",
+      entered ? "Withdrawing…" : "Entering…",
     );
     expect(render().props.disabled).toBe(true);
     expect(render().props.variant).toBe(entered ? "secondary" : undefined);
     finish();
     await idle;
-    expect(render().props.children).toBe(entered ? "Submit" : "Withdraw");
+    expect(render().props.children).toBe(
+      entered ? "Enter competition" : "Withdraw",
+    );
     expect(render().props.variant).toBe(entered ? undefined : "secondary");
     expect(render().props.disabled).toBe(false);
   }

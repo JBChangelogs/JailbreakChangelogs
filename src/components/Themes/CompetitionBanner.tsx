@@ -87,7 +87,7 @@ export default function CompetitionBanner() {
             href={`${href}#submit`}
             className="text-link hover:text-link-hover font-medium"
           >
-            Submit your theme
+            Enter competition
           </Link>{" "}
           or{" "}
           <Link

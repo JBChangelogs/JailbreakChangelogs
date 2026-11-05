@@ -69,8 +69,9 @@ export default async function CompetitionsPage() {
           <div>
             <h1 className="page-heading mb-2">Theme Competitions</h1>
             <p className="text-secondary-text">
-              Submit a theme you&apos;ve published to the marketplace. The entry
-              the most people use wins.
+              Enter a theme you&apos;ve published to the marketplace.
+              Competition entry is optional; follow the competition&apos;s style
+              to take part.
             </p>
           </div>
           <Button asChild variant="secondary">

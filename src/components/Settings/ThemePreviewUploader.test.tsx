@@ -137,7 +137,8 @@ test("new themes must be saved before screenshots can be uploaded", () => {
   expect(
     rendered.some(
       (node) =>
-        node.props.children === "Save your theme before adding screenshots.",
+        node.props.children ===
+        "Save your theme to enable screenshot uploads here. You can also add screenshots later through Edit.",
     ),
   ).toBe(true);
   expect(rendered.some((node) => node.type === "input")).toBe(false);

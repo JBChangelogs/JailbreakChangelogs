@@ -81,7 +81,7 @@ export default function ThemeCompetitionEntryButton({
           competitionStatus(competition) !== "running"
         )
           return;
-        setSubmitting(entered ? "Withdrawing…" : "Submitting…");
+        setSubmitting(entered ? "Withdrawing…" : "Entering…");
         try {
           if (entered) {
             await withdrawFromCompetition(competition.id, theme.share_code);
@@ -118,7 +118,7 @@ export default function ThemeCompetitionEntryButton({
             ? "Withdraw from competition"
             : full
               ? "Competition entry limit reached"
-              : "Submit to competition")}
+              : "Enter competition")}
     </Button>
   );
 }
