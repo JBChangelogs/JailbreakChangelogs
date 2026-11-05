@@ -28,7 +28,13 @@ function uploader({
   saved = true,
   count = 0,
   failure,
-}: { saved?: boolean; count?: number; failure?: ThemeApiError } = {}) {
+  disabled = false,
+}: {
+  saved?: boolean;
+  count?: number;
+  failure?: ThemeApiError;
+  disabled?: boolean;
+} = {}) {
   const theme: UserTheme = {
     id: 1,
     label: "Mine",
@@ -45,6 +51,15 @@ function uploader({
   const uploads: unknown[] = [];
   const deletes: unknown[] = [];
   let dropzone: { disabled: boolean; onDrop: (files: File[]) => void };
+  let pasteListener: ((event: object) => void) | undefined;
+  let cleanup: (() => void) | undefined;
+  class PasteTarget {
+    constructor(readonly editable: boolean) {}
+    matches() {
+      return this.editable;
+    }
+    isContentEditable = false;
+  }
   const jsx = (type: string, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: (props: unknown) => Node };
   runInNewContext(
@@ -60,6 +75,15 @@ function uploader({
     {
       exports,
       Error,
+      HTMLElement: PasteTarget,
+      window: {
+        addEventListener: (_type: string, listener: typeof pasteListener) => {
+          pasteListener = listener;
+        },
+        removeEventListener: () => {
+          pasteListener = undefined;
+        },
+      },
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "react-dropzone")
@@ -74,6 +98,11 @@ function uploader({
           };
         if (name === "react")
           return {
+            useCallback: (callback: unknown) => callback,
+            useEffect: (effect: () => () => void) => {
+              cleanup?.();
+              cleanup = effect();
+            },
             useState: (initial: unknown) => {
               const index = cursor++;
               if (!(index in states)) states[index] = initial;
@@ -112,7 +141,7 @@ function uploader({
     return nodes(
       exports.default({
         theme: saved ? theme : undefined,
-        disabled: false,
+        disabled,
         onChange: (previews: ThemePreviewImage[]) => {
           changed.push(previews);
           theme.previews = previews;
@@ -129,8 +158,58 @@ function uploader({
     await new Promise((resolve) => setImmediate(resolve));
   };
   const zone = () => (render(), dropzone);
-  return { render, select, zone, changed, busy, uploads, deletes };
+  const paste = async (files: File[], editable = false) => {
+    render();
+    let prevented = false;
+    pasteListener?.({
+      target: new PasteTarget(editable),
+      clipboardData: {
+        items: files.map((file) => ({
+          type: file.type,
+          getAsFile: () => file,
+        })),
+      },
+      preventDefault: () => {
+        prevented = true;
+      },
+    });
+    await new Promise((resolve) => setImmediate(resolve));
+    return prevented;
+  };
+  return { render, select, zone, paste, changed, busy, uploads, deletes };
 }
+
+test("clipboard uploads the first image through the existing upload flow", async () => {
+  const view = uploader();
+  const image = new File(["image"], "clipboard.png", { type: "image/png" });
+  expect(
+    await view.paste([
+      new File(["text"], "text.txt", { type: "text/plain" }),
+      image,
+      image,
+    ]),
+  ).toBe(true);
+  expect(view.uploads).toEqual([{ id: 1, file: image }]);
+  expect(view.changed).toEqual([[screenshot]]);
+  expect(view.busy).toEqual([true, false]);
+});
+
+test("clipboard preserves text editing and respects save, busy and upload limits", async () => {
+  const image = new File(["image"], "clipboard.png", { type: "image/png" });
+  for (const options of [{ saved: false }, { count: 3 }, { disabled: true }]) {
+    const view = uploader(options);
+    expect(await view.paste([image])).toBe(false);
+    expect(view.uploads).toEqual([]);
+  }
+  const view = uploader();
+  expect(await view.paste([image], true)).toBe(false);
+  expect(
+    await view.paste([new File(["text"], "text.txt", { type: "text/plain" })]),
+  ).toBe(false);
+  view.zone().onDrop([image]);
+  expect(await view.paste([image])).toBe(false);
+  expect(view.uploads).toHaveLength(1);
+});
 
 test("new themes must be saved before screenshots can be uploaded", () => {
   const rendered = uploader({ saved: false }).render();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
@@ -27,26 +27,51 @@ export default function ThemePreviewUploader({
   const [error, setError] = useState<string | null>(null);
   const previews = theme?.previews ?? [];
 
-  const change = async (operation: () => Promise<ThemePreviewImage[]>) => {
-    if (busy || disabled || !theme) return;
-    setBusy(true);
-    onBusyChange(true);
-    setError(null);
-    try {
-      onChange(await operation());
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Couldn't update the screenshots. Please try again.",
-      );
-    } finally {
-      setBusy(false);
-      onBusyChange(false);
-    }
-  };
+  const change = useCallback(
+    async (operation: () => Promise<ThemePreviewImage[]>) => {
+      if (busy || disabled || !theme) return;
+      setBusy(true);
+      onBusyChange(true);
+      setError(null);
+      try {
+        onChange(await operation());
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Couldn't update the screenshots. Please try again.",
+        );
+      } finally {
+        setBusy(false);
+        onBusyChange(false);
+      }
+    },
+    [busy, disabled, theme, onBusyChange, onChange],
+  );
 
   const full = previews.length >= 3;
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      if (event.defaultPrevented || busy || disabled || full || !theme) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.matches("input, textarea") || target.isContentEditable)
+      )
+        return;
+      for (const item of event.clipboardData?.items ?? []) {
+        if (!item.type.startsWith("image/")) continue;
+        const image = item.getAsFile();
+        if (!image) continue;
+        event.preventDefault();
+        void change(() => uploadThemePreview(theme.id, image));
+        return;
+      }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [busy, disabled, full, theme, change]);
+
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
       multiple: false,
@@ -119,7 +144,7 @@ export default function ThemePreviewUploader({
                 ? "Screenshot limit reached"
                 : isDragActive
                   ? "Drop to upload"
-                  : "Drag a screenshot here or click to choose"}
+                  : "Click, drop, or paste a screenshot (Ctrl+V / ⌘V)"}
             </span>
           </div>
         </>
