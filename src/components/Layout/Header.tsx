@@ -472,8 +472,10 @@ const MobileDrawer = memo(function MobileDrawer({
 
 export default function Header({
   releaseAnnouncement,
+  banner,
 }: {
   releaseAnnouncement?: React.ReactNode;
+  banner?: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
   const isCollabPage = useIsCollabPage();
@@ -841,6 +843,7 @@ export default function Header({
             setUtmModalOpen={setUtmModalOpen}
           />
         </div>
+        {banner}
       </div>
 
       <DesktopSidebar
@@ -947,6 +950,8 @@ export default function Header({
               </div>
             </div>
           </div>
+
+          {banner}
 
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
