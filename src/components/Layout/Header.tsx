@@ -822,6 +822,7 @@ export default function Header({
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <div
         ref={desktopHeaderRef}
+        data-site-header
         className={`sticky top-0 hidden xl:block ${desktopUserMenuOpen ? "z-[2147483647]" : "z-1300"}`}
         style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
@@ -855,6 +856,7 @@ export default function Header({
       {/* Mobile header - hidden on desktop via CSS */}
       <div
         ref={mobileHeaderRef}
+        data-site-header
         className="sticky top-0 z-1400 block xl:hidden"
         style={{ viewTransitionName: "navbar-mobile" } as React.CSSProperties}
       >

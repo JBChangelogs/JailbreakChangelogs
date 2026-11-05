@@ -14,7 +14,8 @@ import type { UserData } from "@/types/auth";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import { accentColorToHex } from "@/utils/ui/accentColor";
 
-const DEFAULT_COLOR = "#7fff00";
+// The accent picker's default, for profiles without an accent color.
+const DEFAULT_COLOR = "#2462cd";
 
 export function UnderglowSetting({ userData }: { userData: UserData }) {
   const queryClient = useQueryClient();
@@ -24,10 +25,17 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
     queryFn: () =>
       fetchUserById(userData.id, PUBLIC_API_URL) as Promise<{
         underglow?: number | string | null;
+        accent_color?: number | string | null;
+        custom_accent_color?: number | string | null;
       }>,
     staleTime: 60_000,
   });
   const saved = accentColorToHex(profile?.underglow);
+  // Turning it on starts from the profile's accent, so it matches the cards.
+  const startColor =
+    accentColorToHex(profile?.custom_accent_color) ??
+    accentColorToHex(profile?.accent_color) ??
+    DEFAULT_COLOR;
   const { modalState, closeModal, checkAccentColorAccess } =
     useSupporterModal();
   const canEdit = () => checkAccentColorAccess(userData.premiumtype ?? 0);
@@ -76,7 +84,7 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
             if (!on) {
               setDraft(null);
               void save(null);
-            } else if (canEdit()) setDraft(DEFAULT_COLOR);
+            } else if (canEdit()) setDraft(startColor);
           }}
         />
       </div>

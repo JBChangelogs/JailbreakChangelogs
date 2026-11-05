@@ -808,6 +808,12 @@ img.twemoji {
     0 8px 28px -10px color-mix(in srgb, var(--underglow) 45%, transparent);
 }
 
+/* On a profile with an underglow, the site header glows in that color too. */
+html[data-profile-underglow] [data-site-header] {
+  box-shadow: 0 14px 44px -16px
+    color-mix(in srgb, var(--profile-underglow) 70%, transparent);
+}
+
 @keyframes nav-sidebar-in {
   from {
     transform: translateX(-100%);

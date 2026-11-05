@@ -350,6 +350,18 @@ export default function UserProfileClient({
     messageEligibilityQuery.isError ||
     messageEligibilityQuery.data === 200;
 
+  // The site header glows in the profile's underglow too (see globals.css).
+  const profileUnderglow = accentColorToHex(user?.underglow);
+  useEffect(() => {
+    if (!profileUnderglow) return;
+    const root = document.documentElement;
+    root.dataset.profileUnderglow = "";
+    root.style.setProperty("--profile-underglow", profileUnderglow);
+    return () => {
+      delete root.dataset.profileUnderglow;
+      root.style.removeProperty("--profile-underglow");
+    };
+  }, [profileUnderglow]);
   useEffect(() => {
     if (blockedUsersQuery.error)
       log.error("Error fetching blocked status:", blockedUsersQuery.error);
