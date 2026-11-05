@@ -219,8 +219,9 @@ function WinnerBanner({
             </span>
           </span>
           <span className="text-primary-text font-semibold tabular-nums">
-            {winner.user_days.toLocaleString()}{" "}
-            {winner.user_days === 1 ? "point" : "points"}
+            {winner.score != null
+              ? `${winner.score.toLocaleString(undefined, { maximumFractionDigits: 2 })} avg users`
+              : `${winner.user_days.toLocaleString()} ${winner.user_days === 1 ? "point" : "points"}`}
           </span>
         </div>
         <div>
@@ -571,6 +572,13 @@ function Standings({
   data: CompetitionStandings;
   status: CompetitionStatus;
 }) {
+  const { user } = useAuthContext();
+  const showExcluded =
+    user?.flags?.some(
+      (flag) =>
+        (flag.flag === "is_owner" || flag.flag === "website_moderator") &&
+        flag.enabled === true,
+    ) && data.standings.some((s) => s.excluded_users != null);
   if (data.standings.length === 0) return null;
   // Limit the chart to the six available series colors.
   const top = data.standings.slice(0, 6);
@@ -675,10 +683,19 @@ function Standings({
             <tr>
               <th className="px-4 py-2 font-medium">Rank</th>
               <th className="px-4 py-2 font-medium">Theme</th>
-              <th className="px-4 py-2 text-right font-medium">Points</th>
+              <th className="px-4 py-2 text-right font-medium">
+                {data.standings.some((s) => s.score != null)
+                  ? "Score"
+                  : "Points"}
+              </th>
               <th className="px-4 py-2 text-right font-medium">
                 {status === "ended" ? "Users (final day)" : "Users today"}
               </th>
+              {showExcluded && (
+                <th className="px-4 py-2 text-right font-medium">
+                  Excluded users
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -736,11 +753,18 @@ function Standings({
                     </div>
                   </td>
                   <td className="px-4 py-2 text-right tabular-nums">
-                    {s.user_days.toLocaleString()}
+                    {s.score != null
+                      ? `${s.score.toLocaleString(undefined, { maximumFractionDigits: 2 })} avg users`
+                      : s.user_days.toLocaleString()}
                   </td>
                   <td className="px-4 py-2 text-right tabular-nums">
                     {s.current_users.toLocaleString()}
                   </td>
+                  {showExcluded && (
+                    <td className="px-4 py-2 text-right tabular-nums">
+                      {s.excluded_users?.toLocaleString() ?? "—"}
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -748,8 +772,9 @@ function Standings({
         </table>
       </div>
       <p className="text-secondary-text text-xs">
-        A theme earns 1 point for every user who has it applied, each day since
-        it was submitted. Most points wins.
+        Your score is the average number of people using your theme since you
+        entered it, counting how long each person actually had it applied. Your
+        own usage and alt accounts don&apos;t count. Highest score wins.
       </p>
     </section>
   );

@@ -193,6 +193,26 @@ test("marketplace card shows the top three ranked entries and links to the compe
   ]);
 });
 
+test.each([1.93, 0])(
+  "top themes display score %s instead of user days",
+  (score) => {
+    const { html } = render({
+      standings: {
+        ...standings,
+        standings: standings.standings.map((entry) => ({
+          ...entry,
+          score,
+          user_days: 26.95,
+          excluded_users: 2,
+        })),
+      },
+    });
+    expect(html).toContain(`${score} avg users`);
+    expect(html).not.toContain("26.95");
+    expect(html).not.toContain("points");
+  },
+);
+
 test("use theme applies and remembers an entry while the active theme is disabled", () => {
   const view = render({ activeTheme: "THEME001" });
   expect(

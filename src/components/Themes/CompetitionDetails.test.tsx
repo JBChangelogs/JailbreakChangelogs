@@ -24,95 +24,166 @@ function submissions(value: unknown): string[] {
   return submissions(node.props.children);
 }
 
-test("standings chart ticks use recorded days instead of repeated intraday labels", () => {
-  type ChartNode = {
-    type: string;
-    props: Record<string, unknown> & { children?: unknown };
-  };
-  const exports = {} as { Standings: (props: object) => ChartNode };
-  const jsx = (type: string, props: ChartNode["props"]) => ({ type, props });
-  runInNewContext(
-    transpileModule(
-      readFileSync(
-        new URL("./CompetitionDetails.tsx", import.meta.url),
-        "utf8",
-      ) + "\nexports.Standings = Standings;",
-      {
-        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
-      },
-    ).outputText,
-    {
-      exports,
-      require: (name: string) => {
-        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
-        if (name === "@/components/ui/chart")
-          return { ChartTooltip: "ChartTooltip" };
-        if (name === "recharts")
-          return Object.fromEntries(
-            ["LineChart", "CartesianGrid", "XAxis", "YAxis", "Line"].map(
-              (name) => [name, name],
-            ),
-          );
-        return {};
-      },
-    },
-  );
-  const daily = [
-    { timestamp: Date.UTC(2026, 10, 4) / 1000, users: { THEME001: 0 } },
-    { timestamp: Date.UTC(2026, 10, 5) / 1000, users: { THEME001: 4 } },
-  ];
-  const tree = exports.Standings({
-    status: "running",
-    data: {
-      daily,
-      standings: [
+test.each([
+  { score: undefined },
+  { score: 1.93 },
+  { score: 0 },
+  { score: 1.93, flag: "is_owner", enabled: true, excluded: 2 },
+  { score: 1.93, flag: "website_moderator", enabled: true, excluded: 0 },
+  { score: undefined, flag: "is_owner", enabled: true },
+  { score: 1.93, flag: "is_owner", enabled: false, excluded: 2 },
+  { score: 1.93, flag: "website_moderator", enabled: false, excluded: 2 },
+  { score: 1.93, flag: "website_moderator", excluded: 2 },
+  { score: 1.93, flag: "is_vt", enabled: true, excluded: 2 },
+  { score: 1.93, excluded: 2 },
+])(
+  "standings and winner handle scores, staff exclusions, legacy results, and daily chart ticks: %j",
+  ({ score, flag, enabled, excluded }) => {
+    type ChartNode = {
+      type: string;
+      props: Record<string, unknown> & { children?: unknown };
+    };
+    const exports = {} as {
+      Standings: (props: object) => ChartNode;
+      WinnerBanner: (props: object) => ChartNode;
+    };
+    const jsx = (type: string, props: ChartNode["props"]) => ({ type, props });
+    runInNewContext(
+      transpileModule(
+        readFileSync(
+          new URL("./CompetitionDetails.tsx", import.meta.url),
+          "utf8",
+        ) +
+          "\nexports.Standings = Standings; exports.WinnerBanner = WinnerBanner;",
         {
-          theme: { share_code: "THEME001", label: "Autumn" },
-          rank: 1,
-          user_days: 4,
-          current_users: 4,
+          compilerOptions: {
+            module: ModuleKind.CommonJS,
+            jsx: JsxEmit.ReactJSX,
+          },
         },
+      ).outputText,
+      {
+        exports,
+        require: (name: string) => {
+          if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+          if (name.endsWith("AuthContext"))
+            return {
+              useAuthContext: () => ({
+                user: flag ? { flags: [{ flag, enabled }] } : null,
+              }),
+            };
+          if (name === "@/components/ui/chart")
+            return { ChartTooltip: "ChartTooltip" };
+          if (name === "recharts")
+            return Object.fromEntries(
+              ["LineChart", "CartesianGrid", "XAxis", "YAxis", "Line"].map(
+                (name) => [name, name],
+              ),
+            );
+          return {};
+        },
+      },
+    );
+    const daily = [
+      { timestamp: Date.UTC(2026, 10, 4) / 1000, users: { THEME001: 0 } },
+      { timestamp: Date.UTC(2026, 10, 5) / 1000, users: { THEME001: 4 } },
+    ];
+    const standing = {
+      theme: { share_code: "THEME001", label: "Autumn" },
+      rank: 1,
+      score,
+      user_days: score === undefined ? 4 : 26.95,
+      current_users: 4,
+      excluded_users: excluded,
+    };
+    const tree = exports.Standings({
+      status: "running",
+      data: {
+        daily,
+        standings: [standing],
+      },
+    });
+    function nodes(value: unknown): ChartNode[] {
+      if (Array.isArray(value)) return value.flatMap(nodes);
+      if (!value || typeof value !== "object" || !("props" in value)) return [];
+      const node = value as ChartNode;
+      return [node, ...nodes(node.props.children)];
+    }
+    const chart = nodes(tree);
+    const cells = chart.filter((node) => node.type === "td");
+    const showExcluded =
+      (flag === "is_owner" || flag === "website_moderator") &&
+      enabled === true &&
+      excluded != null;
+    expect(
+      chart.some(
+        (node) =>
+          node.type === "th" && node.props.children === "Excluded users",
+      ),
+    ).toBe(showExcluded);
+    expect(cells).toHaveLength(showExcluded ? 5 : 4);
+    if (showExcluded) expect(cells[4].props.children).toBe(String(excluded));
+    expect(cells[2].props.children).toBe(
+      score === undefined ? "4" : `${score} avg users`,
+    );
+    expect(
+      chart.some(
+        (node) =>
+          node.type === "th" &&
+          node.props.children === (score === undefined ? "Points" : "Score"),
+      ),
+    ).toBe(true);
+    const winner = nodes(exports.WinnerBanner({ winner: standing }));
+    expect(
+      winner.some(
+        (node) =>
+          node.props.children ===
+          (score === undefined ? "4 points" : `${score} avg users`),
+      ),
+    ).toBe(true);
+    expect(
+      chart.some(
+        (node) =>
+          node.type === "p" &&
+          String(node.props.children).includes(
+            "Your score is the average number of people using your theme",
+          ),
+      ),
+    ).toBe(true);
+    const axis = chart.find((node) => node.type === "XAxis")!;
+    expect(axis.props.ticks).toEqual(daily.map((day) => day.timestamp * 1000));
+    expect(axis.props.scale).toBe("time");
+    expect(axis.props.minTickGap).toBe(48);
+    expect(chart.find((node) => node.type === "LineChart")!.props.data).toEqual(
+      [
+        { t: daily[0].timestamp * 1000, THEME001: 0 },
+        { t: daily[1].timestamp * 1000, THEME001: 4 },
       ],
-    },
-  });
-  function nodes(value: unknown): ChartNode[] {
-    if (Array.isArray(value)) return value.flatMap(nodes);
-    if (!value || typeof value !== "object" || !("props" in value)) return [];
-    const node = value as ChartNode;
-    return [node, ...nodes(node.props.children)];
-  }
-  const chart = nodes(tree);
-  const axis = chart.find((node) => node.type === "XAxis")!;
-  expect(axis.props.ticks).toEqual(daily.map((day) => day.timestamp * 1000));
-  expect(axis.props.scale).toBe("time");
-  expect(axis.props.minTickGap).toBe(48);
-  expect(chart.find((node) => node.type === "LineChart")!.props.data).toEqual([
-    { t: daily[0].timestamp * 1000, THEME001: 0 },
-    { t: daily[1].timestamp * 1000, THEME001: 4 },
-  ]);
-  expect(
-    chart.find((node) => node.type === "CartesianGrid")!.props.stroke,
-  ).toBe("var(--color-border-card)");
-  const tooltip = chart.find((node) => node.type === "ChartTooltip")!.props
-    .content as ChartNode;
-  const format = tooltip.props.formatter as (
-    value: number,
-    name: string,
-    item: { dataKey: string },
-  ) => ChartNode;
-  const row = nodes(format(0, "THEME001", { dataKey: "THEME001" }));
-  expect(
-    row.some(
-      (node) =>
-        Array.isArray(node.props.children) &&
-        node.props.children.includes("Autumn"),
-    ),
-  ).toBe(true);
-  expect(row.some((node) => node.props.children === "0")).toBe(true);
-  expect(row.find((node) => node.props.style)!.props.style).toEqual({
-    backgroundColor: "var(--color-chart-1)",
-  });
-});
+    );
+    expect(
+      chart.find((node) => node.type === "CartesianGrid")!.props.stroke,
+    ).toBe("var(--color-border-card)");
+    const tooltip = chart.find((node) => node.type === "ChartTooltip")!.props
+      .content as ChartNode;
+    const format = tooltip.props.formatter as (
+      value: number,
+      name: string,
+      item: { dataKey: string },
+    ) => ChartNode;
+    const row = nodes(format(0, "THEME001", { dataKey: "THEME001" }));
+    expect(
+      row.some(
+        (node) =>
+          Array.isArray(node.props.children) &&
+          node.props.children.includes("Autumn"),
+      ),
+    ).toBe(true);
+    expect(row.some((node) => node.props.children === "0")).toBe(true);
+    expect(row.find((node) => node.props.style)!.props.style).toEqual({
+      backgroundColor: "var(--color-chart-1)",
+    });
+  },
+);
 
 test("submissions show newest entries first without changing cached order, including appended live entries", () => {
   const initial = {

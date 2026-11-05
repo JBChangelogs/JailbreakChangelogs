@@ -62,7 +62,7 @@ function TopThemes({ id }: { id: number }) {
       <ol className="grid gap-3 lg:grid-cols-3">
         {data.standings
           .slice(0, 3)
-          .map(({ theme, rank, user_days, current_users }) => {
+          .map(({ theme, rank, score, user_days, current_users }) => {
             const medal = MEDALS[rank];
             const author =
               theme.user?.global_name && theme.user.global_name !== "None"
@@ -123,8 +123,10 @@ function TopThemes({ id }: { id: number }) {
                     </p>
                   </div>
                   <p className="text-secondary-text mt-1 text-xs tabular-nums">
-                    {user_days.toLocaleString()} points ·{" "}
-                    {current_users.toLocaleString()} users today
+                    {score != null
+                      ? `${score.toLocaleString(undefined, { maximumFractionDigits: 2 })} avg users`
+                      : `${user_days.toLocaleString()} points`}{" "}
+                    · {current_users.toLocaleString()} users today
                   </p>
                   <Button
                     size="sm"
@@ -146,7 +148,8 @@ function TopThemes({ id }: { id: number }) {
           })}
       </ol>
       <p className="text-secondary-text text-xs">
-        Ranked by points: 1 point per user, per day.
+        Ranked by average users since entry. Your own usage and alt accounts
+        don&apos;t count. Highest score wins.
       </p>
     </div>
   );

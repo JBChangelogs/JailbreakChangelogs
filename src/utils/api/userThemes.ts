@@ -399,7 +399,10 @@ export const competitionStatus = (
 export interface CompetitionStanding {
   theme: MarketplaceTheme;
   entered_at: number;
-  /** One point per user per day with the theme applied. */
+  /** Average eligible users since entry; absent for legacy finalized results. */
+  score?: number;
+  excluded_users?: number;
+  /** Total time users had the theme applied, in days. */
   user_days: number;
   current_users: number;
   rank: number;
