@@ -335,6 +335,7 @@ export default function CustomThemeEditor({
   const [cssDraft, setCssDraft] = useState<string | null>(null);
   const [cssErrors, setCssErrors] = useState<string[]>([]);
   const cssGutterRef = useRef<HTMLPreElement>(null);
+  const cssInputRef = useRef<HTMLTextAreaElement>(null);
   const [matchLogo, setMatchLogo] = useState(
     () =>
       !!theme?.logo_filter &&
@@ -342,6 +343,8 @@ export default function CustomThemeEditor({
   );
   const setColor = (key: string, value: string, reset = false) => {
     if (!current) return;
+    // Show the new value in the CSS text instead of overwriting it later.
+    setCssDraft(null);
     const vars = { ...current.vars, [key]: value };
     // Hover, active and focus colors follow their main color unless they
     // were changed since the editor opened or last saved.
@@ -500,6 +503,21 @@ export default function CustomThemeEditor({
   const pickColors = (keys: string[], element: Element) => {
     const available = keys.filter((key) => current && key in current.vars);
     if (!available.length) return;
+    if (mode === "css") {
+      // After render, so a Fix's new value is in the text first.
+      requestAnimationFrame(() => {
+        const input = cssInputRef.current;
+        const start = input?.value.indexOf(`${available[0]}:`) ?? -1;
+        if (!input || start < 0) return;
+        const end = input.value.indexOf("\n", start);
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(start, end < 0 ? input.value.length : end);
+        const line = input.value.slice(0, start).split("\n").length - 1;
+        input.scrollTop = Math.max(0, line - 3) * 20; // leading-5 rows
+        input.scrollIntoView({ block: "nearest" });
+      });
+      return;
+    }
     floatingAnchor.current = {
       getBoundingClientRect: () => element.getBoundingClientRect(),
       contextElement: element,
@@ -1397,7 +1415,7 @@ export default function CustomThemeEditor({
                         Edit as CSS
                       </h3>
                       <p className="text-secondary-text text-xs">
-                        Copy your theme, or paste CSS and apply it. Only the
+                        Copy your theme, or paste or edit CSS. Only the
                         theme&apos;s colors, color-scheme and --logo-filter are
                         read.
                       </p>
@@ -1449,6 +1467,7 @@ export default function CustomThemeEditor({
                       ).join("\n")}
                     </pre>
                     <Textarea
+                      ref={cssInputRef}
                       value={cssText}
                       onChange={(event) => setCssDraft(event.target.value)}
                       onScroll={(event) => {
