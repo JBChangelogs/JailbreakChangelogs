@@ -9,6 +9,7 @@ import { ColorSwatch } from "@/components/ui/color-picker";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import {
   deleteThemePackImage,
   fetchPackFields,
@@ -373,7 +374,7 @@ function PackImageDrop({
     useDropzone({
       multiple: false,
       accept: { "image/*": [] },
-      disabled,
+      disabled: disabled || !!url,
       onDrop: ([image]) => image && onUpload(image),
     });
 
@@ -383,7 +384,7 @@ function PackImageDrop({
     const onPaste = (event: ClipboardEvent) => {
       const here =
         hovered.current || zone.current?.contains(document.activeElement);
-      if (disabled || !here) return;
+      if (disabled || url || !here) return;
       for (const item of event.clipboardData?.items ?? []) {
         const image = item.type.startsWith("image/") && item.getAsFile();
         if (!image) continue;
@@ -395,7 +396,30 @@ function PackImageDrop({
     // Capture, so it runs before the screenshot uploader's listener.
     window.addEventListener("paste", onPaste, true);
     return () => window.removeEventListener("paste", onPaste, true);
-  }, [disabled]);
+  }, [disabled, url]);
+
+  const remove = (
+    <Button
+      variant="ghost"
+      size="sm"
+      aria-label={`Remove the ${label.toLowerCase()}`}
+      disabled={disabled}
+      onClick={onRemove}
+    >
+      <Icon icon="lucide:x" aria-hidden="true" />
+    </Button>
+  );
+
+  // One image per part, so a set one hides the uploader, like a full set of screenshots.
+  if (url)
+    return (
+      <ThemePreviewImages
+        previews={[{ id: label, url, kind: "desktop" }]}
+        label={label}
+        disabled={disabled}
+        onDelete={onRemove}
+      />
+    );
 
   return (
     <div className="flex items-center gap-2">
@@ -403,7 +427,7 @@ function PackImageDrop({
         {...getRootProps({
           ref: zone,
           role: "button",
-          "aria-label": `${url ? "Replace" : "Upload"} the ${label.toLowerCase()}`,
+          "aria-label": `Upload the ${label.toLowerCase()}`,
           onMouseEnter: () => (hovered.current = true),
           onMouseLeave: () => (hovered.current = false),
         })}
@@ -418,33 +442,20 @@ function PackImageDrop({
         )}
       >
         <input {...getInputProps()} />
-        {url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt="" className="h-10 w-16 rounded object-cover" />
-        ) : (
-          <Icon
-            icon="material-symbols:cloud-upload"
-            className="text-secondary-text size-6 shrink-0"
-            aria-hidden="true"
-          />
-        )}
+        <Icon
+          icon="material-symbols:cloud-upload"
+          className="text-secondary-text size-6 shrink-0"
+          aria-hidden="true"
+        />
         <span className="text-primary-text min-w-0">
           {busy
             ? "Uploading…"
             : isDragActive
               ? "Drop to upload"
-              : `Click, drop, or paste ${url ? "a new" : "a"} ${label.toLowerCase()} (Ctrl+V / ⌘V)`}
+              : `Click, drop, or paste a ${label.toLowerCase()} (Ctrl+V / ⌘V)`}
         </span>
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        aria-label={`Remove the ${label.toLowerCase()}`}
-        disabled={disabled}
-        onClick={onRemove}
-      >
-        <Icon icon="lucide:x" aria-hidden="true" />
-      </Button>
+      {remove}
     </div>
   );
 }
