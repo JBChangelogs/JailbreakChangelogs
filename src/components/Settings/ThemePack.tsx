@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +10,10 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
+import {
+  BackgroundUploadDialog,
+  BannerUploadDialog,
+} from "@/components/Settings/ImageUploadDialog";
 import {
   deleteThemePackImage,
   fetchPackFields,
@@ -138,6 +142,14 @@ export function ThemePackEditor({
   const { data: fields } = usePackFields();
   const [busy, setBusy] = useState<PackPart | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const onUploading = useCallback(
+    (on: boolean) => {
+      setUploading(on);
+      onBusyChange(on);
+    },
+    [onBusyChange],
+  );
   const [opened, setOpened] = useState<Set<PackPart>>(new Set());
   const [expanded] = useState(
     () =>
@@ -174,20 +186,13 @@ export function ThemePackEditor({
                 : true,
         );
 
-  const changeImage = async (
-    kind: "banner" | "background",
-    image: File | null,
-  ) => {
+  const removeImage = async (kind: "banner" | "background") => {
     if (!themeId) return;
     setBusy(kind);
     onBusyChange(true);
     setError(null);
     try {
-      onImagesChange(
-        image
-          ? await uploadThemePackImage(themeId, kind, image)
-          : await deleteThemePackImage(themeId, kind),
-      );
+      onImagesChange(await deleteThemePackImage(themeId, kind));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't update it.");
     } finally {
@@ -201,17 +206,34 @@ export function ThemePackEditor({
     if (field.type === "image") {
       const kind = name as "banner" | "background";
       const url = images[kind];
+      const UploadDialog =
+        kind === "banner" ? BannerUploadDialog : BackgroundUploadDialog;
+      // The same crop step as profile uploads, so the image always fits.
       return (
-        <PackImageDrop
-          label={PART_LABELS[name]}
-          url={url ?? null}
-          busy={busy === kind}
-          disabled={disabled || busy !== null}
-          onUpload={(image) => void changeImage(kind, image)}
-          onRemove={() =>
-            url ? void changeImage(kind, null) : toggleOpened(name, false)
-          }
-        />
+        <UploadDialog
+          userData={{}}
+          target="theme pack"
+          upload={async (image) => {
+            const next = await uploadThemePackImage(themeId!, kind, image);
+            onImagesChange(next);
+            return next[kind] ?? "";
+          }}
+          onUploaded={() => {}}
+          onUploadStateChange={onUploading}
+        >
+          {(_open, isUploading, cropImage) => (
+            <PackImageDrop
+              label={PART_LABELS[name]}
+              url={url ?? null}
+              busy={isUploading}
+              disabled={disabled || busy !== null || uploading}
+              onUpload={cropImage}
+              onRemove={() =>
+                url ? void removeImage(kind) : toggleOpened(name, false)
+              }
+            />
+          )}
+        </UploadDialog>
       );
     }
 

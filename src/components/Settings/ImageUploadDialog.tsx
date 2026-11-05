@@ -104,8 +104,17 @@ interface ImageUploadDialogProps {
   children: (
     openFilePicker: () => void,
     isUploading: boolean,
+    /** Opens the crop step straight away with an image picked elsewhere. */
+    cropImage: (file: File) => void,
   ) => React.ReactNode;
   imageType: ImageType;
+  /**
+   * Uploads somewhere other than the profile (a theme pack), returning the
+   * new URL. Skips the tier check and the display setting.
+   */
+  upload?: (file: File) => Promise<string>;
+  /** Names what the image is for when it isn't the user's own profile. */
+  target?: string;
 }
 
 const ImageUploadDialog = ({
@@ -115,6 +124,8 @@ const ImageUploadDialog = ({
   onUploadStateChange,
   children,
   imageType,
+  upload,
+  target,
 }: ImageUploadDialogProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cropperRef = useRef<CropperInstance | null>(null);
@@ -196,7 +207,7 @@ const ImageUploadDialog = ({
       banner: checkBannerAccess,
       background: checkBackgroundAccess,
     }[imageType];
-    if (!checkAccess(userData.premiumtype ?? 0)) return;
+    if (!upload && !checkAccess(userData.premiumtype ?? 0)) return;
 
     setIsUploadPromptOpen(true);
   }, [
@@ -204,6 +215,7 @@ const ImageUploadDialog = ({
     checkBannerAccess,
     checkBackgroundAccess,
     imageType,
+    upload,
     userData.premiumtype,
   ]);
 
@@ -328,6 +340,12 @@ const ImageUploadDialog = ({
       }
       setUploadPhase("uploading");
       uploadStarted = true;
+      if (upload) {
+        onUploaded(await upload(croppedFile), false);
+        clearSelectedSource();
+        toast.success(`${title} uploaded`);
+        return;
+      }
       const newImageUrl = await config.upload(croppedFile);
       let displayEnabled = userData.settings_v2?.[settingName] === true;
 
@@ -378,7 +396,7 @@ const ImageUploadDialog = ({
         className="hidden"
         disabled={isUploading}
       />
-      {children(openFilePicker, isUploading)}
+      {children(openFilePicker, isUploading, selectImage)}
 
       <Dialog open={isUploadPromptOpen} onOpenChange={setIsUploadPromptOpen}>
         <DialogContent
@@ -438,8 +456,12 @@ const ImageUploadDialog = ({
           showClose={!isUploading}
         >
           <DialogHeader>
-            <DialogTitle>Adjust your {label}</DialogTitle>
+            <DialogTitle>
+              Adjust {target ? `the ${target}` : "your"} {label}
+            </DialogTitle>
             <DialogDescription>
+              {target &&
+                `Profiles that apply your pack get this ${label}, cropped the same way. `}
               Drag to reposition the image and use the slider to zoom.
             </DialogDescription>
           </DialogHeader>
