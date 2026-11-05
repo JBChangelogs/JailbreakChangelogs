@@ -10,13 +10,14 @@ import CCPAHandler from "@/components/Home/CCPAHandler";
 const TOC = [
   { id: "discord", label: "1. Discord Data" },
   { id: "roblox", label: "2. Roblox Data" },
-  { id: "analytics", label: "3. Analytics & Security" },
-  { id: "third-party", label: "4. Third-Party Links" },
-  { id: "deletion", label: "5. Data Deletion Requests" },
-  { id: "ccpa", label: "6. CCPA Privacy Rights" },
-  { id: "gdpr", label: "7. GDPR Data Protection" },
-  { id: "changes", label: "8. Changes To This Policy" },
-  { id: "contact", label: "9. Contact Us" },
+  { id: "messaging", label: "3. Messaging & Reports" },
+  { id: "analytics", label: "4. Analytics & Security" },
+  { id: "third-party", label: "5. Third-Party Services & Links" },
+  { id: "deletion", label: "6. Data Deletion Requests" },
+  { id: "ccpa", label: "7. CCPA Privacy Rights" },
+  { id: "gdpr", label: "8. GDPR Data Protection" },
+  { id: "changes", label: "9. Changes To This Policy" },
+  { id: "contact", label: "10. Contact Us" },
 ];
 
 export default function PrivacyPage() {
@@ -24,7 +25,7 @@ export default function PrivacyPage() {
     <LegalLayout
       title="Privacy Policy"
       icon="heroicons-outline:shield-check"
-      lastUpdated="November 1st, 2026"
+      lastUpdated="November 5th, 2026"
       toc={TOC}
       intro={
         <p>
@@ -37,9 +38,12 @@ export default function PrivacyPage() {
       <LegalCallout>
         <p className="mb-2 font-semibold">Summary of key points</p>
         <p className="text-secondary-text">
-          We only collect Discord and Roblox data when you choose to
-          authenticate, we never sell or share your data with third parties, and
-          you can request deletion of your data at any time through our{" "}
+          We collect account information when you authenticate, content you
+          submit through features such as messaging, and usage and security data
+          described below. We do not sell your personal data. Messages are
+          shared with their recipients, and report alerts are delivered to our
+          staff in our private Discord server. You can request deletion of your
+          data through our{" "}
           <a
             href="https://discord.gg/jailbreakchangelogs"
             target="_blank"
@@ -106,10 +110,49 @@ export default function PrivacyPage() {
         />
       </LegalSection>
 
-      <LegalSection
-        id="analytics"
-        title="3. Internal Analytics & Security (Rybbit)"
-      >
+      <LegalSection id="messaging" title="3. Messaging & Reports">
+        <p>
+          When you use direct messages or group chats on our website or app, we
+          store message content, sender and recipient or group identifiers,
+          timestamps, replies, reactions, and metadata for content you share. We
+          also store group names, membership, invitations, conversation
+          preferences, and read status to provide messaging and unread counts.
+        </p>
+        <p>
+          Direct messages are available to the participants. Group messages are
+          available to current group members, including members who join after a
+          message was sent. Messages are processed and stored by our servers and
+          are not end-to-end encrypted. Depending on your settings, we share
+          read receipts and live typing indicators with conversation
+          participants. Message notifications may show the sender and message
+          content on a recipient&apos;s device.
+        </p>
+        <p>
+          When a direct or group message is reported, we save a separate copy of
+          the reported message, relevant account or group identifiers, the
+          report reason, and up to five messages before and five messages after
+          it from the same conversation. Authorized staff can review this
+          information in our moderation dashboard to investigate abuse and
+          enforce our terms. Report details, including the reported message and
+          relevant identifiers, are delivered through a webhook to our staff in
+          our private Discord server so we can see new reports and respond
+          quickly. The webhook alerts our team and does not submit reports to
+          Discord staff. The surrounding conversation context is available in
+          our dashboard.
+        </p>
+        <p>
+          We retain messages to provide conversation history and keep report
+          records separately for moderation and handling disputes. Hiding a
+          conversation or leaving a group does not delete its messages. Deleting
+          a message does not automatically remove copies already saved in
+          reports, sent to Discord, or retained by recipients. Deleting your
+          account does not automatically erase all message or report records. To
+          request deletion of these records, use the contact methods in the Data
+          Deletion Requests section below.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="analytics" title="4. Internal Analytics & Security">
         <p>
           We use a self-hosted instance of{" "}
           <a
@@ -158,16 +201,38 @@ export default function PrivacyPage() {
           used for automated decisions, and is kept for as long as your account
           exists.
         </p>
+        <p>
+          Separately from Rybbit, we collect messaging metrics to understand
+          message volume, website versus app usage, and how long messages take
+          to be read. These analytics records contain timestamps, the app or
+          website indicator, or read durations, without message content, user
+          identifiers, or message identifiers. Our internal dashboard displays
+          aggregate counts and read timing statistics.
+        </p>
       </LegalSection>
 
-      <LegalSection id="third-party" title="4. Third-Party Links">
+      <LegalSection id="third-party" title="5. Third-Party Services & Links">
+        <p>
+          We use a Discord webhook to notify our staff of new reports in our
+          private Discord server as described above. Discord provides the
+          platform that processes these alerts under{" "}
+          <a
+            href="https://discord.com/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-link hover:text-link-hover hover:underline"
+          >
+            Discord&apos;s Privacy Policy
+          </a>
+          .
+        </p>
         <p>
           Our website may contain links to third-party websites. We are not
           responsible for the privacy practices of these websites.
         </p>
       </LegalSection>
 
-      <LegalSection id="deletion" title="5. Data Deletion Requests">
+      <LegalSection id="deletion" title="6. Data Deletion Requests">
         <p>
           You have the right to request deletion of your data at any time. If
           you would like to request deletion of your inventory data or any other
@@ -200,14 +265,17 @@ export default function PrivacyPage() {
           ]}
         />
         <p>
-          We will process your deletion request promptly and confirm once your
-          data has been removed from our systems.
+          We will review your deletion request and explain what has been deleted
+          and whether any information must be retained under applicable law. If
+          your request concerns messages or reports, please identify the
+          relevant account and conversation or report so we can review those
+          records, including copies sent through our moderation workflow.
         </p>
       </LegalSection>
 
       <LegalSection
         id="ccpa"
-        title="6. CCPA Privacy Rights (Do Not Sell My Personal Information)"
+        title="7. CCPA Privacy Rights (Do Not Sell My Personal Information)"
       >
         <p>
           Under the CCPA, among other rights, California consumers have the
@@ -232,7 +300,7 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="gdpr" title="7. GDPR Data Protection Rights">
+      <LegalSection id="gdpr" title="8. GDPR Data Protection Rights">
         <p>
           We would like to make sure you are fully aware of all of your data
           protection rights. Every user is entitled to the following:
@@ -281,14 +349,14 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
-      <LegalSection id="changes" title="8. Changes To This Privacy Policy">
+      <LegalSection id="changes" title="9. Changes To This Privacy Policy">
         <p>
           We may update this Privacy Policy from time to time. Any changes will
           be posted on this page.
         </p>
       </LegalSection>
 
-      <LegalSection id="contact" title="9. Contact Us">
+      <LegalSection id="contact" title="10. Contact Us">
         <p>
           If you have any questions or concerns about our Privacy Policy, please
           don&apos;t hesitate to contact us:

@@ -15,7 +15,8 @@ const TOC = [
   { id: "revisions", label: "5. Revisions and Errata" },
   { id: "refunds", label: "6. Refund Policy" },
   { id: "suggestions", label: "7. Item Suggestions" },
-  { id: "contact", label: "8. Contact Information" },
+  { id: "messaging", label: "8. Messaging & Group Chats" },
+  { id: "contact", label: "9. Contact Information" },
 ];
 
 export default function TermsOfServicePage() {
@@ -23,7 +24,7 @@ export default function TermsOfServicePage() {
     <LegalLayout
       title="Terms of Service"
       icon="heroicons-outline:document-text"
-      lastUpdated="June 2nd, 2026"
+      lastUpdated="November 5th, 2026"
       toc={TOC}
       intro={
         <p>
@@ -164,7 +165,51 @@ export default function TermsOfServicePage() {
         />
       </LegalSection>
 
-      <LegalSection id="contact" title="8. Contact Information">
+      <LegalSection id="messaging" title="8. Messaging & Group Chats">
+        <p>
+          You are responsible for the messages and content you share through
+          direct messages and group chats on our website and app. You must have
+          the right to share that content. You allow us to store, process, and
+          deliver it to conversation participants and review reported content
+          for moderation as described in our{" "}
+          <Link
+            href="/privacy#messaging"
+            className="text-link hover:text-link-hover hover:underline"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
+        <LegalList
+          items={[
+            "Do not harass, threaten, bully, or send hateful or unlawful content.",
+            "Do not use messaging for scams, phishing, impersonation, spam, malicious links, or malware.",
+            "Do not share another person's private or sensitive information without permission.",
+            "Respect blocks, messaging preferences, and moderation restrictions. Do not use alternate accounts or group invitations to evade them.",
+            "Do not submit false or abusive reports or use group controls to facilitate abuse.",
+          ]}
+        />
+        <p>
+          You can block users and report direct or group messages using the
+          available controls. Reports include the reported message and nearby
+          conversation context for authorized staff to review. Report details
+          are also delivered through a webhook to our staff in our private
+          Discord server so we can respond quickly. These alerts go to our team,
+          not Discord staff. Violations may result in messaging restrictions,
+          temporary or permanent communication bans, or account suspension.
+        </p>
+        <p>
+          Group owners can manage invitations and membership, remove members,
+          delete messages in their group, and delete the group. Members who join
+          a group can see its earlier message history. Leaving a group or hiding
+          a conversation does not delete the messages you sent. Deleting a
+          message or account does not automatically remove report records or
+          copies retained by recipients. Avoid sharing passwords, payment
+          details, or other sensitive information through messaging.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="contact" title="9. Contact Information">
         <p>
           If you have any questions about these Terms of Service, please contact
           us:
