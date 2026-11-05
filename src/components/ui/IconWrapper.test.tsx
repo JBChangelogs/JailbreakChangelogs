@@ -37,7 +37,7 @@ test("SVG references keep unique stable IDs and explicit IDs are preserved", () 
   const markup = render();
   expect(render()).toBe(markup);
   const ids = Array.from(
-    markup.matchAll(/<clipPath id="([^"]+)"/g),
+    markup.matchAll(/<clipPath id=["']([^"']+)/g),
     ([, id]) => id,
   );
   expect(ids).toHaveLength(2);
@@ -48,10 +48,8 @@ test("SVG references keep unique stable IDs and explicit IDs are preserved", () 
   const explicitMarkup = renderExplicit();
   expect(renderExplicit()).toBe(explicitMarkup);
   expect(explicitMarkup).toContain('id="clipped-icon"');
-  // Iconify derives it from the given id; its separator changed in 6.0.3
-  // (clipped-iconID0 → clipped_iconID0), so only the prefix is checked.
-  const clipId = explicitMarkup.match(/<clipPath id="([^"]+)"/)?.[1];
-  expect(clipId).toMatch(/^clipped[-_]icon/);
+  const clipId = explicitMarkup.match(/<clipPath id=["']([^"']+)/)?.[1];
+  expect(clipId).toBe("clipped-iconID0");
   expect(explicitMarkup).toContain(`clip-path="url(#${clipId})"`);
   expect(
     renderToStaticMarkup(
