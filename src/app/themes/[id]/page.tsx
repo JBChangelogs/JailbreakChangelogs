@@ -5,9 +5,10 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
-import ThemeDetailsActions from "@/components/Settings/ThemeDetailsActions";
+import ThemeDetailsActions, {
+  ThemePackSection,
+} from "@/components/Settings/ThemeDetailsActions";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
-import { ThemePackSummary } from "@/components/Settings/ThemePack";
 import { Icon } from "@/components/ui/IconWrapper";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { BASE_API_URL, fetchUserById } from "@/utils/api/api";
@@ -171,17 +172,8 @@ export default async function ThemeDetailsPage({ params }: Props) {
                 <dt className="text-secondary-text mb-1">Share code</dt>
                 <dd className="font-mono">{theme.share_code}</dd>
               </div>
-              {!!Object.keys(theme.pack ?? {}).length && (
-                <div className="col-span-2 lg:col-span-1">
-                  <dt className="text-secondary-text mb-1">
-                    Customization pack
-                  </dt>
-                  <dd>
-                    <ThemePackSummary pack={theme.pack} />
-                  </dd>
-                </div>
-              )}
             </dl>
+            <ThemePackSection theme={theme} />
           </div>
           {(theme.description || !!theme.previews?.length) && (
             <div className="min-w-0 space-y-4">

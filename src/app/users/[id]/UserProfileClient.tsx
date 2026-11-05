@@ -4,7 +4,11 @@ import {
   MutualFriendsCount,
   RemoveFriendMenuItem,
 } from "@/components/Users/Friends";
-import { FriendButton } from "@/components/Users/UserProfilePopover";
+import {
+  FriendButton,
+  UserProfilePopover,
+  type PopoverUser,
+} from "@/components/Users/UserProfilePopover";
 import { FRIENDS_KEY, FRIEND_REQUESTS_KEY } from "@/hooks/useFriendship";
 import {
   accentCardTheme,
@@ -14,9 +18,13 @@ import {
 
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApplyPackButton } from "@/components/Settings/ThemeDetailsActions";
+import { usePackFields } from "@/components/Settings/ThemePack";
+import { Spinner } from "@/components/ui/Spinner";
+import { fetchSharedTheme, type ThemePack } from "@/utils/api/userThemes";
 import Link from "next/link";
 import NextError from "next/error";
-import { notFound } from "next/navigation";
+import { notFound, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -26,7 +34,11 @@ import { Banner } from "@/components/Profile/Banner";
 import { ProfileBackground } from "@/components/Profile/ProfileBackground";
 import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
-import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
+import {
+  PUBLIC_API_URL,
+  fetchUserById,
+  getResponseErrorMessage,
+} from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import {
@@ -65,6 +77,32 @@ import type { ProfileDataResult } from "@/services/profileDataService";
 import type { UserFlag } from "@/types/auth";
 
 const log = createLogger("UI");
+
+const toColorInt = (hex?: string | null) =>
+  hex ? parseInt(hex.slice(1), 16) : null;
+
+function withPack(user: User, pack: ThemePack): User {
+  const settings = { ...user.settings_v2 } as UserSettingsV2;
+  const next: User = { ...user };
+  if (pack.banner) {
+    next.custom_banner = pack.banner;
+    settings.custom_banner = true;
+  }
+  if (pack.background) {
+    next.custom_background = pack.background;
+    settings.custom_background = true;
+  }
+  if (pack.accent) {
+    next.custom_accent_color = pack.accent.color;
+    next.accent_gradient = toColorInt(pack.accent.gradient);
+  }
+  if (pack.card_style) next.accent_style = pack.card_style;
+  if (pack.colored_profile_cards != null)
+    settings.colored_profile_cards = pack.colored_profile_cards;
+  if (pack.underglow) next.underglow = toColorInt(pack.underglow);
+  next.settings_v2 = settings;
+  return next;
+}
 
 interface User {
   id: string;
@@ -129,7 +167,50 @@ export default function UserProfileClient({
   const profileIdentityRef = useRef<HTMLHeadingElement>(null);
   const router = useRouter();
   const { user: currentUser, isLoading: authLoading } = useAuthContext();
-  const user = profileData?.user ?? null;
+  // ?pack=CODE on your own profile previews that theme's pack, unsaved.
+  const searchParams = useSearchParams();
+  const packCode = searchParams.get("pack");
+  // Opened from the try-on sheet: exiting brings the sheet back.
+  const fromSheet = searchParams.get("from") === "sheet";
+  const ownProfile = !!currentUser && currentUser.id === profileData?.user?.id;
+  const { data: packTheme, isFetched: packThemeFetched } = useQuery({
+    queryKey: ["shared-theme", packCode],
+    queryFn: () => fetchSharedTheme(packCode!),
+    enabled: ownProfile && !!packCode,
+    retry: false,
+    staleTime: 60_000,
+  });
+  const { data: packCreator, isFetched: packCreatorFetched } = useQuery({
+    queryKey: ["shared-theme-creator", packTheme?.user_id],
+    queryFn: () =>
+      fetchUserById(packTheme!.user_id, PUBLIC_API_URL) as Promise<
+        PopoverUser & { settings_v2?: UserSettingsV2 }
+      >,
+    enabled: !!packTheme,
+    staleTime: 5 * 60_000,
+  });
+  const packCreatorName =
+    packCreator?.global_name && packCreator.global_name !== "None"
+      ? packCreator.global_name
+      : packCreator?.username;
+  const { isFetched: packFieldsFetched } = usePackFields(!!packTheme);
+  // Wait for everything the bar shows, so it doesn't shift; fetched, not
+  // succeeded, so a failed request can't hang it.
+  const hasPack = !!Object.keys(packTheme?.pack ?? {}).length;
+  const loadingPreview =
+    ownProfile &&
+    !!packCode &&
+    (!packThemeFetched ||
+      (hasPack && (!packCreatorFetched || !packFieldsFetched)));
+  const previewing =
+    packCreatorFetched &&
+    packFieldsFetched &&
+    ownProfile &&
+    !!packTheme &&
+    !!Object.keys(packTheme.pack ?? {}).length;
+  const savedUser = profileData?.user ?? null;
+  const user =
+    previewing && savedUser ? withPack(savedUser, packTheme.pack!) : savedUser;
   const profileUserId = user?.id;
   const errorState = error?.message ?? null;
   const errorCode = error?.code ?? null;
@@ -772,7 +853,7 @@ export default function UserProfileClient({
   // Tier 2, like custom banners, so it hides after a downgrade.
   const hasVisibleBackground =
     user.settings_v2?.custom_background === true &&
-    (user.premiumtype ?? 0) >= 2 &&
+    (previewing || (user.premiumtype ?? 0) >= 2) &&
     !!user.custom_background;
 
   const profileActionButtonClassName =
@@ -791,6 +872,75 @@ export default function UserProfileClient({
       {hasVisibleBackground && user.custom_background && (
         <ProfileBackground src={user.custom_background} />
       )}
+      {loadingPreview && (
+        <div
+          role="status"
+          className="bg-button-info/10 border-button-info/30 text-secondary-text relative flex min-h-12 items-center justify-center gap-2 border-b px-4 py-2 text-sm"
+        >
+          <Spinner className="size-4" />
+          Loading the pack preview…
+        </div>
+      )}
+      {previewing && (
+        <div className="bg-button-info/10 border-button-info/30 text-primary-text relative flex min-h-12 flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-2 text-center text-sm">
+          <Icon
+            icon="lucide:eye"
+            className="text-button-info size-4 shrink-0"
+            aria-hidden="true"
+          />
+          <p className="min-w-0">
+            Previewing the{" "}
+            <Link
+              href={`/themes/${packTheme.share_code}`}
+              className="font-semibold hover:underline"
+            >
+              {packTheme.label}
+            </Link>{" "}
+            pack
+            {packCreatorName && (
+              <>
+                {" by "}
+                <UserProfilePopover
+                  user={{ ...packCreator, id: packTheme.user_id }}
+                  side="bottom"
+                >
+                  <button
+                    type="button"
+                    className="text-link hover:text-link-hover inline-flex cursor-pointer items-center gap-1.5 align-middle"
+                  >
+                    <UserAvatar
+                      userId={packTheme.user_id}
+                      avatarHash={packCreator?.avatar ?? null}
+                      username={packCreator?.username ?? ""}
+                      custom_avatar={packCreator?.custom_avatar ?? undefined}
+                      premiumType={packCreator?.premiumtype}
+                      settings={packCreator?.settings_v2}
+                      size={5}
+                      showBadge={false}
+                    />
+                    {packCreatorName}
+                  </button>
+                </UserProfilePopover>
+              </>
+            )}
+            . Only you see this; nothing is saved until you apply it.
+          </p>
+          <ApplyPackButton theme={packTheme} size="sm" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              router.replace(
+                fromSheet
+                  ? `/users/${user.id}?theme=${packTheme.share_code}`
+                  : `/users/${user.id}`,
+              )
+            }
+          >
+            Exit preview
+          </Button>
+        </div>
+      )}
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
         <ProfileIdentityBar user={user} identityRef={profileIdentityRef} />
@@ -803,7 +953,12 @@ export default function UserProfileClient({
               banner={user.banner}
               customBanner={user.custom_banner}
               settings={user.settings_v2}
-              premiumType={user.premiumtype}
+              // A preview shows the pack's banner whatever the tier.
+              premiumType={
+                previewing
+                  ? Math.max(user.premiumtype ?? 0, 2)
+                  : user.premiumtype
+              }
             />
             {isOwnProfile && (
               <BannerEditOverlay

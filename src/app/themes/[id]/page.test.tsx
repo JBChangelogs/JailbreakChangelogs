@@ -85,14 +85,13 @@ function page(
               "data-comments-type": props.type,
             }),
         };
-      return {
-        default: ({ children }: { children?: ReactNode }) =>
-          createElement(
-            "div",
-            { "data-component": name.split("/").at(-1) },
-            children,
-          ),
-      };
+      const stub = ({ children }: { children?: ReactNode }) =>
+        createElement(
+          "div",
+          { "data-component": name.split("/").at(-1) },
+          children,
+        );
+      return { default: stub, ThemePackSection: () => null };
     },
   });
   return {

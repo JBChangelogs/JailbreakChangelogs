@@ -18,7 +18,8 @@ import { useBottomPanel } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
-import { ThemePackSummary } from "@/components/Settings/ThemePack";
+import { ThemePackSection } from "@/components/Settings/ThemeDetailsActions";
+import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
@@ -143,11 +144,20 @@ export default function SharedThemeDialog() {
     }
   };
 
-  const title = theme
-    ? theme.label
-    : isLoading
-      ? "Loading theme…"
-      : "Theme not found";
+  const title = theme ? (
+    <span className="flex min-w-0 items-center gap-2">
+      <Icon
+        icon={theme.icon ?? DEFAULT_THEME_ICON}
+        className="size-5 shrink-0"
+        aria-hidden="true"
+      />
+      <span className="truncate">{theme.label}</span>
+    </span>
+  ) : isLoading ? (
+    "Loading theme…"
+  ) : (
+    "Theme not found"
+  );
   const description = theme ? (
     <>
       Shared theme
@@ -193,6 +203,8 @@ export default function SharedThemeDialog() {
         side={bottomPanel.sheet.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
+        // Non-modal, so it doesn't take focus (it'd light up after Alt+Tab).
+        onOpenAutoFocus={(event) => event.preventDefault()}
         style={bottomPanel.sheet.style}
         className={cn(
           "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
@@ -268,12 +280,16 @@ export default function SharedThemeDialog() {
                 Copy link
               </Button>
             </div>
-            <ThemePackSummary pack={theme.pack} />
             {!!theme.previews?.length && (
-              <ThemePreviewImages
-                previews={theme.previews}
-                label={theme.label}
-              />
+              <section className="space-y-2">
+                <h3 className="text-primary-text text-sm font-medium">
+                  Preview screenshots
+                </h3>
+                <ThemePreviewImages
+                  previews={theme.previews}
+                  label={theme.label}
+                />
+              </section>
             )}
             <details>
               <summary className="text-link cursor-pointer text-sm font-medium">
@@ -288,6 +304,8 @@ export default function SharedThemeDialog() {
                 logoFilter={theme.logo_filter}
               />
             </details>
+            {/* The sheet would cover the profile, so the preview closes it. */}
+            <ThemePackSection theme={theme} onPreview={close} />
           </div>
         )}
 
