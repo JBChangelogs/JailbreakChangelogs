@@ -353,8 +353,8 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
           className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md"
         />
       </div>
-      <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
-        <div className="bg-tertiary-bg rounded-md p-4 text-center">
+      <div className="mt-4 rounded-lg border-2 border-transparent shadow-lg [background:linear-gradient(var(--color-tertiary-bg),var(--color-tertiary-bg))_padding-box,linear-gradient(to_bottom_right,#076bb6,#ca4a0d)_border-box]">
+        <div className="p-4 text-center">
           <div className="mb-3 flex justify-center">
             <SiteLogo
               collaboration
