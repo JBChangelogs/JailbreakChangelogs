@@ -31,7 +31,7 @@ export default function ServiceAvailabilityTicker({
                     prefetch={false}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-link hover:underline"
+                    className="text-link hover:text-link-hover hover:underline"
                   >
                     {alert.linkText}
                   </Link>
