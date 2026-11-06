@@ -106,7 +106,10 @@ const render = (
 test("one item uses a horizontal card with visible market details and its listing link", () => {
   const markup = render([item]);
   expect(markup).toContain("ml-3 w-2/5");
-  expect(markup).toContain("w-full max-w-md");
+  expect(markup).toContain(
+    "grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))]",
+  );
+  expect(markup).not.toContain("max-w-md");
   expect(markup).toContain("Listed total");
   expect(markup).toContain("30,000,000");
   expect(markup).toContain('title="High"');
@@ -122,8 +125,9 @@ test("two grouped cards share the panel width and totals retain condition and qu
     [item, { ...item, isDuped: true }, { ...item, isDuped: true }],
     "Requesting",
   );
-  expect(markup).toContain("flex flex-wrap items-start gap-3");
-  expect(markup).toContain("min-w-0 flex-1");
+  expect(markup).toContain(
+    "grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))]",
+  );
   expect(markup).not.toContain("w-44");
   expect(markup).toContain("max-h-32 w-full");
   expect(markup).toContain('class="object-contain"');
@@ -148,10 +152,13 @@ test("custom tags and empty sides do not display invented values or market detai
   expect(render([])).toContain("No items listed");
 });
 
-test("multiple cards keep compact widths and wrap within the panel", () => {
+test("multiple cards share available panel width and wrap without fixed card widths", () => {
   const markup = render([item, { ...item, id: 2 }, { ...item, id: 3 }]);
-  expect(markup).toContain("flex flex-wrap items-start gap-3");
-  expect(markup).toContain("w-44");
+  expect(markup).toContain(
+    "grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))]",
+  );
+  expect(markup).not.toContain("w-44");
+  expect(markup).not.toContain("max-w-md");
 });
 
 test("zero value breakdowns are omitted while nonzero cash and duped totals remain", () => {

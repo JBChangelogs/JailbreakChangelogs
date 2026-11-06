@@ -266,7 +266,7 @@ const TradeSidePreview = ({
                   <div className="hover:bg-primary-bg/20 cursor-default transition-colors">
                     <div className="px-3 py-2">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
+                        <div className="bg-quaternary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
                           <Image
                             placeholder={IMAGE_PLACEHOLDER}
                             src={getTradeItemImagePath(item, true)}
@@ -358,7 +358,7 @@ const TradeSidePreview = ({
       {/* Desktop card grid */}
       <div className="hidden lg:block">
         {previewItems.length > 0 ? (
-          <div className="flex flex-wrap items-start gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))] items-start gap-3">
             {previewItems.map((item) => {
               const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}-grid`;
               const itemHref = getTradeItemDetailHref(item);
@@ -375,7 +375,7 @@ const TradeSidePreview = ({
                   className={`bg-secondary-bg hover:border-border-focus/50 overflow-hidden rounded-lg border border-white/5 transition-colors ${previewItems.length === 1 ? "flex items-center" : ""}`}
                 >
                   <div
-                    className={`relative aspect-video overflow-hidden ${previewItems.length === 1 ? "ml-3 w-2/5 shrink-0 rounded-lg" : previewItems.length === 2 ? "max-h-32 w-full" : "w-full"}`}
+                    className={`bg-quaternary-bg relative aspect-video overflow-hidden ${previewItems.length === 1 ? "my-3 ml-3 w-2/5 shrink-0 rounded-lg" : previewItems.length === 2 ? "max-h-32 w-full" : "w-full"}`}
                   >
                     <Image
                       placeholder={IMAGE_PLACEHOLDER}
@@ -468,10 +468,7 @@ const TradeSidePreview = ({
               );
 
               return (
-                <div
-                  key={itemKey}
-                  className={`cursor-default ${previewItems.length === 1 ? "w-full max-w-md" : previewItems.length === 2 ? "min-w-0 flex-1" : "w-44 max-w-full"}`}
-                >
+                <div key={itemKey} className="min-w-0 cursor-default">
                   {isCustomTradeItem(item) ? (
                     cardWithLink
                   ) : (
