@@ -116,7 +116,7 @@ export default function ValuesItemsGrid({
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [hasMore, isFetching, loadMoreError, onLoadMore]);
+  }, [hasMore, isFetching, loadMoreError, onLoadMore, displayedItems.length]);
 
   const hasCategoryActive = selectedFilterSorts.length > 0;
   const hasLocalFilters = selectedFilterSorts.includes("favorites");
@@ -230,7 +230,10 @@ export default function ValuesItemsGrid({
         {noRailAds && <NitroValuesTopAd />}
       </div>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        data-values-items-grid
+        className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
         {displayedItems.length === 0 && isLoading ? (
           [...Array(pageSize)].map((_, index) => (
             <ItemCardSkeleton key={index} />
@@ -284,14 +287,15 @@ export default function ValuesItemsGrid({
             </React.Fragment>
           ))
         )}
-        {/* Sentinel above the skeletons so fetching starts before they're visible */}
         {hasMore && !loadMoreError && displayedItems.length > 0 && (
-          <>
-            <div ref={loadMoreRef} className="col-span-full -mb-4" />
-            {[...Array(pageSize)].map((_, index) => (
+          <div
+            ref={loadMoreRef}
+            className="col-span-full grid grid-cols-subgrid gap-4"
+          >
+            {[...Array(Math.min(pageSize, 4))].map((_, index) => (
               <ItemCardSkeleton key={`more-${index}`} />
             ))}
-          </>
+          </div>
         )}
       </div>
 

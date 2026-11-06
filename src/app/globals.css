@@ -2,6 +2,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Prevent scroll anchoring from repeatedly loading pages. */
+html:has([data-values-items-grid]) {
+  overflow-anchor: none;
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

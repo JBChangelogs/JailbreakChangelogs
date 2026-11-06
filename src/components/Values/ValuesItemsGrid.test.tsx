@@ -9,6 +9,8 @@ import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 test("scroll loading pauses during fetches and errors, retries manually, and resets page links on filter changes", () => {
   const effects: Array<() => void | (() => void)> = [];
   const refs: Array<{ current: unknown }> = [];
+  const effectDependencies: unknown[][] = [];
+  let effectIndex = 0;
   let refIndex = 0;
   let intersection!: (entries: Array<{ isIntersecting: boolean }>) => void;
   let observed = 0;
@@ -18,6 +20,7 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   const pages: number[] = [];
   const button = Symbol("Button");
   const gridAd = Symbol("NitroGridAd");
+  const skeleton = Symbol("ItemCardSkeleton");
   const auth = { isLoading: false, user: { premiumtype: 0 } };
   const exports = {} as { default: typeof ValuesItemsGrid };
   runInNewContext(
@@ -45,7 +48,14 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
           return {
             default: { Fragment: "fragment" },
             useMemo: (fn: () => unknown) => fn(),
-            useEffect: (fn: () => void) => effects.push(fn),
+            useEffect: (fn: () => void, deps: unknown[]) => {
+              const index = effectIndex++;
+              const previous = effectDependencies[index];
+              if (!previous || deps.some((dep, i) => dep !== previous[i])) {
+                effectDependencies[index] = deps;
+                effects.push(fn);
+              }
+            },
             useRef: (value: unknown) =>
               refs[refIndex++] ?? (refs[refIndex - 1] = { current: value }),
           };
@@ -67,6 +77,8 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
         if (name === "@/utils/auth/supporterAccess")
           return { canHideAdsForPremiumType };
         if (name === "@/components/Ads/NitroGridAd") return { default: gridAd };
+        if (name === "@/components/Items/ItemCardSkeleton")
+          return { default: skeleton };
         if (name === "../ui/button") return { Button: button };
         if (name === "./valuesFilterOptions")
           return { getFilterSortsDisplayNames };
@@ -106,6 +118,7 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
       onClick?: () => void;
       disabled?: boolean;
       className?: string;
+      ref?: unknown;
     };
   };
   function nodes(value: unknown): Node[] {
@@ -116,6 +129,7 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   }
   const render = () => {
     refIndex = 0;
+    effectIndex = 0;
     effects.length = 0;
     const tree = exports.default(props);
     refs[1].current = {};
@@ -168,7 +182,38 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   render();
   expect(pages).toEqual([1]);
 
-  // Appending pages must not leave padded ad rows for ad-free supporters.
+  props.items = [{ id: 1 }] as typeof props.items;
+  props.hasMore = true;
+  view = render();
+  const loadingRegion = nodes(view.tree).find(
+    (node) => node.props.ref === refs[1],
+  )!;
+  expect(
+    nodes(loadingRegion.props.children).filter(
+      (node) => node.type === skeleton,
+    ),
+  ).toHaveLength(4);
+  expect(loadingRegion.props.className).toContain("grid-cols-subgrid");
+  intersection([{ isIntersecting: true }]);
+  expect(loaded).toBe(3);
+  view.cleanup();
+  props.isFetching = true;
+  render();
+  props.isFetching = false;
+  view = render();
+  intersection([{ isIntersecting: true }]);
+  expect(loaded).toBe(4);
+  view.cleanup();
+  // Fast responses may skip the fetching render.
+  const observedBeforeAppend = observed;
+  props.items = [{ id: 1 }, { id: 2 }] as typeof props.items;
+  view = render();
+  expect(observed).toBe(observedBeforeAppend + 1);
+  intersection([{ isIntersecting: true }]);
+  expect(loaded).toBe(5);
+  view.cleanup();
+  props.hasMore = false;
+
   const adRows = () =>
     nodes(render().tree).filter(
       (node) =>
