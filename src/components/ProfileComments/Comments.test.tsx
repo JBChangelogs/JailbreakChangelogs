@@ -68,6 +68,37 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
     reply_to_id: null,
     changelogDetails: { title: "Update" },
   };
+  for (const themeDetails of [
+    undefined,
+    { label: "Ocean", previews: [] },
+    { label: "Ocean", previews: [{ url: "/theme-preview.webp" }] },
+  ]) {
+    const card = nodes(
+      exports.default({
+        ...props,
+        item_type: "Theme",
+        item_id: "E5XAULY4",
+        themeDetails,
+      }),
+    );
+    expect(
+      card
+        .filter((node) => node.type === "Link")
+        .map((node) => node.props.href),
+    ).toEqual(["/themes/E5XAULY4#comment-42", "/themes/E5XAULY4#comment-42"]);
+    expect(card.find((node) => node.type === "Image")?.props).toMatchObject({
+      src: themeDetails?.previews[0]?.url || "/placeholder.webp",
+    });
+    expect(
+      card.some(
+        (node) =>
+          node.props.children === (themeDetails?.label || "Theme #E5XAULY4"),
+      ),
+    ).toBe(true);
+    expect(
+      card.some((node) => [node.props.children].flat().includes("View thread")),
+    ).toBe(true);
+  }
   const profileLinks = nodes(
     exports.default({
       ...props,

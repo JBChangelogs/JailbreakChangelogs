@@ -6,6 +6,7 @@ import type { fetchFavoritesData, fetchCommentDetails } from "./actions";
 
 test("favorites bound stalled requests and comment details skip unnecessary item lookups", async () => {
   let itemRequests = 0;
+  const themeRequests: string[] = [];
   let fetchImpl: (
     input: string,
     init: RequestInit,
@@ -35,6 +36,14 @@ test("favorites bound stalled requests and comment details skip unnecessary item
         },
       },
       require: (name: string) => {
+        if (name === "@/utils/api/userThemes")
+          return {
+            fetchSharedTheme: async (code: string) => {
+              themeRequests.push(code);
+              if (code === "MISSING") throw new Error("Theme unavailable");
+              return { label: "Ocean", previews: [{ url: "/preview.webp" }] };
+            },
+          };
         if (name === "@/utils/api/api")
           return {
             PUBLIC_API_URL: "https://public-api.example.com",
@@ -67,6 +76,16 @@ test("favorites bound stalled requests and comment details skip unnecessary item
   expect((await exports.fetchCommentDetails(suggestionComments)).items).toEqual(
     {},
   );
+  expect(itemRequests).toBe(0);
+  const themeDetails = await exports.fetchCommentDetails([
+    { item_id: "E5XAULY4", item_type: "theme" },
+    { item_id: "E5XAULY4", item_type: "Theme" },
+    { item_id: "MISSING", item_type: "theme" },
+  ]);
+  expect(themeRequests).toEqual(["E5XAULY4", "MISSING"]);
+  expect(themeDetails.themes.E5XAULY4).toMatchObject({ label: "Ocean" });
+  expect(themeDetails.themes.MISSING).toBeNull();
+  expect(themeDetails.items).toEqual({});
   expect(itemRequests).toBe(0);
   expect(
     (

@@ -5,6 +5,7 @@ import {
 } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import { fetchSharedTheme } from "@/utils/api/userThemes";
 
 const log = createLogger("API");
 
@@ -65,7 +66,8 @@ export async function fetchCommentDetails(
               type !== "vsuggestion" &&
               type !== "value_suggestion" &&
               type !== "inventory" &&
-              type !== "user"
+              type !== "user" &&
+              type !== "theme"
             );
           })
           .map((c) => c.item_id.toString()),
@@ -80,11 +82,28 @@ export async function fetchCommentDetails(
       ),
     ];
 
-    const [items, seasons] = await Promise.all([
+    const themeCodes = [
+      ...new Set(
+        comments
+          .filter((c) => c.item_type.toLowerCase() === "theme")
+          .map((c) => String(c.item_id)),
+      ),
+    ];
+
+    const [items, seasons, themes] = await Promise.all([
       itemIds.length > 0
         ? fetchPartialItems<PartialItem>(["name", "type"])
         : Promise.resolve([]),
       Promise.all(seasonIds.map((id) => fetchSeason(id))),
+      Promise.all(
+        themeCodes.map(async (code) => {
+          try {
+            return [code, await fetchSharedTheme(code)] as const;
+          } catch {
+            return [code, null] as const;
+          }
+        }),
+      ),
     ]);
 
     const itemMap: Record<string, unknown> = {};
@@ -105,6 +124,7 @@ export async function fetchCommentDetails(
       seasons: seasonMap,
       trades: {},
       inventories: {},
+      themes: Object.fromEntries(themes),
     };
   } catch (error) {
     log.error("Failed to fetch comment details:", error);
@@ -114,6 +134,7 @@ export async function fetchCommentDetails(
       seasons: {},
       trades: {},
       inventories: {},
+      themes: {},
     };
   }
 }

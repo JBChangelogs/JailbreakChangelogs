@@ -319,6 +319,7 @@ export default function CommentsTab({
     seasons: { ...sharedItemDetails, ...detailsQuery.data?.seasons },
     trades: { ...sharedItemDetails, ...detailsQuery.data?.trades },
     inventories: { ...sharedItemDetails, ...detailsQuery.data?.inventories },
+    themes: { ...sharedItemDetails, ...detailsQuery.data?.themes },
   };
   const detailsLoading = detailsQuery.isLoading;
   useEffect(() => {
@@ -476,6 +477,9 @@ export default function CommentsTab({
                         commentDetails.trades[comment.item_id.toString()]
                       }
                       isLoading={detailsLoading}
+                      themeDetails={
+                        commentDetails.themes[String(comment.item_id)]
+                      }
                     />
                   ))}
                 </div>

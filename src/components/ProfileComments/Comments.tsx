@@ -33,6 +33,7 @@ import {
 } from "@/utils/ui/images";
 import { ItemDetails } from "@/types";
 import type { UserData } from "@/types/auth";
+import type { SharedTheme } from "@/utils/api/userThemes";
 
 export type ProfileCommentUser = Pick<
   UserData,
@@ -82,6 +83,7 @@ interface CommentProps {
   itemDetails?: unknown;
   seasonDetails?: unknown;
   tradeDetails?: unknown;
+  themeDetails?: unknown;
   profileOwner?: ProfileCommentUser;
   isLoading?: boolean;
 }
@@ -238,6 +240,7 @@ export default function Comment({
   changelogDetails: propChangelogDetails,
   itemDetails: propItemDetails,
   seasonDetails: propSeasonDetails,
+  themeDetails: propThemeDetails,
   profileOwner,
   isLoading: propIsLoading,
 }: CommentProps) {
@@ -250,6 +253,7 @@ export default function Comment({
   const itemDetails = (propItemDetails as ItemDetails) || null;
   const changelogDetails = (propChangelogDetails as ChangelogDetails) || null;
   const seasonDetails = (propSeasonDetails as SeasonDetails) || null;
+  const themeDetails = (propThemeDetails as SharedTheme) || null;
   const isLoading = propIsLoading || false;
 
   const timestamp = edited_at || parseInt(date);
@@ -322,6 +326,23 @@ export default function Comment({
   };
 
   const renderThumbnail = () => {
+    if (item_type.toLowerCase() === "theme") {
+      return (
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">
+          <Image
+            placeholder={IMAGE_PLACEHOLDER}
+            src={themeDetails?.previews?.[0]?.url || IMAGE_PATHS.PLACEHOLDER}
+            alt={themeDetails?.label || `Theme ${item_id}`}
+            fill
+            unoptimized
+            sizes="(min-width: 640px) 144px, 112px"
+            className="object-cover"
+            onError={handleImageError}
+          />
+        </div>
+      );
+    }
+
     if (item_type.toLowerCase() === "user" && profileOwner) {
       return (
         <div className="shrink-0">
@@ -495,6 +516,10 @@ export default function Comment({
   };
 
   const getItemName = () => {
+    if (item_type.toLowerCase() === "theme") {
+      return themeDetails?.label || `Theme #${item_id}`;
+    }
+
     if (item_type.toLowerCase() === "changelog" && changelogDetails?.title) {
       return changelogDetails.title;
     }
@@ -553,23 +578,25 @@ export default function Comment({
   };
 
   const contextHref =
-    item_type.toLowerCase() === "user"
-      ? `/users/${item_id}`
-      : item_type.toLowerCase() === "changelog"
-        ? `/changelogs/${item_id}`
-        : item_type.toLowerCase() === "season"
-          ? `/seasons/${item_id}`
-          : item_type.toLowerCase() === "tradev2"
-            ? `/trading/ad/${item_id}?tab=comments`
-            : item_type.toLowerCase() === "inventory"
-              ? `/inventories/${item_id}?tab=comments`
-              : ["vsuggestion", "value_suggestion"].includes(
-                    item_type.toLowerCase(),
-                  )
-                ? `/items/suggestions/${item_id}?tab=discussion`
-                : itemDetails?.name
-                  ? `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails.name)}?tab=comments`
-                  : null;
+    item_type.toLowerCase() === "theme"
+      ? `/themes/${encodeURIComponent(item_id)}`
+      : item_type.toLowerCase() === "user"
+        ? `/users/${item_id}`
+        : item_type.toLowerCase() === "changelog"
+          ? `/changelogs/${item_id}`
+          : item_type.toLowerCase() === "season"
+            ? `/seasons/${item_id}`
+            : item_type.toLowerCase() === "tradev2"
+              ? `/trading/ad/${item_id}?tab=comments`
+              : item_type.toLowerCase() === "inventory"
+                ? `/inventories/${item_id}?tab=comments`
+                : ["vsuggestion", "value_suggestion"].includes(
+                      item_type.toLowerCase(),
+                    )
+                  ? `/items/suggestions/${item_id}?tab=discussion`
+                  : itemDetails?.name
+                    ? `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails.name)}?tab=comments`
+                    : null;
   const threadHref = contextHref ? `${contextHref}#comment-${id}` : null;
   const context = (
     <>
