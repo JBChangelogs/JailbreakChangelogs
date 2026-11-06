@@ -5,6 +5,14 @@ export const onRequestError: Instrumentation.onRequestError = (
   request,
   context,
 ) => {
+  try {
+    globalThis.__jbclRecordSpanError?.(
+      `next-request-error ${context.routePath}`,
+      error,
+    );
+  } catch {
+    // Tracing must never break error reporting.
+  }
   console.error(
     JSON.stringify({
       level: "error",
@@ -30,6 +38,28 @@ export async function register() {
       process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
     ) {
       const { registerOTel } = await import("@vercel/otel");
+      const { trace, SpanStatusCode } = await import("@opentelemetry/api");
+      globalThis.__jbclRecordSpanError = (message, error) => {
+        const span = trace.getActiveSpan();
+        if (!span) return;
+        if (error instanceof Error) {
+          span.recordException(error);
+        } else {
+          let detail = "";
+          if (error !== undefined) {
+            try {
+              detail = ` ${JSON.stringify(error)}`;
+            } catch {
+              detail = ` ${String(error)}`;
+            }
+          }
+          span.recordException({
+            name: "LoggedError",
+            message: message + detail,
+          });
+        }
+        span.setStatus({ code: SpanStatusCode.ERROR, message });
+      };
       registerOTel({
         instrumentationConfig: {
           fetch: {

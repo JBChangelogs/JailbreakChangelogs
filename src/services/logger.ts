@@ -14,6 +14,14 @@ export type LogModule =
 
 type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
+declare global {
+  // Installed by src/instrumentation.ts on the server when OTel is enabled,
+  // so this module stays free of OTel imports in the client bundle.
+  var __jbclRecordSpanError:
+    | ((message: string, error?: unknown) => void)
+    | undefined;
+}
+
 const MODULE_COLORS: Record<string, string> = {
   API: "#4fc3f7",
   AUTH: "#81c784",
@@ -69,6 +77,26 @@ function emit(
   extra?: unknown,
 ): void {
   if (!shouldLog()) return;
+
+  if (typeof window === "undefined") {
+    const line = `[JBCL] [${module}] ${level}: ${message}`;
+    const fn =
+      level === "ERROR"
+        ? console.error
+        : level === "WARN"
+          ? console.warn
+          : console.log;
+    if (extra !== undefined) fn(line, extra);
+    else fn(line);
+    if (level === "ERROR") {
+      try {
+        globalThis.__jbclRecordSpanError?.(`[${module}] ${message}`, extra);
+      } catch {
+        // Tracing must never break logging.
+      }
+    }
+    return;
+  }
 
   const ts = new Date().toISOString().split("T")[1].slice(0, -1);
   const modColor = MODULE_COLORS[module] ?? "#e0e0e0";

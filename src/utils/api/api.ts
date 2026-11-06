@@ -1548,9 +1548,11 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
       });
 
       if (!response.ok) {
-        // console.error(
-        //   `[SERVER] fetchRobloxUsersBatch: Failed with status ${response.status}`,
-        // );
+        log.error("fetchRobloxUsersBatch: Failed", {
+          status: response.status,
+          url: response.url,
+          ids: validUserIds.length,
+        });
         return { data: [] };
       }
 

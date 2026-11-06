@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
 
+const SpanStatusCode = { UNSET: 0, OK: 1, ERROR: 2 };
+
 const source = transpileModule(
   readFileSync(new URL("./instrumentation.ts", import.meta.url), "utf8"),
   { compilerOptions: { module: ModuleKind.CommonJS } },
@@ -42,6 +44,9 @@ test("tracing initializes only with a Node collector and preserves Railway flag 
         if (name === "railway") {
           return { flags: { init: async () => calls.push("flags") } };
         }
+        if (name === "@opentelemetry/api") {
+          return { trace: { getActiveSpan: () => undefined }, SpanStatusCode };
+        }
         throw new Error(`Unexpected import: ${name}`);
       },
     });
@@ -69,6 +74,50 @@ test("tracing initializes only with a Node collector and preserves Railway flag 
       ]);
     }
   }
+});
+
+test("logged errors are recorded on the active span", async () => {
+  const recorded: unknown[] = [];
+  const statuses: unknown[] = [];
+  const span = {
+    recordException: (e: unknown) => recorded.push(e),
+    setStatus: (s: unknown) => statuses.push(s),
+  };
+  const sandbox = {
+    exports: {} as { register: () => Promise<void> },
+    Error,
+    JSON,
+    String,
+    process: {
+      env: { NEXT_RUNTIME: "nodejs", OTEL_EXPORTER_OTLP_ENDPOINT: "http://c" },
+    },
+    console: { error() {} },
+    require: (name: string) => {
+      if (name === "@vercel/otel") return { registerOTel() {} };
+      if (name === "railway") return { flags: { init: async () => {} } };
+      if (name === "@opentelemetry/api") {
+        return { trace: { getActiveSpan: () => span }, SpanStatusCode };
+      }
+      throw new Error(`Unexpected import: ${name}`);
+    },
+  } as Record<string, unknown> & {
+    exports: { register: () => Promise<void> };
+    __jbclRecordSpanError?: (message: string, error?: unknown) => void;
+  };
+  runInNewContext(source, sandbox);
+  await sandbox.exports.register();
+
+  const err = new Error("boom");
+  sandbox.__jbclRecordSpanError!("[API] failed", err);
+  sandbox.__jbclRecordSpanError!("[API] fetch failed", { status: 500 });
+  expect(recorded).toEqual([
+    err,
+    { name: "LoggedError", message: '[API] fetch failed {"status":500}' },
+  ]);
+  expect(statuses).toEqual([
+    { code: SpanStatusCode.ERROR, message: "[API] failed" },
+    { code: SpanStatusCode.ERROR, message: "[API] fetch failed" },
+  ]);
 });
 
 test("request errors log searchable details without headers or query strings", () => {
