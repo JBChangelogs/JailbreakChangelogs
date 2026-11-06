@@ -11,7 +11,8 @@ export function ProfileBackground({ src }: { src: string }) {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 -z-10 [clip-path:inset(0)]"
     >
-      <div className="fixed inset-0">
+      {/* Keep the image crop stable while mobile browser toolbars hide. */}
+      <div className="fixed inset-0 h-lvh md:h-auto">
         <Image
           src={src}
           alt=""

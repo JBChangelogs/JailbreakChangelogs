@@ -12,7 +12,8 @@ export function useProfileBackgroundAspectRatio(enabled: boolean) {
 
     // Measure the same fixed frame even before the first background is uploaded.
     const frame = document.createElement("div");
-    frame.className = "pointer-events-none invisible fixed inset-0";
+    frame.className =
+      "pointer-events-none invisible fixed inset-0 h-lvh md:h-auto";
     frame.setAttribute("aria-hidden", "true");
     main.append(frame);
 
