@@ -148,6 +148,7 @@ function editor({
               collapsed,
               sheet: { side: "right" },
             }),
+            useDesktopDock: () => ({ side: "right", minimized: false }),
             BottomPanelHeader: "BottomPanelHeader",
             BottomPanelFooter: "BottomPanelFooter",
           };
@@ -521,4 +522,42 @@ test("a failed save neither applies nor offers to apply a theme", async () => {
   expect(view.savedEvents).toEqual([]);
   expect(view.prompt().isOpen).toBe(false);
   expect(view.errors).toEqual(["Couldn't save your theme"]);
+});
+
+test("menu badges follow button and link palette edits while preserving separate badge edits", () => {
+  const view = editor({
+    collapsed: false,
+    vars: {
+      "--color-button-info": "#0000ff",
+      "--color-link": "#0088ff",
+      "--color-menu-badge-bg": "#001133",
+      "--color-menu-badge-text": "#0088ff",
+    },
+  });
+  const color = (key: string) =>
+    view.render().find((node) => node.props.colorKey === key)!.props;
+  (color("--color-button-info").onChange as (value: string) => void)("#ff6600");
+  (color("--color-link").onChange as (value: string) => void)("#ff8800");
+  const vars = () => color("--color-link").vars as Record<string, string>;
+  expect(vars()["--color-menu-badge-bg"]).toBe(
+    "color-mix(in srgb, var(--color-button-info) 20%, transparent)",
+  );
+  expect(vars()["--color-menu-badge-text"]).toBe("var(--color-link)");
+  const selectGroup = (group: string) => {
+    const menu = view
+      .render()
+      .find(
+        (node) =>
+          node.type === "DropdownMenuRadioGroup" &&
+          ["Main", "Icons and menu badges"].includes(String(node.props.value)),
+      )!;
+    (menu.props.onValueChange as (value: string) => void)(group);
+  };
+  selectGroup("Icons and menu badges");
+  (color("--color-menu-badge-text").onChange as (value: string) => void)(
+    "#ffffff",
+  );
+  selectGroup("Main");
+  (color("--color-link").onChange as (value: string) => void)("#ff0000");
+  expect(vars()["--color-menu-badge-text"]).toBe("#ffffff");
 });

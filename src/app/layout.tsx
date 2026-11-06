@@ -404,6 +404,7 @@ export default async function RootLayout({
                       }
                     >
                       <Header
+                        banner={<CompetitionBanner />}
                         releaseAnnouncement={
                           <Suspense fallback={null}>
                             <LatestReleaseDialog />
@@ -411,7 +412,6 @@ export default async function RootLayout({
                         }
                       />
                     </Suspense>
-                    <CompetitionBanner />
                     <main className="min-h-screen flex-1">
                       <NuqsAdapter>
                         <Suspense>{children}</Suspense>

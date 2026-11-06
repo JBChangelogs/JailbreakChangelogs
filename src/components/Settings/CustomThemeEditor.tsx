@@ -32,6 +32,11 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -87,6 +92,7 @@ import {
   BottomPanelFooter,
   BottomPanelHeader,
   useBottomPanel,
+  useDesktopDock,
 } from "@/components/ui/bottom-panel";
 import { colorKeysAt } from "@/utils/ui/elementColors";
 
@@ -212,6 +218,9 @@ export default function CustomThemeEditor({
   // page stays visible while editing.
   const bottomPanel = useBottomPanel("the editor");
   const { isMobile } = bottomPanel;
+  const dock = useDesktopDock("the editor");
+  const { minimized } = dock;
+  const collapsed = isMobile ? bottomPanel.collapsed : minimized;
   const { theme: siteTheme, customTheme } = useTheme();
   const { data: siteThemes } = useQuery({
     queryKey: ["site-themes"],
@@ -280,9 +289,10 @@ export default function CustomThemeEditor({
   const baselineRef = useRef<string | null>(null);
   if (baselineRef.current === null && snapshot) baselineRef.current = snapshot;
   const dirty = snapshot !== baselineRef.current;
-  const originalVars: Record<string, string> = baselineRef.current
-    ? (JSON.parse(baselineRef.current) as CustomThemeInput).vars
-    : {};
+  const original = baselineRef.current
+    ? (JSON.parse(baselineRef.current) as CustomThemeInput)
+    : null;
+  const originalVars: Record<string, string> = original?.vars ?? {};
   const update = (change: Partial<CustomThemeInput>) =>
     current && setDraft({ ...current, ...change });
 
@@ -328,14 +338,13 @@ export default function CustomThemeEditor({
   };
   // With "Match buttons" on, the logo follows the button color. A saved
   // theme starts matched if its logo already is.
-  // "css" shows the theme as editable CSS. Until it's edited, the text
-  // follows the theme; once edited, Apply or Reset decides.
   const [mode, setMode] = useState<"visual" | "css" | "import">("visual");
   const [importInput, setImportInput] = useState("");
   const importInputRef = useRef<HTMLInputElement>(null);
   const [cssDraft, setCssDraft] = useState<string | null>(null);
   const [cssErrors, setCssErrors] = useState<string[]>([]);
   const cssGutterRef = useRef<HTMLPreElement>(null);
+  const cssInputRef = useRef<HTMLTextAreaElement>(null);
   const [matchLogo, setMatchLogo] = useState(
     () =>
       !!theme?.logo_filter &&
@@ -343,6 +352,9 @@ export default function CustomThemeEditor({
   );
   const setColor = (key: string, value: string, reset = false) => {
     if (!current) return;
+    // Show the new value in the CSS text instead of overwriting it later.
+    setCssDraft(null);
+    setCssErrors([]);
     const vars = { ...current.vars, [key]: value };
     // Hover, active and focus colors follow their main color unless they
     // were changed since the editor opened or last saved.
@@ -382,28 +394,51 @@ export default function CustomThemeEditor({
     }
   };
 
-  // Applies what's valid; anything skipped stays in the text to fix.
-  const applyCss = () => {
-    if (!current || cssDraft === null) return;
+  const applyCss = (css: string) => {
+    if (!current) return null;
     const { theme: parsed, errors } = parseThemeCss(
-      cssDraft,
+      css,
       Object.keys(current.vars),
     );
-    if ("logo_filter" in parsed) setMatchLogo(false);
-    update({ ...parsed, vars: { ...current.vars, ...parsed.vars } });
+    if ("logo_filter" in parsed && parsed.logo_filter !== current.logo_filter)
+      setMatchLogo(false);
     setCssErrors(errors);
-    if (!errors.length) {
-      setCssDraft(null);
-      toast.success("CSS applied");
-    }
+    const next = {
+      ...current,
+      ...parsed,
+      vars: { ...current.vars, ...parsed.vars },
+    };
+    setDraft(next);
+    return next;
+  };
+  // Typing applies after a short pause, so half-typed values don't flash.
+  useEffect(() => {
+    if (cssDraft === null) return;
+    const id = setTimeout(() => applyCss(cssDraft), 400);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cssDraft]);
+  const cssChanged =
+    !!original && !!current && themeToCss(current) !== themeToCss(original);
+  const resetCss = () => {
+    setCssDraft(null);
+    setCssErrors([]);
+    if (!original) return;
+    const { scheme, vars, logo_filter } = original;
+    setMatchLogo(
+      !!logo_filter && logo_filter === matchLogoFilter(buttonHex(vars)),
+    );
+    update({ scheme, vars, logo_filter });
   };
 
   // Saves without closing. Returns the saved theme, or null if it failed.
   const save = async (): Promise<UserTheme | null> => {
     if (!current || saving || updatingPreviews) return null;
+    // CSS typed in the last moment hasn't applied yet; include it.
+    const theme = (cssDraft !== null && applyCss(cssDraft)) || current;
     // icon is sent only when it changed, so themes without one save on
     // API versions that don't know the field yet.
-    const { icon = null, ...rest } = current;
+    const { icon = null, ...rest } = theme;
     const input =
       icon !== (savedTheme?.icon ?? null)
         ? { ...rest, icon, label: rest.label.trim() }
@@ -424,7 +459,7 @@ export default function CustomThemeEditor({
       }
       toast.success(savedTheme ? "Theme saved" : "Theme created");
       setSavedTheme(saved);
-      baselineRef.current = JSON.stringify(current);
+      baselineRef.current = JSON.stringify(theme);
       onSaved(saved);
       return saved;
     } catch (err) {
@@ -478,6 +513,21 @@ export default function CustomThemeEditor({
   const pickColors = (keys: string[], element: Element) => {
     const available = keys.filter((key) => current && key in current.vars);
     if (!available.length) return;
+    if (mode === "css") {
+      // After render, so a Fix's new value is in the text first.
+      requestAnimationFrame(() => {
+        const input = cssInputRef.current;
+        const start = input?.value.indexOf(`${available[0]}:`) ?? -1;
+        if (!input || start < 0) return;
+        const end = input.value.indexOf("\n", start);
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(start, end < 0 ? input.value.length : end);
+        const line = input.value.slice(0, start).split("\n").length - 1;
+        input.scrollTop = Math.max(0, line - 3) * 20; // leading-5 rows
+        input.scrollIntoView({ block: "nearest" });
+      });
+      return;
+    }
     floatingAnchor.current = {
       getBoundingClientRect: () => element.getBoundingClientRect(),
       contextElement: element,
@@ -663,7 +713,7 @@ export default function CustomThemeEditor({
       {/* Not modal and no overlay: the user browses the site with the draft
           applied. Clicks on the page don't close it, so work isn't lost. */}
       <SheetContent
-        side={bottomPanel.sheet.side}
+        side={isMobile ? bottomPanel.sheet.side : dock.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
         // Escape while picking only ends the pick (see the picker's onKey).
@@ -674,12 +724,16 @@ export default function CustomThemeEditor({
         style={bottomPanel.sheet.style}
         className={cn(
           "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
-          isMobile ? bottomPanel.sheet.className : "h-full sm:max-w-xl",
+          isMobile
+            ? bottomPanel.sheet.className
+            : minimized
+              ? "bottom-auto! h-auto! sm:max-w-sm"
+              : "h-full sm:max-w-xl",
         )}
       >
         {current && (
           <Popover
-            open={open && floatingColors !== null && !bottomPanel.collapsed}
+            open={open && floatingColors !== null && !collapsed}
             onOpenChange={(next) => !next && setFloatingColors(null)}
           >
             <PopoverPrimitive.Anchor virtualRef={floatingAnchor} />
@@ -791,19 +845,31 @@ export default function CustomThemeEditor({
           </>
         ) : (
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Close the editor"
-              title="Close (Shift+click to skip unsaved changes)"
-              onClick={(event) => cancel(event.shiftKey)}
-              className="absolute top-3 right-3"
-            >
-              <Icon icon="lucide:x" aria-hidden="true" />
-            </Button>
+            <div className="absolute top-3 right-3 flex gap-1">
+              {dock.controls}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Close the editor"
+                    onClick={(event) => cancel(event.shiftKey)}
+                  >
+                    <Icon icon="lucide:x" aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Close (Shift+click to skip unsaved changes)
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
-              <SheetTitle>{savedTheme ? "Edit theme" : "New theme"}</SheetTitle>
-              <SheetDescription className="text-secondary-text">
+              <SheetTitle className="pr-28">
+                {savedTheme ? "Edit theme" : "New theme"}
+              </SheetTitle>
+              <SheetDescription
+                className={cn("text-secondary-text", minimized && "sr-only")}
+              >
                 Browse the site to see your theme anywhere. Changes show as you
                 go.
               </SheetDescription>
@@ -811,7 +877,7 @@ export default function CustomThemeEditor({
           </>
         )}
 
-        {bottomPanel.collapsed ? null : !current ? (
+        {collapsed ? null : !current ? (
           <p className="text-secondary-text px-6 py-8 text-sm">
             Loading colors…
           </p>
@@ -826,9 +892,14 @@ export default function CustomThemeEditor({
             >
               <Tabs
                 value={mode}
-                onValueChange={(value) =>
-                  setMode(value as "visual" | "css" | "import")
-                }
+                onValueChange={(value) => {
+                  // Leaving CSS applies what's pending; the text then
+                  // follows the theme again, so it can't go stale.
+                  if (cssDraft !== null) applyCss(cssDraft);
+                  setCssDraft(null);
+                  setCssErrors([]);
+                  setMode(value as "visual" | "css" | "import");
+                }}
               >
                 <TabsList fullWidth>
                   <TabsTrigger value="visual" fullWidth>
@@ -842,180 +913,193 @@ export default function CustomThemeEditor({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <label
-                    htmlFor="publish-theme"
-                    className="text-primary-text text-sm font-medium"
-                  >
-                    Publish to marketplace
-                  </label>
-                  <p
-                    id="publish-theme-description"
-                    className="text-secondary-text text-xs"
-                  >
-                    Your theme and author name will be public after saving. Any
-                    style is welcome. This does not enter a competition.
-                  </p>
-                  <Link
-                    href="/themes"
-                    className="text-link hover:text-link-hover mt-1 inline-block text-xs hover:underline"
-                  >
-                    Browse marketplace
-                  </Link>
-                </div>
-                <Switch
-                  id="publish-theme"
-                  aria-describedby="publish-theme-description"
-                  checked={current.published ?? false}
-                  disabled={saving}
-                  onCheckedChange={(published) => update({ published })}
-                />
-              </div>
-              <ThemePreviewUploader
-                theme={savedTheme}
-                disabled={saving}
-                onBusyChange={setUpdatingPreviews}
-                onChange={(previews) => {
-                  if (!savedTheme) return;
-                  const updated = { ...savedTheme, previews };
-                  setSavedTheme(updated);
-                  onSaved(updated);
-                }}
-              />
-              <ThemePackEditor
-                pack={current.pack ?? {}}
-                images={savedTheme?.pack ?? {}}
-                themeId={savedTheme?.id}
-                disabled={saving}
-                onChange={(pack) => update({ pack })}
-                onBusyChange={setUpdatingPreviews}
-                onImagesChange={(pack) => {
-                  if (!savedTheme) return;
-                  const updated = { ...savedTheme, pack };
-                  setSavedTheme(updated);
-                  onSaved(updated);
-                }}
-              />
-              {/* On phones: name and icon side by side, "Start from a theme"
-                  full width below them. */}
-              <div className="flex flex-wrap items-end gap-3">
-                <label
-                  className={cn("flex-1", isMobile ? "min-w-0" : "min-w-48")}
-                >
-                  <span className="text-primary-text text-sm font-medium">
-                    Name
-                  </span>
-                  <Input
-                    value={current.label}
-                    maxLength={64}
-                    onChange={(event) => update({ label: event.target.value })}
-                    className="mt-1"
+              {mode === "visual" && (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <label
+                        htmlFor="publish-theme"
+                        className="text-primary-text text-sm font-medium"
+                      >
+                        Publish to marketplace
+                      </label>
+                      <p
+                        id="publish-theme-description"
+                        className="text-secondary-text text-xs"
+                      >
+                        Your theme and author name will be public after saving.
+                        Any style is welcome. This does not enter a competition.
+                      </p>
+                      <Link
+                        href="/themes"
+                        className="text-link hover:text-link-hover mt-1 inline-block text-xs hover:underline"
+                      >
+                        Browse marketplace
+                      </Link>
+                    </div>
+                    <Switch
+                      id="publish-theme"
+                      aria-describedby="publish-theme-description"
+                      checked={current.published ?? false}
+                      disabled={saving}
+                      onCheckedChange={(published) => update({ published })}
+                    />
+                  </div>
+                  <ThemePreviewUploader
+                    theme={savedTheme}
+                    disabled={saving}
+                    onBusyChange={setUpdatingPreviews}
+                    onChange={(previews) => {
+                      if (!savedTheme) return;
+                      const updated = { ...savedTheme, previews };
+                      setSavedTheme(updated);
+                      onSaved(updated);
+                    }}
                   />
-                </label>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      size="md"
+                  <ThemePackEditor
+                    pack={current.pack ?? {}}
+                    images={savedTheme?.pack ?? {}}
+                    themeId={savedTheme?.id}
+                    disabled={saving}
+                    onChange={(pack) => update({ pack })}
+                    onBusyChange={setUpdatingPreviews}
+                    onImagesChange={(pack) => {
+                      if (!savedTheme) return;
+                      const updated = { ...savedTheme, pack };
+                      setSavedTheme(updated);
+                      onSaved(updated);
+                    }}
+                  />
+                  {/* On phones: name and icon side by side, "Start from a theme"
+                  full width below them. */}
+                  <div className="flex flex-wrap items-end gap-3">
+                    <label
                       className={cn(
-                        isMobile && "order-last w-full justify-between",
+                        "flex-1",
+                        isMobile ? "min-w-0" : "min-w-48",
                       )}
                     >
-                      <span className="flex items-center gap-2">
-                        <Icon icon="lucide:copy" aria-hidden="true" />
-                        Start from a theme
+                      <span className="text-primary-text text-sm font-medium">
+                        Name
                       </span>
-                      <Icon icon="lucide:chevron-down" aria-hidden="true" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className={cn(
-                      "border-border-card bg-secondary-bg text-primary-text max-h-80 overflow-y-auto rounded-xl border p-1 shadow-lg",
-                      // As wide as the full-width button on phones.
-                      isMobile && "w-(--radix-popper-anchor-width)",
-                    )}
-                  >
-                    {siteThemes?.map((t) => (
-                      <DropdownMenuItem
-                        key={t.slug}
-                        onSelect={() => {
-                          setMatchLogo(false);
-                          update(fromSiteTheme(t));
-                        }}
-                        // pl-[11px] + the menu's 1px border and p-1 = the button's px-4,
-                        // so each icon lines up under its icon.
-                        className="focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 pl-[11px] text-sm"
+                      <Input
+                        value={current.label}
+                        maxLength={64}
+                        onChange={(event) =>
+                          update({ label: event.target.value })
+                        }
+                        className="mt-1"
+                      />
+                    </label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          className={cn(
+                            isMobile && "order-last w-full justify-between",
+                          )}
+                        >
+                          <span className="flex items-center gap-2">
+                            <Icon icon="lucide:copy" aria-hidden="true" />
+                            Start from a theme
+                          </span>
+                          <Icon icon="lucide:chevron-down" aria-hidden="true" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className={cn(
+                          "border-border-card bg-secondary-bg text-primary-text max-h-80 overflow-y-auto rounded-xl border p-1 shadow-lg",
+                          // As wide as the full-width button on phones.
+                          isMobile && "w-(--radix-popper-anchor-width)",
+                        )}
                       >
-                        <Icon
-                          icon={t.icon}
-                          aria-hidden="true"
-                          className="text-secondary-text size-4 shrink-0"
-                        />
-                        {t.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <ThemeIconPicker
-                  value={current.icon ?? null}
-                  onChange={(icon) => update({ icon })}
-                />
-              </div>
+                        {siteThemes?.map((t) => (
+                          <DropdownMenuItem
+                            key={t.slug}
+                            onSelect={() => {
+                              setMatchLogo(false);
+                              update(fromSiteTheme(t));
+                            }}
+                            // pl-[11px] + the menu's 1px border and p-1 = the button's px-4,
+                            // so each icon lines up under its icon.
+                            className="focus:bg-quaternary-bg focus:text-primary-text flex cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 pl-[11px] text-sm"
+                          >
+                            <Icon
+                              icon={t.icon}
+                              aria-hidden="true"
+                              className="text-secondary-text size-4 shrink-0"
+                            />
+                            {t.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <ThemeIconPicker
+                      value={current.icon ?? null}
+                      onChange={(icon) => update({ icon })}
+                    />
+                  </div>
 
-              <label htmlFor="theme-description" className="block space-y-1">
-                <span className="text-primary-text text-sm font-medium">
-                  Description (optional)
-                </span>
-                <span className="relative block">
-                  <Textarea
-                    id="theme-description"
-                    value={current.description ?? ""}
-                    maxLength={500}
-                    rows={3}
-                    onChange={(event) =>
-                      update({ description: event.target.value })
-                    }
-                    aria-describedby="theme-description-count"
-                    placeholder="Tell people about your theme…"
-                    className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text hover:border-border-focus focus:border-button-info min-h-30 resize-y rounded p-3 pb-7 shadow-none focus-visible:ring-0"
-                  />
-                  <span
-                    id="theme-description-count"
-                    className="text-secondary-text pointer-events-none absolute right-2 bottom-2 text-xs"
+                  <label
+                    htmlFor="theme-description"
+                    className="block space-y-1"
                   >
-                    {(current.description ?? "").length}/500
-                  </span>
-                </span>
-              </label>
+                    <span className="text-primary-text text-sm font-medium">
+                      Description (optional)
+                    </span>
+                    <span className="relative block">
+                      <Textarea
+                        id="theme-description"
+                        value={current.description ?? ""}
+                        maxLength={500}
+                        rows={3}
+                        onChange={(event) =>
+                          update({ description: event.target.value })
+                        }
+                        aria-describedby="theme-description-count"
+                        placeholder="Tell people about your theme…"
+                        className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text hover:border-border-focus focus:border-button-info min-h-30 resize-y rounded p-3 pb-7 shadow-none focus-visible:ring-0"
+                      />
+                      <span
+                        id="theme-description-count"
+                        className="text-secondary-text pointer-events-none absolute right-2 bottom-2 text-xs"
+                      >
+                        {(current.description ?? "").length}/500
+                      </span>
+                    </span>
+                  </label>
 
-              <div className="space-y-2">
-                <div>
-                  <h3 className="text-primary-text text-sm font-medium">
-                    Light or dark
-                  </h3>
-                  <p className="text-secondary-text text-xs">
-                    Matches scrollbars and other browser parts to your colors.
-                  </p>
-                </div>
-                <Tabs
-                  radio
-                  value={current.scheme}
-                  onValueChange={(scheme) =>
-                    update({ scheme: scheme as "dark" | "light" })
-                  }
-                >
-                  <TabsList aria-label="Light or dark" fullWidth>
-                    <TabsTrigger value="dark" fullWidth>
-                      Dark
-                    </TabsTrigger>
-                    <TabsTrigger value="light" fullWidth>
-                      Light
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+                  <div className="space-y-2">
+                    <div>
+                      <h3 className="text-primary-text text-sm font-medium">
+                        Light or dark
+                      </h3>
+                      <p className="text-secondary-text text-xs">
+                        Matches scrollbars and other browser parts to your
+                        colors.
+                      </p>
+                    </div>
+                    <Tabs
+                      radio
+                      value={current.scheme}
+                      onValueChange={(scheme) =>
+                        update({ scheme: scheme as "dark" | "light" })
+                      }
+                    >
+                      <TabsList aria-label="Light or dark" fullWidth>
+                        <TabsTrigger value="dark" fullWidth>
+                          Dark
+                        </TabsTrigger>
+                        <TabsTrigger value="light" fullWidth>
+                          Light
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                </>
+              )}
 
               {problemGroups.length > 0 && (
                 <div
@@ -1240,13 +1324,6 @@ export default function CustomThemeEditor({
               ) : mode === "import" ? (
                 <div className="space-y-5">
                   <div className="flex items-start gap-3">
-                    <div className="bg-icon-tile-bg flex size-10 shrink-0 items-center justify-center rounded-lg">
-                      <Icon
-                        icon="lucide:download"
-                        aria-hidden="true"
-                        className="text-icon-tile size-5"
-                      />
-                    </div>
                     <div>
                       <h3 className="text-primary-text text-sm font-medium">
                         Import a theme
@@ -1359,19 +1436,12 @@ export default function CustomThemeEditor({
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="bg-icon-tile-bg flex size-10 shrink-0 items-center justify-center rounded-lg">
-                      <Icon
-                        icon="lucide:code"
-                        aria-hidden="true"
-                        className="text-icon-tile size-5"
-                      />
-                    </div>
                     <div>
                       <h3 className="text-primary-text text-sm font-medium">
                         Edit as CSS
                       </h3>
                       <p className="text-secondary-text text-xs">
-                        Copy your theme, or paste CSS and apply it. Only the
+                        Copy your theme, or paste or edit CSS. Only the
                         theme&apos;s colors, color-scheme and --logo-filter are
                         read.
                       </p>
@@ -1379,17 +1449,6 @@ export default function CustomThemeEditor({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    {cssDraft === null ? (
-                      <span className="text-status-success flex items-center gap-1.5 text-xs font-medium">
-                        <Icon icon="lucide:check" aria-hidden="true" />
-                        Matches your theme
-                      </span>
-                    ) : (
-                      <span className="text-warning flex items-center gap-1.5 text-xs font-medium">
-                        <Icon icon="lucide:pencil" aria-hidden="true" />
-                        Edited, not applied
-                      </span>
-                    )}
                     <div className="ml-auto flex flex-wrap gap-2">
                       <Button
                         variant="secondary"
@@ -1410,26 +1469,10 @@ export default function CustomThemeEditor({
                         />
                         Paste
                       </Button>
-                      {cssDraft !== null && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setCssDraft(null);
-                              setCssErrors([]);
-                            }}
-                          >
-                            Reset
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={applyCss}
-                            title="Apply (Ctrl+Enter)"
-                          >
-                            Apply
-                          </Button>
-                        </>
+                      {(cssDraft !== null || cssChanged) && (
+                        <Button variant="ghost" size="sm" onClick={resetCss}>
+                          Reset
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -1450,21 +1493,13 @@ export default function CustomThemeEditor({
                       ).join("\n")}
                     </pre>
                     <Textarea
+                      ref={cssInputRef}
                       value={cssText}
                       onChange={(event) => setCssDraft(event.target.value)}
                       onScroll={(event) => {
                         if (cssGutterRef.current) {
                           cssGutterRef.current.scrollTop =
                             event.currentTarget.scrollTop;
-                        }
-                      }}
-                      onKeyDown={(event) => {
-                        if (
-                          (event.ctrlKey || event.metaKey) &&
-                          event.key === "Enter"
-                        ) {
-                          event.preventDefault();
-                          applyCss();
                         }
                       }}
                       spellCheck={false}
@@ -1477,8 +1512,8 @@ export default function CustomThemeEditor({
                     />
                   </div>
                   <p className="text-tertiary-text text-xs">
-                    Ctrl+Enter applies. Lines that aren&apos;t theme colors are
-                    skipped and listed.
+                    Changes apply as you type. Lines that aren&apos;t theme
+                    colors are skipped and listed.
                   </p>
 
                   {cssErrors.length > 0 && (
@@ -1512,9 +1547,7 @@ export default function CustomThemeEditor({
                   scheme={current.scheme}
                   logoFilter={current.logo_filter}
                   onPick={pickColors}
-                  hideTooltips={
-                    floatingColors !== null && !bottomPanel.collapsed
-                  }
+                  hideTooltips={floatingColors !== null && !collapsed}
                 />
               </details>
             </div>

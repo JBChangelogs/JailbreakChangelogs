@@ -80,7 +80,7 @@ interface TradeItemPickerV2Props {
   selectedItems: TradeItem[];
   onSelect: (item: TradeItem, side: TradeSide) => boolean;
   onAddCustomType: (customId: string, side: TradeSide) => void;
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "modal";
   allowOg?: boolean;
   cardBackground?: "secondary" | "tertiary";
   activeSide?: TradeSide;
@@ -446,7 +446,9 @@ export default function TradeItemPickerV2({
   const gridClassName =
     variant === "compact"
       ? "mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"
-      : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
+      : variant === "modal"
+        ? "mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
 
   const itemCardBackgroundClassName =
     cardBackground === "tertiary" ? "bg-tertiary-bg" : "bg-secondary-bg";
@@ -1039,7 +1041,13 @@ export default function TradeItemPickerV2({
                           <TabsList
                             data-variant="filled"
                             aria-label={`Condition for ${item.name}`}
-                            className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
+                            className="border-border-card gap-0.5 rounded-lg border p-0.5"
+                            style={{
+                              backgroundColor:
+                                cardBackground === "tertiary"
+                                  ? "var(--color-secondary-bg)"
+                                  : "var(--color-tertiary-bg)",
+                            }}
                           >
                             {(
                               [
@@ -1148,7 +1156,7 @@ export default function TradeItemPickerV2({
                       )}
                       <div className="bg-secondary-bg flex flex-wrap items-center justify-between gap-2 rounded-lg p-1.5">
                         <span className="text-primary-text shrink-0 text-xs font-medium whitespace-nowrap">
-                          {condition === "duped" ? "Duped Demand" : "Demand"}
+                          Demand
                         </span>
                         {(() => {
                           const { demand } = getTradeItemMarketDetails(

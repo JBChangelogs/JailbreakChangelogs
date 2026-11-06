@@ -44,6 +44,7 @@ import { formatCustomDate } from "@/utils/helpers/timestamp";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { DupedBadge } from "@/components/trading/DupedBadge";
 import { OgBadge } from "@/components/trading/OgBadge";
+import { TradeItemMarketDetails } from "@/components/trading/TradeItemContext";
 import { MakeOfferDialog } from "@/components/trading/MakeOfferDialog";
 import { handleImageError } from "@/utils/ui/images";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
@@ -55,6 +56,7 @@ import {
   isCustomTradeItem,
 } from "@/utils/trading/tradeItems";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -170,7 +172,9 @@ const TradeSidePreview = ({
 }) => {
   const previewItems = groupTradeItems(items);
   const standardItems = items.filter((item) => !isCustomTradeItem(item));
-  const hasStandardItems = standardItems.length > 0;
+  const valuedItemCount = standardItems.filter((item) =>
+    hasItemValue(item.isDuped ? item.duped_value : item.cash_value),
+  ).length;
   const cashTotal = standardItems.reduce((sum, item) => {
     if (item.isDuped) return sum;
     return sum + parseValueString(item.cash_value);
@@ -181,17 +185,40 @@ const TradeSidePreview = ({
   }, 0);
 
   return (
-    <section className="flex flex-col overflow-hidden">
-      <div className="mb-3 flex items-center justify-center">
-        <h3 className="text-primary-text text-sm font-semibold">
-          {title}{" "}
-          <span className="text-secondary-text font-medium">
-            ({items.length})
+    <section className="border-border-card bg-tertiary-bg @container flex min-w-0 flex-col overflow-hidden rounded-xl border p-3 sm:p-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span
+            className={`inline-flex size-9 shrink-0 items-center justify-center rounded-lg ${title === "Offering" ? "bg-status-success/15 text-status-success" : "bg-status-error/15 text-status-error"}`}
+          >
+            <Icon
+              icon="heroicons:arrow-up-right"
+              className={`size-5 ${title === "Requesting" ? "rotate-180" : ""}`}
+            />
           </span>
-        </h3>
+          <h3 className="text-primary-text text-sm font-semibold">
+            {title}{" "}
+            <span className="text-secondary-text font-medium">
+              ({items.length})
+            </span>
+          </h3>
+        </div>
+        <div className="text-right">
+          <p className="text-secondary-text text-[10px] tracking-wide uppercase">
+            Listed total
+            {valuedItemCount > 0 && valuedItemCount < items.length
+              ? " (partial)"
+              : ""}
+          </p>
+          <p className="text-primary-text text-lg font-bold tabular-nums">
+            {valuedItemCount > 0
+              ? formatTradeValue(cashTotal + dupedTotal)
+              : "N/A"}
+          </p>
+        </div>
       </div>
       {/* Mobile list view */}
-      <div className="border-border-card bg-tertiary-bg flex-1 rounded-xl border lg:hidden">
+      <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border lg:hidden">
         <div className="border-border-card border-b px-3 py-2 text-xs font-semibold">
           <span className="text-secondary-text">Items</span>
         </div>
@@ -203,8 +230,7 @@ const TradeSidePreview = ({
               const rawItemValue = item.isDuped
                 ? item.duped_value
                 : item.cash_value;
-              const hasKnownItemValue =
-                rawItemValue != null && rawItemValue !== "N/A";
+              const hasKnownItemValue = hasItemValue(rawItemValue);
               const itemValue = hasKnownItemValue
                 ? formatTradeValue(parseValueString(rawItemValue))
                 : "N/A";
@@ -213,7 +239,7 @@ const TradeSidePreview = ({
                 <Link
                   href={itemHref}
                   prefetch={false}
-                  className="text-primary-text hover:text-link line-clamp-1 text-sm font-semibold transition-colors"
+                  className="text-primary-text hover:text-link-hover focus-visible:text-link-hover line-clamp-1 text-sm font-semibold transition-colors"
                 >
                   {item.name}
                 </Link>
@@ -237,7 +263,7 @@ const TradeSidePreview = ({
                   key={itemKey}
                   className="border-border-card border-b last:border-b-0"
                 >
-                  <div className="hover:bg-quaternary-bg cursor-default transition-colors">
+                  <div className="hover:bg-primary-bg/20 cursor-default transition-colors">
                     <div className="px-3 py-2">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="bg-tertiary-bg relative hidden aspect-video w-28 shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block">
@@ -246,7 +272,11 @@ const TradeSidePreview = ({
                             src={getTradeItemImagePath(item, true)}
                             alt={item.name}
                             fill
-                            className="object-cover"
+                            className={
+                              isCustomTradeItem(item)
+                                ? "object-contain p-2"
+                                : "object-cover"
+                            }
                             onError={handleImageError}
                             draggable={false}
                           />
@@ -302,6 +332,11 @@ const TradeSidePreview = ({
                               </span>
                             </div>
                           )}
+                          {!isCustomTradeItem(item) && (
+                            <div className="mt-2">
+                              <TradeItemMarketDetails item={item} />
+                            </div>
+                          )}
                           <div className="sr-only">
                             {item.name} ({item.type})
                           </div>
@@ -321,116 +356,135 @@ const TradeSidePreview = ({
       </div>
 
       {/* Desktop card grid */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col">
+      <div className="hidden lg:block">
         {previewItems.length > 0 ? (
-          <div className="border-border-card bg-tertiary-bg flex-1 rounded-xl border p-2">
-            <div className="grid grid-cols-3 items-start gap-2">
-              {previewItems.map((item) => {
-                const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}-grid`;
-                const itemHref = getTradeItemDetailHref(item);
-                const rawItemValue = item.isDuped
-                  ? item.duped_value
-                  : item.cash_value;
-                const hasKnownItemValue =
-                  rawItemValue != null && rawItemValue !== "N/A";
-                const itemValue = hasKnownItemValue
-                  ? formatTradeValue(parseValueString(rawItemValue))
-                  : "N/A";
+          <div className="flex flex-wrap items-start gap-3">
+            {previewItems.map((item) => {
+              const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}-grid`;
+              const itemHref = getTradeItemDetailHref(item);
+              const rawItemValue = item.isDuped
+                ? item.duped_value
+                : item.cash_value;
+              const hasKnownItemValue = hasItemValue(rawItemValue);
+              const itemValue = hasKnownItemValue
+                ? formatTradeValue(parseValueString(rawItemValue))
+                : "N/A";
 
-                const cardInner = (
-                  <div className="bg-secondary-bg hover:bg-quaternary-bg overflow-hidden rounded-lg border border-white/5 transition-colors">
-                    <div className="relative aspect-video w-full overflow-hidden">
-                      <Image
-                        placeholder={IMAGE_PLACEHOLDER}
-                        src={getTradeItemImagePath(item, true)}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                        onError={handleImageError}
-                        draggable={false}
-                      />
+              const cardInner = (
+                <div
+                  className={`bg-secondary-bg hover:border-border-focus/50 overflow-hidden rounded-lg border border-white/5 transition-colors ${previewItems.length === 1 ? "flex items-center" : ""}`}
+                >
+                  <div
+                    className={`relative aspect-video overflow-hidden ${previewItems.length === 1 ? "ml-3 w-2/5 shrink-0 rounded-lg" : previewItems.length === 2 ? "max-h-32 w-full" : "w-full"}`}
+                  >
+                    <Image
+                      placeholder={IMAGE_PLACEHOLDER}
+                      src={getTradeItemImagePath(item, true)}
+                      alt={item.name}
+                      fill
+                      className={
+                        isCustomTradeItem(item)
+                          ? "object-contain p-2"
+                          : previewItems.length === 2
+                            ? "object-contain"
+                            : "object-cover"
+                      }
+                      onError={handleImageError}
+                      draggable={false}
+                    />
+                    {item.count > 1 && (
+                      <span
+                        aria-hidden="true"
+                        className="bg-primary-bg/85 text-primary-text absolute top-2 right-2 rounded-md px-2 py-1 text-xs leading-none font-bold shadow-sm backdrop-blur-sm"
+                      >
+                        ×{item.count}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 p-3">
+                    <div className="flex min-w-0 items-start gap-1.5">
+                      <p className="text-primary-text group-hover/item-card:text-link-hover group-focus-visible/item-card:text-link-hover line-clamp-2 min-w-0 flex-1 text-sm leading-5 font-semibold wrap-break-word transition-colors">
+                        {item.name}
+                      </p>
                       {item.count > 1 && (
-                        <span
-                          aria-hidden="true"
-                          className="bg-primary-bg/85 text-primary-text absolute top-2 right-2 rounded-md px-2 py-1 text-xs leading-none font-bold shadow-sm backdrop-blur-sm"
-                        >
+                        <span className="text-secondary-text shrink-0 text-xs font-semibold tabular-nums">
                           ×{item.count}
                         </span>
                       )}
                     </div>
-                    <div className="p-2.5">
-                      <div className="flex min-w-0 items-start gap-1.5">
-                        <p className="text-primary-text line-clamp-2 min-w-0 flex-1 text-sm leading-5 font-semibold wrap-break-word">
-                          {item.name}
-                        </p>
-                        {item.count > 1 && (
-                          <span className="text-secondary-text shrink-0 text-xs font-semibold tabular-nums">
-                            ×{item.count}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <span
-                          className="bg-tertiary-bg/40 text-primary-text inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                          style={{
-                            borderColor: getCategoryColor(item.type),
-                            backgroundColor: `${getCategoryColor(item.type)}22`,
-                          }}
-                        >
-                          {(() => {
-                            const categoryIcon = getCategoryIcon(item.type);
-                            return categoryIcon ? (
-                              <categoryIcon.Icon
-                                className="h-3 w-3 shrink-0"
-                                style={{ color: getCategoryColor(item.type) }}
-                              />
-                            ) : null;
-                          })()}
-                          {item.type}
-                        </span>
-                        {item.isDuped && <DupedBadge />}
-                        {item.isOG && <OgBadge />}
-                      </div>
-                      {!isCustomTradeItem(item) && (
-                        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-secondary-text shrink-0 text-xs font-medium">
-                            {item.isDuped ? "Duped value" : "Cash value"}
-                          </span>
-                          <span
-                            className={`bg-button-info text-form-button-text inline-flex h-6 shrink-0 items-center rounded-md px-2.5 text-xs leading-none font-bold tabular-nums`}
-                          >
-                            {itemValue}
-                          </span>
-                        </div>
-                      )}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span
+                        className="bg-tertiary-bg/40 text-primary-text inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
+                        style={{
+                          borderColor: getCategoryColor(item.type),
+                          backgroundColor: `${getCategoryColor(item.type)}22`,
+                        }}
+                      >
+                        {(() => {
+                          const categoryIcon = getCategoryIcon(item.type);
+                          return categoryIcon ? (
+                            <categoryIcon.Icon
+                              className="h-3 w-3 shrink-0"
+                              style={{ color: getCategoryColor(item.type) }}
+                            />
+                          ) : null;
+                        })()}
+                        {item.type}
+                      </span>
+                      {item.isDuped && <DupedBadge />}
+                      {item.isOG && <OgBadge />}
                     </div>
-                  </div>
-                );
-
-                const cardWithLink = itemHref ? (
-                  <Link href={itemHref} prefetch={false} className="block">
-                    {cardInner}
-                  </Link>
-                ) : (
-                  <div>{cardInner}</div>
-                );
-
-                return (
-                  <div key={itemKey} className="cursor-default">
-                    {isCustomTradeItem(item) ? (
-                      cardWithLink
-                    ) : (
-                      <Tooltip delayDuration={400}>
-                        <TooltipTrigger asChild>
-                          <div>{cardWithLink}</div>
-                        </TooltipTrigger>
-                        <TradeItemHoverTooltip side="bottom" item={item} />
-                      </Tooltip>
+                    {!isCustomTradeItem(item) && (
+                      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-secondary-text shrink-0 text-xs font-medium">
+                          {item.isDuped ? "Duped value" : "Cash value"}
+                        </span>
+                        <span
+                          className={`bg-button-info text-form-button-text inline-flex h-6 shrink-0 items-center rounded-md px-2.5 text-xs leading-none font-bold tabular-nums`}
+                        >
+                          {itemValue}
+                        </span>
+                      </div>
+                    )}
+                    {!isCustomTradeItem(item) && (
+                      <div className="mt-3">
+                        <TradeItemMarketDetails item={item} />
+                      </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+
+              const cardWithLink = itemHref ? (
+                <Link
+                  href={itemHref}
+                  prefetch={false}
+                  className="group/item-card focus-visible:outline-border-focus block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  {cardInner}
+                </Link>
+              ) : (
+                <div>{cardInner}</div>
+              );
+
+              return (
+                <div
+                  key={itemKey}
+                  className={`cursor-default ${previewItems.length === 1 ? "w-full max-w-md" : previewItems.length === 2 ? "min-w-0 flex-1" : "w-44 max-w-full"}`}
+                >
+                  {isCustomTradeItem(item) ? (
+                    cardWithLink
+                  ) : (
+                    <Tooltip delayDuration={400}>
+                      <TooltipTrigger asChild>
+                        <div>{cardWithLink}</div>
+                      </TooltipTrigger>
+                      <TradeItemHoverTooltip side="bottom" item={item} />
+                    </Tooltip>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="text-secondary-text px-3 py-3 text-xs">
@@ -439,20 +493,19 @@ const TradeSidePreview = ({
         )}
       </div>
 
-      {hasStandardItems ? (
+      {(cashTotal > 0 || dupedTotal > 0) && (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
-            Total: {formatTradeValue(cashTotal + dupedTotal)}
-          </span>
-          <span className="border-status-success/20 bg-status-success/80 text-button-success-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
-            Cash: {formatTradeValue(cashTotal)}
-          </span>
-          <span className="border-status-error/20 bg-status-error/80 text-button-danger-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
-            Duped: {formatTradeValue(dupedTotal)}
-          </span>
+          {cashTotal > 0 && (
+            <span className="border-status-success/20 bg-status-success/80 text-button-success-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
+              Cash: {formatTradeValue(cashTotal)}
+            </span>
+          )}
+          {dupedTotal > 0 && (
+            <span className="border-status-error/20 bg-status-error/80 text-button-danger-text inline-flex h-6 items-center rounded-md border px-2.5 py-0.5">
+              Duped: {formatTradeValue(dupedTotal)}
+            </span>
+          )}
         </div>
-      ) : (
-        <div className="mt-3 hidden h-6 lg:block" />
       )}
     </section>
   );
@@ -940,6 +993,15 @@ export default function TradeDetailsClient({
     <>
       <div className="container mx-auto mb-16 px-4 sm:px-6 lg:px-8">
         <Breadcrumb />
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          <h1 className="text-primary-text text-2xl font-bold tracking-tight">
+            Trade ad{" "}
+            <span className="text-secondary-text font-normal">#{trade.id}</span>
+          </h1>
+          <span className="border-border-card bg-tertiary-bg text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
+            {trade.status}
+          </span>
+        </div>
         {/* Trade Card */}
         <div className="border-border-card bg-secondary-bg w-full overflow-hidden rounded-xl border p-6">
           <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex flex-col gap-3 border-b px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -975,7 +1037,7 @@ export default function TradeDetailsClient({
                         <Link
                           href={`/users/${trade.user.id}`}
                           prefetch={false}
-                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                          className="text-link hover:text-link-hover focus-visible:text-link-hover truncate text-sm font-semibold transition-colors"
                         >
                           {displayName}
                         </Link>
@@ -985,7 +1047,7 @@ export default function TradeDetailsClient({
                         href={`https://www.roblox.com/users/${trade.user.roblox_id}/profile`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                        className="text-link hover:text-link-hover focus-visible:text-link-hover truncate text-sm font-semibold transition-colors"
                       >
                         {displayName}
                       </a>
@@ -1016,7 +1078,7 @@ export default function TradeDetailsClient({
                           <RelativeTimeText timestamp={trade.created_at} />
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent side="top">
+                      <TooltipContent side="bottom">
                         <p>{formatCustomDate(trade.created_at)}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -1027,7 +1089,7 @@ export default function TradeDetailsClient({
                           Expires <RelativeTimeText timestamp={trade.expires} />
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent side="top">
+                      <TooltipContent side="bottom">
                         <p>{formatCustomDate(trade.expires)}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -1121,7 +1183,7 @@ export default function TradeDetailsClient({
                       Created <RelativeTimeText timestamp={trade.created_at} />
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
+                  <TooltipContent side="bottom">
                     <p>{formatCustomDate(trade.created_at)}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -1132,7 +1194,7 @@ export default function TradeDetailsClient({
                       Expires <RelativeTimeText timestamp={trade.expires} />
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
+                  <TooltipContent side="bottom">
                     <p>{formatCustomDate(trade.expires)}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -1172,522 +1234,499 @@ export default function TradeDetailsClient({
 
           <NitroRailFallbackAd adId="np-trading-rail-fallback" />
 
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             <TradeSidePreview title="Offering" items={trade.offering} />
             <TradeSidePreview title="Requesting" items={trade.requesting} />
           </div>
+        </div>
 
-          <div className="mt-8">
-            <Tabs value={activeTradeTab} onValueChange={handleTradeTabChange}>
-              <div className="w-full overflow-x-auto">
-                <TabsList fullWidth className="w-full min-w-0">
-                  <TabsTrigger
-                    fullWidth
-                    value="offers"
-                    id="trade-tab-offers"
-                    aria-controls="trade-tabpanel-offers"
-                  >
-                    {offerCountLabel}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    fullWidth
-                    value="comments"
-                    id="trade-tab-comments"
-                    aria-controls="trade-tabpanel-comments"
-                  >
-                    Comments
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+        <Tabs
+          className="mt-8"
+          value={activeTradeTab}
+          onValueChange={handleTradeTabChange}
+        >
+          <div className="w-full overflow-x-auto">
+            <TabsList fullWidth className="w-full min-w-0">
+              <TabsTrigger
+                fullWidth
+                value="offers"
+                id="trade-tab-offers"
+                aria-controls="trade-tabpanel-offers"
+              >
+                {offerCountLabel}
+              </TabsTrigger>
+              <TabsTrigger
+                fullWidth
+                value="comments"
+                id="trade-tab-comments"
+                aria-controls="trade-tabpanel-comments"
+              >
+                Comments
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-              <div className="relative overflow-x-clip">
-                <AnimatePresence
-                  mode="popLayout"
-                  initial={false}
-                  custom={tradeTabDirection}
+          <div className="relative overflow-x-clip">
+            <AnimatePresence
+              mode="popLayout"
+              initial={false}
+              custom={tradeTabDirection}
+            >
+              <motion.div
+                key={activeTradeTab}
+                custom={tradeTabDirection}
+                variants={tabSlideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={tabSlideTransition}
+              >
+                <TabsContent
+                  value="offers"
+                  id="trade-tabpanel-offers"
+                  className="mt-4"
                 >
-                  <motion.div
-                    key={activeTradeTab}
-                    custom={tradeTabDirection}
-                    variants={tabSlideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={tabSlideTransition}
-                  >
-                    <TabsContent
-                      value="offers"
-                      id="trade-tabpanel-offers"
-                      className="mt-4"
-                    >
-                      {tradeOffers.status === "loaded" &&
-                        tradeOffers.offers.length > 0 && (
-                          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <div className="relative flex-1">
-                              <input
-                                type="text"
-                                placeholder="Search offers (e.g., Torpedo)"
-                                value={offersSearchQuery}
-                                onChange={(e) =>
-                                  setOffersSearchQuery(e.target.value)
-                                }
-                                className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-14 w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
-                              />
-                              <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-                                {offersSearchQuery && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setOffersSearchQuery("")}
-                                    className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                                    aria-label="Clear offer search"
-                                  >
-                                    <Icon
-                                      icon="heroicons:x-mark"
-                                      className="h-5 w-5"
-                                    />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
-                                  aria-label="Offer search side"
-                                >
-                                  <span>{offersSearchScopeLabel}</span>
-                                  <Icon
-                                    icon="heroicons:chevron-down"
-                                    className="text-secondary-text h-5 w-5"
-                                    inline={true}
-                                  />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="start"
-                                className="w-(--radix-dropdown-menu-trigger-width)"
+                  {tradeOffers.status === "loaded" &&
+                    tradeOffers.offers.length > 0 && (
+                      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            placeholder="Search offers (e.g., Torpedo)"
+                            value={offersSearchQuery}
+                            onChange={(e) =>
+                              setOffersSearchQuery(e.target.value)
+                            }
+                            className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-14 w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
+                          />
+                          <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                            {offersSearchQuery && (
+                              <button
+                                type="button"
+                                onClick={() => setOffersSearchQuery("")}
+                                className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                                aria-label="Clear offer search"
                               >
-                                <DropdownMenuRadioGroup
-                                  value={offersSearchScope}
-                                  onValueChange={(value) =>
-                                    setOffersSearchScope(
-                                      value as
-                                        | "all"
-                                        | "offering"
-                                        | "requesting",
-                                    )
-                                  }
-                                >
-                                  <DropdownMenuRadioItem value="all">
-                                    Both Sides
-                                  </DropdownMenuRadioItem>
-                                  <DropdownMenuRadioItem value="offering">
-                                    Offering Only
-                                  </DropdownMenuRadioItem>
-                                  <DropdownMenuRadioItem value="requesting">
-                                    Requesting Only
-                                  </DropdownMenuRadioItem>
-                                </DropdownMenuRadioGroup>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        )}
-
-                      {tradeOffers.status === "loading" && (
-                        <div className="border-border-card bg-tertiary-bg flex min-h-24 items-center justify-center rounded-lg border p-6 text-center">
-                          <p className="text-secondary-text text-sm">
-                            Loading offers...
-                          </p>
-                        </div>
-                      )}
-
-                      {tradeOffers.status === "error" && (
-                        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                          <p className="text-primary-text text-sm font-semibold">
-                            Failed to load offers
-                          </p>
-                          <p className="text-secondary-text mt-1 text-sm">
-                            {tradeOffers.error || "Please try again later."}
-                          </p>
-                        </div>
-                      )}
-
-                      {tradeOffers.status === "loaded" &&
-                        tradeOffers.offers.length === 0 && (
-                          <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
-                            <p className="text-primary-text text-sm font-semibold">
-                              No offers yet
-                            </p>
-                            <p className="text-secondary-text mt-1 text-sm">
-                              Check back later to see incoming offers.
-                            </p>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="secondary"
-                              className="mt-4"
-                              onClick={() => refreshTradeOffers()}
-                            >
-                              <Icon icon="heroicons-outline:arrow-path" />
-                              Refresh
-                            </Button>
-                          </div>
-                        )}
-
-                      {tradeOffers.status === "loaded" &&
-                        tradeOffers.offers.length > 0 && (
-                          <div className="space-y-4">
-                            {visibleOffers.length === 0 ? (
-                              <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
-                                <p className="text-primary-text text-sm font-semibold">
-                                  No matching offers
-                                </p>
-                                <p className="text-secondary-text mt-1 text-sm">
-                                  Try a different search or switch sides.
-                                </p>
-                              </div>
-                            ) : (
-                              visibleOffers.map((offer) => {
-                                const offerUser = offer.user;
-                                const offerDisplayName =
-                                  offerUser?.roblox_display_name ||
-                                  offerUser?.global_name ||
-                                  offerUser?.roblox_username ||
-                                  offerUser?.username ||
-                                  "Unknown User";
-                                const offerStatusValue =
-                                  typeof offer.status === "string"
-                                    ? Number(offer.status)
-                                    : typeof offer.status === "number"
-                                      ? offer.status
-                                      : null;
-                                const isPendingOffer = offerStatusValue === 0;
-                                const offerResponseAction =
-                                  offerResponseState[offer.id];
-                                const isOfferOwner = !!(
-                                  isAuthenticated &&
-                                  currentUserId &&
-                                  offerUser?.id &&
-                                  offerUser.id === currentUserId
-                                );
-                                const isDeletingOffer =
-                                  !!offerDeleteState[offer.id];
-                                const offerAvatarSrc =
-                                  offerUser?.roblox_avatar ?? null;
-                                const offerNote = sanitizeText(
-                                  offer.note || "",
-                                );
-                                const offerOffering =
-                                  offer.offering == null
-                                    ? trade.offering
-                                    : normalizeOfferItems(offer.offering);
-                                const offerRequesting =
-                                  offer.requesting == null
-                                    ? trade.requesting
-                                    : normalizeOfferItems(offer.requesting);
-                                const requestingMatchesOriginal =
-                                  tradeItemsEquivalent(
-                                    offerRequesting,
-                                    trade.requesting,
-                                  );
-                                const requestingProvided =
-                                  offer.requesting != null;
-                                const shouldShowRequestingGrid =
-                                  requestingProvided &&
-                                  !requestingMatchesOriginal;
-                                const offerStatusLabel = getOfferStatusLabel(
-                                  offer.status,
-                                );
-                                const offerStatusBadgeClassName =
-                                  getOfferStatusBadgeClassName(offer.status);
-
-                                return (
-                                  <div
-                                    key={offer.id}
-                                    className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-(--color-card-shadow)"
-                                  >
-                                    <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                                        <div
-                                          className={`border-border-card bg-quaternary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
-                                            offerUser?.premiumtype === 3
-                                              ? "rounded-[25%]"
-                                              : "rounded-full"
-                                          }`}
-                                        >
-                                          {offerAvatarSrc ? (
-                                            <Image
-                                              placeholder={IMAGE_PLACEHOLDER}
-                                              src={offerAvatarSrc}
-                                              alt={`${offerDisplayName}'s Roblox avatar`}
-                                              fill
-                                              className="object-cover"
-                                              draggable={false}
-                                              onError={handleImageError}
-                                            />
-                                          ) : (
-                                            <div className="flex h-full w-full items-center justify-center">
-                                              <DefaultAvatar
-                                                premiumType={
-                                                  offerUser?.premiumtype
-                                                }
-                                              />
-                                            </div>
-                                          )}
-                                        </div>
-
-                                        <div className="min-w-0">
-                                          <div className="flex min-w-0 items-center gap-2">
-                                            {offerUser?.id ? (
-                                              <UserProfilePopover
-                                                user={offerUser}
-                                              >
-                                                <Link
-                                                  href={`/users/${offerUser.id}`}
-                                                  prefetch={false}
-                                                  className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                                                >
-                                                  {offerDisplayName}
-                                                </Link>
-                                              </UserProfilePopover>
-                                            ) : offerUser?.roblox_id ? (
-                                              <a
-                                                href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                                              >
-                                                {offerDisplayName}
-                                              </a>
-                                            ) : (
-                                              <p className="text-primary-text truncate text-sm font-semibold">
-                                                {offerDisplayName}
-                                              </p>
-                                            )}
-                                            <UserBadges
-                                              usernumber={
-                                                offerUser?.usernumber ?? 0
-                                              }
-                                              premiumType={
-                                                offerUser?.premiumtype
-                                              }
-                                              size="sm"
-                                              noContainer={true}
-                                              disableTooltips={false}
-                                            />
-                                          </div>
-                                          <p className="text-secondary-text truncate text-xs">
-                                            @
-                                            {offerUser?.roblox_username ||
-                                              offerUser?.username ||
-                                              "unknown"}
-                                          </p>
-                                          <div className="text-secondary-text mt-1 text-xs">
-                                            <Tooltip>
-                                              <TooltipTrigger asChild>
-                                                <span className="cursor-help">
-                                                  Offered{" "}
-                                                  <RelativeTimeText
-                                                    timestamp={offer.created_at}
-                                                    fallback="unknown"
-                                                  />
-                                                </span>
-                                              </TooltipTrigger>
-                                              <TooltipContent side="top">
-                                                <p>
-                                                  {offer.created_at
-                                                    ? formatCustomDate(
-                                                        offer.created_at,
-                                                      )
-                                                    : "Unknown"}
-                                                </p>
-                                              </TooltipContent>
-                                            </Tooltip>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
-                                        <span
-                                          className={`text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${offerStatusBadgeClassName}`}
-                                        >
-                                          {offerStatusLabel}
-                                        </span>
-
-                                        {offerStatusValue === 1 &&
-                                          ((isOwner && offerUser?.id) ||
-                                            (isOfferOwner &&
-                                              trade.user?.id)) && (
-                                            <Button
-                                              type="button"
-                                              size="xs"
-                                              variant="default"
-                                              onClick={() => {
-                                                const targetId = isOwner
-                                                  ? offerUser?.id
-                                                  : trade.user?.id;
-                                                if (targetId)
-                                                  router.push(
-                                                    `/messages/${encodeURIComponent(targetId)}`,
-                                                  );
-                                              }}
-                                            >
-                                              <Icon icon="heroicons-outline:chat-bubble-left-ellipsis" />
-                                              <span className="hidden sm:inline">
-                                                Message
-                                              </span>
-                                            </Button>
-                                          )}
-
-                                        {isOwner && isPendingOffer && (
-                                          <>
-                                            <Button
-                                              type="button"
-                                              size="xs"
-                                              variant="success"
-                                              disabled={!!offerResponseAction}
-                                              onClick={() =>
-                                                void handleOfferResponse(
-                                                  offer.id,
-                                                  "accept",
-                                                  offer.user,
-                                                )
-                                              }
-                                              aria-label="Accept offer"
-                                            >
-                                              <Icon icon="heroicons-outline:check" />
-                                              <span className="hidden sm:inline">
-                                                {offerResponseAction ===
-                                                "accept"
-                                                  ? "Accepting..."
-                                                  : "Accept"}
-                                              </span>
-                                            </Button>
-
-                                            <Button
-                                              type="button"
-                                              size="xs"
-                                              variant="destructive"
-                                              disabled={!!offerResponseAction}
-                                              onClick={() =>
-                                                void handleOfferResponse(
-                                                  offer.id,
-                                                  "decline",
-                                                )
-                                              }
-                                              aria-label="Decline offer"
-                                            >
-                                              <Icon icon="heroicons-outline:x-mark" />
-                                              <span className="hidden sm:inline">
-                                                {offerResponseAction ===
-                                                "decline"
-                                                  ? "Declining..."
-                                                  : "Decline"}
-                                              </span>
-                                            </Button>
-                                          </>
-                                        )}
-
-                                        {isOfferOwner && isPendingOffer && (
-                                          <Button
-                                            type="button"
-                                            size="xs"
-                                            variant="destructive"
-                                            disabled={isDeletingOffer}
-                                            onClick={() =>
-                                              setOfferDeleteConfirmId(offer.id)
-                                            }
-                                            aria-label="Delete offer"
-                                          >
-                                            <Icon icon="heroicons-outline:trash" />
-                                            <span className="hidden sm:inline">
-                                              {isDeletingOffer
-                                                ? "Deleting..."
-                                                : "Delete"}
-                                            </span>
-                                          </Button>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    <div className="p-4">
-                                      <div>
-                                        <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
-                                          Offer Note
-                                        </p>
-                                        {offerNote ? (
-                                          <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
-                                            {offerNote}
-                                          </p>
-                                        ) : (
-                                          <p className="text-secondary-text text-sm">
-                                            No note provided.
-                                          </p>
-                                        )}
-                                      </div>
-
-                                      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                                        <TradeSidePreview
-                                          title="Offering"
-                                          items={offerOffering}
-                                        />
-
-                                        {shouldShowRequestingGrid ? (
-                                          <TradeSidePreview
-                                            title="Requesting"
-                                            items={offerRequesting}
-                                          />
-                                        ) : (
-                                          <div className="border-border-card bg-tertiary-bg/40 rounded-lg border p-4">
-                                            <p className="text-primary-text text-sm font-semibold">
-                                              Requesting
-                                            </p>
-                                            <p className="text-secondary-text mt-1 text-sm">
-                                              As requested in the original ad.
-                                            </p>
-                                          </div>
-                                        )}
-                                      </div>
-                                      <RateLimitBanner
-                                        until={
-                                          offerRateLimits[offer.id] ?? null
-                                        }
-                                        label="You're deleting too fast."
-                                        className="mt-4"
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })
+                                <Icon
+                                  icon="heroicons:x-mark"
+                                  className="h-5 w-5"
+                                />
+                              </button>
                             )}
                           </div>
-                        )}
-                    </TabsContent>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                              aria-label="Offer search side"
+                            >
+                              <span>{offersSearchScopeLabel}</span>
+                              <Icon
+                                icon="heroicons:chevron-down"
+                                className="text-secondary-text h-5 w-5"
+                                inline={true}
+                              />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-(--radix-dropdown-menu-trigger-width)"
+                          >
+                            <DropdownMenuRadioGroup
+                              value={offersSearchScope}
+                              onValueChange={(value) =>
+                                setOffersSearchScope(
+                                  value as "all" | "offering" | "requesting",
+                                )
+                              }
+                            >
+                              <DropdownMenuRadioItem value="all">
+                                Both Sides
+                              </DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="offering">
+                                Offering Only
+                              </DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="requesting">
+                                Requesting Only
+                              </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
 
-                    <TabsContent
-                      value="comments"
-                      id="trade-tabpanel-comments"
-                      className="mt-4"
-                    >
-                      <h3 className="text-primary-text mb-3 text-base font-semibold">
-                        Comments
-                      </h3>
-                      <ChangelogComments
-                        changelogId={trade.id}
-                        changelogTitle={`Trade #${trade.id}`}
-                        type="tradev2"
-                        trade={trade}
-                        initialComments={initialComments}
-                        initialUserMap={initialUserMap}
-                      />
-                    </TabsContent>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </Tabs>
+                  {tradeOffers.status === "loading" && (
+                    <div className="border-border-card bg-tertiary-bg flex min-h-24 items-center justify-center rounded-lg border p-6 text-center">
+                      <p className="text-secondary-text text-sm">
+                        Loading offers...
+                      </p>
+                    </div>
+                  )}
+
+                  {tradeOffers.status === "error" && (
+                    <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                      <p className="text-primary-text text-sm font-semibold">
+                        Failed to load offers
+                      </p>
+                      <p className="text-secondary-text mt-1 text-sm">
+                        {tradeOffers.error || "Please try again later."}
+                      </p>
+                    </div>
+                  )}
+
+                  {tradeOffers.status === "loaded" &&
+                    tradeOffers.offers.length === 0 && (
+                      <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
+                        <p className="text-primary-text text-sm font-semibold">
+                          No offers yet
+                        </p>
+                        <p className="text-secondary-text mt-1 text-sm">
+                          Check back later to see incoming offers.
+                        </p>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="mt-4"
+                          onClick={() => refreshTradeOffers()}
+                        >
+                          <Icon icon="heroicons-outline:arrow-path" />
+                          Refresh
+                        </Button>
+                      </div>
+                    )}
+
+                  {tradeOffers.status === "loaded" &&
+                    tradeOffers.offers.length > 0 && (
+                      <div className="space-y-4">
+                        {visibleOffers.length === 0 ? (
+                          <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
+                            <p className="text-primary-text text-sm font-semibold">
+                              No matching offers
+                            </p>
+                            <p className="text-secondary-text mt-1 text-sm">
+                              Try a different search or switch sides.
+                            </p>
+                          </div>
+                        ) : (
+                          visibleOffers.map((offer) => {
+                            const offerUser = offer.user;
+                            const offerDisplayName =
+                              offerUser?.roblox_display_name ||
+                              offerUser?.global_name ||
+                              offerUser?.roblox_username ||
+                              offerUser?.username ||
+                              "Unknown User";
+                            const offerStatusValue =
+                              typeof offer.status === "string"
+                                ? Number(offer.status)
+                                : typeof offer.status === "number"
+                                  ? offer.status
+                                  : null;
+                            const isPendingOffer = offerStatusValue === 0;
+                            const offerResponseAction =
+                              offerResponseState[offer.id];
+                            const isOfferOwner = !!(
+                              isAuthenticated &&
+                              currentUserId &&
+                              offerUser?.id &&
+                              offerUser.id === currentUserId
+                            );
+                            const isDeletingOffer =
+                              !!offerDeleteState[offer.id];
+                            const offerAvatarSrc =
+                              offerUser?.roblox_avatar ?? null;
+                            const offerNote = sanitizeText(offer.note || "");
+                            const offerOffering =
+                              offer.offering == null
+                                ? trade.offering
+                                : normalizeOfferItems(offer.offering);
+                            const offerRequesting =
+                              offer.requesting == null
+                                ? trade.requesting
+                                : normalizeOfferItems(offer.requesting);
+                            const requestingMatchesOriginal =
+                              tradeItemsEquivalent(
+                                offerRequesting,
+                                trade.requesting,
+                              );
+                            const requestingProvided = offer.requesting != null;
+                            const shouldShowRequestingGrid =
+                              requestingProvided && !requestingMatchesOriginal;
+                            const offerStatusLabel = getOfferStatusLabel(
+                              offer.status,
+                            );
+                            const offerStatusBadgeClassName =
+                              getOfferStatusBadgeClassName(offer.status);
+
+                            return (
+                              <div
+                                key={offer.id}
+                                className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-(--color-card-shadow)"
+                              >
+                                <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+                                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                                    <div
+                                      className={`border-border-card bg-quaternary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                                        offerUser?.premiumtype === 3
+                                          ? "rounded-[25%]"
+                                          : "rounded-full"
+                                      }`}
+                                    >
+                                      {offerAvatarSrc ? (
+                                        <Image
+                                          placeholder={IMAGE_PLACEHOLDER}
+                                          src={offerAvatarSrc}
+                                          alt={`${offerDisplayName}'s Roblox avatar`}
+                                          fill
+                                          className="object-cover"
+                                          draggable={false}
+                                          onError={handleImageError}
+                                        />
+                                      ) : (
+                                        <div className="flex h-full w-full items-center justify-center">
+                                          <DefaultAvatar
+                                            premiumType={offerUser?.premiumtype}
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="min-w-0">
+                                      <div className="flex min-w-0 items-center gap-2">
+                                        {offerUser?.id ? (
+                                          <UserProfilePopover user={offerUser}>
+                                            <Link
+                                              href={`/users/${offerUser.id}`}
+                                              prefetch={false}
+                                              className="text-link hover:text-link-hover focus-visible:text-link-hover truncate text-sm font-semibold transition-colors"
+                                            >
+                                              {offerDisplayName}
+                                            </Link>
+                                          </UserProfilePopover>
+                                        ) : offerUser?.roblox_id ? (
+                                          <a
+                                            href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-link hover:text-link-hover focus-visible:text-link-hover truncate text-sm font-semibold transition-colors"
+                                          >
+                                            {offerDisplayName}
+                                          </a>
+                                        ) : (
+                                          <p className="text-primary-text truncate text-sm font-semibold">
+                                            {offerDisplayName}
+                                          </p>
+                                        )}
+                                        <UserBadges
+                                          usernumber={
+                                            offerUser?.usernumber ?? 0
+                                          }
+                                          premiumType={offerUser?.premiumtype}
+                                          size="sm"
+                                          noContainer={true}
+                                          disableTooltips={false}
+                                        />
+                                      </div>
+                                      <p className="text-secondary-text truncate text-xs">
+                                        @
+                                        {offerUser?.roblox_username ||
+                                          offerUser?.username ||
+                                          "unknown"}
+                                      </p>
+                                      <div className="text-secondary-text mt-1 text-xs">
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span className="cursor-help">
+                                              Offered{" "}
+                                              <RelativeTimeText
+                                                timestamp={offer.created_at}
+                                                fallback="unknown"
+                                              />
+                                            </span>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="bottom">
+                                            <p>
+                                              {offer.created_at
+                                                ? formatCustomDate(
+                                                    offer.created_at,
+                                                  )
+                                                : "Unknown"}
+                                            </p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
+                                    <span
+                                      className={`text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${offerStatusBadgeClassName}`}
+                                    >
+                                      {offerStatusLabel}
+                                    </span>
+
+                                    {offerStatusValue === 1 &&
+                                      ((isOwner && offerUser?.id) ||
+                                        (isOfferOwner && trade.user?.id)) && (
+                                        <Button
+                                          type="button"
+                                          size="xs"
+                                          variant="default"
+                                          onClick={() => {
+                                            const targetId = isOwner
+                                              ? offerUser?.id
+                                              : trade.user?.id;
+                                            if (targetId)
+                                              router.push(
+                                                `/messages/${encodeURIComponent(targetId)}`,
+                                              );
+                                          }}
+                                        >
+                                          <Icon icon="heroicons-outline:chat-bubble-left-ellipsis" />
+                                          <span className="hidden sm:inline">
+                                            Message
+                                          </span>
+                                        </Button>
+                                      )}
+
+                                    {isOwner && isPendingOffer && (
+                                      <>
+                                        <Button
+                                          type="button"
+                                          size="xs"
+                                          variant="success"
+                                          disabled={!!offerResponseAction}
+                                          onClick={() =>
+                                            void handleOfferResponse(
+                                              offer.id,
+                                              "accept",
+                                              offer.user,
+                                            )
+                                          }
+                                          aria-label="Accept offer"
+                                        >
+                                          <Icon icon="heroicons-outline:check" />
+                                          <span className="hidden sm:inline">
+                                            {offerResponseAction === "accept"
+                                              ? "Accepting..."
+                                              : "Accept"}
+                                          </span>
+                                        </Button>
+
+                                        <Button
+                                          type="button"
+                                          size="xs"
+                                          variant="destructive"
+                                          disabled={!!offerResponseAction}
+                                          onClick={() =>
+                                            void handleOfferResponse(
+                                              offer.id,
+                                              "decline",
+                                            )
+                                          }
+                                          aria-label="Decline offer"
+                                        >
+                                          <Icon icon="heroicons-outline:x-mark" />
+                                          <span className="hidden sm:inline">
+                                            {offerResponseAction === "decline"
+                                              ? "Declining..."
+                                              : "Decline"}
+                                          </span>
+                                        </Button>
+                                      </>
+                                    )}
+
+                                    {isOfferOwner && isPendingOffer && (
+                                      <Button
+                                        type="button"
+                                        size="xs"
+                                        variant="destructive"
+                                        disabled={isDeletingOffer}
+                                        onClick={() =>
+                                          setOfferDeleteConfirmId(offer.id)
+                                        }
+                                        aria-label="Delete offer"
+                                      >
+                                        <Icon icon="heroicons-outline:trash" />
+                                        <span className="hidden sm:inline">
+                                          {isDeletingOffer
+                                            ? "Deleting..."
+                                            : "Delete"}
+                                        </span>
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="p-4">
+                                  {offerNote && (
+                                    <div className="mb-4">
+                                      <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
+                                        Offer Note
+                                      </p>
+                                      <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
+                                        {offerNote}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+                                    <TradeSidePreview
+                                      title="Offering"
+                                      items={offerOffering}
+                                    />
+
+                                    {shouldShowRequestingGrid ? (
+                                      <TradeSidePreview
+                                        title="Requesting"
+                                        items={offerRequesting}
+                                      />
+                                    ) : (
+                                      <div className="border-border-card bg-tertiary-bg/40 rounded-lg border p-4">
+                                        <p className="text-primary-text text-sm font-semibold">
+                                          Requesting
+                                        </p>
+                                        <p className="text-secondary-text mt-1 text-sm">
+                                          As requested in the original ad.
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <RateLimitBanner
+                                    until={offerRateLimits[offer.id] ?? null}
+                                    label="You're deleting too fast."
+                                    className="mt-4"
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent
+                  value="comments"
+                  id="trade-tabpanel-comments"
+                  className="mt-4"
+                >
+                  <ChangelogComments
+                    changelogId={trade.id}
+                    changelogTitle={`Trade #${trade.id}`}
+                    type="tradev2"
+                    trade={trade}
+                    initialComments={initialComments}
+                    initialUserMap={initialUserMap}
+                  />
+                </TabsContent>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </div>
+        </Tabs>
 
         {/* Delete Confirmation Dialog */}
         <ConfirmDialog

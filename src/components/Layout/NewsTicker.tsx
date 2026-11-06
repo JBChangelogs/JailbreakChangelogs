@@ -54,7 +54,7 @@ export default function NewsTicker({
                     prefetch={false}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-link hover:text-link-hover font-semibold underline"
+                    className="text-link hover:text-link-hover font-semibold hover:underline"
                   >
                     {announcement.linkText}
                   </Link>

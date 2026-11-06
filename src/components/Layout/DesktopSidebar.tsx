@@ -106,9 +106,9 @@ export default function DesktopSidebar({
         if (!event.currentTarget.contains(event.relatedTarget))
           setFocused(false);
       }}
-      className="bg-secondary-bg border-border-card fixed bottom-0 left-0 z-1200 hidden flex-col border-r 2xl:flex"
+      className="bg-secondary-bg border-border-card fixed bottom-0 left-0 z-1300 hidden flex-col border-r 2xl:flex"
       style={{
-        top: "max(60px, var(--header-height, 60px))",
+        top: "max(60px, var(--desktop-sidebar-top, var(--header-height, 60px)))",
         width: temporarilyExpanded
           ? "240px"
           : "var(--desktop-sidebar-width, 240px)",

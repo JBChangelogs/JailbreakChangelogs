@@ -34,8 +34,7 @@ export function CommentForm() {
     emojiStringMap,
   } = useCommentsContext();
   const { twemojiEnabled } = useTwemoji();
-  const inputBgClass =
-    type === "tradev2" ? "bg-secondary-bg" : "bg-tertiary-bg";
+  const inputBgClass = "bg-tertiary-bg";
 
   const [newComment, setNewComment] = useState("");
   const [emojiOpen, setEmojiOpen] = useState(false);

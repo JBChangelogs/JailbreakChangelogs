@@ -472,8 +472,10 @@ const MobileDrawer = memo(function MobileDrawer({
 
 export default function Header({
   releaseAnnouncement,
+  banner,
 }: {
   releaseAnnouncement?: React.ReactNode;
+  banner?: React.ReactNode;
 }) {
   const queryClient = useQueryClient();
   const isCollabPage = useIsCollabPage();
@@ -751,6 +753,7 @@ export default function Header({
   }, [wsConnected]);
 
   const desktopHeaderRef = useRef<HTMLDivElement>(null);
+  const desktopNavbarRef = useRef<HTMLDivElement>(null);
   const mobileHeaderRef = useRef<HTMLDivElement>(null);
   const [desktopUserMenuOpen, setDesktopUserMenuOpen] = useState(false);
 
@@ -780,6 +783,10 @@ export default function Header({
           );
           lastHeaderHeight = height;
         }
+        document.documentElement.style.setProperty(
+          "--desktop-sidebar-top",
+          `${desktopNavbarRef.current?.getBoundingClientRect().bottom ?? height}px`,
+        );
         frameId = 0;
       });
     };
@@ -831,7 +838,7 @@ export default function Header({
         <NewsTicker announcement={tickerFlags.newsAnnouncement} />
         {updateAvailable && <UpdateAvailableNotice />}
         {releaseAnnouncement}
-        <div className="relative z-10">
+        <div ref={desktopNavbarRef} className="relative z-10">
           <NavbarModern
             onOpenSearch={searchEnabled ? () => setSearchOpen(true) : undefined}
             unreadCount={unreadCount}
@@ -841,6 +848,7 @@ export default function Header({
             setUtmModalOpen={setUtmModalOpen}
           />
         </div>
+        <div data-header-banner>{banner}</div>
       </div>
 
       <DesktopSidebar
@@ -947,6 +955,8 @@ export default function Header({
               </div>
             </div>
           </div>
+
+          <div data-header-banner>{banner}</div>
 
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

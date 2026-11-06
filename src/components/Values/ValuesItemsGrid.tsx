@@ -279,26 +279,27 @@ export default function ValuesItemsGrid({
             </React.Fragment>
           ))
         )}
+        {/* Sentinel above the skeletons so fetching starts before they're visible */}
+        {hasMore && !loadMoreError && displayedItems.length > 0 && (
+          <>
+            <div ref={loadMoreRef} className="col-span-full -mb-4" />
+            {[...Array(pageSize)].map((_, index) => (
+              <ItemCardSkeleton key={`more-${index}`} />
+            ))}
+          </>
+        )}
       </div>
 
-      <div
-        ref={loadMoreRef}
-        className="mt-8 flex flex-col items-center gap-3"
-        aria-live="polite"
-      >
+      <div className="mt-8 flex flex-col items-center gap-3" aria-live="polite">
         {loadMoreError && (
-          <p className="text-secondary-text">
-            Could not load more items. Please try again.
-          </p>
-        )}
-        {hasMore && (
-          <Button onClick={onLoadMore} disabled={isFetching}>
-            {isFetching
-              ? "Loading more…"
-              : loadMoreError
-                ? "Retry"
-                : "Load more"}
-          </Button>
+          <>
+            <p className="text-secondary-text">
+              Could not load more items. Please try again.
+            </p>
+            <Button onClick={onLoadMore} disabled={isFetching}>
+              {isFetching ? "Loading more…" : "Retry"}
+            </Button>
+          </>
         )}
         {!hasMore && displayedItems.length > 0 && (
           <p className="text-secondary-text text-sm">No more items.</p>

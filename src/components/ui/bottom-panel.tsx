@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function BottomPanelHeader({
   handle,
@@ -231,4 +236,41 @@ export function useBottomPanel(
         }
       : { side: "right" as const, style: undefined, className: "" },
   };
+}
+
+/** Desktop side sheets: dock left or right, or minimize to the header. */
+export function useDesktopDock(label: string) {
+  const [side, setSide] = useState<"left" | "right">("right");
+  const [minimized, setMinimized] = useState(false);
+  const other = side === "right" ? "left" : "right";
+  const button = (label: string, icon: string, onClick: () => void) => (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={label}
+          onClick={onClick}
+        >
+          <Icon icon={icon} aria-hidden="true" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+  const controls = (
+    <>
+      {button(`Move ${label} to the ${other}`, `lucide:panel-${other}`, () =>
+        setSide(other),
+      )}
+      {minimized
+        ? button(`Expand ${label}`, "lucide:maximize-2", () =>
+            setMinimized(false),
+          )
+        : button(`Minimize ${label}`, "lucide:minimize-2", () =>
+            setMinimized(true),
+          )}
+    </>
+  );
+  return { side, minimized, controls };
 }

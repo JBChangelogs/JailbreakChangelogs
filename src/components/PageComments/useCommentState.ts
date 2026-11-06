@@ -1854,8 +1854,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const isBlocked =
     isPostRateLimited || !!commentBan || profileCommentsDisabled;
 
-  const containerBgClass =
-    type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
+  const containerBgClass = "bg-secondary-bg";
 
   const canDeleteAnyComment =
     (user as UserData | null)?.flags?.some(

@@ -121,6 +121,14 @@ body:has(
   display: none !important;
 }
 
+/* Hide the rail ad under an open side sheet; the other rail stays. */
+body:has([data-sheet-side="left"][data-state="open"])
+  [data-rail-side="left"],
+body:has([data-sheet-side="right"][data-state="open"])
+  [data-rail-side="right"] {
+  visibility: hidden !important;
+}
+
 @theme {
   /* Radius scale shifted one step rounder than Tailwind defaults */
   --radius-md: 0.5rem;
@@ -808,8 +816,13 @@ img.twemoji {
     0 8px 28px -10px color-mix(in srgb, var(--underglow) 45%, transparent);
 }
 
-/* On a profile with an underglow, the site header glows in that color too. */
-html[data-profile-underglow] [data-site-header] {
+/* Keep the glow below preview notices instead of washing over their text. */
+html[data-profile-underglow]:not(:has([data-profile-preview-banner]))
+  :is(
+    [data-site-header]:not(:has([data-header-banner] > *)),
+    [data-header-banner] > *
+  ),
+html[data-profile-underglow] [data-profile-preview-banner] {
   box-shadow: 0 14px 44px -16px
     color-mix(in srgb, var(--profile-underglow) 70%, transparent);
 }
@@ -837,6 +850,15 @@ html[data-profile-underglow] [data-site-header] {
 
 /* Keep content beside the desktop navigation, including in maintenance bypass. */
 @media (min-width: 1536px) {
+  /* The inset banner leaves sidebar links beneath the header's empty area. */
+  .site-layout [data-site-header] {
+    pointer-events: none;
+  }
+
+  .site-layout [data-site-header] > * {
+    pointer-events: auto;
+  }
+
   html:not([data-desktop-navigation="top-bar"])
     [data-desktop-top-navigation] {
     display: none;
@@ -890,7 +912,8 @@ html[data-profile-underglow] [data-site-header] {
   }
 
   .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > main,
-  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer {
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer,
+  .site-layout [data-header-banner] {
     margin-left: var(--desktop-sidebar-width);
     width: calc(100% - var(--desktop-sidebar-width));
     min-width: 0;
@@ -904,7 +927,8 @@ html[data-profile-underglow] [data-site-header] {
   }
 
   .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > main,
-  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer {
+  .site-layout:has([data-desktop-sidebar], [data-desktop-sidebar-pending]) > footer,
+  .site-layout [data-header-banner] {
     transition:
       margin-left 225ms ease-out,
       width 225ms ease-out;

@@ -184,7 +184,47 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
           const labelTransition = label.getAnimations()[0].effect.getTiming();
           root.dataset.desktopNavigation = 'top-bar';
           const topBarWidth = getComputedStyle(document.querySelector('.site-layout')).getPropertyValue('--desktop-sidebar-width').trim();
-          document.querySelector('#result').textContent = JSON.stringify({initial, measuredIcons, tickerTop, expanded, expandedMeasuredIcons, middle, collapsed, spam, afterSpam, freshTransition, labelTransition, topBarWidth});
+          const header = document.createElement('div');
+          header.dataset.siteHeader = '';
+          header.style.cssText = 'position:sticky;top:0;z-index:1300';
+          header.innerHTML = '<div style="height:64px">Navbar</div><div data-header-banner><div style="height:36px">Competition</div></div>';
+          document.querySelector('.site-layout').prepend(header);
+          const banner = header.querySelector('[data-header-banner]');
+          root.dataset.profileUnderglow = '';
+          root.style.setProperty('--profile-underglow', '#00ffff');
+          root.style.setProperty('--header-height', '100px');
+          root.style.setProperty('--desktop-sidebar-top', '64px');
+          const bannerPositions = [];
+          for (const [mode, compact] of [['sidebar', 'false'], ['sidebar', 'true'], ['top-bar', 'false']]) {
+            root.dataset.desktopNavigation = mode;
+            root.dataset.desktopSidebarCollapsed = compact;
+            banner.getBoundingClientRect();
+            document.getAnimations().forEach(animation => animation.finish());
+            bannerPositions.push({left: banner.getBoundingClientRect().left, width: banner.getBoundingClientRect().width, sidebarTop: sidebar.getBoundingClientRect().top});
+          }
+          root.dataset.desktopNavigation = 'sidebar';
+          banner.getBoundingClientRect();
+          document.getAnimations().forEach(animation => animation.finish());
+          const sidebarClickable = !!document.elementFromPoint(20, 80)?.closest('[data-desktop-sidebar]');
+          const competitionGlow = getComputedStyle(banner.firstElementChild).boxShadow;
+          const preview = document.createElement('div');
+          preview.dataset.profilePreviewBanner = '';
+          main.prepend(preview);
+          const previewGlows = {header: getComputedStyle(header).boxShadow, competition: getComputedStyle(banner.firstElementChild).boxShadow, preview: getComputedStyle(preview).boxShadow};
+          preview.remove();
+          banner.replaceChildren();
+          const restoredHeaderGlow = getComputedStyle(header).boxShadow;
+          const mobile = document.createElement('iframe');
+          mobile.style.cssText = 'width:390px;border:0';
+          document.body.append(mobile);
+          const mobileDocument = mobile.contentDocument;
+          const mobileStyles = mobileDocument.createElement('style');
+          mobileStyles.textContent = document.querySelector('style').textContent;
+          mobileDocument.head.append(mobileStyles);
+          mobileDocument.body.innerHTML = '<div class="site-layout"><div data-site-header><div data-header-banner>Competition</div></div><aside data-desktop-sidebar class="hidden 2xl:flex"></aside></div>';
+          const mobileBanner = mobileDocument.querySelector('[data-header-banner]').getBoundingClientRect();
+          const mobileBannerPosition = {left: mobileBanner.left, width: mobileBanner.width};
+          document.querySelector('#result').textContent = JSON.stringify({initial, measuredIcons, tickerTop, expanded, expandedMeasuredIcons, middle, collapsed, spam, afterSpam, freshTransition, labelTransition, topBarWidth, bannerPositions, sidebarClickable, competitionGlow, previewGlows, restoredHeaderGlow, mobileBannerPosition});
         };
         </script></body></html>`,
       );
@@ -279,6 +319,18 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         easing: "ease-out",
       });
       expect(result.topBarWidth).toBe("0px");
+      expect(result.bannerPositions).toEqual([
+        { left: 240, width: 1680, sidebarTop: 64 },
+        { left: 72, width: 1848, sidebarTop: 64 },
+        { left: 0, width: 1920, sidebarTop: 0 },
+      ]);
+      expect(result.sidebarClickable).toBe(true);
+      expect(result.competitionGlow).not.toBe("none");
+      expect(result.previewGlows.header).toBe("none");
+      expect(result.previewGlows.competition).toBe("none");
+      expect(result.previewGlows.preview).not.toBe("none");
+      expect(result.restoredHeaderGlow).not.toBe("none");
+      expect(result.mobileBannerPosition).toEqual({ left: 0, width: 390 });
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }
@@ -383,6 +435,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
                   const hoverIdle = snapshot();
                   enter(); await pause();
                   const hoverOpen = snapshot();
+                  const hoverCoversBanner = !!document.elementFromPoint(100, 95)?.closest('[data-desktop-sidebar]');
                   exit(); await pause();
                   const hoverClosed = snapshot();
                   enter('touch'); await pause();
@@ -405,7 +458,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
                   await new Promise(resolve => setTimeout(resolve, 350));
                   const hideSaves = outgoing.slice(-2);
                   const savedBehavior = getDesktopSidebarBehavior();
-                  document.querySelector('#result').textContent = JSON.stringify({clickedCollapse, clickedExpand, afterCollapse, afterHover, afterLeave, afterFocus, afterExpand, focusPreserved, afterRecollapse, afterRefocus, afterBlur, hoverIdle, hoverOpen, hoverClosed, touch, keyboardOpen, keyboardStillOpen, keyboardClosed, pinned, compact, showSaves, hideSaves, savedBehavior});
+                  document.querySelector('#result').textContent = JSON.stringify({clickedCollapse, clickedExpand, afterCollapse, afterHover, afterLeave, afterFocus, afterExpand, focusPreserved, afterRecollapse, afterRefocus, afterBlur, hoverIdle, hoverOpen, hoverCoversBanner, hoverClosed, touch, keyboardOpen, keyboardStillOpen, keyboardClosed, pinned, compact, showSaves, hideSaves, savedBehavior});
                 }
                 check().catch(error => document.querySelector('#result').textContent = JSON.stringify({error: String(error)}));
               `,
@@ -446,7 +499,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
       const htmlPath = join(directory, "index.html");
       writeFileSync(
         htmlPath,
-        `<!doctype html><html><head><style>${css.css}\n[data-slot="tooltip-content"]{animation:none!important}</style></head><body><div class="site-layout"><div id="app"></div><main><button id="outside">Outside navigation</button></main></div><pre id="result"></pre><script src="test.js"></script></body></html>`,
+        `<!doctype html><html><head><style>${css.css}\n[data-slot="tooltip-content"]{animation:none!important}</style></head><body><div class="site-layout"><div data-site-header style="position:sticky;top:0;z-index:1300"><div style="height:60px">Navbar</div><div data-header-banner><div style="height:36px;border-bottom:1px solid cyan">Competition</div></div></div><div id="app"></div><main><button id="outside">Outside navigation</button></main></div><pre id="result"></pre><script src="test.js"></script></body></html>`,
       );
       const process = Bun.spawn(
         [
@@ -478,6 +531,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
         output.match(/<pre id="result">(.*?)<\/pre>/)?.[1] ?? "null",
       );
       expect(result).toEqual({
+        hoverCoversBanner: true,
         clickedCollapse: {
           expanded: "false",
           label: "Show sidebar",

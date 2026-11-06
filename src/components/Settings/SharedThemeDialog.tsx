@@ -14,7 +14,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Icon } from "@/components/ui/IconWrapper";
-import { useBottomPanel } from "@/components/ui/bottom-panel";
+import { useBottomPanel, useDesktopDock } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
@@ -97,7 +97,9 @@ export default function SharedThemeDialog() {
 
   // On phones, a bottom panel so the page shows the theme above it.
   const bottomPanel = useBottomPanel("the theme preview");
-  const { isMobile, collapsed } = bottomPanel;
+  const dock = useDesktopDock("the theme preview");
+  const { isMobile } = bottomPanel;
+  const collapsed = isMobile ? bottomPanel.collapsed : dock.minimized;
 
   if (code === null) return null;
   const inUse = !!theme && customTheme?.share_code === theme.share_code;
@@ -200,7 +202,7 @@ export default function SharedThemeDialog() {
       {/* Not modal and no overlay, so the site stays usable in the theme;
           clicks on it don't close the sheet. */}
       <SheetContent
-        side={bottomPanel.sheet.side}
+        side={isMobile ? bottomPanel.sheet.side : dock.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
         // Non-modal, so it doesn't take focus (it'd light up after Alt+Tab).
@@ -208,7 +210,11 @@ export default function SharedThemeDialog() {
         style={bottomPanel.sheet.style}
         className={cn(
           "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
-          isMobile ? bottomPanel.sheet.className : "h-full sm:max-w-md",
+          isMobile
+            ? bottomPanel.sheet.className
+            : dock.minimized
+              ? "bottom-auto! h-auto! sm:max-w-sm"
+              : "h-full sm:max-w-md",
         )}
       >
         {isMobile ? (
@@ -239,9 +245,14 @@ export default function SharedThemeDialog() {
             </SheetDescription>
           </div>
         ) : (
-          <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
-            <SheetTitle>{title}</SheetTitle>
-            <SheetDescription className="text-secondary-text">
+          <SheetHeader className="relative shrink-0 px-6 pt-6 pb-2">
+            <div className="absolute top-3 right-3 flex gap-1">
+              {dock.controls}
+            </div>
+            <SheetTitle className="pr-20">{title}</SheetTitle>
+            <SheetDescription
+              className={cn("text-secondary-text", collapsed && "sr-only")}
+            >
               {description}
             </SheetDescription>
           </SheetHeader>
