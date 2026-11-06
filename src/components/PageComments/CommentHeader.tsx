@@ -2,7 +2,7 @@
 
 import NumberFlow from "@number-flow/react";
 import { Icon } from "../ui/IconWrapper";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, type ReactNode } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,41 @@ import { getSortLabel } from "@/utils/api/sortGroups";
 import { useCommentsContext } from "./CommentsContext";
 
 export function CommentHeader({ pill }: { pill?: ReactNode }) {
+  const headerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const header = headerRef.current;
+    const container = header?.parentElement;
+    if (!header || !container) return;
+    let offset = 0;
+
+    const update = () => {
+      const style = getComputedStyle(header);
+      const bounds = container.getBoundingClientRect();
+      const top = header.getBoundingClientRect().top - offset;
+      const releaseHeight = Math.min(
+        window.innerHeight - parseFloat(style.top),
+        bounds.height,
+      );
+      offset =
+        style.position === "sticky"
+          ? Math.min(0, bounds.bottom - releaseHeight - top)
+          : 0;
+      header.style.transform = offset ? `translateY(${offset}px)` : "";
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    observer.observe(container);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      header.style.transform = "";
+    };
+  }, []);
+
   const {
     totalComments,
     type,
@@ -29,6 +64,7 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
   return (
     <>
       <div
+        ref={headerRef}
         className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 -mb-4 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:mb-0 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
       >
         <div className="grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4">

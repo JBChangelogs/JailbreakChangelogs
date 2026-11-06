@@ -5,7 +5,7 @@ import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 
 interface Node {
   type: unknown;
-  props: { children?: unknown };
+  props: { children?: unknown; className?: string };
 }
 
 function nodes(value: unknown): Node[] {
@@ -36,6 +36,8 @@ test("theme comment headings append Community Theme without an empty item catego
       exports,
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "react")
+          return { useRef: () => ({ current: null }), useEffect: () => {} };
         if (name.endsWith("CommentsContext"))
           return { useCommentsContext: () => state };
         if (name.endsWith("sortGroups"))
@@ -52,6 +54,10 @@ test("theme comment headings append Community Theme without an empty item catego
   };
   const heading = () =>
     text(nodes(exports.CommentHeader({})).find((node) => node.type === "h2"));
+  const headerClasses = nodes(exports.CommentHeader({}))
+    .find((node) => node.props.className?.includes("sticky"))!
+    .props.className!.split(/\s+/);
+  expect(headerClasses).toContain("sticky");
   expect(heading()).toBe(" Comments for Fall Theme (Light) Community Theme");
   state.totalComments = 1;
   expect(heading()).toBe(" Comment for Fall Theme (Light) Community Theme");
@@ -61,6 +67,88 @@ test("theme comment headings append Community Theme without an empty item catego
   state.type = "item";
   state.itemType = "vehicle";
   expect(heading()).toBe(" Comments for Fall Theme (Light) (vehicle)");
+});
+
+test("sticky headers scroll with the final screenful and resume when more comments load", () => {
+  let bottom = 1200;
+  let height = 2000;
+  let position = "sticky";
+  const style = { transform: "" };
+  let effect!: () => () => void;
+  let resize!: () => void;
+  const events = new Map<string, () => void>();
+  const header = {
+    style,
+    getBoundingClientRect: () => ({
+      top: 64 + (parseFloat(style.transform.replace("translateY(", "")) || 0),
+    }),
+    parentElement: { getBoundingClientRect: () => ({ bottom, height }) },
+  };
+  const exports = {} as { CommentHeader: (props: object) => Node };
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./CommentHeader.tsx", import.meta.url), "utf8"),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      getComputedStyle: () => ({ top: "64px", position }),
+      ResizeObserver: class {
+        constructor(callback: () => void) {
+          resize = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+      window: {
+        innerHeight: 800,
+        addEventListener: (name: string, callback: () => void) =>
+          events.set(name, callback),
+        removeEventListener: (name: string) => events.delete(name),
+      },
+      require: (name: string) => {
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "react")
+          return {
+            useRef: () => ({ current: header }),
+            useEffect: (callback: typeof effect) => {
+              effect = callback;
+            },
+          };
+        if (name.endsWith("CommentsContext"))
+          return { useCommentsContext: () => ({}) };
+        return {};
+      },
+    },
+  );
+  exports.CommentHeader({});
+  const cleanup = effect();
+  expect(style.transform).toBe("");
+  bottom = 800;
+  events.get("scroll")!();
+  expect(style.transform).toBe("");
+  bottom = 700;
+  events.get("scroll")!();
+  expect(style.transform).toBe("translateY(-100px)");
+  bottom = 650;
+  events.get("scroll")!();
+  expect(style.transform).toBe("translateY(-150px)");
+  bottom = 1200;
+  resize();
+  expect(style.transform).toBe("");
+  height = 300;
+  bottom = 350;
+  resize();
+  expect(style.transform).toBe("translateY(-14px)");
+  position = "static";
+  events.get("resize")!();
+  expect(style.transform).toBe("");
+  cleanup();
+  expect(style.transform).toBe("");
+  expect(events.size).toBe(0);
 });
 
 function renderComments(state: object) {
