@@ -35,7 +35,7 @@ const sharedEnv = {
 };
 
 function frontend() {
-  return service("(Prod) FrontEnd", {
+  return service("FrontEnd", {
     source: github("JBChangelogs/JailbreakChangelogs", {
       branch: "main",
       checkSuites: true,
