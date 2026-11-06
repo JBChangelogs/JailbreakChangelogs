@@ -32,6 +32,11 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -842,15 +847,21 @@ export default function CustomThemeEditor({
           <>
             <div className="absolute top-3 right-3 flex gap-1">
               {dock.controls}
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Close the editor"
-                title="Close (Shift+click to skip unsaved changes)"
-                onClick={(event) => cancel(event.shiftKey)}
-              >
-                <Icon icon="lucide:x" aria-hidden="true" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Close the editor"
+                    onClick={(event) => cancel(event.shiftKey)}
+                  >
+                    <Icon icon="lucide:x" aria-hidden="true" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Close (Shift+click to skip unsaved changes)
+                </TooltipContent>
+              </Tooltip>
             </div>
             <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
               <SheetTitle className="pr-28">
