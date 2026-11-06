@@ -69,7 +69,7 @@ test("theme comment headings append Community Theme without an empty item catego
   expect(heading()).toBe(" Comments for Fall Theme (Light) (vehicle)");
 });
 
-test("sticky headers scroll with the final screenful and resume when more comments load", () => {
+test("sticky headers scroll with the final comments and resume when more comments load", () => {
   let bottom = 1200;
   let height = 2000;
   let position = "sticky";
@@ -127,15 +127,15 @@ test("sticky headers scroll with the final screenful and resume when more commen
   exports.CommentHeader({});
   const cleanup = effect();
   expect(style.transform).toBe("");
-  bottom = 800;
+  bottom = 500;
   events.get("scroll")!();
   expect(style.transform).toBe("");
-  bottom = 700;
+  bottom = 400;
   events.get("scroll")!();
-  expect(style.transform).toBe("translateY(-100px)");
-  bottom = 650;
+  expect(style.transform).toBe("translateY(-32px)");
+  bottom = 350;
   events.get("scroll")!();
-  expect(style.transform).toBe("translateY(-150px)");
+  expect(style.transform).toBe("translateY(-82px)");
   bottom = 1200;
   resize();
   expect(style.transform).toBe("");

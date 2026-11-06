@@ -28,7 +28,7 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
       const bounds = container.getBoundingClientRect();
       const top = header.getBoundingClientRect().top - offset;
       const releaseHeight = Math.min(
-        window.innerHeight - parseFloat(style.top),
+        (window.innerHeight - parseFloat(style.top)) * 0.5,
         bounds.height,
       );
       offset =
