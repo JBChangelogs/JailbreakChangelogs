@@ -32,8 +32,13 @@ const previewSource =
   source.slice(
     source.indexOf("const TradeSidePreview"),
     source.indexOf("const normalizeOfferItems"),
+  ) +
+  source.slice(
+    source.indexOf("const getStatusBadgeClassName"),
+    source.indexOf("const buildTradeItemCountMap"),
   );
 const exports = {} as {
+  statusClass: (status: unknown) => string;
   Preview: (props: {
     title: "Offering" | "Requesting";
     items: TradeItem[];
@@ -41,9 +46,13 @@ const exports = {} as {
 };
 const passthrough = ({ children }: { children: ReactNode }) => children;
 runInNewContext(
-  transpileModule(previewSource + "\nexports.Preview = TradeSidePreview;", {
-    compilerOptions: { jsx: JsxEmit.ReactJSX, module: ModuleKind.CommonJS },
-  }).outputText,
+  transpileModule(
+    previewSource +
+      "\nexports.Preview = TradeSidePreview; exports.statusClass = getStatusBadgeClassName;",
+    {
+      compilerOptions: { jsx: JsxEmit.ReactJSX, module: ModuleKind.CommonJS },
+    },
+  ).outputText,
   {
     exports,
     require: () => jsxRuntime,
@@ -102,6 +111,20 @@ const render = (
   items: TradeItem[],
   title: "Offering" | "Requesting" = "Offering",
 ) => renderToStaticMarkup(createElement(exports.Preview, { title, items }));
+
+test("trade labels and numeric offer statuses share badge colors", () => {
+  for (const [value, label] of [
+    "Pending",
+    "Accepted",
+    "Declined",
+    "Completed",
+  ].entries()) {
+    expect(exports.statusClass(label)).toBe(exports.statusClass(value));
+    expect(exports.statusClass(String(value))).toBe(exports.statusClass(value));
+  }
+  expect(exports.statusClass("Pending")).toContain("bg-status-warning/20");
+  expect(exports.statusClass("Completed")).toContain("bg-status-success/10");
+});
 
 test("one item uses a horizontal card with visible market details and its listing link", () => {
   const markup = render([item]);

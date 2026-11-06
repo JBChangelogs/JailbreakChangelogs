@@ -131,12 +131,15 @@ const getOfferStatusLabel = (status: unknown): string => {
   return "Unknown";
 };
 
-const getOfferStatusBadgeClassName = (status: unknown): string => {
+const getStatusBadgeClassName = (status: unknown): string => {
   const value = typeof status === "string" ? Number(status) : status;
 
-  if (value === 1) return "border-status-success/30 bg-status-success/20";
-  if (value === 2) return "border-status-error/30 bg-status-error/15";
-  if (value === 3) return "border-status-success/30 bg-status-success/10";
+  if (value === 1 || status === "Accepted")
+    return "border-status-success/30 bg-status-success/20";
+  if (value === 2 || status === "Declined")
+    return "border-status-error/30 bg-status-error/15";
+  if (value === 3 || status === "Completed")
+    return "border-status-success/30 bg-status-success/10";
   return "border-status-warning/30 bg-status-warning/20";
 };
 
@@ -995,7 +998,9 @@ export default function TradeDetailsClient({
             Trade ad{" "}
             <span className="text-secondary-text font-normal">#{trade.id}</span>
           </h1>
-          <span className="border-border-card bg-tertiary-bg text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
+          <span
+            className={`text-primary-text inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getStatusBadgeClassName(trade.status)}`}
+          >
             {trade.status}
           </span>
         </div>
@@ -1456,7 +1461,7 @@ export default function TradeDetailsClient({
                               offer.status,
                             );
                             const offerStatusBadgeClassName =
-                              getOfferStatusBadgeClassName(offer.status);
+                              getStatusBadgeClassName(offer.status);
 
                             return (
                               <div
