@@ -41,6 +41,8 @@ for (const environment of ["production", "development"]) {
         if (name === "next/script") return { default: "Script" };
         if (name === "@/utils/analytics/reportAppError")
           return { reportAppError: (...args: unknown[]) => reports.push(args) };
+        if (name === "@/hooks/useReloadOnNewBuild")
+          return { useReloadOnNewBuild: () => calls.push("recovery") };
         throw new Error(`Unexpected import: ${name}`);
       },
     });
@@ -62,9 +64,17 @@ for (const environment of ["production", "development"]) {
     const buttons = elements.filter((node) => node.type === "button");
     expect(buttons).toHaveLength(1);
     buttons[0].props.onClick?.();
-    expect(calls).toEqual(["reload"]);
+    expect(calls).toEqual(["recovery", "reload"]);
   });
 }
+
+const hookSource = transpileModule(
+  readFileSync(
+    new URL("../hooks/useReloadOnNewBuild.ts", import.meta.url),
+    "utf8",
+  ),
+  { compilerOptions: { module: ModuleKind.CommonJS } },
+).outputText;
 
 function recoveryHarness() {
   const storage = new Map<string, string>();
@@ -81,9 +91,8 @@ function recoveryHarness() {
   };
 
   const mount = async (cancel?: "timeout" | "unmount") => {
-    const exports = {} as { default: (props: unknown) => Node };
-    const jsx = (type: string, props: Node["props"]) => ({ type, props });
-    runInNewContext(source, {
+    const exports = {} as { useReloadOnNewBuild: () => void };
+    runInNewContext(hookSource, {
       exports,
       AbortController,
       process: {
@@ -129,18 +138,13 @@ function recoveryHarness() {
               if (cleanup) cleanups.push(cleanup);
             },
           };
-        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
-        if (name === "next/script") return { default: "Script" };
-        if (name === "@/utils/analytics/reportAppError")
-          return { reportAppError: () => {} };
         throw new Error(`Unexpected import: ${name}`);
       },
     });
-    const tree = exports.default({ error: new Error("Render failed") });
+    exports.useReloadOnNewBuild();
     if (cancel === "timeout") abortTimeout();
     if (cancel === "unmount") cleanups.at(-1)?.();
     await new Promise<void>((resolve) => setImmediate(resolve));
-    return tree;
   };
   return { mount, state, storage, reloads, requests };
 }
@@ -174,9 +178,8 @@ test("current, older, and invalid versions leave the normal error screen visible
   ]) {
     const harness = recoveryHarness();
     harness.state.body = body;
-    const tree = await harness.mount();
+    await harness.mount();
     expect(harness.reloads).toEqual([]);
-    expect(nodes(tree).some((node) => node.type === "button")).toBe(true);
     expect(harness.storage.size).toBe(0);
   }
 });
