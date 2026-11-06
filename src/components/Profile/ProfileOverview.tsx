@@ -135,11 +135,11 @@ export default function ProfileOverview({
       className="mx-3 grid min-w-0 scroll-mt-[calc(var(--header-height)+5rem)] gap-3 sm:mx-0 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6"
     >
       <aside
-        className="order-1 min-w-0 lg:sticky lg:top-[calc(var(--header-height)+5rem)] lg:order-none lg:col-start-2 lg:row-start-1 lg:max-h-[calc(100dvh-var(--header-height)-6rem)] lg:space-y-5 lg:self-start lg:overflow-y-auto"
+        className="order-1 min-w-0 lg:sticky lg:top-[calc(var(--header-height)+5rem)] lg:order-none lg:col-start-2 lg:row-start-1 lg:self-start"
         aria-label="Profile details and navigation"
       >
         <nav
-          className="border-border-card bg-secondary-bg scroll-mt-[calc(var(--header-height)+5rem)] rounded-2xl border p-4"
+          className="border-border-card bg-secondary-bg scroll-mt-[calc(var(--header-height)+5rem)] rounded-2xl border p-4 lg:max-h-[calc(100dvh-var(--header-height)-6rem)] lg:overflow-y-auto"
           aria-label="Explore profile"
           id="profile-navigation"
         >
