@@ -4,26 +4,38 @@ import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import { hasItemValue } from "@/utils/items/itemValue";
 import { formatFullValue, getValueChange } from "@/utils/trading/values";
+import type { RecentChange } from "@/types";
 
 interface Node {
   type: unknown;
   props: Record<string, unknown>;
 }
 
-function badges(value: unknown): unknown[] {
-  if (Array.isArray(value)) return value.flatMap(badges);
+function nodes(value: unknown): Node[] {
+  if (Array.isArray(value)) return value.flatMap(nodes);
   if (!value || typeof value !== "object" || !("props" in value)) return [];
   const node = value as Node;
-  const children = badges(node.props.children);
-  return node.type === "span" &&
-    String(node.props.className).includes("bg-button-info")
-    ? [node.props.children, ...children]
-    : children;
+  return [node, ...nodes(node.props.children)];
 }
 
-test("item cards show N/A for missing mobile values and preserve compact prices", () => {
+const badges = (value: unknown) =>
+  nodes(value)
+    .filter(
+      (node) =>
+        node.type === "span" &&
+        String(node.props.className).includes("bg-button-info"),
+    )
+    .map((node) => node.props.children);
+
+test("item cards preserve prices and support values layout and favorites on item pages", async () => {
   let mobile = true;
   let pathname = "/values";
+  let authenticated = false;
+  let loginRequests = 0;
+  let requestOkay = true;
+  const requests: Array<{ url: string; method: string }> = [];
+  const favoriteChanges: boolean[] = [];
+  let recentChanges: RecentChange[] | undefined;
   const exports = {} as {
     default: (props: unknown) => Node;
   };
@@ -44,6 +56,10 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
     ).outputText,
     {
       exports,
+      fetch: async (url: string, options: { method: string }) => {
+        requests.push({ url, method: options.method });
+        return { ok: requestOkay };
+      },
       require: (name: string) => {
         if (name === "react") return { ...react, default: react };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
@@ -54,7 +70,26 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
           return { useMediaQuery: () => mobile };
         if (name === "next/navigation") return { usePathname: () => pathname };
         if (name === "@/contexts/AuthContext")
-          return { useAuthContext: () => ({ isAuthenticated: false }) };
+          return {
+            useAuthContext: () => ({
+              isAuthenticated: authenticated,
+              setLoginModal: () => {
+                loginRequests++;
+              },
+            }),
+          };
+        if (name === "@/utils/api/api")
+          return { PUBLIC_API_URL: "https://api.example" };
+        if (name === "@/utils/api/apiDevToken")
+          return {
+            buildApiFetchRequest: (base: string, path: string) => ({
+              url: base + path,
+              headers: {},
+            }),
+          };
+        if (name === "sonner") return { toast: { error: noop, success: noop } };
+        if (name === "@/services/logger")
+          return { createLogger: () => ({ error: noop }) };
         return new Proxy({}, { get: () => noop });
       },
     },
@@ -63,6 +98,8 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
     value: string | null | undefined,
     type = "Drift",
     placementLimit?: number | null,
+    showValues = false,
+    isFavorited = false,
   ) =>
     exports.default({
       item: {
@@ -71,10 +108,12 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
         type,
         cash_value: value,
         duped_value: value,
+        recent_changes: recentChanges,
       },
-      isFavorited: false,
-      onFavoriteChange: noop,
+      isFavorited,
+      onFavoriteChange: (next: boolean) => favoriteChanges.push(next),
       placementLimit,
+      showValues,
     });
   const render = (value: string | null | undefined) =>
     badges(renderCard(value));
@@ -97,4 +136,72 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
       }
     }
   }
+  recentChanges = [
+    {
+      changelog_id: 1,
+      suggestion_id: 1,
+      changed_by: "user",
+      created_at: 1,
+      field: "cash_value",
+      current_value: "1m",
+      suggested_value: "2m",
+    },
+    {
+      changelog_id: 1,
+      suggestion_id: 1,
+      changed_by: "user",
+      created_at: 1,
+      field: "duped_value",
+      current_value: "500k",
+      suggested_value: "250k",
+    },
+  ];
+  const changeLabels = (showValues: boolean) =>
+    nodes(renderCard("2m", "Drift", undefined, showValues))
+      .filter(
+        (node) =>
+          node.type === "span" &&
+          Array.isArray(node.props.children) &&
+          ["+", "-"].includes(node.props.children[0]),
+      )
+      .map((node) => (node.props.children as string[]).join(""));
+  mobile = false;
+  pathname = "/values";
+  expect(changeLabels(false)).toEqual(["+1,000,000", "-250,000"]);
+  pathname = "/item/Furniture/Blue%20Fire";
+  expect(changeLabels(true)).toEqual(["+1m", "-250k"]);
+  recentChanges = undefined;
+  mobile = true;
+  const sharedCard = renderCard("28m", "Furniture", 1, true);
+  expect(JSON.stringify(sharedCard)).toContain(
+    '"aria-label":"Placement limit: 1"',
+  );
+  expect(badges(sharedCard)).toEqual(["28m", "28m"]);
+  const clickFavorite = async (isFavorited = false) => {
+    const button = nodes(
+      renderCard("28m", "Furniture", 1, true, isFavorited),
+    ).find(
+      (node) =>
+        node.type === "button" &&
+        String(node.props["aria-label"]).includes("favorites"),
+    )!;
+    await (button.props.onClick as (event: unknown) => Promise<void>)({
+      preventDefault: noop,
+      stopPropagation: noop,
+    });
+  };
+  await clickFavorite();
+  expect(loginRequests).toBe(1);
+  expect(requests).toHaveLength(0);
+  authenticated = true;
+  await clickFavorite();
+  await clickFavorite(true);
+  expect(requests).toEqual([
+    { url: "https://api.example/v2/users/me/favorites/1", method: "PUT" },
+    { url: "https://api.example/v2/users/me/favorites/1", method: "DELETE" },
+  ]);
+  expect(favoriteChanges).toEqual([true, false]);
+  requestOkay = false;
+  await clickFavorite();
+  expect(favoriteChanges).toEqual([true, false]);
 });

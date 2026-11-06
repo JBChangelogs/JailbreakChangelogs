@@ -5,19 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import { ItemDetails } from "@/types";
 import { fetchSimilarItems, fetchSimilarItemSorts } from "@/utils/api/api";
-import Image from "next/image";
-import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
-import {
-  handleImageError,
-  getItemImagePath,
-  isVideoItem,
-  getVideoPath,
-} from "@/utils/ui/images";
-import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
-import { formatFullValue } from "@/utils/trading/values";
-import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { getTrendColor, getDemandColor } from "@/utils/items/badgeColors";
+import ItemCard from "./ItemCard";
+import ItemCardSkeleton from "./ItemCardSkeleton";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useUserFavorites } from "@/hooks/useUserFavorites";
+import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,18 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getSortLabel } from "@/utils/api/sortGroups";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { unlockLevel } from "@/utils/items/season";
-import { hasItemValue } from "@/utils/items/itemValue";
-import {
-  formatUnlockLevelBadge,
-  formatUnlockRequirementsTooltip,
-  hasUnlockLevel,
-} from "@/utils/items/itemUnlockPresentation";
 
 const SIMILAR_ITEMS_LIMIT = 6;
 
@@ -47,36 +28,17 @@ interface SimilarItemsProps {
   currentItem: ItemDetails;
 }
 
-function SeasonLevelBadges({ item }: { item: ItemDetails }) {
-  const level = unlockLevel(item.level);
-  const hasLevel = hasUnlockLevel(level);
-  if (item.season == null && !hasLevel) return null;
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
-          {item.season != null && (
-            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-              S{item.season}
-            </span>
-          )}
-          {hasLevel && (
-            <span className="bg-status-success text-button-success-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-              {formatUnlockLevelBadge(level)}
-            </span>
-          )}
-        </div>
-      </TooltipTrigger>
-      <TooltipContent>
-        {formatUnlockRequirementsTooltip(item.season ?? undefined, level)}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
 const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
   const [selectedSort, setSelectedSort] = useState<string | null>(null);
+  const { user } = useAuthContext();
+  const favoritesQuery = useUserFavorites(user?.id);
+  const { data: placementLimitsMap } = useQuery({
+    queryKey: ["furniture-placement-limits"],
+    queryFn: fetchFurniturePlacementLimits,
+    staleTime: Infinity,
+    gcTime: 60 * 60_000,
+    retry: false,
+  });
 
   const { data: sortGroups = [], isPending: sortsPending } = useQuery({
     queryKey: ["similar-item-sorts"],
@@ -97,19 +59,16 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
   });
 
   return (
-    <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
+    <div className="@container space-y-4 sm:space-y-6">
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-icon-tile-bg flex h-10 w-10 items-center justify-center rounded-lg">
-            <Icon
-              icon="heroicons-outline:sparkles"
-              className="text-icon-tile h-6 w-6"
-            />
-          </div>
-          <h3 className="text-primary-text text-xl font-semibold">
-            Similar Items
-          </h3>
-        </div>
+        <h3 className="text-primary-text text-2xl font-bold">
+          Similar Items{" "}
+          {!sortsPending && !itemsPending && (
+            <span className="text-secondary-text ml-1 text-sm font-normal">
+              {similarItems?.length ?? 0}
+            </span>
+          )}
+        </h3>
 
         {sortGroups.length > 0 && sortBy && (
           <DropdownMenu>
@@ -161,13 +120,9 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
       </div>
 
       {sortsPending || itemsPending ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 min-[375px]:@min-[20rem]:grid-cols-2 @min-[40rem]:grid-cols-3">
           {[...Array(SIMILAR_ITEMS_LIMIT)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="border-border-card bg-tertiary-bg mb-3 aspect-video rounded-lg border"></div>
-              <div className="bg-quaternary-bg/70 mb-2 h-4 w-3/4 rounded"></div>
-              <div className="bg-quaternary-bg/70 h-4 w-1/2 rounded"></div>
-            </div>
+            <ItemCardSkeleton key={i} />
           ))}
         </div>
       ) : !similarItems || similarItems.length === 0 ? (
@@ -190,115 +145,22 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 min-[375px]:@min-[20rem]:grid-cols-2 @min-[40rem]:grid-cols-3">
           {similarItems.map((item) => (
-            <Link
+            <ItemCard
               key={item.id}
-              href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-              className="group block"
-              prefetch={false}
-            >
-              <div className="border-border-card bg-tertiary-bg relative overflow-hidden rounded-lg border transition-all duration-300">
-                <div className="relative aspect-video w-full overflow-hidden">
-                  {isVideoItem(item.name) ? (
-                    <video
-                      src={getVideoPath(item.type, item.name)}
-                      loop
-                      muted
-                      playsInline
-                      autoPlay
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Image
-                      placeholder={IMAGE_PLACEHOLDER}
-                      src={getItemImagePath(item.type, item.name, true)}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      onError={handleImageError}
-                    />
-                  )}
-                  <SeasonLevelBadges item={item} />
-                </div>
-
-                <div className="flex flex-1 flex-col space-y-2 p-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-primary-text group-hover:text-link line-clamp-2 text-sm leading-tight font-semibold transition-colors">
-                      {item.name}
-                    </h3>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1">
-                    <span
-                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
-                      style={{
-                        borderColor: getCategoryColor(item.type),
-                        backgroundColor: `${getCategoryColor(item.type)}22`,
-                      }}
-                    >
-                      {(() => {
-                        const categoryIcon = getCategoryIcon(item.type);
-                        return categoryIcon ? (
-                          <categoryIcon.Icon
-                            className="mr-1.5 h-3 w-3"
-                            style={{ color: getCategoryColor(item.type) }}
-                          />
-                        ) : null;
-                      })()}
-                      {item.type}
-                    </span>
-                    {(item.tradable === 0 || item.tradable === false) && (
-                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
-                        {item.id === 713 ? "Reference Only" : "Non-Tradable"}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
-                      <span className="text-secondary-text text-[10px] font-medium">
-                        Cash
-                      </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                        {formatFullValue(item.cash_value)}
-                      </span>
-                    </div>
-
-                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
-                      <span className="text-secondary-text text-[10px] font-medium">
-                        Duped
-                      </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
-                        {formatFullValue(item.duped_value)}
-                      </span>
-                    </div>
-
-                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
-                      <span className="text-secondary-text text-[10px] font-medium">
-                        Demand
-                      </span>
-                      <span
-                        className={`${getDemandColor(item.demand)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap`}
-                      >
-                        {hasItemValue(item.demand) ? item.demand : "Unknown"}
-                      </span>
-                    </div>
-
-                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
-                      <span className="text-secondary-text text-[10px] font-medium">
-                        Trend
-                      </span>
-                      <span
-                        className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap`}
-                      >
-                        {hasItemValue(item.trend) ? item.trend : "Unknown"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+              item={item}
+              showValues
+              isFavorited={
+                favoritesQuery.data?.some(
+                  (favorite) => favorite.item.id === item.id,
+                ) ?? false
+              }
+              placementLimit={placementLimitsMap?.get(item.id) ?? null}
+              onFavoriteChange={() => {
+                void favoritesQuery.refetch();
+              }}
+            />
           ))}
         </div>
       )}

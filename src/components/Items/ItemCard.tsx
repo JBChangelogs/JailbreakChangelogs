@@ -1,5 +1,5 @@
 import React from "react";
-import { Item } from "@/types";
+import { Item, ItemDetails } from "@/types";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
@@ -42,10 +42,11 @@ import {
 const log = createLogger("UI");
 
 interface ItemCardProps {
-  item: Item;
+  item: Item | ItemDetails;
   isFavorited: boolean;
   onFavoriteChange: (isFavorited: boolean) => void;
   placementLimit?: number | null;
+  showValues?: boolean;
 }
 
 function ItemCard({
@@ -53,6 +54,7 @@ function ItemCard({
   isFavorited,
   onFavoriteChange,
   placementLimit,
+  showValues = false,
 }: ItemCardProps) {
   const isBlueBird = item.id === 919;
   const blueBirdDefaultImage =
@@ -67,7 +69,7 @@ function ItemCard({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
-  const isValuesPage = pathname === "/values";
+  const isValuesPage = showValues || pathname === "/values";
   const { isAuthenticated, setLoginModal } = useAuthContext();
 
   useEffect(() => {
@@ -263,7 +265,7 @@ function ItemCard({
 
   const formatChange = (difference: number) => {
     const diff = Math.abs(difference);
-    if (isMobile) {
+    if (isMobile || showValues) {
       if (diff >= 1000000)
         return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
       if (diff >= 1000)
@@ -310,7 +312,9 @@ function ItemCard({
                   isFavorited ? "Remove from favorites" : "Add to favorites"
                 }
                 className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-20 cursor-pointer rounded-full border p-1.5 transition-opacity ${
-                  isHovered ? "opacity-100" : "opacity-0"
+                  isHovered || isFavorited
+                    ? "opacity-100"
+                    : "opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100"
                 } hover:bg-secondary-bg`}
                 data-rybbit-event={
                   isFavorited ? "Item Unfavorited" : "Item Favorited"
@@ -493,8 +497,9 @@ function ItemCard({
                     </TooltipContent>
                   </Tooltip>
                 )}
-              {currentItemData.tradable === 0 && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
+              {(currentItemData.tradable === 0 ||
+                currentItemData.tradable === false) && (
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-5 items-center rounded-md border px-1.5 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs">
                   {currentItemData.id === 713
                     ? "Reference Only"
                     : "Non-Tradable"}
@@ -731,6 +736,7 @@ export default React.memo(ItemCard, (prev, next) => {
   return (
     prev.item === next.item &&
     prev.isFavorited === next.isFavorited &&
-    prev.placementLimit === next.placementLimit
+    prev.placementLimit === next.placementLimit &&
+    prev.showValues === next.showValues
   );
 });
