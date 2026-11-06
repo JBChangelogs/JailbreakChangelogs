@@ -173,9 +173,11 @@ export function ThemePackSection({
 export function ApplyPackButton({
   theme,
   size,
+  variant = "secondary",
 }: {
   theme: SharedTheme;
   size?: "sm";
+  variant?: "secondary" | "link";
 }) {
   const { isAuthenticated, user, refreshUser } = useAuthContext();
   const [open, setOpen] = useState(false);
@@ -212,7 +214,7 @@ export function ApplyPackButton({
 
   return (
     <>
-      <Button variant="secondary" size={size} onClick={() => setOpen(true)}>
+      <Button variant={variant} size={size} onClick={() => setOpen(true)}>
         <Icon icon="lucide:sparkles" aria-hidden="true" />
         Apply to my profile
       </Button>

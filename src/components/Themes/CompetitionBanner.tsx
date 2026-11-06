@@ -66,7 +66,7 @@ export default function CompetitionBanner() {
   const href = `/themes/competitions/${competition.id}`;
 
   return (
-    <div className="bg-button-info/10 border-button-info/30 text-primary-text relative flex items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm">
+    <div className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative flex items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm">
       <Icon
         icon="heroicons:trophy"
         className="text-button-info size-4 shrink-0"

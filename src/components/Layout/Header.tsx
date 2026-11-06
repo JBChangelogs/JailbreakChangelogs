@@ -753,6 +753,7 @@ export default function Header({
   }, [wsConnected]);
 
   const desktopHeaderRef = useRef<HTMLDivElement>(null);
+  const desktopNavbarRef = useRef<HTMLDivElement>(null);
   const mobileHeaderRef = useRef<HTMLDivElement>(null);
   const [desktopUserMenuOpen, setDesktopUserMenuOpen] = useState(false);
 
@@ -782,6 +783,10 @@ export default function Header({
           );
           lastHeaderHeight = height;
         }
+        document.documentElement.style.setProperty(
+          "--desktop-sidebar-top",
+          `${desktopNavbarRef.current?.getBoundingClientRect().bottom ?? height}px`,
+        );
         frameId = 0;
       });
     };
@@ -833,7 +838,7 @@ export default function Header({
         <NewsTicker announcement={tickerFlags.newsAnnouncement} />
         {updateAvailable && <UpdateAvailableNotice />}
         {releaseAnnouncement}
-        <div className="relative z-10">
+        <div ref={desktopNavbarRef} className="relative z-10">
           <NavbarModern
             onOpenSearch={searchEnabled ? () => setSearchOpen(true) : undefined}
             unreadCount={unreadCount}
@@ -843,7 +848,7 @@ export default function Header({
             setUtmModalOpen={setUtmModalOpen}
           />
         </div>
-        {banner}
+        <div data-header-banner>{banner}</div>
       </div>
 
       <DesktopSidebar
@@ -951,7 +956,7 @@ export default function Header({
             </div>
           </div>
 
-          {banner}
+          <div data-header-banner>{banner}</div>
 
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

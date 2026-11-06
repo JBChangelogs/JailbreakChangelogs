@@ -874,15 +874,19 @@ export default function UserProfileClient({
       )}
       {loadingPreview && (
         <div
+          data-profile-preview-banner
           role="status"
-          className="bg-button-info/10 border-button-info/30 text-secondary-text relative flex min-h-12 items-center justify-center gap-2 border-b px-4 py-2 text-sm"
+          className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative flex items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm"
         >
-          <Spinner className="size-4" />
+          <Spinner className="text-button-info size-4 shrink-0" />
           Loading the pack preview…
         </div>
       )}
       {previewing && (
-        <div className="bg-button-info/10 border-button-info/30 text-primary-text relative flex min-h-12 flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-2 text-center text-sm">
+        <div
+          data-profile-preview-banner
+          className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative flex flex-wrap items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm"
+        >
           <Icon
             icon="lucide:eye"
             className="text-button-info size-4 shrink-0"
@@ -892,7 +896,7 @@ export default function UserProfileClient({
             Previewing the{" "}
             <Link
               href={`/themes/${packTheme.share_code}`}
-              className="font-semibold hover:underline"
+              className="text-link hover:text-link-hover font-medium hover:underline"
             >
               {packTheme.label}
             </Link>{" "}
@@ -925,9 +929,9 @@ export default function UserProfileClient({
             )}
             . Only you see this; nothing is saved until you apply it.
           </p>
-          <ApplyPackButton theme={packTheme} size="sm" />
+          <ApplyPackButton theme={packTheme} size="sm" variant="link" />
           <Button
-            variant="ghost"
+            variant="link"
             size="sm"
             onClick={() =>
               router.replace(
