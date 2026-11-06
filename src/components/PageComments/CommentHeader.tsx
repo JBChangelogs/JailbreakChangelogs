@@ -2,7 +2,14 @@
 
 import NumberFlow from "@number-flow/react";
 import { Icon } from "../ui/IconWrapper";
-import { Fragment, useEffect, useRef, type ReactNode } from "react";
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,7 +108,8 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
             />
             <span>Comments are user-submitted and unverified.</span>
           </p>
-          <div className="flex justify-end sm:order-1">
+          <div className="flex justify-end gap-2 sm:order-1">
+            <JumpToCommentForm headerRef={headerRef} />
             <CommentSort />
           </div>
         </div>
@@ -116,6 +124,68 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
         )}
       </div>
     </>
+  );
+}
+
+function JumpToCommentForm({
+  headerRef,
+}: {
+  headerRef: RefObject<HTMLDivElement | null>;
+}) {
+  const {
+    profileCommentsDisabled,
+    isLoggedIn,
+    isBlocked,
+    isCommentFormExpanded,
+    setIsCommentFormExpanded,
+    setLoginModal,
+  } = useCommentsContext();
+  const [formInView, setFormInView] = useState(true);
+
+  useEffect(() => {
+    const form = document.getElementById("new-comment-form");
+    const header = headerRef.current;
+    if (!form || !header) return;
+    const inset =
+      header.offsetHeight + (parseFloat(getComputedStyle(header).top) || 0);
+    const observer = new IntersectionObserver(
+      ([entry]) => setFormInView(entry.isIntersecting),
+      { rootMargin: `-${inset}px 0px 0px 0px` },
+    );
+    observer.observe(form);
+    return () => observer.disconnect();
+  }, [headerRef]);
+
+  if (profileCommentsDisabled || isBlocked || formInView) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!isLoggedIn) {
+          setLoginModal({ open: true });
+          return;
+        }
+        document
+          .getElementById("comments-top")
+          ?.scrollIntoView({ behavior: "smooth" });
+        if (isCommentFormExpanded) {
+          document
+            .getElementById("new-comment-textarea")
+            ?.focus({ preventScroll: true });
+        } else {
+          setIsCommentFormExpanded(true);
+        }
+      }}
+      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all duration-300 focus:ring-1 focus:outline-none"
+    >
+      <Icon
+        icon="heroicons:pencil-square"
+        className="h-4 w-4 shrink-0"
+        inline={true}
+      />
+      <span>Comment</span>
+    </button>
   );
 }
 

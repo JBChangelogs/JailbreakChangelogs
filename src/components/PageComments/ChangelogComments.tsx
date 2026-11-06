@@ -141,7 +141,10 @@ function CommentsLayout() {
         className={`border-border-card ${containerBgClass} rounded-lg border p-2 sm:p-3`}
       >
         {/* Not the title: it's sticky, so it never scrolls out of view */}
-        <div id="comments-top" className="scroll-mt-(--header-height)" />
+        <div
+          id="comments-top"
+          className="scroll-mt-[calc(var(--header-height)+1rem)]"
+        />
         <div className="flex flex-col gap-4">
           <CommentHeader
             pill={

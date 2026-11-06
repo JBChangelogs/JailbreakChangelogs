@@ -1536,7 +1536,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     const textarea = document.getElementById(
       "new-comment-textarea",
     ) as HTMLTextAreaElement | null;
-    textarea?.focus();
+    textarea?.focus({ preventScroll: true });
   }, [isCommentFormExpanded]);
 
   // Focus the reply textarea when a reply form opens
