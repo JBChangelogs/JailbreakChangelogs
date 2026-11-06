@@ -59,20 +59,25 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
       },
     },
   );
+  const renderCard = (
+    value: string | null | undefined,
+    type = "Drift",
+    placementLimit?: number | null,
+  ) =>
+    exports.default({
+      item: {
+        id: 1,
+        name: "Blue Fire",
+        type,
+        cash_value: value,
+        duped_value: value,
+      },
+      isFavorited: false,
+      onFavoriteChange: noop,
+      placementLimit,
+    });
   const render = (value: string | null | undefined) =>
-    badges(
-      exports.default({
-        item: {
-          id: 1,
-          name: "Blue Fire",
-          type: "Drift",
-          cash_value: value,
-          duped_value: value,
-        },
-        isFavorited: false,
-        onFavoriteChange: noop,
-      }),
-    );
+    badges(renderCard(value));
 
   for (pathname of ["/values", "/other"]) {
     for (const value of [null, undefined, "", " ", "null", "N/A"])
@@ -83,5 +88,13 @@ test("item cards show N/A for missing mobile values and preserve compact prices"
     expect(render(null)).toEqual(["N/A", "N/A"]);
     expect(render("28m")).toEqual(["28,000,000", "28,000,000"]);
     mobile = true;
+    for (const type of ["Furniture", "Vehicle"]) {
+      for (const limit of [undefined, null, 0, 1]) {
+        const tree = JSON.stringify(renderCard("20k", type, limit));
+        expect(tree.includes(`"aria-label":"Placement limit: ${limit}"`)).toBe(
+          pathname === "/values" && type === "Furniture" && limit != null,
+        );
+      }
+    }
   }
 });

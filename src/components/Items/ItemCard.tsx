@@ -274,9 +274,9 @@ function ItemCard({
   };
 
   return (
-    <div className="w-full">
+    <div className="h-full w-full">
       <div
-        className="group border-border-card border-b-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
+        className="group border-border-card border-b-border-card bg-secondary-bg relative flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -288,7 +288,7 @@ function ItemCard({
         />
         <div
           ref={mediaRef}
-          className="bg-tertiary-bg relative w-full overflow-hidden"
+          className="bg-tertiary-bg relative w-full shrink-0 overflow-hidden"
           style={{ aspectRatio: isValuesPage ? "854 / 480" : "1 / 1" }}
         >
           <div className="absolute top-2 right-2 z-10 flex gap-2">
@@ -438,7 +438,7 @@ function ItemCard({
             </div>
           )}
         </div>
-        <div className="flex flex-1 flex-col space-y-2 p-2 sm:space-y-4 sm:p-4">
+        <div className="flex flex-1 flex-col space-y-1.5 p-2 sm:space-y-4 sm:p-4">
           <div className="flex flex-col gap-1 sm:gap-1.5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-primary-text group-hover:text-link text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
@@ -473,6 +473,26 @@ function ItemCard({
               >
                 {item.type}
               </span>
+              {isValuesPage &&
+                item.type === "Furniture" &&
+                placementLimit != null && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        tabIndex={0}
+                        aria-label={`Placement limit: ${placementLimit}`}
+                        className="text-secondary-text border-border-card bg-tertiary-bg relative z-20 inline-flex h-5 cursor-help items-center gap-1 rounded-md border px-1.5 text-[10px] leading-none whitespace-nowrap sm:h-6 sm:px-2.5 sm:text-xs"
+                      >
+                        Limit:{" "}
+                        <span className="font-semibold">{placementLimit}</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      You can place up to {placementLimit} of this item in your
+                      home
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               {currentItemData.tradable === 0 && (
                 <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
                   {currentItemData.id === 713
@@ -528,16 +548,16 @@ function ItemCard({
           <div className="space-y-1 sm:space-y-2">
             {isValuesPage ? (
               <div className="border-border-card bg-tertiary-bg grid grid-cols-2 rounded-lg border">
-                <div className="flex flex-col gap-1.5 p-1.5 sm:p-3">
+                <div className="flex min-w-0 flex-col gap-1 p-1.5 sm:gap-1.5 sm:p-3">
                   <span className="text-primary-text text-xs font-semibold">
                     Clean
                   </span>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                    <span className="text-secondary-text sr-only text-[10px] font-medium sm:not-sr-only sm:text-xs">
                       Value
                     </span>
                     <div className="flex items-center gap-1">
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-md px-1.5 text-xs leading-none font-bold sm:h-6 sm:px-2">
                         {isMobile && hasItemValue(currentItemData.cash_value)
                           ? currentItemData.cash_value
                           : formatFullValue(currentItemData.cash_value)}
@@ -554,27 +574,27 @@ function ItemCard({
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex min-h-[50px] flex-col gap-0.5 sm:min-h-0">
                     <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
                       Demand
                     </span>
                     <span
-                      className={`${getDemandColor(currentItemData.demand)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
+                      className={`${getDemandColor(currentItemData.demand)} inline-flex max-w-full items-center self-start rounded-md px-1.5 py-1 text-[10px] leading-tight font-bold sm:rounded-lg sm:px-2 sm:text-xs sm:leading-none`}
                     >
                       {demandLabel}
                     </span>
                   </div>
                 </div>
-                <div className="border-border-card flex flex-col gap-1.5 border-l p-1.5 sm:p-3">
+                <div className="border-border-card flex min-w-0 flex-col gap-1 border-l p-1.5 sm:gap-1.5 sm:p-3">
                   <span className="text-primary-text text-xs font-semibold">
                     Duped
                   </span>
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
+                    <span className="text-secondary-text sr-only text-[10px] font-medium sm:not-sr-only sm:text-xs">
                       Value
                     </span>
                     <div className="flex items-center gap-1">
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-5 items-center rounded-md px-1.5 text-xs leading-none font-bold sm:h-6 sm:px-2">
                         {isMobile && hasItemValue(currentItemData.duped_value)
                           ? currentItemData.duped_value
                           : formatFullValue(currentItemData.duped_value)}
@@ -591,12 +611,12 @@ function ItemCard({
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex min-h-[50px] flex-col gap-0.5 sm:min-h-0">
                     <span className="text-secondary-text text-[10px] font-medium sm:text-xs">
                       Demand
                     </span>
                     <span
-                      className={`${getDemandColor(dupedDemandLabel)} inline-flex items-center self-start rounded-lg px-2 py-1 text-xs leading-none font-bold`}
+                      className={`${getDemandColor(dupedDemandLabel)} inline-flex max-w-full items-center self-start rounded-md px-1.5 py-1 text-[10px] leading-tight font-bold sm:rounded-lg sm:px-2 sm:text-xs sm:leading-none`}
                     >
                       {dupedDemandLabel}
                     </span>
@@ -660,40 +680,22 @@ function ItemCard({
                   </span>
                 </div>
                 <span
-                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
+                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-5 items-center rounded-md px-1.5 text-[10px] leading-none font-bold whitespace-nowrap min-[480px]:px-3 sm:h-6 sm:text-xs`}
                 >
                   {trendLabel}
                 </span>
               </div>
             )}
-            {isValuesPage &&
-              item.type === "Furniture" &&
-              placementLimit != null && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="border-border-card bg-tertiary-bg flex cursor-help items-center justify-between rounded-lg border p-1 sm:p-2.5">
-                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                        Placement Limit
-                      </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold min-[480px]:px-3">
-                        {placementLimit}
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    You can place up to {placementLimit} of this item in your
-                    base
-                  </TooltipContent>
-                </Tooltip>
-              )}
           </div>
 
-          <div className="text-secondary-text mt-auto flex flex-col gap-1 pt-1 text-[10px] sm:flex-row sm:items-center sm:justify-between sm:pt-2 sm:text-xs">
+          <div className="text-secondary-text mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1 pt-1 text-[10px] sm:pt-2 sm:text-xs">
             {currentItemData.last_updated ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="cursor-help">
-                    {`Last updated: ${formatLastUpdated(currentItemData.last_updated)}`}
+                    <span className="sm:hidden">Updated </span>
+                    <span className="hidden sm:inline">Last updated: </span>
+                    {formatLastUpdated(currentItemData.last_updated)}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -701,16 +703,21 @@ function ItemCard({
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <span>Last updated: Never</span>
+              <span>
+                <span className="sm:hidden">Never updated</span>
+                <span className="hidden sm:inline">Last updated: Never</span>
+              </span>
             )}
             {isValuesPage && (
               <Link
                 href="/items/suggestions"
+                aria-label={`Suggest a value for ${item.name}`}
                 prefetch={false}
                 onClick={(e) => e.stopPropagation()}
                 className="text-link hover:text-link-hover relative z-20 underline transition-colors"
               >
-                Suggest a value
+                <span className="sm:hidden">Suggest</span>
+                <span className="hidden sm:inline">Suggest a value</span>
               </Link>
             )}
           </div>
