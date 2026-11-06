@@ -87,6 +87,7 @@ import {
   BottomPanelFooter,
   BottomPanelHeader,
   useBottomPanel,
+  useDesktopDock,
 } from "@/components/ui/bottom-panel";
 import { colorKeysAt } from "@/utils/ui/elementColors";
 
@@ -212,6 +213,9 @@ export default function CustomThemeEditor({
   // page stays visible while editing.
   const bottomPanel = useBottomPanel("the editor");
   const { isMobile } = bottomPanel;
+  const dock = useDesktopDock("the editor");
+  const { minimized } = dock;
+  const collapsed = isMobile ? bottomPanel.collapsed : minimized;
   const { theme: siteTheme, customTheme } = useTheme();
   const { data: siteThemes } = useQuery({
     queryKey: ["site-themes"],
@@ -704,7 +708,7 @@ export default function CustomThemeEditor({
       {/* Not modal and no overlay: the user browses the site with the draft
           applied. Clicks on the page don't close it, so work isn't lost. */}
       <SheetContent
-        side={bottomPanel.sheet.side}
+        side={isMobile ? bottomPanel.sheet.side : dock.side}
         hideOverlay
         onInteractOutside={(event) => event.preventDefault()}
         // Escape while picking only ends the pick (see the picker's onKey).
@@ -715,12 +719,16 @@ export default function CustomThemeEditor({
         style={bottomPanel.sheet.style}
         className={cn(
           "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
-          isMobile ? bottomPanel.sheet.className : "h-full sm:max-w-xl",
+          isMobile
+            ? bottomPanel.sheet.className
+            : minimized
+              ? "bottom-auto! h-auto! sm:max-w-sm"
+              : "h-full sm:max-w-xl",
         )}
       >
         {current && (
           <Popover
-            open={open && floatingColors !== null && !bottomPanel.collapsed}
+            open={open && floatingColors !== null && !collapsed}
             onOpenChange={(next) => !next && setFloatingColors(null)}
           >
             <PopoverPrimitive.Anchor virtualRef={floatingAnchor} />
@@ -832,19 +840,25 @@ export default function CustomThemeEditor({
           </>
         ) : (
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Close the editor"
-              title="Close (Shift+click to skip unsaved changes)"
-              onClick={(event) => cancel(event.shiftKey)}
-              className="absolute top-3 right-3"
-            >
-              <Icon icon="lucide:x" aria-hidden="true" />
-            </Button>
+            <div className="absolute top-3 right-3 flex gap-1">
+              {dock.controls}
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Close the editor"
+                title="Close (Shift+click to skip unsaved changes)"
+                onClick={(event) => cancel(event.shiftKey)}
+              >
+                <Icon icon="lucide:x" aria-hidden="true" />
+              </Button>
+            </div>
             <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
-              <SheetTitle>{savedTheme ? "Edit theme" : "New theme"}</SheetTitle>
-              <SheetDescription className="text-secondary-text">
+              <SheetTitle className="pr-28">
+                {savedTheme ? "Edit theme" : "New theme"}
+              </SheetTitle>
+              <SheetDescription
+                className={cn("text-secondary-text", minimized && "sr-only")}
+              >
                 Browse the site to see your theme anywhere. Changes show as you
                 go.
               </SheetDescription>
@@ -852,7 +866,7 @@ export default function CustomThemeEditor({
           </>
         )}
 
-        {bottomPanel.collapsed ? null : !current ? (
+        {collapsed ? null : !current ? (
           <p className="text-secondary-text px-6 py-8 text-sm">
             Loading colors…
           </p>
@@ -1522,9 +1536,7 @@ export default function CustomThemeEditor({
                   scheme={current.scheme}
                   logoFilter={current.logo_filter}
                   onPick={pickColors}
-                  hideTooltips={
-                    floatingColors !== null && !bottomPanel.collapsed
-                  }
+                  hideTooltips={floatingColors !== null && !collapsed}
                 />
               </details>
             </div>

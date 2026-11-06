@@ -121,6 +121,14 @@ body:has(
   display: none !important;
 }
 
+/* Hide the rail ad under an open side sheet; the other rail stays. */
+body:has([data-sheet-side="left"][data-state="open"])
+  [data-rail-side="left"],
+body:has([data-sheet-side="right"][data-state="open"])
+  [data-rail-side="right"] {
+  visibility: hidden !important;
+}
+
 @theme {
   /* Radius scale shifted one step rounder than Tailwind defaults */
   --radius-md: 0.5rem;

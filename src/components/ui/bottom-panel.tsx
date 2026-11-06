@@ -232,3 +232,37 @@ export function useBottomPanel(
       : { side: "right" as const, style: undefined, className: "" },
   };
 }
+
+/** Desktop side sheets: dock left or right, or minimize to the header. */
+export function useDesktopDock(label: string) {
+  const [side, setSide] = useState<"left" | "right">("right");
+  const [minimized, setMinimized] = useState(false);
+  const other = side === "right" ? "left" : "right";
+  const controls = (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={`Move ${label} to the ${other}`}
+        title={`Move to the ${other}`}
+        onClick={() => setSide(other)}
+      >
+        <Icon icon={`lucide:panel-${other}`} aria-hidden="true" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={`${minimized ? "Expand" : "Minimize"} ${label}`}
+        aria-expanded={!minimized}
+        title={minimized ? "Expand" : "Minimize"}
+        onClick={() => setMinimized(!minimized)}
+      >
+        <Icon
+          icon={minimized ? "lucide:maximize-2" : "lucide:minimize-2"}
+          aria-hidden="true"
+        />
+      </Button>
+    </>
+  );
+  return { side, minimized, controls };
+}

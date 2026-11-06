@@ -72,6 +72,7 @@ const SheetContent = React.forwardRef<
       <SheetPrimitive.Content
         ref={ref}
         data-sheet=""
+        data-sheet-side={side}
         className={cn(sheetVariants({ side }), className)}
         // Toasts move beside right-hand sheets (see the Toaster).
         {...(side === "right" ? { "data-toast-avoid": "" } : {})}

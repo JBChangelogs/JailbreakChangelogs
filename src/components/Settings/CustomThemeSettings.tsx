@@ -217,6 +217,7 @@ export function useCustomThemes() {
   return {
     isAuthenticated,
     mine,
+    current: mine.find((t) => t.share_code === customTheme?.share_code),
     limit,
     shared,
     inUse: (code: string) => customTheme?.share_code === code,
@@ -393,20 +394,33 @@ export default function CustomThemeControls({
         </Link>
       </div>
       {custom.isAuthenticated && (
-        <Button
-          size="md"
-          variant="secondary"
-          className="w-full sm:w-auto"
-          onClick={() => custom.openEditor("new")}
-        >
-          <Icon icon="lucide:plus" aria-hidden="true" />
-          Create theme
-          {custom.limit > 0 && (
-            <span className="tabular-nums opacity-80">
-              {custom.mine.length}/{custom.limit}
-            </span>
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+          {custom.current && (
+            <Button
+              size="md"
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={() => custom.openEditor(custom.current!)}
+            >
+              <Icon icon="lucide:pencil" aria-hidden="true" />
+              Edit current theme
+            </Button>
           )}
-        </Button>
+          <Button
+            size="md"
+            variant="secondary"
+            className="w-full sm:w-auto"
+            onClick={() => custom.openEditor("new")}
+          >
+            <Icon icon="lucide:plus" aria-hidden="true" />
+            Create theme
+            {custom.limit > 0 && (
+              <span className="tabular-nums opacity-80">
+                {custom.mine.length}/{custom.limit}
+              </span>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   );

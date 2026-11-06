@@ -148,6 +148,7 @@ function editor({
               collapsed,
               sheet: { side: "right" },
             }),
+            useDesktopDock: () => ({ side: "right", minimized: false }),
             BottomPanelHeader: "BottomPanelHeader",
             BottomPanelFooter: "BottomPanelFooter",
           };
