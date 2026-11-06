@@ -910,7 +910,7 @@ export default function UserProfileClient({
                 >
                   <button
                     type="button"
-                    className="text-link hover:text-link-hover inline-flex cursor-pointer items-center gap-1.5 align-middle"
+                    className="text-link hover:text-link-hover inline-flex cursor-pointer items-center gap-1.5 align-middle hover:underline"
                   >
                     <UserAvatar
                       userId={packTheme.user_id}

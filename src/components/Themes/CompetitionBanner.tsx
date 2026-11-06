@@ -85,14 +85,14 @@ export default function CompetitionBanner() {
           competition is live until {formatDate(competition.ends_at)}.{" "}
           <Link
             href={`${href}#submit`}
-            className="text-link hover:text-link-hover font-medium"
+            className="text-link hover:text-link-hover font-medium hover:underline"
           >
             Enter competition
           </Link>{" "}
           or{" "}
           <Link
             href={`${href}#standings`}
-            className="text-link hover:text-link-hover font-medium"
+            className="text-link hover:text-link-hover font-medium hover:underline"
           >
             view the standings
           </Link>
