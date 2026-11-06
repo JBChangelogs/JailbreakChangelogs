@@ -113,7 +113,6 @@ test("global fallback reports the crash and recovers without app providers", () 
         if (name === "next/script") return { default: "Script" };
         if (name === "@/utils/analytics/reportAppError")
           return { reportAppError: (...args: unknown[]) => reports.push(args) };
-        // Provider-free: only imports react.
         if (name === "@/hooks/useReloadOnNewBuild")
           return { useReloadOnNewBuild: () => {} };
         throw new Error(`Unexpected dependency in global fallback: ${name}`);

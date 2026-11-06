@@ -10,9 +10,7 @@ export const onRequestError: Instrumentation.onRequestError = (
       `next-request-error ${context.routePath}`,
       error,
     );
-  } catch {
-    // Tracing must never break error reporting.
-  }
+  } catch {}
   console.error(
     JSON.stringify({
       level: "error",

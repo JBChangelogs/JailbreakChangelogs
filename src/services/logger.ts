@@ -15,8 +15,7 @@ export type LogModule =
 type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
 
 declare global {
-  // Installed by src/instrumentation.ts on the server when OTel is enabled,
-  // so this module stays free of OTel imports in the client bundle.
+  // Set by instrumentation.ts so OTel stays out of the client bundle.
   var __jbclRecordSpanError:
     | ((message: string, error?: unknown) => void)
     | undefined;
@@ -91,9 +90,7 @@ function emit(
     if (level === "ERROR") {
       try {
         globalThis.__jbclRecordSpanError?.(`[${module}] ${message}`, extra);
-      } catch {
-        // Tracing must never break logging.
-      }
+      } catch {}
     }
     return;
   }

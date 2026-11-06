@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 
-// Error boundaries call this: if a newer build is live, the crash is most
-// likely deploy skew (old client JS, new server payload), so reload once onto
-// the new build. Shared key: at most one reload per tab per build.
+// Crashes right after a deploy are usually version skew; reload once per build.
 export function useReloadOnNewBuild() {
   useEffect(() => {
     const buildTime = Number(process.env.NEXT_PUBLIC_BUILD_TIME);
