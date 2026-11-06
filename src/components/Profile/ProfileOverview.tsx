@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import AboutTab from "./AboutTab";
+import BadgesSection from "./BadgesSection";
 import CommentsTab from "./CommentsTab";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import FavoritesTab from "./FavoritesTab";
@@ -227,6 +228,7 @@ export default function ProfileOverview({
             onBioUpdate={onBioUpdate}
           />
         )}
+        {isOverview && <BadgesSection userId={user.id} />}
         {isOverview && <div ref={setCommentsPreviewContainer} />}
         {(isOverview || section.id === "favorites") && (
           <FavoritesTab
