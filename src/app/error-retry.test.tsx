@@ -61,6 +61,9 @@ for (const path of paths) {
               },
             };
           }
+          if (name === "@/components/ui/ErrorDigest") {
+            return { default: () => null };
+          }
           if (name === "@/services/logger") {
             return { createLogger: () => ({ error: () => {} }) };
           }

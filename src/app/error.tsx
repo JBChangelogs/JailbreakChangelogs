@@ -1,5 +1,6 @@
 "use client";
 
+import ErrorDigest from "@/components/ui/ErrorDigest";
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ export default function Error({
             <p className="text-secondary-text mt-4">
               Try again, or return to the home page.
             </p>
+            <ErrorDigest digest={error.digest} />
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
               <Button
                 variant="secondary"

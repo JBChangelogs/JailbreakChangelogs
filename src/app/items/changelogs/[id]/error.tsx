@@ -1,5 +1,6 @@
 "use client";
 
+import ErrorDigest from "@/components/ui/ErrorDigest";
 import { useEffect } from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -50,6 +51,7 @@ export default function Error({
                 ? "The changelog you're looking for doesn't exist or has been removed."
                 : "An unexpected error occurred while loading the changelog details."}
             </p>
+            <ErrorDigest digest={error.digest} />
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <Button size="lg" onClick={retry}>
                 Try again

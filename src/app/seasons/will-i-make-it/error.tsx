@@ -1,5 +1,6 @@
 "use client";
 
+import ErrorDigest from "@/components/ui/ErrorDigest";
 import React, { useEffect } from "react";
 import { reportAppError } from "@/utils/analytics/reportAppError";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -29,6 +30,8 @@ export default function Error({ error, retry }: ErrorProps) {
                 might be a temporary issue.
               </p>
             </div>
+
+            <ErrorDigest digest={error.digest} />
 
             <div className="space-y-4">
               <button

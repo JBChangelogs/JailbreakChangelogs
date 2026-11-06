@@ -1,5 +1,6 @@
 "use client";
 
+import ErrorDigest from "@/components/ui/ErrorDigest";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -36,6 +37,8 @@ export default function Error({
             <p className="text-secondary-text mt-4">
               Something went wrong while loading this user&apos;s dupes.
             </p>
+
+            <ErrorDigest digest={error.digest} />
 
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
               <Button

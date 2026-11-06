@@ -1,5 +1,6 @@
 "use client";
 
+import ErrorDigest from "@/components/ui/ErrorDigest";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -39,6 +40,8 @@ export default function Error({
               Something went wrong while loading the value changelogs. You can
               try again or go back to the values page.
             </p>
+
+            <ErrorDigest digest={error.digest} />
 
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
               <Button
