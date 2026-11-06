@@ -162,14 +162,12 @@ export default function BadgesSection({ userId }: { userId: string }) {
         />
       ) : (
         <>
-          {earnedIds.length > 0 ? (
-            <ul className="flex flex-wrap gap-3">
-              {earnedIds.map((id) => renderBadge(id))}
-            </ul>
-          ) : (
-            <p className="text-secondary-text text-sm">No badges yet</p>
-          )}
-          {lockedIds.length > 0 && (
+          <ul className="flex flex-wrap gap-3">
+            {(earnedIds.length > 0 ? earnedIds : lockedIds).map((id) =>
+              renderBadge(id),
+            )}
+          </ul>
+          {earnedIds.length > 0 && lockedIds.length > 0 && (
             <>
               <Button
                 variant="ghost"
