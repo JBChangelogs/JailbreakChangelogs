@@ -10,6 +10,8 @@ import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementL
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import { useRailAdSize } from "@/hooks/useRailAdSize";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import React from "react";
 import { Button } from "../ui/button";
 import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
@@ -89,6 +91,9 @@ export default function ValuesItemsGrid({
 
   const favoritesSet = useMemo(() => new Set(favorites), [favorites]);
   const noRailAds = useRailAdSize() === "none";
+  const { user, isLoading: isAuthLoading } = useAuthContext();
+  const showAds =
+    !isAuthLoading && !canHideAdsForPremiumType(user?.premiumtype);
 
   const displayedItems = items;
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -266,12 +271,12 @@ export default function ValuesItemsGrid({
                   onFavoriteChange(item.id, fav);
                 }}
               />
-              {(index + 1 === 6 || (index + 1) % 32 === 0) && (
+              {showAds && (index + 1 === 6 || (index + 1) % 32 === 0) && (
                 <div className="col-span-full flex justify-center py-4 md:hidden">
                   <NitroGridAd adId={`np-value-grid-${index + 1}`} />
                 </div>
               )}
-              {noRailAds && (index + 1) % 96 === 0 && (
+              {showAds && noRailAds && (index + 1) % 96 === 0 && (
                 <div className="col-span-full hidden justify-center py-4 md:flex">
                   <NitroGridAd adId={`np-value-feed-${index + 1}`} desktop />
                 </div>

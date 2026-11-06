@@ -4,6 +4,7 @@ import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import type ValuesItemsGrid from "./ValuesItemsGrid";
 import { getFilterSortsDisplayNames } from "./valuesFilterOptions";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 
 test("scroll loading pauses during fetches and errors, retries manually, and resets page links on filter changes", () => {
   const effects: Array<() => void | (() => void)> = [];
@@ -16,6 +17,8 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   let retried = 0;
   const pages: number[] = [];
   const button = Symbol("Button");
+  const gridAd = Symbol("NitroGridAd");
+  const auth = { isLoading: false, user: { premiumtype: 0 } };
   const exports = {} as { default: typeof ValuesItemsGrid };
   runInNewContext(
     transpileModule(
@@ -59,6 +62,11 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
           };
         if (name === "@/hooks/useRailAdSize")
           return { useRailAdSize: () => "none" };
+        if (name === "@/contexts/AuthContext")
+          return { useAuthContext: () => auth };
+        if (name === "@/utils/auth/supporterAccess")
+          return { canHideAdsForPremiumType };
+        if (name === "@/components/Ads/NitroGridAd") return { default: gridAd };
         if (name === "../ui/button") return { Button: button };
         if (name === "./valuesFilterOptions")
           return { getFilterSortsDisplayNames };
@@ -93,7 +101,12 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   };
   type Node = {
     type: unknown;
-    props: { children?: unknown; onClick?: () => void; disabled?: boolean };
+    props: {
+      children?: unknown;
+      onClick?: () => void;
+      disabled?: boolean;
+      className?: string;
+    };
   };
   function nodes(value: unknown): Node[] {
     if (Array.isArray(value)) return value.flatMap(nodes);
@@ -154,4 +167,27 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
   props.debouncedSearchTerm = "Torpedo";
   render();
   expect(pages).toEqual([1]);
+
+  // Appending pages must not leave padded ad rows for ad-free supporters.
+  const adRows = () =>
+    nodes(render().tree).filter(
+      (node) =>
+        node.props.className?.includes("col-span-full") &&
+        nodes(node.props.children).some((child) => child.type === gridAd),
+    );
+  for (const count of [32, 64, 96]) {
+    props.items = Array.from({ length: count }, (_, id) => ({
+      id,
+    })) as typeof props.items;
+    for (const tier of [0, 1, 2, 3]) {
+      auth.user.premiumtype = tier;
+      expect(adRows().length).toBe(
+        tier >= 2 ? 0 : 1 + count / 32 + Math.floor(count / 96),
+      );
+    }
+    auth.user.premiumtype = 0;
+    auth.isLoading = true;
+    expect(adRows()).toEqual([]);
+    auth.isLoading = false;
+  }
 });
