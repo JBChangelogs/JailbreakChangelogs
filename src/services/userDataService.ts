@@ -105,7 +105,15 @@ export class UserDataService {
     if (includeUserConnection && finalUserIds.length > 0) {
       fetchPromises.push(
         fetchUserByRobloxId(finalUserIds[0]).catch((error) => {
-          log.error(`[${context}] Failed to fetch user connection data`, error);
+          // Banned or unlinked users are expected outcomes, not failures; a
+          // warn keeps them out of error traces.
+          const expected =
+            error instanceof Error &&
+            /^(BANNED_USER|NOT_FOUND):/.test(error.message);
+          (expected ? log.warn : log.error)(
+            `[${context}] Failed to fetch user connection data`,
+            error,
+          );
           return null;
         }),
       );
