@@ -848,7 +848,6 @@ export default function Header({
             setUtmModalOpen={setUtmModalOpen}
           />
         </div>
-        <div data-header-banner>{banner}</div>
       </div>
 
       <DesktopSidebar
@@ -956,8 +955,6 @@ export default function Header({
             </div>
           </div>
 
-          <div data-header-banner>{banner}</div>
-
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetContent
@@ -981,6 +978,8 @@ export default function Header({
           </Sheet>
         </>
       </div>
+
+      <div data-header-banner>{banner}</div>
 
       <LoginModal />
       {searchOpen && searchEnabled && (

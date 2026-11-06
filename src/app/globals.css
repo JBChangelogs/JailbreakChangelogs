@@ -822,11 +822,13 @@ img.twemoji {
 }
 
 /* Keep the glow below preview notices instead of washing over their text. */
+html[data-profile-underglow]:not(
+    :has([data-profile-preview-banner], [data-header-banner] > *)
+  )
+  [data-site-header],
 html[data-profile-underglow]:not(:has([data-profile-preview-banner]))
-  :is(
-    [data-site-header]:not(:has([data-header-banner] > *)),
-    [data-header-banner] > *
-  ),
+  [data-header-banner]
+  > *,
 html[data-profile-underglow] [data-profile-preview-banner] {
   box-shadow: 0 14px 44px -16px
     color-mix(in srgb, var(--profile-underglow) 70%, transparent);

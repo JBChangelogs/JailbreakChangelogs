@@ -66,39 +66,47 @@ export default function CompetitionBanner() {
   const href = `/themes/competitions/${competition.id}`;
 
   return (
-    <div className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative flex items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm">
-      <Icon
-        icon="heroicons:trophy"
-        className="text-button-info size-4 shrink-0"
-        aria-hidden="true"
-      />
-      {status === "upcoming" ? (
-        <p className="min-w-0">
-          <Link href={href} className="font-semibold hover:underline">
-            {competition.title}
-          </Link>{" "}
-          theme competition starts {formatDate(competition.starts_at)}.
-        </p>
-      ) : (
-        <p className="min-w-0">
-          <span className="font-semibold">{competition.title}</span> theme
-          competition is live until {formatDate(competition.ends_at)}.{" "}
-          <Link
-            href={`${href}#submit`}
-            className="text-link hover:text-link-hover font-medium hover:underline"
-          >
-            Enter competition
-          </Link>{" "}
-          or{" "}
-          <Link
-            href={`${href}#standings`}
-            className="text-link hover:text-link-hover font-medium hover:underline"
-          >
-            view the standings
-          </Link>
-          .
-        </p>
-      )}
+    <div className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative border-b px-12 py-2 text-center text-sm">
+      <p className="min-w-0">
+        <Icon
+          icon="heroicons:trophy"
+          className="text-button-info mr-1.5 inline size-4 align-[-3px]"
+          aria-hidden="true"
+        />
+        {status === "upcoming" ? (
+          <>
+            <Link href={href} className="font-semibold hover:underline">
+              {competition.title}
+            </Link>
+            <span className="hidden sm:inline"> theme competition</span> starts{" "}
+            {formatDate(competition.starts_at)}.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold">{competition.title}</span>
+            <span className="hidden sm:inline">
+              {" "}
+              theme competition is live until {formatDate(competition.ends_at)}.
+            </span>{" "}
+            <Link
+              href={`${href}#submit`}
+              className="text-link hover:text-link-hover font-medium hover:underline"
+            >
+              Enter<span className="hidden sm:inline"> competition</span>
+            </Link>
+            <span className="sm:hidden"> · </span>
+            <span className="hidden sm:inline"> or </span>
+            <Link
+              href={`${href}#standings`}
+              className="text-link hover:text-link-hover font-medium hover:underline"
+            >
+              <span className="sm:hidden">Standings</span>
+              <span className="hidden sm:inline">view the standings</span>
+            </Link>
+            <span className="hidden sm:inline">.</span>
+          </>
+        )}
+      </p>
       <button
         type="button"
         aria-label="Hide theme competition banner"
