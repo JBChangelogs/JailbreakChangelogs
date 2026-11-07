@@ -31,8 +31,6 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { ExperimentOverridesBadge } from "@/components/Experiments/ExperimentOverridesIndicator";
 import type { UserData } from "@/types/auth";
-import { useWsConnectionPending } from "@/hooks/useWsConnectionPending";
-import { Spinner } from "@/components/ui/Spinner";
 import {
   getDesktopSidebarBehavior,
   setDesktopSidebarBehavior,
@@ -85,7 +83,7 @@ import {
   fetchUnreadMessageCount,
   fetchUnreadNotificationCount,
 } from "@/utils/api/api";
-import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
+import { canOverrideExperiments } from "@/utils/api/experiments";
 import {
   NotificationPopover,
   UnreadBadge,
@@ -201,10 +199,6 @@ const MobileDrawer = memo(function MobileDrawer({
   toggleNavSection,
   onClose,
   onLogout,
-  setUtmModalOpen,
-  wsConnected,
-  wsTogglePending,
-  onToggleWsConnection,
 }: {
   userData: UserData | null;
   openNavSection: string;
@@ -212,15 +206,10 @@ const MobileDrawer = memo(function MobileDrawer({
   toggleNavSection: (title: string) => void;
   onClose: () => void;
   onLogout: () => void;
-  setUtmModalOpen: (open: boolean) => void;
-  wsConnected: boolean;
-  wsTogglePending: boolean;
-  onToggleWsConnection: () => void;
 }) {
   const { setLoginModal } = useAuthContext();
   const pathname = usePathname();
   const activeHref = getNavigationHref(pathname);
-  const isOwner = userData?.flags?.some((f) => f.flag === "is_owner") ?? false;
 
   return (
     <div className="flex h-full flex-col">
@@ -288,90 +277,23 @@ const MobileDrawer = memo(function MobileDrawer({
                 Settings
               </span>
             </Link>
-            {isOwner && (
-              <details className="group/tools">
-                <summary className="text-primary-text hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+            {canOverrideExperiments(userData) && (
+              <Link
+                href="/experiments"
+                onClick={onClose}
+                className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center">
                   <Icon
                     icon="mdi:flask-outline"
-                    className="text-secondary-text h-5 w-5 shrink-0"
+                    className="text-secondary-text h-5 w-5"
+                    inline={true}
                   />
-                  <span className="flex-1">Owner tools</span>
-                  <Icon
-                    icon="mdi:chevron-down"
-                    className="text-secondary-text h-4 w-4 shrink-0 transition-transform duration-300 group-open/tools:rotate-180 motion-reduce:transition-none"
-                  />
-                </summary>
-                <div className="space-y-0.5 pl-3">
-                  <Link
-                    href="/experiments"
-                    onClick={onClose}
-                    className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                      <Icon
-                        icon="mdi:flask-outline"
-                        className="text-secondary-text h-5 w-5"
-                        inline={true}
-                      />
-                    </div>
-                    <span className="text-primary-text text-sm font-semibold">
-                      Experiments
-                    </span>
-                  </Link>
-                  {isOwner && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={onToggleWsConnection}
-                        disabled={wsTogglePending}
-                        aria-label={
-                          wsConnected
-                            ? "Disconnect realtime connection"
-                            : "Connect realtime connection"
-                        }
-                        title={
-                          wsConnected
-                            ? "Disconnect realtime connection"
-                            : "Connect realtime connection"
-                        }
-                        className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                          {wsTogglePending ? (
-                            <Spinner className="h-4 w-4" />
-                          ) : (
-                            <span
-                              className={`h-2.5 w-2.5 rounded-full ${wsConnected ? "bg-green-500" : "bg-red-500"}`}
-                            />
-                          )}
-                        </div>
-                        <span className="text-primary-text min-w-0 flex-1 text-sm font-semibold">
-                          Realtime connection
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onClose();
-                          setUtmModalOpen(true);
-                        }}
-                        className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                      >
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-                          <Icon
-                            icon="heroicons:link"
-                            className="text-secondary-text h-5 w-5"
-                            inline={true}
-                          />
-                        </div>
-                        <span className="text-primary-text text-sm font-semibold">
-                          Generate UTM Link
-                        </span>
-                      </button>
-                    </>
-                  )}
                 </div>
-              </details>
+                <span className="text-primary-text text-sm font-semibold">
+                  Experiments
+                </span>
+              </Link>
             )}
             <Link
               href="/reports"
@@ -499,7 +421,6 @@ export default function Header({
       setOpenNavSection((prev) => (prev === title ? "" : title)),
     [],
   );
-  const [utmModalOpen, setUtmModalOpen] = useState(false);
   const hasWsUnreadSeedRef = useRef(false);
   const seenRealtimeMessageIdsRef = useRef(new Set<string>());
   const notificationCountRefreshTimeoutRef = useRef<number | null>(null);
@@ -511,8 +432,6 @@ export default function Header({
     isLoading,
     wsConnected,
   } = useAuthContext();
-  const { isPending: wsTogglePending, toggleConnection: toggleWsConnection } =
-    useWsConnectionPending(wsConnected);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const showAuth = mounted && !isLoading && isAuthenticated;
@@ -844,7 +763,6 @@ export default function Header({
             unreadMessageCount={unreadMessageCount}
             setUnreadCount={setUnreadCount}
             onUserMenuOpenChange={setDesktopUserMenuOpen}
-            setUtmModalOpen={setUtmModalOpen}
           />
         </div>
       </div>
@@ -967,10 +885,6 @@ export default function Header({
                 toggleNavSection={toggleNavSection}
                 onClose={handleDrawerToggle}
                 onLogout={handleLogout}
-                setUtmModalOpen={setUtmModalOpen}
-                wsConnected={wsConnected}
-                wsTogglePending={wsTogglePending}
-                onToggleWsConnection={toggleWsConnection}
               />
             </SheetContent>
           </Sheet>
@@ -988,11 +902,6 @@ export default function Header({
       <div className="hidden xl:block">
         <EscapeLoginModal />
       </div>
-
-      <UtmGeneratorModal
-        isOpen={utmModalOpen}
-        onClose={() => setUtmModalOpen(false)}
-      />
     </>
   );
 }

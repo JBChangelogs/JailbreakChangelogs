@@ -117,7 +117,6 @@ export const NavbarModern = ({
   unreadMessageCount,
   setUnreadCount,
   onUserMenuOpenChange,
-  setUtmModalOpen,
   onOpenSearch,
 }: {
   className?: string;
@@ -126,7 +125,6 @@ export const NavbarModern = ({
   unreadMessageCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
   onUserMenuOpenChange?: (open: boolean) => void;
-  setUtmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const pathname = usePathname();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -593,19 +591,6 @@ export const NavbarModern = ({
                       />
                       Support Us
                     </Link>
-                  </DropdownMenuItem>
-                )}
-                {userData.flags?.some((f) => f.flag === "is_owner") && (
-                  <DropdownMenuItem
-                    onSelect={() => setUtmModalOpen(true)}
-                    className="gap-3 rounded-md px-3 py-2.5"
-                  >
-                    <Icon
-                      icon="heroicons:link"
-                      className="text-secondary-text h-4 w-4"
-                      inline={true}
-                    />
-                    Generate UTM Link
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem

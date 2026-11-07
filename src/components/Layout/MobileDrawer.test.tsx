@@ -5,8 +5,9 @@ import * as React from "react";
 import * as jsxRuntime from "react/jsx-runtime";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ModuleKind, transpileModule } from "typescript";
+import { canOverrideExperiments } from "@/utils/api/experiments";
 
-test("mobile tools start collapsed and retain owner access", () => {
+test("owners get an Experiments link in the mobile drawer", () => {
   // Isolate the drawer from the header's network and authentication effects.
   const source = readFileSync(new URL("./Header.tsx", import.meta.url), "utf8");
   const drawer = source.slice(
@@ -34,39 +35,31 @@ test("mobile tools start collapsed and retain owner access", () => {
       }) => <a href={href}>{children}</a>,
       UserAvatar: () => null,
       Icon: () => null,
-      Spinner: () => null,
+      canOverrideExperiments,
     },
   );
 
-  for (const [flag, enabled, label] of [
-    ["is_owner", true, "Owner tools"],
-    ["regular", true, null],
-  ] as const) {
+  for (const flag of ["is_owner", "regular"]) {
     const markup = renderToStaticMarkup(
       React.createElement(component, {
         userData: {
           id: "1",
           username: "Player",
           roblox_id: "2",
-          flags: [{ flag, enabled }],
+          flags: [{ flag, enabled: true }],
         },
-        wsConnected: true,
       }),
     );
-    const tools = markup.match(/<details\b[^>]*>.*?<\/details>/s)?.[0];
-    if (label) {
-      expect(tools).toContain(label);
-      expect(tools).not.toMatch(/<details\b[^>]*\bopen(?:\s|=|>)/);
-      expect(tools).toContain("Experiments");
-      expect(tools?.includes("Realtime connection")).toBe(flag === "is_owner");
-      expect(tools?.includes("Generate UTM Link")).toBe(flag === "is_owner");
-    } else {
-      expect(tools).toBeUndefined();
-      expect(markup).not.toContain("Experiments");
+    expect(markup.includes("Experiments")).toBe(flag === "is_owner");
+    for (const removed of [
+      "Owner tools",
+      "Realtime connection",
+      "Generate UTM Link",
+    ]) {
+      expect(markup).not.toContain(removed);
     }
-    const account = markup.replace(tools ?? "", "");
     for (const action of ["Settings", "My Reports", "Logout"]) {
-      expect(account).toContain(action);
+      expect(markup).toContain(action);
     }
   }
 });
