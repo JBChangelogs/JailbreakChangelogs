@@ -1,46 +1,25 @@
-"use client";
-
-import { motion, useAnimationFrame, useMotionValue } from "motion/react";
-import { useRef } from "react";
+import { Children } from "react";
 
 interface SupporterCarouselProps {
   children: React.ReactNode;
-  speed?: number;
 }
 
+// data-state=open: a Radix profile popover trigger inside is open.
 export default function SupporterCarousel({
   children,
-  speed = 0.5,
 }: SupporterCarouselProps) {
-  const baseX = useMotionValue(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useAnimationFrame(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const scrollWidth = container.scrollWidth / 2; // Half because we duplicate
-
-    let newX = baseX.get() - speed;
-
-    // Reset when we've scrolled past one full set
-    if (newX <= -scrollWidth) {
-      newX = 0;
-    }
-
-    baseX.set(newX);
-  });
-
   return (
-    <div className="overflow-hidden">
-      <motion.div
-        ref={containerRef}
-        className="flex gap-6"
-        style={{ x: baseX }}
+    <div className="group overflow-hidden">
+      <div
+        className="animate-marquee flex w-max group-hover:[animation-play-state:paused] has-[[data-state=open]]:[animation-play-state:paused] motion-reduce:animate-none"
+        style={{ animationDuration: `${Children.count(children) * 8}s` }}
       >
-        {children}
-        {children}
-      </motion.div>
+        {/* pr-6, not gap, so the -50% loop lands exactly */}
+        <div className="flex gap-6 pr-6">{children}</div>
+        <div className="flex gap-6 pr-6" aria-hidden>
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

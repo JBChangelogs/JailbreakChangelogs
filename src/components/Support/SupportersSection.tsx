@@ -167,7 +167,7 @@ export default function SupportersSection({
           <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-20 bg-linear-to-r to-transparent"></div>
           <div className="from-primary-bg pointer-events-none absolute top-0 right-0 z-10 h-full w-20 bg-gradient-to-l to-transparent"></div>
 
-          <SupporterCarousel speed={0.5}>
+          <SupporterCarousel>
             {tierSupporters.map((supporter) => (
               <div key={supporter.id}>{renderSupporterCard(supporter)}</div>
             ))}
