@@ -32,6 +32,12 @@ const BADGE_ICONS = [
   { prefix: "veteran", icon: "heroicons:clock" },
   { prefix: "trade_ads_", icon: "heroicons:arrows-right-left" },
   { prefix: "group_member", icon: "heroicons:user-group" },
+  { prefix: "testimonial", icon: "heroicons:chat-bubble-left-right" },
+  { prefix: "server_benefactor", icon: "heroicons:server-stack" },
+  { prefix: "designer", icon: "mdi:palette-outline" },
+  { prefix: "power_user", icon: "heroicons:computer-desktop" },
+  { prefix: "economist", icon: "heroicons:scale" },
+  { prefix: "market_expert", icon: "heroicons:presentation-chart-line" },
 ];
 const CATEGORY_ICONS = [
   { category: "networth", icon: "heroicons:chart-bar" },
