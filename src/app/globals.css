@@ -28,6 +28,71 @@ html:has([data-values-items-grid]) {
   pointer-events: none;
 }
 
+[data-slot="tabs-list"][data-fade-end] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+[data-slot="tabs-list"][data-fade-start] {
+  mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent);
+}
+[data-slot="tabs-list"][data-fade-start][data-fade-end] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent
+  );
+}
+
+/* A mask would fade the filled list's border too, so fade the tabs with
+   sticky overlays in the list's own background instead. */
+html[data-tab-style="filled"] [data-slot="tabs-list"]:is([data-fade-start], [data-fade-end]),
+[data-slot="tabs-list"][data-variant="filled"]:is([data-fade-start], [data-fade-end]) {
+  mask-image: none;
+}
+html[data-tab-style="filled"] [data-slot="tabs-list"]:is([data-fade-start], [data-fade-end])::before,
+html[data-tab-style="filled"] [data-slot="tabs-list"]:is([data-fade-start], [data-fade-end])::after,
+[data-slot="tabs-list"][data-variant="filled"]:is([data-fade-start], [data-fade-end])::before,
+[data-slot="tabs-list"][data-variant="filled"]:is([data-fade-start], [data-fade-end])::after {
+  content: "";
+  position: sticky;
+  z-index: 2;
+  flex: none;
+  align-self: stretch;
+  /* Overshoot the list's 2px padding, with a solid outer edge, so text
+     can't peek past the fade at fractional scroll positions. */
+  margin-block: -2px;
+  width: 27px;
+  pointer-events: none;
+}
+html[data-tab-style="filled"] [data-slot="tabs-list"]::before,
+[data-slot="tabs-list"][data-variant="filled"]::before {
+  left: -3px;
+  order: -1;
+  margin-right: -27px;
+  background: linear-gradient(
+    to left,
+    transparent,
+    var(--color-tertiary-bg) calc(100% - 5px)
+  );
+}
+html[data-tab-style="filled"] [data-slot="tabs-list"]::after,
+[data-slot="tabs-list"][data-variant="filled"]::after {
+  right: -3px;
+  margin-left: -27px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-tertiary-bg) calc(100% - 5px)
+  );
+}
+html[data-tab-style="filled"] [data-slot="tabs-list"]:not([data-fade-start])::before,
+html[data-tab-style="filled"] [data-slot="tabs-list"]:not([data-fade-end])::after,
+[data-slot="tabs-list"][data-variant="filled"]:not([data-fade-start])::before,
+[data-slot="tabs-list"][data-variant="filled"]:not([data-fade-end])::after {
+  visibility: hidden;
+}
+
 html[data-tab-style="filled"] [data-slot="tabs-list"],
 [data-slot="tabs-list"][data-variant="filled"] {
   border: 1px solid var(--color-border-card);

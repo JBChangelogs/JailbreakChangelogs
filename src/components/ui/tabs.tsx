@@ -103,6 +103,8 @@ const TabsList = React.forwardRef<
       animate: false,
     });
 
+    const lastActiveRef = React.useRef<HTMLElement | null>(null);
+
     const updateIndicator = React.useCallback(() => {
       const el = listRef.current as unknown as HTMLElement | null;
       if (!el) return;
@@ -127,6 +129,17 @@ const TabsList = React.forwardRef<
       const width = activeRect.width;
       const top = activeRect.top - listRect.top - el.clientTop;
       const height = activeRect.height;
+
+      if (active !== lastActiveRef.current) {
+        const firstTime = lastActiveRef.current === null;
+        lastActiveRef.current = active;
+        if (el.scrollWidth > el.clientWidth) {
+          el.scrollTo({
+            left: left + width / 2 - el.clientWidth / 2,
+            behavior: firstTime ? "auto" : "smooth",
+          });
+        }
+      }
 
       setIndicator((prev) => {
         if (
@@ -156,12 +169,22 @@ const TabsList = React.forwardRef<
       const el = listRef.current as unknown as HTMLElement | null;
       if (!el) return;
 
+      const updateFades = () => {
+        el.toggleAttribute("data-fade-start", el.scrollLeft > 1);
+        el.toggleAttribute(
+          "data-fade-end",
+          el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+        );
+      };
+      updateFades();
+
       let rafId: number | null = null;
       const scheduleUpdate = () => {
         if (rafId !== null) cancelAnimationFrame(rafId);
         rafId = requestAnimationFrame(() => {
           rafId = null;
           updateIndicator();
+          updateFades();
         });
       };
 
@@ -194,6 +217,7 @@ const TabsList = React.forwardRef<
         followId = 0;
         updateIndicator();
       };
+      el.addEventListener("scroll", updateFades, { passive: true });
       el.addEventListener("transitionrun", onListTransitionRun);
       el.addEventListener("transitionend", onListTransitionEnd);
       el.addEventListener("transitioncancel", onListTransitionEnd);
@@ -204,6 +228,7 @@ const TabsList = React.forwardRef<
         cancelAnimationFrame(followId);
         observer.disconnect();
         resizeObserver.disconnect();
+        el.removeEventListener("scroll", updateFades);
         el.removeEventListener("transitionrun", onListTransitionRun);
         el.removeEventListener("transitionend", onListTransitionEnd);
         el.removeEventListener("transitioncancel", onListTransitionEnd);
