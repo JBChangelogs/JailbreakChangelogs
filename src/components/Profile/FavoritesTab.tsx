@@ -294,7 +294,7 @@ export default function FavoritesTab({
   return (
     <div className="space-y-6" id="favorites-section">
       <div className="border-border-card bg-secondary-bg rounded-2xl border p-5 sm:p-6">
-        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               {preview ? "Favorite items" : "Favorited Items"}{" "}
