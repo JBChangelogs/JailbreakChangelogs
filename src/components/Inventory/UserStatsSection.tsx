@@ -686,17 +686,18 @@ export default function UserStatsSection({
             <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap italic">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span
-                    className="group cursor-pointer transition-opacity select-none hover:opacity-80"
+                  <button
+                    type="button"
+                    className="cursor-pointer text-left italic transition-opacity hover:opacity-80"
                     onClick={handleCopyTradeNote}
                   >
                     &quot;{tradeNote}&quot;
                     <Icon
                       icon="heroicons-outline:clipboard"
-                      className="text-secondary-text ml-1.5 inline h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
+                      className="text-secondary-text ml-1.5 inline h-4 w-4"
                       inline={true}
                     />
-                  </span>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   <p>Click to copy</p>
