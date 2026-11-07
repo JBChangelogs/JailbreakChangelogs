@@ -11,6 +11,7 @@ export const TRADE_ITEM_FIELDS = [
   "level",
   "tradable",
   "trend",
+  "trends",
   "demand",
   "duped_demand",
 ] as const;

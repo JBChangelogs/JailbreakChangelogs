@@ -122,6 +122,7 @@ interface TradeOfferV2ItemInfo {
   cash_value?: string | null;
   duped_value?: string | null;
   trend?: string | null;
+  trends?: string[] | null;
   demand?: string | null;
   duped_demand?: string | null;
   notes?: string | null;

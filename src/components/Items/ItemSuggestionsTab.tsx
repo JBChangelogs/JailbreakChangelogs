@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useState, useEffect, useRef } from "react";
@@ -15,7 +16,6 @@ import {
   formatMessageDate,
   formatShortDateTime,
 } from "@/utils/helpers/timestamp";
-import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
@@ -155,8 +155,8 @@ interface Suggestion {
   id: number;
   item_id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   reason: string;
   status: string;
   upvotes: number;
@@ -527,7 +527,7 @@ export default function ItemSuggestionsTab({
                       className="text-secondary-text text-base font-bold line-through"
                       style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
                     >
-                      {formatFullValue(suggestion.current_value || "N/A")}
+                      {<SuggestionValue value={suggestion.current_value} />}
                     </div>
                   </div>
                   <div className="min-w-0 p-3">
@@ -543,7 +543,7 @@ export default function ItemSuggestionsTab({
                       className="text-primary-text text-base font-bold"
                       style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
                     >
-                      {formatFullValue(suggestion.suggested_value)}
+                      {<SuggestionValue value={suggestion.suggested_value} />}
                     </div>
                   </div>
                 </div>

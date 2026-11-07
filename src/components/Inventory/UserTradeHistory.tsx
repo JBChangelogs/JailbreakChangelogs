@@ -71,6 +71,7 @@ type TradeCatalogRow = Pick<
   | "level"
   | "tradable"
   | "trend"
+  | "trends"
   | "demand"
   | "duped_demand"
 >;
@@ -85,6 +86,7 @@ const TRADE_CATALOG_FIELDS = [
   "level",
   "tradable",
   "trend",
+  "trends",
   "demand",
   "duped_demand",
 ] as const;
@@ -560,6 +562,7 @@ export default function UserTradeHistory({
           level: item.level,
           tradable: item.tradable,
           trend: item.trend,
+          trends: item.trends,
           demand: item.demand,
           duped_demand: item.duped_demand,
         },

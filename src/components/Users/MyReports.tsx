@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { parseSortGroups } from "@/utils/api/sortGroups";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -151,8 +152,8 @@ interface ReportMetadataMessage {
 interface ReportMetadataSuggestion {
   id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   author: string;
   user_id: string | number;
   item_id: number;
@@ -594,7 +595,10 @@ function ReportContext({ report }: { report: Report }) {
                     .join(" ")}
                 </p>
                 <p className="text-secondary-text text-sm font-bold [overflow-wrap:anywhere] break-words line-through">
-                  {metadata.suggestion.current_value || "N/A"}
+                  <SuggestionValue
+                    value={metadata.suggestion.current_value}
+                    format={(value) => value}
+                  />
                 </p>
               </div>
               <div className="min-w-0">
@@ -607,7 +611,10 @@ function ReportContext({ report }: { report: Report }) {
                     .join(" ")}
                 </p>
                 <p className="text-primary-text text-sm font-bold [overflow-wrap:anywhere] break-words">
-                  {metadata.suggestion.suggested_value}
+                  <SuggestionValue
+                    value={metadata.suggestion.suggested_value}
+                    format={(value) => value}
+                  />
                 </p>
               </div>
             </div>

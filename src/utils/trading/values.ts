@@ -1,5 +1,9 @@
 import { FilterSort, ValueSort } from "@/types";
-import { hasItemValue } from "@/utils/items/itemValue";
+import {
+  hasItemValue,
+  itemTrends,
+  type TrendFields,
+} from "@/utils/items/itemValue";
 import { isSeasonalItem } from "@/utils/items/season";
 
 export const demandOrder = [
@@ -128,14 +132,11 @@ const normalizeLastUpdated = (value: number, shouldNormalize: boolean) =>
 export const filterByValueSort = <T>(
   items: T[],
   valueSort: ValueSort,
-  getters: Pick<ValueSortGetters<T>, "getDemand" | "getTrend"> = {},
+  getters: Pick<ValueSortGetters<T>, "getDemand"> = {},
 ): T[] => {
   const getDemand =
     getters.getDemand ??
     ((item: T) => (item as { demand?: string | null }).demand);
-  const getTrend =
-    getters.getTrend ??
-    ((item: T) => (item as { trend?: string | null }).trend);
 
   if (
     valueSort.startsWith("demand-") &&
@@ -156,8 +157,10 @@ export const filterByValueSort = <T>(
     const targetTrend = trendValueMap[valueSort];
     if (!targetTrend) return items;
     const target = normalizeValueText(targetTrend);
-    return items.filter(
-      (item) => normalizeValueText(getTrend(item)) === target,
+    return items.filter((item) =>
+      itemTrends(item as TrendFields).some(
+        (trend) => normalizeValueText(trend) === target,
+      ),
     );
   }
 
@@ -374,8 +377,7 @@ type FilterableItem = {
   level?: number | string | null;
   tradable?: number;
   demand?: string | null;
-  trend?: string | null;
-};
+} & TrendFields;
 
 const matchesFilterSort = (
   item: FilterableItem,
@@ -433,9 +435,10 @@ const matchesFilterSort = (
     case "trend-hoarded":
     case "trend-manipulated":
     case "trend-recovering":
-      return (
-        normalizeValueText(item.trend) ===
-        normalizeValueText(trendValueMap[filterSort])
+      return itemTrends(item).some(
+        (trend) =>
+          normalizeValueText(trend) ===
+          normalizeValueText(trendValueMap[filterSort]),
       );
     default:
       return false;

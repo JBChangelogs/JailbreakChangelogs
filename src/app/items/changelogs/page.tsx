@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
 
@@ -15,7 +16,6 @@ import {
   formatMessageDate,
   formatRelativeDate,
 } from "@/utils/helpers/timestamp";
-import { formatFullValue } from "@/utils/trading/values";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
@@ -62,8 +62,8 @@ interface EntryUser {
 interface ChangelogEntry {
   id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   upvotes: number;
   downvotes: number;
   item: EntryItem;
@@ -321,9 +321,11 @@ export default function ValuesChangelogPage() {
                                           {`Old ${fieldLabel(entry.field).toUpperCase()}`}
                                         </span>
                                         <span className="text-secondary-text text-sm font-bold break-all line-through">
-                                          {formatFullValue(
-                                            entry.current_value || "N/A",
-                                          )}
+                                          {
+                                            <SuggestionValue
+                                              value={entry.current_value}
+                                            />
+                                          }
                                         </span>
                                       </div>
                                       <Icon
@@ -341,9 +343,11 @@ export default function ValuesChangelogPage() {
                                           {`New ${fieldLabel(entry.field).toUpperCase()}`}
                                         </span>
                                         <span className="text-primary-text text-sm font-bold break-all">
-                                          {formatFullValue(
-                                            entry.suggested_value,
-                                          )}
+                                          {
+                                            <SuggestionValue
+                                              value={entry.suggested_value}
+                                            />
+                                          }
                                         </span>
                                       </div>
 

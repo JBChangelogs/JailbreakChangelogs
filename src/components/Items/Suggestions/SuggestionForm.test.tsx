@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+import { itemTrends } from "@/utils/items/itemValue";
 
 type Element = {
   type: unknown;
@@ -19,6 +20,7 @@ function render(
   item: Record<string, unknown> | null,
   suggestedValue = "",
   isVtEligible = false,
+  suggestedTrends: string[] = [],
 ) {
   const exports = {} as { SuggestionForm: (props: unknown) => Element };
   const effects: Array<{ effect: () => unknown; dependencies: unknown[] }> = [];
@@ -40,9 +42,11 @@ function render(
                   ? field
                   : index === 4
                     ? suggestedValue
-                    : typeof initial === "function"
-                      ? initial()
-                      : initial;
+                    : index === 5
+                      ? suggestedTrends
+                      : typeof initial === "function"
+                        ? initial()
+                        : initial;
             return [value, (value: unknown) => changes.push({ index, value })];
           },
           useRef: () => ({ current: null }),
@@ -55,6 +59,7 @@ function render(
         return {
           createEmptyCommonTrade: () => ({ requesting: [], offering: [] }),
         };
+      if (name === "@/utils/items/itemValue") return { itemTrends };
       if (name === "@/utils/items/categoryIcons")
         return { getCategoryColor: () => "#fff", getCategoryIcon: () => null };
       return new Proxy(
@@ -68,7 +73,7 @@ function render(
   });
   const tree = exports.SuggestionForm({
     limits: {
-      valid_fields: ["demand", "duped_demand", "trend"],
+      valid_fields: ["demand", "duped_demand", "trend", "trends"],
       valid_demands: ["Low", "Average", "High"],
       valid_trends: ["Dropping", "Stable", "Rising"],
     },
@@ -101,7 +106,6 @@ test("categorical suggestions exclude the item's current value from backend opti
   for (const [field, expected] of [
     ["demand", ["Low", "High"]],
     ["duped_demand", ["Average", "High"]],
-    ["trend", ["Dropping", "Rising"]],
   ] as const) {
     const options = optionButtons(render(field, item).tree).map(optionLabel);
     expect(options).toEqual([...expected]);
@@ -119,7 +123,8 @@ test("unknown current values preserve backend options and selecting an item clea
     )
     ?.effect();
   expect(result.changes).toContainEqual({ index: 4, value: "" });
-  expect(result.changes).toContainEqual({ index: 5, value: null });
+  expect(result.changes).toContainEqual({ index: 5, value: [] });
+  expect(result.changes).toContainEqual({ index: 6, value: null });
 });
 
 function optionButtons(tree: unknown) {
@@ -139,7 +144,6 @@ test("demand and trend options preserve pressed state and selection", () => {
   for (const [field, selected] of [
     ["demand", "High"],
     ["duped_demand", "Average"],
-    ["trend", "Rising"],
   ]) {
     const result = render(field, item, selected);
     const options = optionButtons(result.tree);
@@ -180,12 +184,38 @@ test("visibility uses a segmented choice and preserves the VT submission flag", 
   ).toBe(true);
   const change = control.props.onValueChange as (value: string) => void;
   change("public");
-  expect(result.changes).toContainEqual({ index: 14, value: false });
+  expect(result.changes).toContainEqual({ index: 15, value: false });
   change("vt");
-  expect(result.changes).toContainEqual({ index: 14, value: true });
+  expect(result.changes).toContainEqual({ index: 15, value: true });
   expect(
     nodes(render("demand", item).tree).some(
       (node) => node.props?.radio === true,
     ),
   ).toBe(false);
+});
+
+test("trends is a multi-select that keeps every backend option and appends picks in order", () => {
+  const result = render("trends", item, "", false, ["Rising"]);
+  const options = optionButtons(result.tree);
+  expect(options.map(optionLabel)).toEqual(["Dropping", "Stable", "Rising"]);
+  const rising = options.find((node) => optionLabel(node) === "Rising")!;
+  expect(rising.props["aria-pressed"]).toBe(true);
+  const stable = options.find((node) => optionLabel(node) === "Stable")!;
+  expect(stable.props["aria-pressed"]).toBe(false);
+
+  (stable.props.onClick as () => void)();
+  const add = result.changes.at(-1)!.value as (prev: string[]) => string[];
+  expect(add(["Rising"])).toEqual(["Rising", "Stable"]);
+  (rising.props.onClick as () => void)();
+  const remove = result.changes.at(-1)!.value as (prev: string[]) => string[];
+  expect(remove(["Rising", "Stable"])).toEqual(["Stable"]);
+});
+
+test("the legacy single trend field is not offered", () => {
+  const labels = nodes(render("demand", item).tree)
+    .filter((node) => node.type === "button")
+    .flatMap((node) => nodes(node))
+    .map((node) => node.props.children);
+  expect(labels).toContain("trends");
+  expect(labels).not.toContain("trend");
 });

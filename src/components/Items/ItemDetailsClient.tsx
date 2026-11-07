@@ -64,7 +64,7 @@ import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
 import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
 import { hasSeason } from "@/utils/items/season";
-import { hasItemValue } from "@/utils/items/itemValue";
+import { hasItemValue, itemTrends } from "@/utils/items/itemValue";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
 import { ItemUnlockBadges } from "./ItemUnlockBadges";
 import { createLogger } from "@/services/logger";
@@ -946,7 +946,7 @@ export default function ItemDetailsClient({
                         dupedValue={currentItem.duped_value}
                         demand={currentItem.demand}
                         dupedDemand={currentItem.duped_demand}
-                        trend={currentItem.trend}
+                        trends={itemTrends(currentItem)}
                         notes={currentItem.notes}
                         price={currentItem.price}
                         health={currentItem.health}

@@ -24,6 +24,7 @@ export type CatalogValues = {
   demand: string | null;
   duped_demand: string | null;
   trend: string | null;
+  trends?: string[] | null;
   is_limited: number | null;
   is_seasonal: number | null;
   tradable: number;
@@ -36,6 +37,7 @@ const CATALOG_VALUE_FIELDS = [
   "demand",
   "duped_demand",
   "trend",
+  "trends",
   "is_limited",
   "is_seasonal",
   "tradable",

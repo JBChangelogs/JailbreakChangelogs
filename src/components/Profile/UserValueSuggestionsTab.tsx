@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
@@ -21,7 +22,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatFullValue } from "@/utils/trading/values";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import {
   getItemImagePath,
@@ -77,8 +77,8 @@ interface Suggestion {
   id: number;
   item_id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   reason: string;
   common_trades?: CommonTrade[] | null;
   status: string;
@@ -715,7 +715,7 @@ export default function UserValueSuggestionsTab({
                           overflowWrap: "anywhere",
                         }}
                       >
-                        {formatFullValue(suggestion.current_value || "N/A")}
+                        {<SuggestionValue value={suggestion.current_value} />}
                       </div>
                     </div>
                     <div className="min-w-0 p-3">
@@ -734,7 +734,7 @@ export default function UserValueSuggestionsTab({
                           overflowWrap: "anywhere",
                         }}
                       >
-                        {formatFullValue(suggestion.suggested_value)}
+                        {<SuggestionValue value={suggestion.suggested_value} />}
                       </div>
                     </div>
                   </div>

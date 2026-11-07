@@ -4,7 +4,9 @@ import Link from "next/link";
 import { TradeItem } from "@/types/trading";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { formatFullValue } from "@/utils/trading/values";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { itemTrends } from "@/utils/items/itemValue";
+import { TrendChips } from "@/components/Items/TrendChips";
 import { getTradeItemDetailHref } from "@/utils/trading/tradeItems";
 import { Icon } from "@/components/ui/IconWrapper";
 import { DupedBadge } from "@/components/trading/DupedBadge";
@@ -17,7 +19,6 @@ interface TradeAdTooltipProps {
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const demand = item.demand ?? "N/A";
   const dupedDemand = item.duped_demand ?? "N/A";
-  const trend = item.trend ?? null;
   const itemHref = getTradeItemDetailHref(item);
 
   return (
@@ -130,11 +131,10 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             <span className="text-secondary-text text-xs tracking-wider uppercase">
               Trend:
             </span>
-            <span
-              className={`${getTrendColor(trend || "N/A")} inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap`}
-            >
-              {!trend || trend === "N/A" ? "Unknown" : trend}
-            </span>
+            <TrendChips
+              trends={itemTrends(item)}
+              chipClassName="inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-semibold whitespace-nowrap"
+            />
           </div>
         </div>
       </div>

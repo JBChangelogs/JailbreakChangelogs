@@ -17,7 +17,8 @@ import { formatFullValue, parseCashValue } from "@/utils/trading/values";
 import { formatCurrencyValue } from "@/utils/trading/currency";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import { isSeasonalItem } from "@/utils/items/season";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { TrendChips } from "@/components/Items/TrendChips";
 import type { Item } from "@/types/index";
 import type { TradeItem } from "@/types/trading";
 import type {
@@ -219,7 +220,7 @@ function TradeItemSummary({
   const isDuped = item.duped ?? item.isDuped ?? false;
   const isLimited = item.is_limited === 1;
   const isSeasonal = isSeasonalItem(item);
-  const { demand, trend } = getTradeItemMarketDetails(item, isDuped);
+  const { demand, trends } = getTradeItemMarketDetails(item, isDuped);
   const status = item.cash_value !== undefined ? "ready" : valuesStatus;
   const categoryIcon = item.type ? getCategoryIcon(item.type) : null;
   const categoryColor = item.type ? getCategoryColor(item.type) : null;
@@ -322,11 +323,6 @@ function TradeItemSummary({
               demand ?? "Unknown",
               getDemandColor(status === "ready" ? demand : undefined),
             ],
-            [
-              "Trend",
-              trend ?? "Unknown",
-              getTrendColor(status === "ready" ? trend : undefined),
-            ],
           ].map(([label, value, badgeColor]) => (
             <div
               key={label}
@@ -346,6 +342,23 @@ function TradeItemSummary({
               </dd>
             </div>
           ))}
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+            <dt className="text-secondary-text font-medium whitespace-nowrap">
+              Trend
+            </dt>
+            <dd>
+              {status === "ready" ? (
+                <TrendChips
+                  trends={trends}
+                  chipClassName="inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap"
+                />
+              ) : (
+                <span className="inline-flex h-6 items-center rounded-md px-2 text-xs leading-none font-bold whitespace-nowrap">
+                  {status === "loading" ? "Loading…" : "Unavailable"}
+                </span>
+              )}
+            </dd>
+          </div>
         </dl>
       )}
     </>

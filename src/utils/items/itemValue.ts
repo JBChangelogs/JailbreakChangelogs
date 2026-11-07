@@ -6,3 +6,14 @@ export function hasItemValue(
   const trimmed = value.trim();
   return trimmed !== "" && trimmed !== "N/A" && trimmed !== "null";
 }
+
+export type TrendFields = {
+  trend?: string | null;
+  trends?: string[] | null;
+};
+
+// `trends` is the full list (first entry === `trend`); fall back to `trend`
+// for payloads that predate it.
+export function itemTrends(item: TrendFields): string[] {
+  return item.trends ?? (hasItemValue(item.trend) ? [item.trend] : []);
+}

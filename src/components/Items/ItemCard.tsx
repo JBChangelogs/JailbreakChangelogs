@@ -18,10 +18,11 @@ import {
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/trading/values";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { TrendChips } from "@/components/Items/TrendChips";
 import { hasSeason } from "@/utils/items/season";
 import { ItemUnlockBadges } from "./ItemUnlockBadges";
-import { hasItemValue } from "@/utils/items/itemValue";
+import { hasItemValue, itemTrends } from "@/utils/items/itemValue";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -252,10 +253,6 @@ function ItemCard({
     !currentItemData.duped_demand || currentItemData.duped_demand === "N/A"
       ? "N/A"
       : currentItemData.duped_demand;
-  const trendLabel =
-    currentItemData.trend === null || currentItemData.trend === "N/A"
-      ? "Unknown"
-      : currentItemData.trend;
   const cashChange = isValuesPage
     ? getValueChange(item.recent_changes, "cash_value")
     : null;
@@ -684,11 +681,11 @@ function ItemCard({
                     Trend
                   </span>
                 </div>
-                <span
-                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-5 items-center rounded-md px-1.5 text-[10px] leading-none font-bold whitespace-nowrap min-[480px]:px-3 sm:h-6 sm:text-xs`}
-                >
-                  {trendLabel}
-                </span>
+                <TrendChips
+                  trends={itemTrends(currentItemData)}
+                  className="justify-end"
+                  chipClassName="inline-flex h-5 items-center rounded-md px-1.5 text-[10px] leading-none font-bold whitespace-nowrap min-[480px]:px-3 sm:h-6 sm:text-xs"
+                />
               </div>
             )}
           </div>

@@ -307,7 +307,7 @@ export default function ValueSuggestionsPage() {
   const handleFormSubmit = async (payload: {
     item: number;
     field: string;
-    value: string;
+    value: string | string[];
     reason: string;
     isVt: boolean;
     commonTrades?: CommonTradeSubmission[];

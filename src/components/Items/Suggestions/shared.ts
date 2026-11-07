@@ -2,6 +2,7 @@ export const SUGGESTION_FIELDS = [
   "cash_value",
   "duped_value",
   "trend",
+  "trends",
   "demand",
   "duped_demand",
   "notes",
@@ -15,6 +16,7 @@ export const SUGGESTION_CHART_METRICS: Partial<
   demand: "traded",
   duped_demand: "traded",
   trend: "cash",
+  trends: "cash",
 };
 
 export const fieldLabel = (field: string) =>

@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
-import { hasItemValue } from "@/utils/items/itemValue";
+import { hasItemValue, itemTrends } from "@/utils/items/itemValue";
 import { formatFullValue, getValueChange } from "@/utils/trading/values";
 import type { RecentChange } from "@/types";
 
@@ -63,7 +63,8 @@ test("item cards preserve prices and support values layout and favorites on item
       require: (name: string) => {
         if (name === "react") return { ...react, default: react };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
-        if (name === "@/utils/items/itemValue") return { hasItemValue };
+        if (name === "@/utils/items/itemValue")
+          return { hasItemValue, itemTrends };
         if (name === "@/utils/trading/values")
           return { formatFullValue, getValueChange };
         if (name === "@/hooks/useMediaQuery")

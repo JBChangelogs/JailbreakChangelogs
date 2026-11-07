@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  SuggestionValue,
+  type SuggestionFieldValue,
+} from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import {
   type ComponentProps,
@@ -29,7 +33,6 @@ import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
-import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -127,8 +130,8 @@ interface Suggestion {
   id: number;
   item_id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   reason: string;
   common_trades?: CommonTrade[] | null;
   status: string;
@@ -241,8 +244,8 @@ function ValueChangeCard({
   suggestedValue,
 }: {
   field: string;
-  currentValue: string;
-  suggestedValue: string;
+  currentValue: SuggestionFieldValue;
+  suggestedValue: SuggestionFieldValue;
 }) {
   return (
     <div className="border-border-card bg-secondary-bg rounded-xl border">
@@ -266,7 +269,7 @@ function ValueChangeCard({
             className="text-secondary-text text-lg font-bold line-through"
             style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
           >
-            {formatFullValue(currentValue || "N/A")}
+            {<SuggestionValue value={currentValue} />}
           </div>
         </div>
         <div className="min-w-0 p-3">
@@ -278,7 +281,7 @@ function ValueChangeCard({
             className="text-primary-text text-lg font-bold"
             style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
           >
-            {formatFullValue(suggestedValue)}
+            {<SuggestionValue value={suggestedValue} />}
           </div>
         </div>
       </div>
@@ -1231,9 +1234,11 @@ export default function ValueSuggestionDetailPage() {
                                 overflowWrap: "anywhere",
                               }}
                             >
-                              {formatFullValue(
-                                suggestion.current_value || "N/A",
-                              )}
+                              {
+                                <SuggestionValue
+                                  value={suggestion.current_value}
+                                />
+                              }
                             </div>
                           </div>
                           <div className="min-w-0">
@@ -1252,7 +1257,11 @@ export default function ValueSuggestionDetailPage() {
                                 overflowWrap: "anywhere",
                               }}
                             >
-                              {formatFullValue(suggestion.suggested_value)}
+                              {
+                                <SuggestionValue
+                                  value={suggestion.suggested_value}
+                                />
+                              }
                             </div>
                           </div>
                         </div>

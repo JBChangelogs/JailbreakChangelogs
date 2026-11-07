@@ -831,6 +831,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         demand: base?.demand ?? "N/A",
         duped_demand: base?.duped_demand ?? "N/A",
         trend: base?.trend ?? "N/A",
+        trends: base?.trends,
         notes: base?.notes ?? null,
         side,
         isDuped: false,

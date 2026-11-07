@@ -43,8 +43,8 @@ interface EntryItem {
 interface ChangelogEntry {
   id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   reason: string;
   upvotes: number;
   downvotes: number;

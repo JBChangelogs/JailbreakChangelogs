@@ -44,6 +44,24 @@ describe("combined value page filters", () => {
     ).toEqual([1, 2]);
   });
 
+  test("trend filters match any entry in trends", () => {
+    const items = [
+      {
+        ...item(1, "Vehicle", "High"),
+        trend: "Rising",
+        trends: ["Rising", "Hyped"],
+      },
+      { ...item(2, "Vehicle", "High"), trend: "Rising", trends: ["Rising"] },
+    ];
+
+    expect(
+      filterByTypes(items, ["trend-hyped"]).map((entry) => entry.id),
+    ).toEqual([1]);
+    expect(
+      filterByValueSort(items, "trend-hyped").map((entry) => entry.id),
+    ).toEqual([1]);
+  });
+
   test("seasonal filtering uses season or level instead of the legacy flag", () => {
     const base = item(1, "Vehicle", "High");
     const filtered = filterByTypes(

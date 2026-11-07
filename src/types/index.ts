@@ -102,8 +102,8 @@ export interface RecentChange {
   changed_by: string;
   created_at: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
 }
 
 export interface Item {
@@ -123,6 +123,7 @@ export interface Item {
   demand: string | null;
   duped_demand: string | null;
   trend: string | null;
+  trends?: string[] | null;
   description: string | null;
   health: number | null;
   tradable: number;
@@ -162,6 +163,7 @@ export interface ItemDetails {
   demand: string | null;
   duped_demand: string | null;
   trend: string | null;
+  trends?: string[] | null;
   description: string | null;
   health: number | null;
   tradable: boolean | number;

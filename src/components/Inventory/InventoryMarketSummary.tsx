@@ -1,5 +1,6 @@
 import type { CatalogValues } from "@/hooks/usePartialItems";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { TrendChips } from "@/components/Items/TrendChips";
 import { hasItemValue } from "@/utils/items/itemValue";
 import { formatFullValue } from "@/utils/trading/values";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
@@ -11,7 +12,7 @@ export default function InventoryMarketSummary({
   data?: CatalogValues;
   isDuped?: boolean;
 }) {
-  const { demand } = getTradeItemMarketDetails(data ?? {}, isDuped);
+  const { demand, trends } = getTradeItemMarketDetails(data ?? {}, isDuped);
 
   return (
     <dl className="border-border-card bg-secondary-bg mb-3 grid grid-cols-2 gap-x-3 gap-y-2 rounded-lg border p-2.5">
@@ -47,10 +48,11 @@ export default function InventoryMarketSummary({
       </div>
       <div>
         <dt className="text-secondary-text mb-1 text-xs">Trend</dt>
-        <dd
-          className={`${getTrendColor(data?.trend)} inline-flex rounded-md px-2 py-1 text-xs font-bold`}
-        >
-          {hasItemValue(data?.trend) ? data.trend : "Unknown"}
+        <dd>
+          <TrendChips
+            trends={trends}
+            chipClassName="inline-flex rounded-md px-2 py-1 text-xs font-bold"
+          />
         </dd>
       </div>
     </dl>

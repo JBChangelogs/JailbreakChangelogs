@@ -23,6 +23,7 @@ import { TradeAdSkeleton } from "./TradeAdSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
+import { itemTrends } from "@/utils/items/itemValue";
 import { deleteTradeAd, RateLimitError } from "@/utils/trading/core";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
@@ -445,6 +446,9 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
             is_seasonal: null,
             tradable: 1,
             trend: typeof info?.trend === "string" ? info.trend : "N/A",
+            trends: Array.isArray(info?.trends)
+              ? (info.trends as string[])
+              : undefined,
             demand: typeof info?.demand === "string" ? info.demand : "N/A",
             duped_demand:
               typeof info?.duped_demand === "string" ? info.duped_demand : null,
@@ -600,11 +604,11 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
     return match.demand ?? undefined;
   };
 
-  const getTrendForItem = (it: TradeItem): string | undefined => {
-    if (it.trend && it.trend !== "N/A") return it.trend;
+  const getTrendsForItem = (it: TradeItem): string[] => {
+    const own = itemTrends(it);
+    if (own.length > 0) return own;
     const match = items.find((base) => tradeItemIdsEqual(base.id, it.id));
-    if (!match) return undefined;
-    return match.trend ?? undefined;
+    return match ? itemTrends(match) : [];
   };
 
   const fetchRecentTradeAdsPage = useCallback(
@@ -1596,12 +1600,12 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
                     offering: trade.offering.map((it) => ({
                       ...it,
                       demand: getDemandForItem(it) || it.demand,
-                      trend: getTrendForItem(it) || it.trend,
+                      trends: getTrendsForItem(it),
                     })),
                     requesting: trade.requesting.map((it) => ({
                       ...it,
                       demand: getDemandForItem(it) || it.demand,
-                      trend: getTrendForItem(it) || it.trend,
+                      trends: getTrendsForItem(it),
                     })),
                   };
                   return (
@@ -1732,12 +1736,12 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
                       offering: trade.offering.map((it) => ({
                         ...it,
                         demand: getDemandForItem(it) || it.demand,
-                        trend: getTrendForItem(it) || it.trend,
+                        trends: getTrendsForItem(it),
                       })),
                       requesting: trade.requesting.map((it) => ({
                         ...it,
                         demand: getDemandForItem(it) || it.demand,
-                        trend: getTrendForItem(it) || it.trend,
+                        trends: getTrendsForItem(it),
                       })),
                     };
                     return (

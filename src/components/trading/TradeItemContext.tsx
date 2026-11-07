@@ -1,7 +1,8 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
 import { Icon } from "@/components/ui/IconWrapper";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { TrendChips } from "@/components/Items/TrendChips";
 import { hasItemValue } from "@/utils/items/itemValue";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import {
@@ -72,7 +73,7 @@ export const TradeItemMarketDetails = ({
   item: TradeItem;
   isDuped?: boolean;
 }) => {
-  const { demand, trend } = getTradeItemMarketDetails(item, isDuped);
+  const { demand, trends } = getTradeItemMarketDetails(item, isDuped);
 
   return (
     <div className="border-border-card space-y-1 border-t pt-2 text-[11px]">
@@ -87,12 +88,11 @@ export const TradeItemMarketDetails = ({
       </div>
       <div className="flex min-w-0 flex-wrap items-center gap-1">
         <span className="text-primary-text w-11 shrink-0">Trend</span>
-        <span
-          className={`${getTrendColor(trend)} min-w-0 truncate rounded-md px-1.5 py-0.5 font-semibold whitespace-nowrap`}
-          title={hasItemValue(trend) ? trend : "Unknown"}
-        >
-          {hasItemValue(trend) ? trend : "Unknown"}
-        </span>
+        <TrendChips
+          trends={trends}
+          className="min-w-0"
+          chipClassName="min-w-0 truncate rounded-md px-1.5 py-0.5 font-semibold whitespace-nowrap"
+        />
       </div>
     </div>
   );

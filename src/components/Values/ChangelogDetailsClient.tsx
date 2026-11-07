@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
@@ -60,14 +61,14 @@ interface Changes {
     duped_value?: string;
     tradable?: number;
     last_updated?: number;
-    [key: string]: string | number | undefined;
+    [key: string]: string | string[] | number | null | undefined;
   };
   new: {
     cash_value?: string;
     duped_value?: string;
     tradable?: number;
     last_updated?: number;
-    [key: string]: string | number | undefined;
+    [key: string]: string | string[] | number | null | undefined;
   };
 }
 
@@ -1043,85 +1044,90 @@ export default function ChangelogDetailsClient({
                                         key,
                                       ).toUpperCase()}`}
                                     </div>
-                                    {(() => {
-                                      const formatted = formatValue(
-                                        key,
-                                        oldValue,
-                                      );
-                                      const displayValue = formatted.display;
-                                      const MAX_VISIBLE_CHARS = 200;
-                                      const isLong =
-                                        displayValue.length > MAX_VISIBLE_CHARS;
-                                      const expandKey = `${change.change_id}-${key}-old`;
-                                      const isExpanded =
-                                        expandedChanges.has(expandKey);
-                                      const shouldTruncate =
-                                        isLong && !isExpanded;
-                                      const visibleContent = shouldTruncate
-                                        ? displayValue.slice(
-                                            0,
-                                            MAX_VISIBLE_CHARS,
-                                          ) + "..."
-                                        : displayValue;
+                                    {Array.isArray(oldValue) ? (
+                                      <SuggestionValue value={oldValue} />
+                                    ) : (
+                                      (() => {
+                                        const formatted = formatValue(
+                                          key,
+                                          oldValue,
+                                        );
+                                        const displayValue = formatted.display;
+                                        const MAX_VISIBLE_CHARS = 200;
+                                        const isLong =
+                                          displayValue.length >
+                                          MAX_VISIBLE_CHARS;
+                                        const expandKey = `${change.change_id}-${key}-old`;
+                                        const isExpanded =
+                                          expandedChanges.has(expandKey);
+                                        const shouldTruncate =
+                                          isLong && !isExpanded;
+                                        const visibleContent = shouldTruncate
+                                          ? displayValue.slice(
+                                              0,
+                                              MAX_VISIBLE_CHARS,
+                                            ) + "..."
+                                          : displayValue;
 
-                                      return (
-                                        <>
-                                          <div
-                                            className="text-secondary-text overflow-hidden text-lg font-bold wrap-break-word line-through"
-                                            style={{
-                                              wordBreak: "normal",
-                                              overflowWrap: "anywhere",
-                                            }}
-                                          >
-                                            {formatted.isCreator &&
-                                            formatted.robloxId ? (
-                                              <a
-                                                href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-link hover:text-link-hover transition-colors hover:underline"
-                                              >
-                                                {visibleContent}
-                                              </a>
-                                            ) : (
-                                              visibleContent
-                                            )}
-                                          </div>
-                                          {isLong && (
-                                            <button
-                                              onClick={() =>
-                                                toggleChangeExpand(
-                                                  change.change_id,
-                                                  key,
-                                                  "old",
-                                                )
-                                              }
-                                              className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                        return (
+                                          <>
+                                            <div
+                                              className="text-secondary-text overflow-hidden text-lg font-bold wrap-break-word line-through"
+                                              style={{
+                                                wordBreak: "normal",
+                                                overflowWrap: "anywhere",
+                                              }}
                                             >
-                                              {isExpanded ? (
-                                                <>
-                                                  <Icon
-                                                    icon="mdi:chevron-up"
-                                                    className="h-4 w-4"
-                                                    inline={true}
-                                                  />
-                                                  <span>Show less</span>
-                                                </>
+                                              {formatted.isCreator &&
+                                              formatted.robloxId ? (
+                                                <a
+                                                  href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                >
+                                                  {visibleContent}
+                                                </a>
                                               ) : (
-                                                <>
-                                                  <Icon
-                                                    icon="mdi:chevron-down"
-                                                    className="h-4 w-4"
-                                                    inline={true}
-                                                  />
-                                                  <span>Read more</span>
-                                                </>
+                                                visibleContent
                                               )}
-                                            </button>
-                                          )}
-                                        </>
-                                      );
-                                    })()}
+                                            </div>
+                                            {isLong && (
+                                              <button
+                                                onClick={() =>
+                                                  toggleChangeExpand(
+                                                    change.change_id,
+                                                    key,
+                                                    "old",
+                                                  )
+                                                }
+                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                              >
+                                                {isExpanded ? (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-up"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    <span>Show less</span>
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-down"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    <span>Read more</span>
+                                                  </>
+                                                )}
+                                              </button>
+                                            )}
+                                          </>
+                                        );
+                                      })()
+                                    )}
                                   </div>
                                   <div className="min-w-0">
                                     <div className="text-button-success mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
@@ -1136,85 +1142,90 @@ export default function ChangelogDetailsClient({
                                         key,
                                       ).toUpperCase()}`}
                                     </div>
-                                    {(() => {
-                                      const formatted = formatValue(
-                                        key,
-                                        newValue,
-                                      );
-                                      const displayValue = formatted.display;
-                                      const MAX_VISIBLE_CHARS = 200;
-                                      const isLong =
-                                        displayValue.length > MAX_VISIBLE_CHARS;
-                                      const expandKey = `${change.change_id}-${key}-new`;
-                                      const isExpanded =
-                                        expandedChanges.has(expandKey);
-                                      const shouldTruncate =
-                                        isLong && !isExpanded;
-                                      const visibleContent = shouldTruncate
-                                        ? displayValue.slice(
-                                            0,
-                                            MAX_VISIBLE_CHARS,
-                                          ) + "..."
-                                        : displayValue;
+                                    {Array.isArray(newValue) ? (
+                                      <SuggestionValue value={newValue} />
+                                    ) : (
+                                      (() => {
+                                        const formatted = formatValue(
+                                          key,
+                                          newValue,
+                                        );
+                                        const displayValue = formatted.display;
+                                        const MAX_VISIBLE_CHARS = 200;
+                                        const isLong =
+                                          displayValue.length >
+                                          MAX_VISIBLE_CHARS;
+                                        const expandKey = `${change.change_id}-${key}-new`;
+                                        const isExpanded =
+                                          expandedChanges.has(expandKey);
+                                        const shouldTruncate =
+                                          isLong && !isExpanded;
+                                        const visibleContent = shouldTruncate
+                                          ? displayValue.slice(
+                                              0,
+                                              MAX_VISIBLE_CHARS,
+                                            ) + "..."
+                                          : displayValue;
 
-                                      return (
-                                        <>
-                                          <div
-                                            className="text-primary-text overflow-hidden text-lg font-bold wrap-break-word"
-                                            style={{
-                                              wordBreak: "normal",
-                                              overflowWrap: "anywhere",
-                                            }}
-                                          >
-                                            {formatted.isCreator &&
-                                            formatted.robloxId ? (
-                                              <a
-                                                href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-link hover:text-link-hover transition-colors hover:underline"
-                                              >
-                                                {visibleContent}
-                                              </a>
-                                            ) : (
-                                              visibleContent
-                                            )}
-                                          </div>
-                                          {isLong && (
-                                            <button
-                                              onClick={() =>
-                                                toggleChangeExpand(
-                                                  change.change_id,
-                                                  key,
-                                                  "new",
-                                                )
-                                              }
-                                              className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                        return (
+                                          <>
+                                            <div
+                                              className="text-primary-text overflow-hidden text-lg font-bold wrap-break-word"
+                                              style={{
+                                                wordBreak: "normal",
+                                                overflowWrap: "anywhere",
+                                              }}
                                             >
-                                              {isExpanded ? (
-                                                <>
-                                                  <Icon
-                                                    icon="mdi:chevron-up"
-                                                    className="h-4 w-4"
-                                                    inline={true}
-                                                  />
-                                                  <span>Show less</span>
-                                                </>
+                                              {formatted.isCreator &&
+                                              formatted.robloxId ? (
+                                                <a
+                                                  href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                >
+                                                  {visibleContent}
+                                                </a>
                                               ) : (
-                                                <>
-                                                  <Icon
-                                                    icon="mdi:chevron-down"
-                                                    className="h-4 w-4"
-                                                    inline={true}
-                                                  />
-                                                  <span>Read more</span>
-                                                </>
+                                                visibleContent
                                               )}
-                                            </button>
-                                          )}
-                                        </>
-                                      );
-                                    })()}
+                                            </div>
+                                            {isLong && (
+                                              <button
+                                                onClick={() =>
+                                                  toggleChangeExpand(
+                                                    change.change_id,
+                                                    key,
+                                                    "new",
+                                                  )
+                                                }
+                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                              >
+                                                {isExpanded ? (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-up"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    <span>Show less</span>
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-down"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    <span>Read more</span>
+                                                  </>
+                                                )}
+                                              </button>
+                                            )}
+                                          </>
+                                        );
+                                      })()
+                                    )}
                                   </div>
                                 </div>
                               </div>

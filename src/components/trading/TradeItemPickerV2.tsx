@@ -14,7 +14,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { TrendChips } from "@/components/Items/TrendChips";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/trading/currency";
 import { Pagination } from "@/components/ui/Pagination";
@@ -372,7 +373,6 @@ export default function TradeItemPickerV2({
     );
     const filteredByValue = filterByValueSort(matchingFilters, valueSort, {
       getDemand: (item) => item.demand,
-      getTrend: (item) => item.trend,
     });
 
     const selectedSort: ValueSort = validValueSorts.has(valueSort)
@@ -1181,17 +1181,11 @@ export default function TradeItemPickerV2({
                         <span className="text-primary-text shrink-0 text-xs font-medium whitespace-nowrap">
                           Trend
                         </span>
-                        {(() => {
-                          const t =
-                            getTradeItemMarketDetails(item).trend ?? "N/A";
-                          return (
-                            <span
-                              className={`${getTrendColor(t)} inline-flex min-h-6 max-w-full items-center rounded-md px-2 py-1 text-center text-xs leading-tight font-bold whitespace-normal`}
-                            >
-                              {t === "N/A" ? "Unknown" : t}
-                            </span>
-                          );
-                        })()}
+                        <TrendChips
+                          trends={getTradeItemMarketDetails(item).trends}
+                          className="justify-end"
+                          chipClassName="inline-flex min-h-6 max-w-full items-center rounded-md px-2 py-1 text-center text-xs leading-tight font-bold whitespace-normal"
+                        />
                       </div>
                     </div>
                   )}

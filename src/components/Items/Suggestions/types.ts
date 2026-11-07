@@ -21,6 +21,7 @@ interface CommonTradeItem extends Partial<
     | "demand"
     | "duped_demand"
     | "trend"
+    | "trends"
     | "is_limited"
     | "season"
     | "level"
@@ -82,8 +83,8 @@ export interface Suggestion {
   id: number;
   item_id: number;
   field: string;
-  current_value: string;
-  suggested_value: string;
+  current_value: string | string[] | null;
+  suggested_value: string | string[] | null;
   reason: string;
   common_trades?: CommonTrade[] | null;
   status: string;

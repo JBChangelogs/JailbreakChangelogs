@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { useState } from "react";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
@@ -106,9 +107,12 @@ export function ReportSuggestionModal({
                   Old {fieldLabel(suggestion.field)}
                 </p>
                 <p className="text-secondary-text text-sm font-bold [overflow-wrap:anywhere] break-words line-through">
-                  {formatFullValue(
-                    stripHtml(suggestion.current_value || "N/A"),
-                  )}
+                  {
+                    <SuggestionValue
+                      value={suggestion.current_value}
+                      format={(value) => formatFullValue(stripHtml(value))}
+                    />
+                  }
                 </p>
               </div>
               <div className="min-w-0">
@@ -117,7 +121,12 @@ export function ReportSuggestionModal({
                   New {fieldLabel(suggestion.field)}
                 </p>
                 <p className="text-primary-text text-sm font-bold [overflow-wrap:anywhere] break-words">
-                  {formatFullValue(stripHtml(suggestion.suggested_value))}
+                  {
+                    <SuggestionValue
+                      value={suggestion.suggested_value}
+                      format={(value) => formatFullValue(stripHtml(value))}
+                    />
+                  }
                 </p>
               </div>
             </div>

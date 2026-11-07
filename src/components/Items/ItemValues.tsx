@@ -6,7 +6,8 @@ import {
   formatPrice,
   getValueChange,
 } from "@/utils/trading/values";
-import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getDemandColor } from "@/utils/items/badgeColors";
+import { TrendChips } from "@/components/Items/TrendChips";
 import { RecentChange } from "@/types";
 import { hasItemValue } from "@/utils/items/itemValue";
 
@@ -15,7 +16,7 @@ interface ItemValuesProps {
   dupedValue: string | null;
   demand: string | null;
   dupedDemand?: string | null;
-  trend?: string | null;
+  trends: string[];
   notes: string | null;
   price: string;
   health: number | null;
@@ -29,7 +30,7 @@ function ItemValues({
   dupedValue,
   demand,
   dupedDemand,
-  trend,
+  trends,
   notes,
   price,
   health,
@@ -202,13 +203,11 @@ function ItemValues({
               Trend
             </h4>
           </div>
-          <span
-            className={`${getTrendColor(trend || "N/A")} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
-          >
-            {!trend || trend === "Unknown" || trend === "N/A"
-              ? "Unknown"
-              : trend}
-          </span>
+          <TrendChips
+            trends={trends}
+            className="gap-2"
+            chipClassName="inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold"
+          />
         </div>
 
         {/* Placement Limit - only for Furniture */}

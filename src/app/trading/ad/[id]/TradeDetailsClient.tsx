@@ -530,6 +530,7 @@ const normalizeOfferItems = (items: TradeOfferV2["offering"]): TradeItem[] => {
       is_seasonal: null,
       tradable: 1,
       trend: item?.info?.trend || "N/A",
+      trends: item?.info?.trends,
       demand: item?.info?.demand || "N/A",
       duped_demand: item?.info?.duped_demand ?? null,
       isDuped: item?.duped ?? false,

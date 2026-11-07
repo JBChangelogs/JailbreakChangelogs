@@ -1,8 +1,11 @@
 import Link from "next/link";
+import {
+  SuggestionValue,
+  suggestionValueText,
+} from "@/components/Items/TrendChips";
 import { Icon } from "@/components/ui/IconWrapper";
 import type { Item, RecentChange } from "@/types";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { formatFullValue } from "@/utils/trading/values";
 import {
   formatMessageDate,
   formatRelativeDate,
@@ -77,9 +80,9 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
             {/* Clamped here; the changelog has the full text. */}
             <span
               className="text-secondary-text line-clamp-2 min-w-0 text-sm font-bold break-words line-through sm:block sm:truncate"
-              title={formatFullValue(latest.current_value || "N/A")}
+              title={suggestionValueText(latest.current_value)}
             >
-              {formatFullValue(latest.current_value || "N/A")}
+              <SuggestionValue value={latest.current_value} />
             </span>
           </div>
           <Icon
@@ -98,9 +101,9 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
             </span>
             <span
               className="text-primary-text line-clamp-2 min-w-0 text-sm font-bold break-words sm:block sm:truncate"
-              title={formatFullValue(latest.suggested_value)}
+              title={suggestionValueText(latest.suggested_value)}
             >
-              {formatFullValue(latest.suggested_value)}
+              <SuggestionValue value={latest.suggested_value} />
             </span>
           </div>
         </div>

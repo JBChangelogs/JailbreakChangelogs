@@ -1,5 +1,6 @@
 "use client";
 
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import type { MouseEvent } from "react";
 import Image from "next/image";
@@ -297,7 +298,12 @@ export function SuggestionCard({
                 overflowWrap: "anywhere",
               }}
             >
-              {formatFullValue(stripHtml(suggestion.current_value || "N/A"))}
+              {
+                <SuggestionValue
+                  value={suggestion.current_value}
+                  format={(value) => formatFullValue(stripHtml(value))}
+                />
+              }
             </div>
           </div>
           <div className="min-w-0 px-3 pt-3">
@@ -312,7 +318,12 @@ export function SuggestionCard({
                 overflowWrap: "anywhere",
               }}
             >
-              {formatFullValue(stripHtml(suggestion.suggested_value))}
+              {
+                <SuggestionValue
+                  value={suggestion.suggested_value}
+                  format={(value) => formatFullValue(stripHtml(value))}
+                />
+              }
             </div>
           </div>
         </div>

@@ -1,10 +1,13 @@
-import { hasItemValue } from "@/utils/items/itemValue";
+import {
+  hasItemValue,
+  itemTrends,
+  type TrendFields,
+} from "@/utils/items/itemValue";
 
 type MarketFields = {
   demand?: string | null;
   duped_demand?: string | null;
-  trend?: string | null;
-};
+} & TrendFields;
 
 export function getTradeItemMarketDetails(
   item: MarketFields & { isDuped?: boolean; duped?: boolean },
@@ -14,6 +17,6 @@ export function getTradeItemMarketDetails(
 
   return {
     demand: hasItemValue(demand) ? demand : undefined,
-    trend: hasItemValue(item.trend) ? item.trend : undefined,
+    trends: itemTrends(item),
   };
 }

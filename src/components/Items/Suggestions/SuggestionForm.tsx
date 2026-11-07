@@ -45,6 +45,8 @@ import {
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { getDemandCssColor, getTrendCssColor } from "@/utils/items/badgeColors";
 import { formatFullValue } from "@/utils/trading/values";
+import { itemTrends } from "@/utils/items/itemValue";
+import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserAvatar } from "@/utils/ui/avatar";
 import type { Item } from "@/types/index";
 
@@ -66,7 +68,7 @@ export interface SuggestionFormProps {
   onSubmit: (payload: {
     item: number;
     field: string;
-    value: string;
+    value: string | string[];
     reason: string;
     isVt: boolean;
     commonTrades?: CommonTradeSubmission[];
@@ -90,6 +92,8 @@ export function SuggestionForm({
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [field, setField] = useState("cash_value");
   const [suggestedValue, setSuggestedValue] = useState("");
+  // Ordered: the first pick becomes the item's primary trend.
+  const [suggestedTrends, setSuggestedTrends] = useState<string[]>([]);
   const [suggestedValueError, setSuggestedValueError] = useState<string | null>(
     null,
   );
@@ -136,7 +140,15 @@ export function SuggestionForm({
   const minChars = limits?.min_characters ?? 350;
   const maxChars = limits?.max_characters ?? 750;
   const maxNoteLength = limits?.max_note_length ?? 300;
-  const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
+  const validFields = (
+    limits?.valid_fields ?? ["cash_value", "duped_value"]
+  ).filter((f) => f !== "trend");
+  const suggestedFieldValue =
+    field === "trends" ? suggestedTrends : suggestedValue;
+  const hasSuggestedValue =
+    field === "trends"
+      ? suggestedTrends.length > 0
+      : suggestedValue.trim() !== "";
 
   const filteredItems = (catalog.data?.items ?? [])
     .filter((item) => item.tradable === 1 || item.id === 587 || item.id === 713)
@@ -172,6 +184,7 @@ export function SuggestionForm({
 
   useEffect(() => {
     setSuggestedValue("");
+    setSuggestedTrends([]);
     setSuggestedValueError(null);
     setCommonTrades([createEmptyCommonTrade(), createEmptyCommonTrade()]);
     setCommonTradesError(null);
@@ -181,6 +194,7 @@ export function SuggestionForm({
     if (isAutoCalcItem && (field === "cash_value" || field === "duped_value")) {
       setField(effectiveValidFields[0] ?? "demand");
       setSuggestedValue("");
+      setSuggestedTrends([]);
       setSuggestedValueError(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,7 +250,7 @@ export function SuggestionForm({
       await onSubmit({
         item: selectedItem.id,
         field,
-        value: suggestedValue,
+        value: suggestedFieldValue,
         reason: reason.trim(),
         isVt,
         commonTrades: requiresCommonTrades
@@ -246,6 +260,7 @@ export function SuggestionForm({
       setSelectedItem(null);
       setItemSearch("");
       setSuggestedValue("");
+      setSuggestedTrends([]);
       setSuggestedValueError(null);
       setReason("");
       setReasonError(null);
@@ -499,6 +514,7 @@ export function SuggestionForm({
                         if (f === field) return;
                         setField(f);
                         setSuggestedValue("");
+                        setSuggestedTrends([]);
                         setSuggestedValueError(null);
                       }}
                       className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
@@ -558,20 +574,23 @@ export function SuggestionForm({
                   <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                     Current {fieldLabel(field)}
                   </p>
-                  {field === "trend" ? (
-                    (() => {
-                      const val =
-                        (selectedItem[field as keyof Item] as string) || "N/A";
-                      const color = getTrendCssColor(val);
-                      return (
+                  {field === "trends" ? (
+                    <span className="flex flex-wrap gap-1">
+                      {itemTrends(selectedItem).map((val) => (
                         <span
+                          key={val}
                           className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-md border-2 px-2.5 text-xs leading-none font-semibold"
-                          style={{ borderColor: color }}
+                          style={{ borderColor: getTrendCssColor(val) }}
                         >
                           {val}
                         </span>
-                      );
-                    })()
+                      ))}
+                      {itemTrends(selectedItem).length === 0 && (
+                        <span className="text-primary-text text-base font-bold">
+                          N/A
+                        </span>
+                      )}
+                    </span>
                   ) : ["demand", "duped_demand"].includes(field) ? (
                     (() => {
                       const val =
@@ -602,7 +621,7 @@ export function SuggestionForm({
               <label className="text-primary-text mb-1.5 block text-sm font-medium">
                 Suggested {fieldLabel(field)}
               </label>
-              {field === "trend" ? (
+              {field === "trends" ? (
                 loadingLimits ? (
                   <div className="text-secondary-text text-sm">
                     Loading options...
@@ -611,47 +630,49 @@ export function SuggestionForm({
                   <div className="space-y-2">
                     <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
                       <span className="text-secondary-text">
-                        Select one of the options below as your suggested trend.
+                        Select every trend that applies. The first one you pick
+                        is the primary trend.
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {(limits?.valid_trends ?? [])
-                        .filter(
-                          (t) =>
-                            t.trim().toLowerCase() !==
-                            selectedItem?.trend?.trim().toLowerCase(),
-                        )
-                        .map((t) => {
-                          const color = getTrendCssColor(t);
-                          return (
-                            <button
-                              key={t}
-                              type="button"
-                              onClick={() => setSuggestedValue(t)}
-                              aria-pressed={suggestedValue === t}
-                              className={`bg-tertiary-bg text-primary-text focus-visible:outline-border-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                                suggestedValue === t
-                                  ? "ring-2"
-                                  : "opacity-60 hover:opacity-90"
-                              }`}
-                              style={
-                                {
-                                  borderColor: color,
-                                  "--tw-ring-color": color,
-                                } as React.CSSProperties
-                              }
-                            >
-                              {suggestedValue === t && (
-                                <Icon
-                                  icon="heroicons:check"
-                                  className="h-4 w-4 shrink-0"
-                                  aria-hidden="true"
-                                />
-                              )}
-                              <span>{t}</span>
-                            </button>
-                          );
-                        })}
+                      {(limits?.valid_trends ?? []).map((t) => {
+                        const color = getTrendCssColor(t);
+                        const selected = suggestedTrends.includes(t);
+                        return (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() =>
+                              setSuggestedTrends((prev) =>
+                                selected
+                                  ? prev.filter((p) => p !== t)
+                                  : [...prev, t],
+                              )
+                            }
+                            aria-pressed={selected}
+                            className={`bg-tertiary-bg text-primary-text focus-visible:outline-border-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                              selected
+                                ? "ring-2"
+                                : "opacity-60 hover:opacity-90"
+                            }`}
+                            style={
+                              {
+                                borderColor: color,
+                                "--tw-ring-color": color,
+                              } as React.CSSProperties
+                            }
+                          >
+                            {selected && (
+                              <Icon
+                                icon="heroicons:check"
+                                className="h-4 w-4 shrink-0"
+                                aria-hidden="true"
+                              />
+                            )}
+                            <span>{t}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )
@@ -885,7 +906,7 @@ export function SuggestionForm({
                   submitting ||
                   !!rateLimitUntil ||
                   !selectedItem ||
-                  !suggestedValue.trim() ||
+                  !hasSuggestedValue ||
                   (field === "notes" &&
                     suggestedValue.length > maxNoteLength) ||
                   reason.length < minChars ||
@@ -1073,10 +1094,13 @@ export function SuggestionForm({
                       className="text-secondary-text text-2xl font-bold line-through"
                       style={{ overflowWrap: "anywhere" }}
                     >
-                      {formatFullValue(
-                        (selectedItem?.[field as keyof Item] as string) ||
-                          "N/A",
-                      )}
+                      <SuggestionValue
+                        value={
+                          field === "trends"
+                            ? selectedItem && itemTrends(selectedItem)
+                            : (selectedItem?.[field as keyof Item] as string)
+                        }
+                      />
                     </p>
                   </div>
                   <Icon
@@ -1097,7 +1121,7 @@ export function SuggestionForm({
                       className="text-primary-text text-2xl font-bold"
                       style={{ overflowWrap: "anywhere" }}
                     >
-                      {formatFullValue(suggestedValue)}
+                      <SuggestionValue value={suggestedFieldValue} />
                     </p>
                   </div>
                 </div>

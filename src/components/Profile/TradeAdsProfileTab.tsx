@@ -89,6 +89,7 @@ export default function TradeAdsProfileTab({
     cash_value?: string | null;
     duped_value?: string | null;
     trend?: string | null;
+    trends?: string[] | null;
     demand?: string | null;
     duped_demand?: string | null;
     notes?: string | null;
@@ -155,6 +156,7 @@ export default function TradeAdsProfileTab({
         is_seasonal: null,
         tradable: 1,
         trend: item.info?.trend || "N/A",
+        trends: item.info?.trends,
         demand: item.info?.demand || "N/A",
         duped_demand: item.info?.duped_demand ?? null,
         isDuped: item.duped ?? false,
