@@ -54,9 +54,20 @@ function Tooltip({
 }
 
 function TooltipTrigger({
+  onFocus,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+  return (
+    <TooltipPrimitive.Trigger
+      data-slot="tooltip-trigger"
+      onFocus={(event) => {
+        onFocus?.(event);
+        if (!event.currentTarget.matches(":focus-visible"))
+          event.preventDefault();
+      }}
+      {...props}
+    />
+  );
 }
 
 function TooltipContent({
