@@ -8,6 +8,7 @@ import type * as Dropdown from "./dropdown-menu";
 type TriggerHandlers = {
   onPointerDown: (input: ReturnType<typeof event>) => void;
   onClick: (input: ReturnType<typeof event>) => void;
+  onKeyDown: (input: unknown) => void;
 };
 
 function harness() {
@@ -119,6 +120,21 @@ test("mouse, pen and keyboard keep Radix activation without a second toggle", ()
     h.trigger().onClick(input);
     expect(h.root().open).toBe(false);
   }
+});
+
+test("Samsung taps with click detail 0 still toggle; keyboard clicks after a touch do not", () => {
+  const h = harness();
+  h.root();
+  h.trigger().onPointerDown(event("touch"));
+  h.trigger().onClick({ ...event("touch"), detail: 0 });
+  expect(h.root().open).toBe(true);
+
+  const k = harness();
+  k.root();
+  k.trigger().onPointerDown(event("touch")); // Cancelled by a scroll.
+  k.trigger().onKeyDown({ key: "Enter" });
+  k.trigger().onClick(event(""));
+  expect(k.root().open).toBe(false);
 });
 
 test("touch clicks respect disabled controls and caller click cancellation", () => {

@@ -49,7 +49,7 @@ const DropdownMenu = ({
 const DropdownMenuTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
->(({ onPointerDown, onClick, disabled, ...props }, ref) => {
+>(({ onPointerDown, onClick, onKeyDown, disabled, ...props }, ref) => {
   const menu = React.useContext(DropdownMenuTouchContext);
   const touch = React.useRef(false);
   // Radix closes an open menu on any pointerdown outside its content, the
@@ -68,14 +68,15 @@ const DropdownMenuTrigger = React.forwardRef<
         // Wait for a native click: scrolling cancels it, unlike pointerdown.
         if (touch.current) event.preventDefault();
       }}
+      onKeyDown={(event) => {
+        // Enter/Space also fire a click, which Radix already handles.
+        touch.current = false;
+        onKeyDown?.(event);
+      }}
       onClick={(event) => {
         onClick?.(event);
-        if (
-          !event.defaultPrevented &&
-          !disabled &&
-          touch.current &&
-          event.detail > 0
-        ) {
+        // Not event.detail: Samsung Internet sends some taps with detail 0.
+        if (!event.defaultPrevented && !disabled && touch.current) {
           menu?.setOpen(!wasOpen.current);
         }
       }}
