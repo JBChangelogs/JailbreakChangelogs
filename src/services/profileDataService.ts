@@ -43,7 +43,12 @@ export async function fetchProfileData(
     return {
       followerCount: Array.isArray(followersData) ? followersData.length : 0,
       followingCount: Array.isArray(followingData) ? followingData.length : 0,
-      bio: bioData?.description || null,
+      // The API returns this placeholder instead of an empty description.
+      bio:
+        bioData?.description &&
+        bioData.description !== "No description provided"
+          ? bioData.description
+          : null,
       bioLastUpdated: bioData?.last_updated || null,
     };
   } catch (error) {
