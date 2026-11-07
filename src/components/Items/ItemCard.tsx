@@ -715,14 +715,14 @@ function ItemCard({
             )}
             {isValuesPage && (
               <Link
-                href="/items/suggestions"
-                aria-label={`Suggest a value for ${item.name}`}
+                href={`/items/suggestions?query=${encodeURIComponent(item.name)}`}
+                aria-label={`View value suggestions for ${item.name}`}
                 prefetch={false}
                 onClick={(e) => e.stopPropagation()}
-                className="text-link hover:text-link-hover relative z-20 underline transition-colors"
+                className="text-link hover:text-link-hover relative z-20 transition-colors hover:underline focus-visible:underline"
               >
-                <span className="sm:hidden">Suggest</span>
-                <span className="hidden sm:inline">Suggest a value</span>
+                <span className="sm:hidden">Suggestions</span>
+                <span className="hidden sm:inline">View suggestions</span>
               </Link>
             )}
           </div>
