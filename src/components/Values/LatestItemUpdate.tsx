@@ -36,11 +36,13 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
 
   return (
     <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border px-4 py-2.5 text-sm">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="text-secondary-text text-xs">Latest update</span>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+        <span className="text-secondary-text shrink-0 text-xs whitespace-nowrap">
+          Latest update
+        </span>
         <Link
           href={itemUrl}
-          className="text-link hover:text-link-hover truncate font-semibold transition-colors"
+          className="text-link hover:text-link-hover min-w-0 font-semibold break-words transition-colors"
         >
           {item.name}
         </Link>
@@ -62,8 +64,8 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
       </div>
 
       {latest ? (
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
-          <div className="flex min-w-0 items-center gap-1.5">
+        <div className="grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-1.5 sm:flex sm:items-center sm:gap-3">
+          <div className="contents sm:flex sm:min-w-0 sm:items-center sm:gap-1.5">
             <Icon
               icon="mdi:minus-circle"
               className="text-button-danger h-3.5 w-3.5 shrink-0"
@@ -72,9 +74,9 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
             <span className="text-button-danger shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase">
               {`Old ${fieldLabel(latest.field).toUpperCase()}`}
             </span>
-            {/* One line here; the changelog has the full text. */}
+            {/* Clamped here; the changelog has the full text. */}
             <span
-              className="text-secondary-text max-w-xs min-w-0 truncate text-sm font-bold line-through"
+              className="text-secondary-text line-clamp-2 max-w-xs min-w-0 text-sm font-bold break-words line-through sm:line-clamp-1"
               title={formatFullValue(latest.current_value || "N/A")}
             >
               {formatFullValue(latest.current_value || "N/A")}
@@ -82,10 +84,10 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
           </div>
           <Icon
             icon="material-symbols:arrow-forward-rounded"
-            className="text-tertiary-text h-3.5 w-3.5 shrink-0"
+            className="text-tertiary-text hidden h-3.5 w-3.5 shrink-0 sm:inline"
             inline
           />
-          <div className="flex min-w-0 items-center gap-1.5">
+          <div className="contents sm:flex sm:min-w-0 sm:items-center sm:gap-1.5">
             <Icon
               icon="mdi:plus-circle"
               className="text-button-success h-3.5 w-3.5 shrink-0"
@@ -95,7 +97,7 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
               {`New ${fieldLabel(latest.field).toUpperCase()}`}
             </span>
             <span
-              className="text-primary-text max-w-xs min-w-0 truncate text-sm font-bold"
+              className="text-primary-text line-clamp-2 max-w-xs min-w-0 text-sm font-bold break-words sm:line-clamp-1"
               title={formatFullValue(latest.suggested_value)}
             >
               {formatFullValue(latest.suggested_value)}
