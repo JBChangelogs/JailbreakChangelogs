@@ -254,7 +254,7 @@ export function NotificationPopover({
 
         {/* Tabs */}
         {isAuthenticated && (
-          <div className="border-border-secondary border-b">
+          <div className="border-border-secondary border-b [html[data-tab-style=filled]_&]:px-4 [html[data-tab-style=filled]_&]:py-3">
             <Tabs
               value={tab}
               onValueChange={(value) => {
@@ -263,7 +263,7 @@ export function NotificationPopover({
                 setPage(1);
               }}
             >
-              <TabsList className="w-full rounded-none border-0!" fullWidth>
+              <TabsList className="w-full" fullWidth>
                 <TabsTrigger value="unread" fullWidth>
                   Unread
                 </TabsTrigger>

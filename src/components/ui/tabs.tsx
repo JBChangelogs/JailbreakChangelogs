@@ -122,13 +122,18 @@ const TabsList = React.forwardRef<
       // pill spill into a neighbouring flex-1 tab, so measure fractionally.
       // The filled pill also takes the tab's own top and height, so it sits
       // exactly where the tab (and its centered text) is.
+      // Undo ancestor transforms, e.g. a dialog's zoom-in animation.
       const activeRect = active.getBoundingClientRect();
       const listRect = el.getBoundingClientRect();
+      const scaleX = el.offsetWidth ? listRect.width / el.offsetWidth : 1;
+      const scaleY = el.offsetHeight ? listRect.height / el.offsetHeight : 1;
       const left =
-        activeRect.left - listRect.left - el.clientLeft + el.scrollLeft;
-      const width = activeRect.width;
-      const top = activeRect.top - listRect.top - el.clientTop;
-      const height = activeRect.height;
+        (activeRect.left - listRect.left) / scaleX -
+        el.clientLeft +
+        el.scrollLeft;
+      const width = activeRect.width / scaleX;
+      const top = (activeRect.top - listRect.top) / scaleY - el.clientTop;
+      const height = activeRect.height / scaleY;
 
       if (active !== lastActiveRef.current) {
         const firstTime = lastActiveRef.current === null;
@@ -372,7 +377,7 @@ const TabsTrigger = React.forwardRef<
           onBlur?.(event);
         }}
         className={cn(
-          "focus-visible:ring-border-focus text-secondary-text data-[state=inactive]:hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:not-data-[pointer-focus]:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+          "focus-visible:ring-border-focus text-secondary-text hover:text-primary-text data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-[color] focus-visible:not-data-[pointer-focus]:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
           fullWidth && "flex-1 px-2",
           className,
         )}
