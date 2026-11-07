@@ -35,7 +35,8 @@ export default function Error({
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
               <Button
                 variant="secondary"
-                onClick={retry}
+                // No digest = client-side error; a soft refresh keeps the broken JS, so reload.
+                onClick={error.digest ? retry : () => window.location.reload()}
                 className="w-full sm:w-auto"
               >
                 <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />

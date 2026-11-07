@@ -35,7 +35,8 @@ export default function Error({ error, retry }: ErrorProps) {
 
             <div className="space-y-4">
               <button
-                onClick={retry}
+                // No digest = client-side error; a soft refresh keeps the broken JS, so reload.
+                onClick={error.digest ? retry : () => window.location.reload()}
                 className="w-full rounded-lg bg-[#FFB636] px-6 py-3 font-semibold text-white transition-colors duration-200 hover:bg-[#FFA500]"
               >
                 Try again

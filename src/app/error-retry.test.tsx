@@ -31,6 +31,7 @@ for (const path of paths) {
       }).outputText,
       {
         exports,
+        window: { location: { reload: () => calls.push("reload") } },
         process: { env: { NODE_ENV: "production" } },
         require: (name: string) => {
           if (name === "react")
@@ -71,14 +72,18 @@ for (const path of paths) {
         },
       },
     );
-    const error = new Error("Temporary API failure");
-    const tree = nodes(
-      exports.default({
-        error,
-        retry: () => calls.push("retry"),
-        reset: () => calls.push("reset"),
-      }),
-    );
+    const error = Object.assign(new Error("Temporary API failure"), {
+      digest: "123",
+    });
+    const render = (err: Error) =>
+      nodes(
+        exports.default({
+          error: err,
+          retry: () => calls.push("retry"),
+          reset: () => calls.push("reset"),
+        }),
+      );
+    const tree = render(error);
     expect(reports).toEqual([
       [
         error,
@@ -93,6 +98,19 @@ for (const path of paths) {
     expect(retryButton?.props.onClick).toBeFunction();
     retryButton?.props.onClick?.();
     expect(calls).toEqual(["retry"]);
+
+    // Client-side errors (no digest) need a full reload to drop stale JS.
+    calls.length = 0;
+    reports.length = 0;
+    const clientTree = render(new Error("ChunkLoadError"));
+    clientTree
+      .find(
+        (node) =>
+          (node.type === "Button" || node.type === "button") &&
+          node.props.onClick,
+      )
+      ?.props.onClick?.();
+    expect(calls).toEqual(["reload"]);
     if (path.startsWith("inventories/")) {
       expect(tree.find((node) => node.type === "Link")?.props.href).toBe(
         path === "inventories/error.tsx" ? "/" : "/inventories",

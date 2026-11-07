@@ -53,7 +53,10 @@ export default function Error({
             </p>
             <ErrorDigest digest={error.digest} />
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" onClick={retry}>
+              <Button
+                size="lg" // No digest = client-side error; a soft refresh keeps the broken JS, so reload.
+                onClick={error.digest ? retry : () => window.location.reload()}
+              >
                 Try again
               </Button>
               <Button asChild size="lg" variant="secondary">
