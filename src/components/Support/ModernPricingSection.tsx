@@ -8,9 +8,7 @@ import { useQueryState } from "nuqs";
 import { toast } from "sonner";
 import { getAllowedFileExtensions } from "@/config/settings";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/ui/IconWrapper";
-import ChangelogMediaEmbed from "@/components/Changelogs/ChangelogMediaEmbed";
 import PricingTierAction from "./PricingTierAction";
 import { getTierPurchase, getTierShareUrl } from "./pricing";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -127,7 +125,6 @@ export default function ModernPricingSection() {
   });
   const { user } = useAuthContext();
   const supporterLevel = user?.premiumtype ?? 0;
-  const { resolvedTheme } = useTheme();
   const isYearly = tabParam === "roblox";
   const discordLevelsQuery = useQuery({
     queryKey: ["supporter-gift-levels"],
@@ -141,16 +138,6 @@ export default function ModernPricingSection() {
   const discordLevels = hasMounted ? (discordLevelsQuery.data ?? []) : [];
   const discordLevelsLoading = !hasMounted || discordLevelsQuery.isPending;
   const isOwner = user?.flags?.some((f) => f.flag === "is_owner");
-
-  const discordImagePath =
-    resolvedTheme === "dark"
-      ? "/support/discord/light-discord.png"
-      : "/support/discord/dark-discord.png";
-
-  const robloxImagePath =
-    resolvedTheme === "dark"
-      ? "/support/roblox/light-roblox.png"
-      : "/support/roblox/dark-roblox.png";
 
   const copyToClipboard = async (address: string, cryptoType: string) => {
     try {
@@ -523,11 +510,9 @@ export default function ModernPricingSection() {
               Pay with USD through Discord for supporter perks.
             </p>
             <div className="flex flex-1 items-center justify-center">
-              <ChangelogMediaEmbed
-                type="image"
-                url={discordImagePath}
-                showUrl={false}
-                wrapperClassName="mx-auto h-60 w-60"
+              <ThemedQrCode
+                src="/support/discord/discord-qr.png"
+                label="Discord QR code"
               />
             </div>
             <a
@@ -548,11 +533,9 @@ export default function ModernPricingSection() {
               Pay with Robux through Roblox for supporter perks.
             </p>
             <div className="flex flex-1 items-center justify-center">
-              <ChangelogMediaEmbed
-                type="image"
-                url={robloxImagePath}
-                showUrl={false}
-                wrapperClassName="mx-auto h-60 w-60"
+              <ThemedQrCode
+                src="/support/roblox/roblox-qr.png"
+                label="Roblox QR code"
               />
             </div>
             <a
@@ -694,5 +677,19 @@ export default function ModernPricingSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+// The PNG is an alpha mask, so the code takes the active theme's colors.
+function ThemedQrCode({ src, label }: { src: string; label: string }) {
+  return (
+    <div className="bg-primary-bg mx-auto h-60 w-60 rounded-xl">
+      <div
+        role="img"
+        aria-label={label}
+        className="bg-primary-text h-full w-full mask-contain mask-center mask-no-repeat"
+        style={{ maskImage: `url(${src})` }}
+      />
+    </div>
   );
 }
