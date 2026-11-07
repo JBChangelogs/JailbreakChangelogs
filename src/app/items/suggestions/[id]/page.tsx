@@ -1371,11 +1371,10 @@ export default function ValueSuggestionDetailPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => openReportModal(suggestion)}
-                          className="text-button-danger! hover:bg-button-danger/10!"
                         >
                           <Icon
-                            icon="material-symbols:flag-outline-rounded"
-                            className="h-3.5 w-3.5"
+                            icon="heroicons:flag"
+                            className="h-4 w-4"
                             inline
                           />
                           Report

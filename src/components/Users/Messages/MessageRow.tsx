@@ -591,7 +591,7 @@ export function MessageRow({
             }}
             className={danger}
           >
-            <Icon icon="heroicons-outline:flag" className="mr-2 h-4 w-4" />
+            <Icon icon="heroicons:flag" className="mr-2 h-4 w-4" />
             Report
           </Item>
         )}

@@ -720,7 +720,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                               className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
                             >
                               <Icon
-                                icon="heroicons-outline:flag"
+                                icon="heroicons:flag"
                                 className="mr-2 h-4 w-4"
                               />
                               Report Comment
@@ -1014,7 +1014,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                     onClick={() => handleReportClick(comment.id)}
                     className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
                   >
-                    <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
+                    <Icon icon="heroicons:flag" className="h-4 w-4" />
                     Report Comment
                   </ContextMenuItem>
                   {canDeleteAnyComment && (
@@ -1422,7 +1422,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                             className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
                                           >
                                             <Icon
-                                              icon="heroicons-outline:flag"
+                                              icon="heroicons:flag"
                                               className="mr-2 h-4 w-4"
                                             />
                                             Report Comment
@@ -1653,7 +1653,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                   className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
                                 >
                                   <Icon
-                                    icon="heroicons-outline:flag"
+                                    icon="heroicons:flag"
                                     className="h-4 w-4"
                                   />
                                   Report Comment

@@ -104,7 +104,7 @@ export default function ReportItemInfoButton({ item }: { item: ItemDetails }) {
   return (
     <>
       <Button variant="ghost" size="xs" onClick={openModal}>
-        <Icon icon="heroicons-outline:flag" className="h-4 w-4" />
+        <Icon icon="heroicons:flag" className="h-4 w-4" />
         Report inaccurate description
       </Button>
 

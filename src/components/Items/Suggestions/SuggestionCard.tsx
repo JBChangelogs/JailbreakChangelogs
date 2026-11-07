@@ -392,14 +392,10 @@ export function SuggestionCard({
                     <button
                       type="button"
                       onClick={onOpenReport}
-                      className="text-button-danger hover:bg-button-danger/10 shrink-0 cursor-pointer rounded p-1 transition-colors"
+                      className="text-secondary-text hover:text-primary-text hover:bg-tertiary-bg shrink-0 cursor-pointer rounded p-1 transition-colors"
                       aria-label="Report suggestion"
                     >
-                      <Icon
-                        icon="material-symbols:flag-outline-rounded"
-                        className="h-4 w-4"
-                        inline
-                      />
+                      <Icon icon="heroicons:flag" className="h-4 w-4" inline />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Report suggestion</TooltipContent>
