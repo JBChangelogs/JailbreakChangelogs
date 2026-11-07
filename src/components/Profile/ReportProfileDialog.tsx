@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { UserAvatar } from "@/utils/ui/avatar";
+import { UserAvatar, getAvatarUrl } from "@/utils/ui/avatar";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { getProfileBanner } from "@/components/Profile/Banner";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
@@ -70,8 +71,17 @@ export function ReportProfileDialog({
     customBanner: user.custom_banner,
     settings: user.settings_v2,
     premiumType: user.premiumtype,
-    size: 512,
   });
+  const avatarUrl = getAvatarUrl({
+    userId: user.id,
+    avatarHash: user.avatar,
+    custom_avatar: user.custom_avatar,
+    settings: user.settings_v2,
+    premiumType: user.premiumtype,
+  });
+  // The lightbox renders outside the dialog, so keep its clicks and Escape
+  // from also closing the dialog.
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   // A stale Discord hash 404s and the profile shows our fallback instead,
   // so only offer the banner once it actually loads.
   const [bannerLoaded, setBannerLoaded] = useState(false);
@@ -104,9 +114,24 @@ export function ReportProfileDialog({
     />
   );
 
-  const identityPreview = (size: number) => (
+  const avatarRadius = user.premiumtype === 3 ? "rounded-2xl" : "rounded-full";
+
+  const identityPreview = (size: number, expandable = false) => (
     <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 rounded-lg border p-3">
-      {avatar(size)}
+      {expandable && avatarUrl ? (
+        <ImageLightbox
+          src={avatarUrl}
+          alt={`${user.username}'s profile picture`}
+          compact
+          previewRadius={avatarRadius}
+          className="shrink-0"
+          onOpenChange={setLightboxOpen}
+        >
+          {avatar(size)}
+        </ImageLightbox>
+      ) : (
+        avatar(size)
+      )}
       <div className="min-w-0">
         <p className="text-primary-text truncate text-sm font-medium">
           {displayName}
@@ -117,14 +142,20 @@ export function ReportProfileDialog({
   );
 
   const imagePreview = (src: string | undefined, label: string) => (
-    <div className="border-border-card bg-tertiary-bg/50 overflow-hidden rounded-lg border">
+    <ImageLightbox
+      src={src}
+      alt={`${user.username}'s ${label}`}
+      className="border-border-card bg-tertiary-bg/50 w-full border"
+      onOpenChange={setLightboxOpen}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={`${user.username}'s ${label}`}
+        draggable={false}
         className="h-auto w-full object-contain"
       />
-    </div>
+    </ImageLightbox>
   );
 
   const options: {
@@ -152,7 +183,7 @@ export function ReportProfileDialog({
       hint: "Their profile picture",
       icon: "heroicons:user-circle",
       show: true,
-      preview: () => identityPreview(16),
+      preview: () => identityPreview(16, true),
     },
     {
       target: "banner",
@@ -259,6 +290,8 @@ export function ReportProfileDialog({
       <DialogContent
         showClose
         aria-describedby={undefined}
+        onEscapeKeyDown={(event) => lightboxOpen && event.preventDefault()}
+        onInteractOutside={(event) => lightboxOpen && event.preventDefault()}
         className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
       >
         <DialogHeader className="px-6 pt-6 pb-2">

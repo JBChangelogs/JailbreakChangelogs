@@ -8,6 +8,7 @@ import {
 } from "@/hooks/useProfileBannerAspectRatio";
 import { UserSettingsV2 } from "@/types/auth";
 import { getBackgroundImageByIndex } from "@/utils/helpers/backgroundImages";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
 interface BannerProps {
   userId: string;
@@ -18,6 +19,7 @@ interface BannerProps {
   premiumType?: number;
   className?: string;
   preview?: boolean;
+  expandable?: boolean;
 }
 
 // Optimized seed calculation - converts string to number more efficiently
@@ -84,6 +86,7 @@ export const Banner = ({
   premiumType,
   className,
   preview = false,
+  expandable = false,
 }: BannerProps) => {
   const previewAspectRatio = useProfileBannerAspectRatio(preview);
   const [primaryBannerFailed, setPrimaryBannerFailed] = useState(false);
@@ -129,6 +132,16 @@ export const Banner = ({
             "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 35%, transparent 75%)",
         }}
       />
+      {expandable && primary && !primaryBannerFailed && (
+        <ImageLightbox
+          src={primary}
+          alt={`${username}'s profile banner`}
+          previewRadius="rounded-none"
+          className="absolute! inset-0 z-20"
+        >
+          {null}
+        </ImageLightbox>
+      )}
     </div>
   );
 };

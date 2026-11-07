@@ -26,7 +26,8 @@ import Link from "next/link";
 import NextError from "next/error";
 import { notFound, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { UserAvatar } from "@/utils/ui/avatar";
+import { UserAvatar, getAvatarUrl } from "@/utils/ui/avatar";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Icon } from "../../../components/ui/IconWrapper";
@@ -611,6 +612,13 @@ export default function UserProfileClient({
   }
 
   const isOwnProfile = currentUserId === user.id;
+  const avatarUrl = getAvatarUrl({
+    userId: user.id,
+    avatarHash: user.avatar,
+    custom_avatar: user.custom_avatar,
+    settings: user.settings_v2,
+    premiumType: user.premiumtype,
+  });
   // Accent colors only recolor profile cards when the owner opts in.
   const accent = userCardAccent(user);
   const underglow = accentColorToHex(user.underglow);
@@ -728,6 +736,7 @@ export default function UserProfileClient({
                   ? Math.max(user.premiumtype ?? 0, 2)
                   : user.premiumtype
               }
+              expandable={!isOwnProfile}
             />
             {isOwnProfile && (
               <BannerEditOverlay
@@ -768,6 +777,19 @@ export default function UserProfileClient({
                     settings={user.settings_v2}
                     premiumType={user.premiumtype}
                   />
+                  {!isOwnProfile && avatarUrl && (
+                    <ImageLightbox
+                      src={avatarUrl}
+                      alt={`${user.username}'s profile picture`}
+                      compact
+                      previewRadius={
+                        user.premiumtype === 3 ? "rounded-2xl" : "rounded-full"
+                      }
+                      className="absolute! inset-1 z-30"
+                    >
+                      {null}
+                    </ImageLightbox>
+                  )}
                   {isOwnProfile && (
                     <AvatarEditOverlay
                       userData={user}

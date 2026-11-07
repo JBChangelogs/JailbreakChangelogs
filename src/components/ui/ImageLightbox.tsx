@@ -133,7 +133,7 @@ export const ImageLightbox = ({
         createPortal(
           <div
             data-image-lightbox
-            className="fixed inset-0 z-[10000] flex flex-col items-center justify-center gap-3 bg-black/90 p-4"
+            className="pointer-events-auto fixed inset-0 z-[10000] flex flex-col items-center justify-center gap-3 bg-black/90 p-4"
             onClick={(event) => {
               if (stopPropagation) event.stopPropagation();
               setActiveIndex(null);
@@ -158,6 +158,7 @@ export const ImageLightbox = ({
               height={0}
               sizes="100vw"
               unoptimized
+              draggable={false}
               referrerPolicy={noReferrer ? "no-referrer" : undefined}
               onClick={(event) => event.stopPropagation()}
               className={cn(

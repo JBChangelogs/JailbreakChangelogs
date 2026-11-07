@@ -72,6 +72,35 @@ export const SilhouetteAvatar = () => (
   </svg>
 );
 
+export function getAvatarUrl({
+  userId,
+  avatarHash,
+  custom_avatar,
+  settings,
+  premiumType,
+}: {
+  userId: string;
+  avatarHash?: string | null;
+  custom_avatar?: string | null;
+  settings?: { custom_avatar?: boolean };
+  premiumType?: number;
+}): string | null {
+  if (
+    settings?.custom_avatar === true &&
+    (premiumType ?? 0) >= 2 &&
+    custom_avatar &&
+    custom_avatar !== "N/A"
+  ) {
+    return custom_avatar;
+  }
+  if (avatarHash && avatarHash !== "None") {
+    return /^https?:\/\//i.test(avatarHash)
+      ? avatarHash
+      : `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=4096`;
+  }
+  return null;
+}
+
 const AvatarWrapper = ({
   children,
   isOnline,
