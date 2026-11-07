@@ -125,8 +125,11 @@ const TabsList = React.forwardRef<
       // Undo ancestor transforms, e.g. a dialog's zoom-in animation.
       const activeRect = active.getBoundingClientRect();
       const listRect = el.getBoundingClientRect();
-      const scaleX = el.offsetWidth ? listRect.width / el.offsetWidth : 1;
-      const scaleY = el.offsetHeight ? listRect.height / el.offsetHeight : 1;
+      // Computed size, not offsetWidth/Height: those round to whole pixels,
+      // so with no transform the scale came out slightly off 1.
+      const style = getComputedStyle(el);
+      const scaleX = listRect.width / parseFloat(style.width) || 1;
+      const scaleY = listRect.height / parseFloat(style.height) || 1;
       const left =
         (activeRect.left - listRect.left) / scaleX -
         el.clientLeft +
