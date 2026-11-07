@@ -501,7 +501,7 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Support Methods */}
-        <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-3">
+        <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           <div className="border-border-card bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Discord Purchases
@@ -509,7 +509,7 @@ export default function ModernPricingSection() {
             <p className="text-secondary-text mb-4 text-sm">
               Pay with USD through Discord for supporter perks.
             </p>
-            <div className="flex flex-1 items-center justify-center">
+            <div className="flex w-full flex-1 items-center justify-center">
               <ThemedQrCode
                 src="/support/discord/discord-qr-mask.png"
                 label="Discord QR code"
@@ -532,7 +532,7 @@ export default function ModernPricingSection() {
             <p className="text-secondary-text mb-4 text-sm">
               Pay with Robux through Roblox for supporter perks.
             </p>
-            <div className="flex flex-1 items-center justify-center">
+            <div className="flex w-full flex-1 items-center justify-center">
               <ThemedQrCode
                 src="/support/roblox/roblox-qr-mask.png"
                 label="Roblox QR code"
@@ -548,7 +548,7 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center md:col-span-2 lg:col-span-1">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Crypto Donations
             </h3>
@@ -683,7 +683,7 @@ export default function ModernPricingSection() {
 // The PNG is an alpha mask, so the code takes the active theme's colors.
 function ThemedQrCode({ src, label }: { src: string; label: string }) {
   return (
-    <div className="bg-primary-bg mx-auto h-60 w-60 rounded-xl">
+    <div className="bg-primary-bg mx-auto aspect-square w-full max-w-60 rounded-xl">
       <div
         role="img"
         aria-label={label}
