@@ -19,7 +19,11 @@ import {
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useWhatsNewPreference } from "@/hooks/useWhatsNewPreference";
-import { safeLocalStorage } from "@/utils/storage/safeStorage";
+import {
+  safeGetJSON,
+  safeLocalStorage,
+  safeSetJSON,
+} from "@/utils/storage/safeStorage";
 
 const ReleaseChanges = dynamic(() => import("./ReleaseChanges"), {
   loading: () => (
@@ -30,6 +34,40 @@ const ReleaseChanges = dynamic(() => import("./ReleaseChanges"), {
 });
 
 const LAST_SEEN_RELEASE_KEY = "jbcl:last-seen-dev-release";
+const LAST_SEEN_AT_KEY = "jbcl:last-seen-dev-release-at";
+const BANNER_VISITS_KEY = "jbcl:dev-release-banner-visits";
+// Releases ship every few days; without a cooldown the banner never leaves.
+const COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000;
+// Shown this many visits without a click counts as seen. A visit is the
+// first showing after a 30 minute gap, shared across tabs.
+const MAX_IGNORED_VISITS = 3;
+const VISIT_GAP_MS = 30 * 60 * 1000;
+
+function markSeen(slug: string) {
+  safeLocalStorage.setItem(LAST_SEEN_RELEASE_KEY, slug);
+  safeLocalStorage.setItem(LAST_SEEN_AT_KEY, String(Date.now()));
+}
+
+function isSeen(slug: string) {
+  if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === slug) return true;
+  const seenAt = Number(safeLocalStorage.getItem(LAST_SEEN_AT_KEY));
+  return seenAt > 0 && Date.now() - seenAt < COOLDOWN_MS;
+}
+
+function ignoredTooOften(slug: string) {
+  const visits = safeGetJSON<{ slug: string; count: number; at: number }>(
+    BANNER_VISITS_KEY,
+    null,
+  );
+  const now = Date.now();
+  const sameRelease = visits?.slug === slug;
+  if (sameRelease && now - visits.at < VISIT_GAP_MS) {
+    return visits.count > MAX_IGNORED_VISITS;
+  }
+  const count = (sameRelease ? visits.count : 0) + 1;
+  safeSetJSON(BANNER_VISITS_KEY, { slug, count, at: now });
+  return count > MAX_IGNORED_VISITS;
+}
 
 interface ReleaseMetadata {
   slug: string;
@@ -71,13 +109,12 @@ export default function LatestReleaseDialogClient({
         pathname === "/dev/changelogs" ||
         pathname === `/dev/changelogs/${release.slug}`
       ) {
-        safeLocalStorage.setItem(LAST_SEEN_RELEASE_KEY, release.slug);
+        markSeen(release.slug);
       }
       return hide();
     }
 
-    if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === release.slug)
-      return hide();
+    if (isSeen(release.slug)) return hide();
 
     // Already showing: keep it across route changes instead of refetching.
     if (preview) return;
@@ -90,8 +127,8 @@ export default function LatestReleaseDialogClient({
       })
       .then((latest) => {
         if (controller.signal.aborted) return;
-        if (safeLocalStorage.getItem(LAST_SEEN_RELEASE_KEY) === latest.slug)
-          return;
+        if (isSeen(latest.slug)) return;
+        if (ignoredTooOften(latest.slug)) return markSeen(latest.slug);
         setPreview(latest);
       })
       .catch(() => {});
@@ -108,10 +145,7 @@ export default function LatestReleaseDialogClient({
   ]);
 
   const dismiss = () => {
-    safeLocalStorage.setItem(
-      LAST_SEEN_RELEASE_KEY,
-      preview?.slug ?? release.slug,
-    );
+    markSeen(preview?.slug ?? release.slug);
     setOpen(false);
     setDismissed(true);
   };

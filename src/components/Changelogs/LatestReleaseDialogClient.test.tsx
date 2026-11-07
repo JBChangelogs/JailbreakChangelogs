@@ -12,8 +12,17 @@ const release = {
 };
 const seenKey = "jbcl:last-seen-dev-release";
 
-function setup({ pathname = "/", disabled = false, seen = "" } = {}) {
-  const storage = new Map([[seenKey, seen]]);
+const seenAtKey = "jbcl:last-seen-dev-release-at";
+const visitsKey = "jbcl:dev-release-banner-visits";
+const DAY = 24 * 60 * 60 * 1000;
+
+function setup({
+  pathname = "/",
+  disabled = false,
+  seen = "",
+  stored = {} as Record<string, string>,
+} = {}) {
+  const storage = new Map([[seenKey, seen], ...Object.entries(stored)]);
   const states: unknown[] = [];
   let stateIndex = 0;
   let effect: (() => unknown) | undefined;
@@ -81,6 +90,10 @@ function setup({ pathname = "/", disabled = false, seen = "" } = {}) {
               getItem: (key: string) => storage.get(key),
               setItem: (key: string, value: string) => storage.set(key, value),
             },
+            safeGetJSON: (key: string, fallback: unknown) =>
+              storage.has(key) ? JSON.parse(storage.get(key)!) : fallback,
+            safeSetJSON: (key: string, value: unknown) =>
+              storage.set(key, JSON.stringify(value)),
           };
         return new Proxy({}, { get: (_, key) => String(key) });
       },
@@ -165,4 +178,61 @@ test("seen releases, disabled announcements, and excluded routes do not show ban
     expectCollapsed(render());
     expect(requests()).toBe(0);
   }
+});
+
+test("a dismissal holds off newer releases for 14 days", async () => {
+  const recent = setup({
+    seen: "v0",
+    stored: { [seenAtKey]: String(Date.now() - DAY) },
+  });
+  recent.render();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expectCollapsed(recent.render());
+  expect(recent.requests()).toBe(0);
+
+  const expired = setup({
+    seen: "v0",
+    stored: { [seenAtKey]: String(Date.now() - 15 * DAY) },
+  });
+  expired.render();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const banner = elements(expired.render()).find(
+    (element) => element.props["data-whats-new-banner"],
+  )!;
+  expect(banner.props["aria-hidden"]).toBe(false);
+});
+
+test("a banner ignored for three visits retires itself", async () => {
+  const { render, storage } = setup({
+    stored: {
+      [visitsKey]: JSON.stringify({
+        slug: release.slug,
+        count: 3,
+        at: Date.now() - DAY,
+      }),
+    },
+  });
+  render();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expectCollapsed(render());
+  expect(storage.get(seenKey)).toBe(release.slug);
+});
+
+test("tabs opened close together count as one visit", async () => {
+  const { render, storage } = setup({
+    stored: {
+      [visitsKey]: JSON.stringify({
+        slug: release.slug,
+        count: 3,
+        at: Date.now() - 60_000,
+      }),
+    },
+  });
+  render();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const banner = elements(render()).find(
+    (element) => element.props["data-whats-new-banner"],
+  )!;
+  expect(banner.props["aria-hidden"]).toBe(false);
+  expect(JSON.parse(storage.get(visitsKey)!).count).toBe(3);
 });
