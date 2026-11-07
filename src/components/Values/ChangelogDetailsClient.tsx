@@ -539,12 +539,12 @@ export default function ChangelogDetailsClient({
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">
+        <div className="grid grid-cols-2 gap-4 lg:flex lg:flex-row">
           {/* Item Type Filter */}
-          <div className="w-full lg:w-1/2">
+          <div className="min-w-0 lg:w-1/2">
             <div className="mb-2">
               <h3 className="text-secondary-text text-sm font-medium">
-                Filter by item type:
+                Item type
               </h3>
             </div>
             <DropdownMenu>
@@ -591,10 +591,10 @@ export default function ChangelogDetailsClient({
           </div>
 
           {/* Suggestion Type Filter */}
-          <div className="w-full lg:w-1/2">
+          <div className="min-w-0 lg:w-1/2">
             <div className="mb-2">
               <h3 className="text-secondary-text text-sm font-medium">
-                Filter by suggestion type:
+                Suggestion type
               </h3>
             </div>
             <DropdownMenu>

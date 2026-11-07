@@ -102,34 +102,46 @@ export default function OGFilters({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex w-full flex-col gap-4 sm:flex-row">
+      <div className="grid w-full grid-cols-2 gap-4 sm:flex sm:flex-row">
         {/* Search Bar */}
-        <div className="relative w-full sm:w-1/3">
-          <input
-            type="text"
-            placeholder="Search items..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            maxLength={MAX_SEARCH_LENGTH}
-            className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-14 w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-          />
-          <Icon
-            icon="heroicons:magnifying-glass"
-            className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-              aria-label="Clear search"
-            >
-              <Icon icon="heroicons:x-mark" />
-            </button>
-          )}
+        <div className="col-span-2 w-full sm:w-1/3">
+          <div className="mb-2 flex h-6 items-center">
+            <span className="text-secondary-text text-xs font-medium">
+              Search items
+            </span>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search items..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              maxLength={MAX_SEARCH_LENGTH}
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-14 w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            />
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                aria-label="Clear search"
+              >
+                <Icon icon="heroicons:x-mark" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Category Filter */}
-        <div className="w-full sm:w-1/3">
+        <div className="min-w-0 sm:w-1/3">
+          <div className="mb-2 flex h-6 items-center">
+            <span className="text-secondary-text text-xs font-medium">
+              Category
+            </span>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -187,7 +199,12 @@ export default function OGFilters({
         </div>
 
         {/* Sort Filter */}
-        <div className="w-full sm:w-1/3">
+        <div className="min-w-0 sm:w-1/3">
+          <div className="mb-2 flex h-6 items-center">
+            <span className="text-secondary-text text-xs font-medium">
+              Sort by
+            </span>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
