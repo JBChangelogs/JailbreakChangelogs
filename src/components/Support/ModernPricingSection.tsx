@@ -511,7 +511,7 @@ export default function ModernPricingSection() {
             </p>
             <div className="flex flex-1 items-center justify-center">
               <ThemedQrCode
-                src="/support/discord/discord-qr.png"
+                src="/support/discord/discord-qr-mask.png"
                 label="Discord QR code"
               />
             </div>
@@ -534,7 +534,7 @@ export default function ModernPricingSection() {
             </p>
             <div className="flex flex-1 items-center justify-center">
               <ThemedQrCode
-                src="/support/roblox/roblox-qr.png"
+                src="/support/roblox/roblox-qr-mask.png"
                 label="Roblox QR code"
               />
             </div>
