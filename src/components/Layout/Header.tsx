@@ -836,8 +836,7 @@ export default function Header({
         <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
         <OfflineDetector />
         <NewsTicker announcement={tickerFlags.newsAnnouncement} />
-        {updateAvailable && <UpdateAvailableNotice />}
-        {releaseAnnouncement}
+        {updateAvailable ? <UpdateAvailableNotice /> : releaseAnnouncement}
         <div ref={desktopNavbarRef} className="relative z-10">
           <NavbarModern
             onOpenSearch={searchEnabled ? () => setSearchOpen(true) : undefined}
@@ -871,8 +870,7 @@ export default function Header({
           <ServiceAvailabilityTicker alert={tickerFlags.serviceAlert} />
           <OfflineDetector />
           <NewsTicker announcement={tickerFlags.newsAnnouncement} />
-          {updateAvailable && <UpdateAvailableNotice />}
-          {releaseAnnouncement}
+          {updateAvailable ? <UpdateAvailableNotice /> : releaseAnnouncement}
           <div className="relative z-10">
             <div className="bg-secondary-bg border-border-card border-b">
               <div className="flex items-center justify-between px-4 py-2">

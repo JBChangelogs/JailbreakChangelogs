@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 
 const BUILD_TIME = Number(process.env.NEXT_PUBLIC_BUILD_TIME) || 0;
 const CHECK_INTERVAL_MS = 5 * 60_000;
@@ -35,20 +37,18 @@ export function useUpdateAvailable() {
 
 export default function UpdateAvailableNotice() {
   return (
-    <div className="bg-secondary-bg border-border-card border-b">
-      <div className="relative px-4 py-2">
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="text-primary-text focus-visible:ring-border-focus group flex w-full cursor-pointer flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-sm px-8 text-center text-xs focus-visible:ring-2 focus-visible:outline-none lg:px-12"
-        >
-          <span className="font-medium">
-            A new version of the site is available
-          </span>
-          <span className="text-link group-hover:text-link-hover font-semibold transition-colors">
-            Reload <span aria-hidden="true">→</span>
-          </span>
-        </button>
+    <div role="status" className="bg-secondary-bg">
+      <div className="bg-button-info/15 border-button-info/40 text-primary-text flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border-b px-4 py-2.5 text-center text-xs sm:text-sm">
+        <span className="inline-flex items-center gap-1.5 font-medium">
+          <Icon
+            icon="heroicons:arrow-path"
+            className="text-button-info h-4 w-4 shrink-0"
+          />
+          A new version of the site is available
+        </span>
+        <Button size="xs" onClick={() => window.location.reload()}>
+          Reload
+        </Button>
       </div>
     </div>
   );
