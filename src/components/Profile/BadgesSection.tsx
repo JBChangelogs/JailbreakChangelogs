@@ -15,11 +15,19 @@ import { formatMonthDayYear } from "@/utils/helpers/timestamp";
 import { cn } from "@/lib/utils";
 import ProfileTabError from "./ProfileTabError";
 
-interface BadgeDefinition {
+interface BadgeProgress {
+  id: string;
   category: string;
   name: string;
   description: string;
+  earned: boolean;
+  earned_at: number | null;
+  current: number;
+  target: number | null;
 }
+
+const formatNumber = (n: number) =>
+  n.toLocaleString(undefined, { maximumFractionDigits: 1 });
 
 const BADGE_ICONS = [
   { prefix: "networth_", icon: "heroicons:chart-bar" },
@@ -70,16 +78,11 @@ export default function BadgesSection({ userId }: { userId: string }) {
   const [showLocked, setShowLocked] = useState(false);
   const badgesQuery = useQuery({
     queryKey: ["user-badges", userId],
-    queryFn: async ({ signal }) => {
-      const [all, earned] = await Promise.all([
-        getJson<Record<string, BadgeDefinition>>("/v2/badges", signal),
-        getJson<{ id: string; earned_at: number }[]>(
-          `/v2/users/${encodeURIComponent(userId)}/badges`,
-          signal,
-        ),
-      ]);
-      return { all, earned };
-    },
+    queryFn: ({ signal }) =>
+      getJson<BadgeProgress[]>(
+        `/v2/users/${encodeURIComponent(userId)}/badges/progress`,
+        signal,
+      ),
     staleTime: 60_000,
     retry: false,
     refetchOnWindowFocus: false,
@@ -87,21 +90,19 @@ export default function BadgesSection({ userId }: { userId: string }) {
 
   if (badgesQuery.isPending) return null;
 
-  const all = badgesQuery.data?.all ?? {};
-  const earnedAt = new Map(
-    badgesQuery.data?.earned
-      .filter((badge) => all[badge.id])
-      .map((badge) => [badge.id, badge.earned_at]),
-  );
-  const earnedIds = [...earnedAt.keys()];
-  const lockedIds = Object.keys(all).filter((id) => !earnedAt.has(id));
+  const badges = badgesQuery.data ?? [];
+  const earnedBadges = badges.filter((badge) => badge.earned);
+  const lockedBadges = badges.filter((badge) => !badge.earned);
 
-  const renderBadge = (id: string) => {
-    const badge = all[id];
-    const earned = earnedAt.get(id);
-    const { icon, tier } = badgeIcon(id, badge.category);
+  const renderBadge = (badge: BadgeProgress) => {
+    const { earned } = badge;
+    const { icon, tier } = badgeIcon(badge.id, badge.category);
+    const showProgress = !earned && badge.target != null && badge.target > 1;
+    const percent = showProgress
+      ? Math.min(badge.current / badge.target!, 1) * 100
+      : 0;
     return (
-      <li key={id}>
+      <li key={badge.id}>
         <Popover>
           <PopoverTrigger asChild>
             <button
@@ -128,6 +129,23 @@ export default function BadgesSection({ userId }: { userId: string }) {
                   </span>
                 )}
               </div>
+              {showProgress ? (
+                <div
+                  role="progressbar"
+                  aria-label={`${badge.name} progress`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(percent)}
+                  className="bg-secondary-text/20 h-1 w-16 overflow-hidden rounded-full"
+                >
+                  <div
+                    className="bg-link/50 h-full rounded-full"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+              ) : (
+                <div aria-hidden className="h-1" />
+              )}
               <span
                 className={cn(
                   "line-clamp-2 text-center text-xs leading-tight font-medium",
@@ -143,8 +161,12 @@ export default function BadgesSection({ userId }: { userId: string }) {
             <p className="text-secondary-text">{badge.description}</p>
             <p className="text-secondary-text text-xs">
               {earned
-                ? `Earned ${formatMonthDayYear(earned)}`
-                : "Not earned yet"}
+                ? badge.earned_at
+                  ? `Earned ${formatMonthDayYear(badge.earned_at)}`
+                  : "Earned"
+                : showProgress
+                  ? `${formatNumber(badge.current)} / ${formatNumber(badge.target!)}`
+                  : "Not earned yet"}
             </p>
           </PopoverContent>
         </Popover>
@@ -157,7 +179,7 @@ export default function BadgesSection({ userId }: { userId: string }) {
       <h2 className="text-primary-text mb-3 text-lg font-semibold">
         Badges{" "}
         <span className="text-secondary-text ml-1 text-sm font-normal">
-          {earnedIds.length}/{earnedIds.length + lockedIds.length}
+          {earnedBadges.length}/{badges.length}
         </span>
       </h2>
       {badgesQuery.isError ? (
@@ -169,11 +191,11 @@ export default function BadgesSection({ userId }: { userId: string }) {
       ) : (
         <>
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-3">
-            {(earnedIds.length > 0 ? earnedIds : lockedIds).map((id) =>
-              renderBadge(id),
+            {(earnedBadges.length > 0 ? earnedBadges : lockedBadges).map(
+              renderBadge,
             )}
           </ul>
-          {earnedIds.length > 0 && lockedIds.length > 0 && (
+          {earnedBadges.length > 0 && lockedBadges.length > 0 && (
             <>
               <Button
                 variant="ghost"
@@ -185,7 +207,7 @@ export default function BadgesSection({ userId }: { userId: string }) {
               >
                 {showLocked
                   ? "Hide locked"
-                  : `Show locked (${lockedIds.length})`}
+                  : `Show locked (${lockedBadges.length})`}
                 <Icon
                   icon="heroicons:chevron-down"
                   className={cn(
@@ -199,7 +221,7 @@ export default function BadgesSection({ userId }: { userId: string }) {
                   id="locked-badges"
                   className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-3"
                 >
-                  {lockedIds.map((id) => renderBadge(id))}
+                  {lockedBadges.map(renderBadge)}
                 </ul>
               )}
             </>
