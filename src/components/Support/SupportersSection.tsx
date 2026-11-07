@@ -106,17 +106,21 @@ export default function SupportersSection({
         />
         <div className="min-w-0 flex-1 text-center">
           <UserProfilePopover user={supporter}>
-            <Link href={`/users/${supporter.id}`} prefetch={false}>
-              <h3 className="text-primary-text hover:text-link truncate text-base font-semibold transition-colors">
+            <Link
+              href={`/users/${supporter.id}`}
+              prefetch={false}
+              className="group/name block"
+            >
+              <h3 className="text-primary-text group-hover/name:text-link truncate text-base font-semibold transition-colors">
                 {supporter.global_name && supporter.global_name !== "None"
                   ? supporter.global_name
                   : supporter.username}
               </h3>
+              <p className="text-secondary-text truncate text-sm">
+                @{supporter.username}
+              </p>
             </Link>
           </UserProfilePopover>
-          <p className="text-secondary-text truncate text-sm">
-            @{supporter.username}
-          </p>
           <div className="mt-3 flex justify-center">
             <Image
               src={`${BADGE_BASE_URL}/jbcl_supporter_${supporter.premiumtype}.svg`}
