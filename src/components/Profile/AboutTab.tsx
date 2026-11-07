@@ -260,7 +260,8 @@ export default function AboutTab({
               rel="noopener noreferrer"
               className="group border-border-card bg-tertiary-bg text-primary-text hover:text-link-hover focus-visible:ring-border-focus inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none sm:gap-2 sm:px-3 sm:text-sm"
             >
-              <DiscordIcon className="size-4 shrink-0" /> Discord
+              <DiscordIcon className="size-4 shrink-0" />
+              <span className="sr-only sm:not-sr-only">Discord</span>
               <span className="text-secondary-text group-hover:text-link-hover min-w-0 truncate transition-colors">
                 @{user.username}
               </span>
@@ -272,7 +273,8 @@ export default function AboutTab({
                 rel="noopener noreferrer"
                 className="group border-border-card bg-tertiary-bg text-primary-text hover:text-link-hover focus-visible:ring-border-focus inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:outline-none sm:gap-2 sm:px-3 sm:text-sm"
               >
-                <RobloxIcon className="size-4 shrink-0" /> Roblox
+                <RobloxIcon className="size-4 shrink-0" />
+                <span className="sr-only sm:not-sr-only">Roblox</span>
                 {user.roblox_username && (
                   <span className="text-secondary-text group-hover:text-link-hover min-w-0 truncate transition-colors">
                     @{user.roblox_username}
