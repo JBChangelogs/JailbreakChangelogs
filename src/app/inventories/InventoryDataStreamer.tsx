@@ -100,7 +100,17 @@ async function InventoryDataFetcher({
             actualRobloxId,
             await getServerVerificationHeaders(),
           ).catch((connectionError) => {
-            log.error("Failed to fetch user connection data", connectionError);
+            if (
+              !(
+                connectionError instanceof Error &&
+                connectionError.message.startsWith("BANNED_USER:")
+              )
+            ) {
+              log.error(
+                "Failed to fetch user connection data",
+                connectionError,
+              );
+            }
             return null;
           })
         : null;

@@ -82,7 +82,11 @@ async function UserDataFetcher({
     }),
     fetchUserByRobloxId(robloxId, await getServerVerificationHeaders()).catch(
       (error) => {
-        log.error("Failed to fetch user connection data", error);
+        if (
+          !(error instanceof Error && error.message.startsWith("BANNED_USER:"))
+        ) {
+          log.error("Failed to fetch user connection data", error);
+        }
         return null;
       },
     ),
