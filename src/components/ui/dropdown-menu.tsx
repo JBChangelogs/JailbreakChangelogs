@@ -6,7 +6,10 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/IconWrapper";
 
-const DropdownMenuTouchContext = React.createContext<(() => void) | null>(null);
+const DropdownMenuTouchContext = React.createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+} | null>(null);
 
 const DropdownMenu = ({
   open: controlledOpen,
@@ -32,7 +35,7 @@ const DropdownMenu = ({
   };
 
   return (
-    <DropdownMenuTouchContext.Provider value={() => changeOpen(!open)}>
+    <DropdownMenuTouchContext.Provider value={{ open, setOpen: changeOpen }}>
       <DropdownMenuPrimitive.Root
         modal={modal}
         open={open}
@@ -47,8 +50,11 @@ const DropdownMenuTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
 >(({ onPointerDown, onClick, disabled, ...props }, ref) => {
-  const toggle = React.useContext(DropdownMenuTouchContext);
+  const menu = React.useContext(DropdownMenuTouchContext);
   const touch = React.useRef(false);
+  // Radix closes an open menu on any pointerdown outside its content, the
+  // trigger included, so read the state before that and flip it on click.
+  const wasOpen = React.useRef(false);
   return (
     <DropdownMenuPrimitive.Trigger
       {...props}
@@ -58,6 +64,7 @@ const DropdownMenuTrigger = React.forwardRef<
         onPointerDown?.(event);
         touch.current =
           event.pointerType === "touch" && !event.defaultPrevented;
+        wasOpen.current = menu?.open ?? false;
         // Wait for a native click: scrolling cancels it, unlike pointerdown.
         if (touch.current) event.preventDefault();
       }}
@@ -69,7 +76,7 @@ const DropdownMenuTrigger = React.forwardRef<
           touch.current &&
           event.detail > 0
         ) {
-          toggle?.();
+          menu?.setOpen(!wasOpen.current);
         }
       }}
     />

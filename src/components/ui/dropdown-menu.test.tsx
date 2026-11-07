@@ -12,13 +12,14 @@ type TriggerHandlers = {
 
 function harness() {
   let state: boolean | undefined;
-  let toggle: () => void;
-  const touch = { current: false };
+  let menu: unknown;
+  const refs: { current: unknown }[] = [];
+  let refIndex = 0;
   const exports = {} as {
     DropdownMenu: (
       props: React.ComponentProps<typeof Dropdown.DropdownMenu>,
     ) => {
-      props: { value: () => void; children: { props: { open: boolean } } };
+      props: { value: unknown; children: { props: { open: boolean } } };
     };
     DropdownMenuTrigger: (
       props: React.ComponentProps<typeof Dropdown.DropdownMenuTrigger>,
@@ -41,8 +42,9 @@ function harness() {
         if (name === "react")
           return {
             createContext: () => ({ Provider: "Provider" }),
-            useContext: () => toggle,
-            useRef: () => touch,
+            useContext: () => menu,
+            useRef: (initial: unknown) =>
+              (refs[refIndex++] ??= { current: initial }),
             forwardRef: (render: unknown) => render,
             useState: (initial: boolean) => {
               state ??= initial;
@@ -64,12 +66,15 @@ function harness() {
     props: React.ComponentProps<typeof Dropdown.DropdownMenu> = {},
   ) => {
     const provider = exports.DropdownMenu(props);
-    toggle = provider.props.value;
+    menu = provider.props.value;
     return provider.props.children.props;
   };
   const trigger = (
     props: React.ComponentProps<typeof Dropdown.DropdownMenuTrigger> = {},
-  ) => exports.DropdownMenuTrigger(props).props;
+  ) => {
+    refIndex = 0;
+    return exports.DropdownMenuTrigger(props).props;
+  };
   const tap = (
     props: React.ComponentProps<typeof Dropdown.DropdownMenuTrigger> = {},
   ) => {
@@ -151,4 +156,16 @@ test("touch toggles honor controlled state, defaultOpen and onOpenChange", () =>
   expect(uncontrolled.root({ defaultOpen: true }).open).toBe(true);
   uncontrolled.tap();
   expect(uncontrolled.root().open).toBe(false);
+});
+
+test("tapping the trigger of an open menu closes it", () => {
+  const h = harness();
+  const root = h.root({ defaultOpen: true });
+  h.trigger().onPointerDown(event("touch"));
+  (root as unknown as { onOpenChange: (open: boolean) => void }).onOpenChange(
+    false,
+  );
+  h.root(); // Re-render, so the click handler sees the closed state.
+  h.trigger().onClick(event("touch"));
+  expect(h.root().open).toBe(false);
 });
