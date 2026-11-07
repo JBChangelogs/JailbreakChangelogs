@@ -272,7 +272,7 @@ export default function ValuesChangelogPage() {
                             </div>
 
                             {/* Entry rows */}
-                            <div className="flex flex-col gap-2">
+                            <div className="divide-border-card/50 flex flex-col divide-y">
                               {visibleEntries.map((entry) => {
                                 const color = getCategoryColor(entry.item.type);
                                 const categoryIcon = getCategoryIcon(
@@ -281,7 +281,7 @@ export default function ValuesChangelogPage() {
                                 return (
                                   <div
                                     key={entry.id}
-                                    className="border-border-card bg-tertiary-bg flex flex-col gap-2 rounded-lg border px-3 py-2.5"
+                                    className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
                                   >
                                     {/* Row 1: item name + badges */}
                                     <div className="flex flex-wrap items-center gap-1.5">
@@ -307,22 +307,17 @@ export default function ValuesChangelogPage() {
                                         )}
                                         {entry.item.type}
                                       </span>
-                                      <span
-                                        className={`${badgeBase} border-border-card bg-quaternary-bg text-primary-text`}
-                                      >
-                                        {fieldLabel(entry.field)}
-                                      </span>
                                     </div>
 
                                     {/* Row 2: old → new + votes */}
                                     <div className="flex flex-wrap items-center gap-3">
-                                      <div className="flex items-center gap-1.5">
+                                      <div className="flex flex-wrap items-center gap-x-1.5">
                                         <Icon
                                           icon="mdi:minus-circle"
                                           className="text-button-danger h-3.5 w-3.5 shrink-0"
                                           inline
                                         />
-                                        <span className="text-button-danger text-xs font-semibold tracking-wide uppercase">
+                                        <span className="text-button-danger shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase">
                                           {`Old ${fieldLabel(entry.field).toUpperCase()}`}
                                         </span>
                                         <span className="text-secondary-text text-sm font-bold break-all line-through">
@@ -333,16 +328,16 @@ export default function ValuesChangelogPage() {
                                       </div>
                                       <Icon
                                         icon="material-symbols:arrow-forward-rounded"
-                                        className="text-tertiary-text h-3.5 w-3.5 shrink-0"
+                                        className="text-tertiary-text hidden h-3.5 w-3.5 shrink-0 sm:block"
                                         inline
                                       />
-                                      <div className="flex items-center gap-1.5">
+                                      <div className="flex flex-wrap items-center gap-x-1.5">
                                         <Icon
                                           icon="mdi:plus-circle"
                                           className="text-button-success h-3.5 w-3.5 shrink-0"
                                           inline
                                         />
-                                        <span className="text-button-success text-xs font-semibold tracking-wide uppercase">
+                                        <span className="text-button-success shrink-0 text-xs font-semibold tracking-wide whitespace-nowrap uppercase">
                                           {`New ${fieldLabel(entry.field).toUpperCase()}`}
                                         </span>
                                         <span className="text-primary-text text-sm font-bold break-all">
@@ -380,14 +375,14 @@ export default function ValuesChangelogPage() {
                                   </div>
                                 );
                               })}
-
-                              {remaining > 0 && (
-                                <p className="text-link group-hover:text-link-hover px-1 text-sm font-medium transition-colors">
-                                  View {remaining} more{" "}
-                                  {remaining === 1 ? "change" : "changes"} →
-                                </p>
-                              )}
                             </div>
+
+                            {remaining > 0 && (
+                              <p className="text-link group-hover:text-link-hover mt-3 text-sm font-medium transition-colors">
+                                View {remaining} more{" "}
+                                {remaining === 1 ? "change" : "changes"} →
+                              </p>
+                            )}
 
                             {/* Contributors */}
                             {(() => {
