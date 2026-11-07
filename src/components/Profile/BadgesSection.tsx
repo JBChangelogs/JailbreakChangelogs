@@ -95,7 +95,7 @@ export default function BadgesSection({ userId }: { userId: string }) {
     const earned = earnedAt.get(id);
     const { icon, tier } = badgeIcon(id, badge.category);
     return (
-      <li key={id} className="w-24">
+      <li key={id}>
         <Popover>
           <PopoverTrigger asChild>
             <button
@@ -162,7 +162,7 @@ export default function BadgesSection({ userId }: { userId: string }) {
         />
       ) : (
         <>
-          <ul className="flex flex-wrap gap-3">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-3">
             {(earnedIds.length > 0 ? earnedIds : lockedIds).map((id) =>
               renderBadge(id),
             )}
@@ -189,7 +189,10 @@ export default function BadgesSection({ userId }: { userId: string }) {
                 />
               </Button>
               {showLocked && (
-                <ul id="locked-badges" className="mt-3 flex flex-wrap gap-3">
+                <ul
+                  id="locked-badges"
+                  className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-3"
+                >
                   {lockedIds.map((id) => renderBadge(id))}
                 </ul>
               )}
