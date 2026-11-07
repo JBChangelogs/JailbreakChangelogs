@@ -62,7 +62,7 @@ test("personal actions stay prominent, respect account state, and avoid self-lin
     /<a[^>]*class="[^"]*bg-button-secondary[^>]*>View My OG Items<\/a>/,
   );
   expect(inventory.indexOf("View My Inventory")).toBeLessThan(
-    inventory.indexOf("Explore:"),
+    inventory.indexOf('href="/values"'),
   );
   expect(inventory).toContain('href="/dupes"');
   expect(inventory).not.toContain('href="/inventories"');
@@ -80,7 +80,7 @@ test("personal actions stay prominent, respect account state, and avoid self-lin
       expect(markup).toContain('href="/og/123"');
       expect(markup).not.toContain(`href="/${current}"`);
       expect(markup.indexOf("View My Inventory")).toBeLessThan(
-        markup.indexOf("Explore:"),
+        markup.indexOf('href="/values"'),
       );
     }
   }

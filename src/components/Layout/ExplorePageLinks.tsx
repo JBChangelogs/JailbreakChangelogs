@@ -19,7 +19,6 @@ export default function ExplorePageLinks({
       aria-label={label}
       className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm"
     >
-      <span className="text-secondary-text">Explore:</span>
       {links.map((link) => (
         <Link
           key={link.href}
