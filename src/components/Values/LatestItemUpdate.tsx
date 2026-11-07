@@ -64,8 +64,8 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
       </div>
 
       {latest ? (
-        <div className="grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-1.5 sm:flex sm:items-center sm:gap-3">
-          <div className="contents sm:flex sm:min-w-0 sm:items-center sm:gap-1.5">
+        <div className="grid w-full min-w-0 grid-cols-[auto_auto_minmax(0,1fr)] items-baseline gap-1.5 sm:flex sm:items-center sm:gap-3 lg:order-last">
+          <div className="contents sm:flex sm:min-w-0 sm:flex-1 sm:items-center sm:gap-1.5">
             <Icon
               icon="mdi:minus-circle"
               className="text-button-danger h-3.5 w-3.5 shrink-0"
@@ -76,7 +76,7 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
             </span>
             {/* Clamped here; the changelog has the full text. */}
             <span
-              className="text-secondary-text line-clamp-2 max-w-xs min-w-0 text-sm font-bold break-words line-through sm:line-clamp-1"
+              className="text-secondary-text line-clamp-2 min-w-0 text-sm font-bold break-words line-through sm:block sm:truncate"
               title={formatFullValue(latest.current_value || "N/A")}
             >
               {formatFullValue(latest.current_value || "N/A")}
@@ -87,7 +87,7 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
             className="text-tertiary-text hidden h-3.5 w-3.5 shrink-0 sm:inline"
             inline
           />
-          <div className="contents sm:flex sm:min-w-0 sm:items-center sm:gap-1.5">
+          <div className="contents sm:flex sm:min-w-0 sm:flex-1 sm:items-center sm:gap-1.5">
             <Icon
               icon="mdi:plus-circle"
               className="text-button-success h-3.5 w-3.5 shrink-0"
@@ -97,7 +97,7 @@ export default function LatestItemUpdate({ item }: { item: Item }) {
               {`New ${fieldLabel(latest.field).toUpperCase()}`}
             </span>
             <span
-              className="text-primary-text line-clamp-2 max-w-xs min-w-0 text-sm font-bold break-words sm:line-clamp-1"
+              className="text-primary-text line-clamp-2 min-w-0 text-sm font-bold break-words sm:block sm:truncate"
               title={formatFullValue(latest.suggested_value)}
             >
               {formatFullValue(latest.suggested_value)}
