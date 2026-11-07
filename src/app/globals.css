@@ -96,6 +96,7 @@ html[data-tab-style="filled"] [data-slot="tabs-list"]:not([data-fade-end])::afte
 html[data-tab-style="filled"] [data-slot="tabs-list"],
 [data-slot="tabs-list"][data-variant="filled"] {
   border: 1px solid var(--color-border-card);
+  border-radius: var(--radius-lg);
   background: var(--color-tertiary-bg);
   padding: 2px;
   /* Match the padding so the pill and a hovered neighbour don't touch. */

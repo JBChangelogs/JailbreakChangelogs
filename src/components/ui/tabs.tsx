@@ -262,9 +262,9 @@ const TabsList = React.forwardRef<
           radios[(index + step + radios.length) % radios.length].focus();
         }}
         className={cn(
-          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden border-0 border-transparent bg-transparent p-0 transition-[background-color,border-color,border-width,padding,gap] duration-200 ease-out motion-reduce:transition-none [-webkit-overflow-scrolling:touch]",
+          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 scrollbar-hide overflow-x-auto overflow-y-hidden border-0 border-transparent bg-transparent p-0 transition-[background-color,border-color,border-width,padding,gap] duration-200 ease-out motion-reduce:transition-none [-webkit-overflow-scrolling:touch]",
           fullWidth && "w-full min-w-0 gap-0",
-          noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
+          noBottomRadius && "rounded-b-none",
           className,
         )}
         {...props}
