@@ -28,10 +28,6 @@ const nextConfig = {
   experimental: {
     agentUpgrade: "latest",
     optimizePackageImports: ["radix-ui"],
-    // Railpack restores .next/cache between deploys; the Turbopack build cache
-    // then reuses stale chunks from old builds whose mangled export names no
-    // longer match ("(0, t.f) is not a function" in prod).
-    turbopackFileSystemCacheForBuild: false,
   },
   images: {
     unoptimized: true,
