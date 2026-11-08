@@ -50,7 +50,7 @@ function frontend() {
     tracing: { enabled: true, autoInstrumentation: false },
     deploy: {
       drainingSeconds: 20,
-      overlapSeconds: 30,
+      overlapSeconds: 0,
       limitOverride: {
         containers: { cpu: 16, memoryBytes: 16_000_000_000 },
       },
