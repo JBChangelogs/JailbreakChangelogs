@@ -63,6 +63,7 @@ const SheetContent = React.forwardRef<
       children,
       hideOverlay = false,
       overlayClassName,
+      onInteractOutside,
       ...props
     },
     ref,
@@ -77,6 +78,14 @@ const SheetContent = React.forwardRef<
         // Toasts move beside right-hand sheets (see the Toaster).
         {...(side === "right" ? { "data-toast-avoid": "" } : {})}
         {...props}
+        onInteractOutside={(event) => {
+          onInteractOutside?.(event);
+          if (
+            event.target instanceof Element &&
+            event.target.closest("[data-sonner-toaster]")
+          )
+            event.preventDefault();
+        }}
       >
         <SheetPrimitive.Title className="sr-only">
           Navigation Menu

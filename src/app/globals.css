@@ -796,6 +796,11 @@ img.twemoji {
   will-change: right, left, transform;
 }
 
+/* Modal sheets set pointer-events: none on body. */
+[data-sonner-toast]:not([data-visible="false"]) {
+  pointer-events: auto;
+}
+
 [data-sonner-toaster][data-x-position="right"]
   [data-sonner-toast][data-removed="true"] {
   --y: translateX(120%) !important;
