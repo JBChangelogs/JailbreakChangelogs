@@ -1,7 +1,6 @@
 "use client";
 
 import ErrorDigest from "@/components/ui/ErrorDigest";
-import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -25,8 +24,12 @@ export default function Error({
   return (
     <section className="bg-primary-bg">
       <div className="container mx-auto px-6 py-12">
-        <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
-          <div className="w-full lg:w-1/2">
+        <div className="flex min-h-[calc(100vh-8rem)] items-center">
+          <div className="mx-auto w-full max-w-xl text-center">
+            <Icon
+              icon="heroicons-outline:exclamation-triangle"
+              className="text-secondary-text mx-auto mb-4 h-10 w-10"
+            />
             <p className="text-secondary-text text-sm font-medium">
               Values error
             </p>
@@ -38,9 +41,7 @@ export default function Error({
               again or return home.
             </p>
 
-            <ErrorDigest digest={error.digest} />
-
-            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Button
                 variant="secondary"
                 size="md"
@@ -64,15 +65,7 @@ export default function Error({
                 </a>
               </Button>
             </div>
-          </div>
-
-          <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
-            <NotFoundIllustration
-              className="w-full max-w-lg lg:mx-auto"
-              alt="Error illustration"
-              width={500}
-              height={400}
-            />
+            <ErrorDigest digest={error.digest} />
           </div>
         </div>
       </div>

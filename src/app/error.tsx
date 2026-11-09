@@ -4,7 +4,6 @@ import ErrorDigest from "@/components/ui/ErrorDigest";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { reportAppError } from "@/utils/analytics/reportAppError";
 
 export default function Error({
@@ -19,8 +18,12 @@ export default function Error({
   return (
     <section className="bg-primary-bg">
       <div className="container mx-auto px-6 py-12">
-        <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
-          <div className="w-full lg:w-1/2">
+        <div className="flex min-h-[calc(100vh-8rem)] items-center">
+          <div className="mx-auto w-full max-w-xl text-center">
+            <Icon
+              icon="heroicons-outline:exclamation-triangle"
+              className="text-secondary-text mx-auto mb-4 h-10 w-10"
+            />
             <p className="text-secondary-text text-sm font-medium">
               Page error
             </p>
@@ -30,8 +33,7 @@ export default function Error({
             <p className="text-secondary-text mt-4">
               Try again, or return to the home page.
             </p>
-            <ErrorDigest digest={error.digest} />
-            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Button
                 variant="secondary"
                 // No digest = client-side error; a soft refresh keeps the broken JS, so reload.
@@ -51,14 +53,7 @@ export default function Error({
                 </a>
               </Button>
             </div>
-          </div>
-          <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
-            <NotFoundIllustration
-              className="w-full max-w-lg lg:mx-auto"
-              alt="Error illustration"
-              width={500}
-              height={400}
-            />
+            <ErrorDigest digest={error.digest} />
           </div>
         </div>
       </div>

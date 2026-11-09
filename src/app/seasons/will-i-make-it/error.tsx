@@ -31,8 +31,6 @@ export default function Error({ error, retry }: ErrorProps) {
               </p>
             </div>
 
-            <ErrorDigest digest={error.digest} />
-
             <div className="space-y-4">
               <button
                 // No digest = client-side error; a soft refresh keeps the broken JS, so reload.
@@ -49,6 +47,7 @@ export default function Error({ error, retry }: ErrorProps) {
                 Go to Seasons
               </button>
             </div>
+            <ErrorDigest digest={error.digest} />
 
             {process.env.NODE_ENV === "development" && (
               <details className="mt-6 text-left">
