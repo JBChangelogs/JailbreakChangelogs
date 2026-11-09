@@ -92,7 +92,6 @@ function TooltipContent({
         {...props}
       >
         <TooltipTwemojiInner>{children}</TooltipTwemojiInner>
-        {/* Outlined arrow: fill covers the box border under it, stroke continues the border. */}
         <TooltipPrimitive.Arrow asChild width={12} height={7}>
           <svg viewBox="0 0 12 7" className="overflow-hidden">
             <path d="M0 0 L6 6 L12 0 Z" className="fill-secondary-bg" />
