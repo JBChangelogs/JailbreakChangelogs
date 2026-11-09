@@ -133,7 +133,7 @@ export function CommentReactions({
 
   return (
     <>
-      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+      <div className="mt-1.5 flex flex-wrap items-stretch gap-1.5">
         {top5.map((r) => (
           <Tooltip key={`${r.emoji}-${tooltipResetKey}`} delayDuration={500}>
             <TooltipTrigger asChild>
@@ -193,7 +193,7 @@ export function CommentReactions({
                   <button
                     type="button"
                     aria-label="Add reaction"
-                    className={`flex ${compact ? "h-6 w-6" : "h-7 w-7"} bg-quaternary-bg text-primary-text items-center justify-center rounded-md transition-colors ${
+                    className={`flex ${compact ? "px-2 py-0.5" : "px-2 py-1"} border-border-card bg-quaternary-bg text-primary-text hover:border-link/30 items-center justify-center rounded-lg border text-sm transition-colors ${
                       isReactionBlocked
                         ? "cursor-not-allowed"
                         : "cursor-pointer hover:brightness-110"
@@ -201,7 +201,7 @@ export function CommentReactions({
                   >
                     <Icon
                       icon="fluent:emoji-add-16-regular"
-                      className={compact ? "h-3 w-3" : "h-3.5 w-3.5"}
+                      className="h-[1.1em] w-[1.1em]"
                     />
                   </button>
                 </PopoverTrigger>

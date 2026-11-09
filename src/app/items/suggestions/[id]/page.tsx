@@ -72,7 +72,10 @@ import {
 } from "@/components/Items/Suggestions/CommonTrades";
 import { RejectionInfo } from "@/components/Items/Suggestions/RejectionInfo";
 import { ReportSuggestionModal } from "@/components/Items/Suggestions/ReportSuggestionModal";
-import type { CommonTrade } from "@/components/Items/Suggestions/types";
+import type {
+  CommonTrade,
+  SuggestionLimits,
+} from "@/components/Items/Suggestions/types";
 import { useSuggestionReporting } from "@/hooks/useSuggestionReporting";
 import { hasMeaningfulCollapsedOverflow } from "@/utils/ui/collapsibleContent";
 
@@ -507,6 +510,27 @@ export default function ValueSuggestionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingCommonTrades, setIsEditingCommonTrades] = useState(false);
   const [editReason, setEditReason] = useState("");
+  const limitsQuery = useQuery({
+    queryKey: ["value-suggestion-limits", user?.id],
+    enabled: isEditing && isAuthenticated,
+    queryFn: async ({ signal }): Promise<SuggestionLimits> => {
+      const { url, headers } = buildApiFetchRequest(
+        PUBLIC_API_URL!,
+        "/v2/value-suggestions/limits",
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers,
+        signal,
+      });
+      if (!response.ok)
+        throw new Error(`Limits request failed (${response.status})`);
+      return response.json();
+    },
+    retry: false,
+  });
+  const minChars = limitsQuery.data?.min_characters ?? 200;
+  const maxChars = limitsQuery.data?.max_characters ?? 750;
   const [editCommonTrades, setEditCommonTrades] = useState<CommonTradeDraft[]>(
     [],
   );
@@ -816,8 +840,10 @@ export default function ValueSuggestionDetailPage() {
   const handleEditSave = async () => {
     if (!suggestion) return;
     const reason = editReason.trim();
-    if (reason.length < 350) {
-      toast.error("Reason must be at least 350 characters.");
+    if (reason.length < minChars || reason.length > maxChars) {
+      toast.error(
+        `Reason must be between ${minChars} and ${maxChars} characters.`,
+      );
       return;
     }
 
@@ -1459,8 +1485,10 @@ export default function ValueSuggestionDetailPage() {
                           {isEditing ? (
                             <div className="space-y-3">
                               <div className="flex justify-end">
-                                <span className="text-secondary-text text-xs">
-                                  {editReason.length} / 350 min
+                                <span
+                                  className={`text-xs ${editReason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
+                                >
+                                  {editReason.length} / {minChars}–{maxChars}
                                 </span>
                               </div>
                               <textarea
@@ -1481,7 +1509,8 @@ export default function ValueSuggestionDetailPage() {
                                   disabled={
                                     editSaving ||
                                     !!editRateLimitUntil ||
-                                    editReason.trim().length < 350
+                                    editReason.trim().length < minChars ||
+                                    editReason.trim().length > maxChars
                                   }
                                 >
                                   {editSaving ? (

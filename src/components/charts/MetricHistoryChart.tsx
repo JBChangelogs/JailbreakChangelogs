@@ -348,10 +348,12 @@ export default function MetricHistoryChart({
                 <ChartTooltipContent
                   active={tooltipActive}
                   label={label}
-                  payload={payload?.toSorted(
-                    (a, b) =>
-                      Number(b.dataKey === "v") - Number(a.dataKey === "v"),
-                  )}
+                  payload={payload
+                    ?.slice()
+                    .sort(
+                      (a, b) =>
+                        Number(b.dataKey === "v") - Number(a.dataKey === "v"),
+                    )}
                   className="min-w-48 px-3 py-2"
                   formatter={(value, name) => {
                     const m =

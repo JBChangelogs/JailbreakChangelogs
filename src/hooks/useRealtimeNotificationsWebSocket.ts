@@ -1445,7 +1445,7 @@ export function useRealtimeNotificationsWebSocket(
         });
 
         ws.addEventListener("error", () => {
-          log.error("Realtime transport error");
+          log.debug("Realtime transport error");
         });
       } catch (error) {
         log.error("Failed to connect", error);

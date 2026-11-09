@@ -463,7 +463,10 @@ export async function fetchUserByIdForMetadata(
 
     return data;
   } catch (error) {
-    if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
+    if (
+      !hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES) &&
+      !hasMessagePrefix(error, ["NOT_FOUND:"])
+    ) {
       log.error("Error fetching user by ID for metadata", error);
     }
 
@@ -948,7 +951,9 @@ export async function fetchChangelog(
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    log.error("fetchChangelog failed", { status: response.status, body });
+    if (response.status !== 404 && response.status !== 422) {
+      log.error("fetchChangelog failed", { status: response.status, body });
+    }
     throw new Error("Failed to fetch changelog");
   }
   return response.json();

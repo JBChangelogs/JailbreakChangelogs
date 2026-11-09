@@ -1032,7 +1032,8 @@ export default function CompetitionDetails({
             ) : (
               <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
                 {competition.items
-                  .toSorted((a, b) => b.entered_at - a.entered_at)
+                  .slice()
+                  .sort((a, b) => b.entered_at - a.entered_at)
                   .map(({ theme }) => (
                     <EntryCard key={theme.share_code} theme={theme} />
                   ))}

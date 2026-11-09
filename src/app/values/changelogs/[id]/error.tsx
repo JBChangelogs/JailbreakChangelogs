@@ -50,7 +50,6 @@ export default function Error({
                 ? "The changelog you're looking for doesn't exist or has been removed."
                 : "An unexpected error occurred while loading the changelog details."}
             </p>
-            <ErrorDigest digest={error.digest} />
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <Button
                 size="lg" // No digest = client-side error; a soft refresh keeps the broken JS, so reload.
@@ -62,6 +61,7 @@ export default function Error({
                 <a href="/values/changelogs">View all changelogs</a>
               </Button>
             </div>
+            <ErrorDigest digest={error.digest} />
           </div>
         </div>
       </div>
