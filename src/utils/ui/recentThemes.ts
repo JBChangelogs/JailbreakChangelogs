@@ -58,9 +58,18 @@ export function rememberSharedTheme(code: string) {
 
 export function forgetSharedTheme(code: string) {
   const current = getRecentThemes();
-  if (current.includes(code)) {
-    saveRecentThemes(current.filter((c) => c !== code));
-  }
+  const index = current.indexOf(code);
+  if (index !== -1) saveRecentThemes(current.filter((c) => c !== code));
+  return () => {
+    const now = getRecentThemes();
+    if (index === -1 || now.includes(code)) return;
+    saveRecentThemes(
+      [...now.slice(0, index), code, ...now.slice(index)].slice(
+        0,
+        RECENT_THEMES_LIMIT,
+      ),
+    );
+  };
 }
 
 export function subscribeRecentThemes(onChange: () => void) {

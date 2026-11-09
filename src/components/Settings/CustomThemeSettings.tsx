@@ -351,8 +351,18 @@ export function CustomThemeMenu({
                 <DropdownMenuItem
                   className={item}
                   onSelect={() => {
-                    forgetSharedTheme(theme.share_code);
-                    if (custom.inUse(theme.share_code)) setCustomTheme(null);
+                    const undo = forgetSharedTheme(theme.share_code);
+                    const wasInUse = custom.inUse(theme.share_code);
+                    if (wasInUse) setCustomTheme(null);
+                    toast(`Removed ${theme.label}`, {
+                      action: {
+                        label: "Undo",
+                        onClick: () => {
+                          undo();
+                          if (wasInUse) setCustomTheme(theme);
+                        },
+                      },
+                    });
                   }}
                 >
                   <Icon icon="lucide:x" aria-hidden="true" className="size-4" />
