@@ -101,6 +101,7 @@ function harness(
             );
           },
         };
+      if (name.endsWith("IconWrapper")) return { Icon: () => null };
       if (name.endsWith("AuthContext"))
         return {
           useAuthContext: () => ({

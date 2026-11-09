@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   competitionStatus,
@@ -119,6 +120,24 @@ export default function ThemeCompetitionEntryButton({
             : full
               ? "Competition entry limit reached"
               : "Enter competition")}
+    </Button>
+  );
+}
+
+export function CompetitionStandingsLink() {
+  const { data: competition } = useQuery({
+    queryKey: ["theme-competition-current"],
+    queryFn: fetchCurrentCompetition,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  if (!competition || competitionStatus(competition) !== "running") return null;
+  return (
+    <Button asChild variant="secondary">
+      <Link href={`/themes/competitions/${competition.id}#standings`}>
+        <Icon icon="heroicons:trophy" aria-hidden="true" />
+        View contest standings
+      </Link>
     </Button>
   );
 }

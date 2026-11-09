@@ -18,7 +18,9 @@ import {
   usePackFields,
 } from "@/components/Settings/ThemePack";
 import ReportThemeButton from "@/components/Settings/ReportThemeButton";
-import ThemeCompetitionEntryButton from "@/components/Themes/ThemeCompetitionEntryButton";
+import ThemeCompetitionEntryButton, {
+  CompetitionStandingsLink,
+} from "@/components/Themes/ThemeCompetitionEntryButton";
 import {
   applyThemePack,
   type MarketplaceTheme,
@@ -57,6 +59,7 @@ export default function ThemeDetailsActions({
         <Link href={`/?theme=${theme.share_code}`}>Try on the site</Link>
       </Button>
       <ThemeCompetitionEntryButton theme={theme} />
+      <CompetitionStandingsLink />
       <Button
         variant="ghost"
         onClick={async () => {

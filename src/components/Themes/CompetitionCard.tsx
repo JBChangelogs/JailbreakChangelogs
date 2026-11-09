@@ -59,7 +59,15 @@ function TopThemes({ id }: { id: number }) {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold">Top themes</h3>
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="text-sm font-semibold">Top themes</h3>
+        <Link
+          href={`/themes/competitions/${id}#standings`}
+          className="text-link hover:text-link-hover text-sm font-medium hover:underline"
+        >
+          See full standings
+        </Link>
+      </div>
       <ol className="grid gap-3 lg:grid-cols-3">
         {data.standings
           .slice(0, 3)
