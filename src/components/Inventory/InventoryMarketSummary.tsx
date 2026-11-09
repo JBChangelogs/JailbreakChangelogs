@@ -39,11 +39,13 @@ export default function InventoryMarketSummary({
         </dd>
       </div>
       <div>
-        <dt className="text-secondary-text mb-1 text-xs">Demand</dt>
+        <dt className="text-secondary-text mb-1 text-xs">
+          {isDuped ? "Duped demand" : "Demand"}
+        </dt>
         <dd
           className={`${getDemandColor(demand)} inline-flex rounded-md px-2 py-1 text-xs font-bold`}
         >
-          {demand ?? "Unknown"}
+          {demand ?? (isDuped ? "N/A" : "Unknown")}
         </dd>
       </div>
       <div>

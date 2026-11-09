@@ -42,7 +42,8 @@ test("inventory market summary shows current values and the catalog demand and t
     const unknownHtml = renderToStaticMarkup(
       <InventoryMarketSummary data={{ ...data, duped_demand }} isDuped />,
     );
-    expect(unknownHtml).toContain(">Unknown<");
+    expect(unknownHtml).toContain(">Duped demand<");
+    expect(unknownHtml).toContain(">N/A</dd>");
     expect(unknownHtml).not.toContain("bg-demand-high");
   }
 });
