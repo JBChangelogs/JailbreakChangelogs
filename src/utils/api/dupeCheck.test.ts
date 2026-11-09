@@ -73,6 +73,16 @@ test("preserves API errors and rejects malformed successful responses", async ()
   await expect(checkDupe("123", 49)).rejects.toThrow("Network unavailable");
 });
 
+test("returns null when the API finds no dupes for the item", async () => {
+  process.env.NEXT_PUBLIC_INVENTORY_API_URL = "https://inventory.example";
+  globalThis.fetch = (async () =>
+    Response.json(
+      { error: "no_dupes_found", message: "No dupes found" },
+      { status: 404 },
+    )) as unknown as typeof fetch;
+  expect(await checkDupe("123", 49)).toBeNull();
+});
+
 test("rejects invalid logged dates instead of displaying incorrect history", async () => {
   process.env.NEXT_PUBLIC_INVENTORY_API_URL = "https://inventory.example";
   for (const date of [undefined, null, "1791835200", -1]) {

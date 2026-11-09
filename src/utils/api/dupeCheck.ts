@@ -10,7 +10,7 @@ export async function checkDupe(
   originalOwner: string,
   itemId: number,
   signal?: AbortSignal,
-): Promise<DupeCheckResult> {
+): Promise<DupeCheckResult | null> {
   if (
     !/^\d+$/.test(originalOwner) ||
     !Number.isInteger(itemId) ||
@@ -27,6 +27,8 @@ export async function checkDupe(
     signal,
   });
   const data = await response.json().catch(() => null);
+  // A clean answer, not a failure: no duplicated copy exists to score.
+  if (response.status === 404 && data?.error === "no_dupes_found") return null;
   if (!response.ok) {
     throw new Error(
       data?.message ?? data?.error ?? "Unable to check this dupe. Try again.",
