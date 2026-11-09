@@ -26,15 +26,18 @@ export function ActiveOfferReminder({
   onViewOffer: (message: Message) => void;
 }) {
   const seen = new Set<string>();
-  const activeOffers = messages.toReversed().flatMap((message) => {
-    const metadata = parseOfferAcceptedMetadata(message.metadata);
-    if (!metadata) return [];
-    const key = `${metadata.trade}:${metadata.offer}`;
-    const offer = offerDetails.map[key];
-    if (seen.has(key) || offer?.status !== 1) return [];
-    seen.add(key);
-    return [{ message, offer }];
-  });
+  const activeOffers = messages
+    .slice()
+    .reverse()
+    .flatMap((message) => {
+      const metadata = parseOfferAcceptedMetadata(message.metadata);
+      if (!metadata) return [];
+      const key = `${metadata.trade}:${metadata.offer}`;
+      const offer = offerDetails.map[key];
+      if (seen.has(key) || offer?.status !== 1) return [];
+      seen.add(key);
+      return [{ message, offer }];
+    });
   if (activeOffers.length === 0) return null;
 
   return (
