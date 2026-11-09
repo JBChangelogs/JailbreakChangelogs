@@ -74,6 +74,7 @@ function TooltipContent({
   className,
   sideOffset = 4,
   collisionPadding = 16,
+  arrowPadding = 8,
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
@@ -83,6 +84,7 @@ function TooltipContent({
         data-slot="tooltip-content"
         sideOffset={sideOffset}
         collisionPadding={collisionPadding}
+        arrowPadding={arrowPadding}
         className={cn(
           "bg-secondary-bg/55 text-primary-text border-border-card animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-[10001] rounded-lg border px-3 py-2 text-xs font-medium backdrop-blur-3xl",
           className,
@@ -90,11 +92,17 @@ function TooltipContent({
         {...props}
       >
         <TooltipTwemojiInner>{children}</TooltipTwemojiInner>
-        <TooltipPrimitive.Arrow
-          className="fill-border-primary"
-          width={11}
-          height={5}
-        />
+        {/* Outlined arrow: fill covers the box border under it, stroke continues the border. */}
+        <TooltipPrimitive.Arrow asChild width={12} height={7}>
+          <svg viewBox="0 0 12 7" className="overflow-hidden">
+            <path d="M0 0 L6 6 L12 0 Z" className="fill-secondary-bg" />
+            <path
+              d="M-1 -1 L6 6 L13 -1"
+              className="stroke-border-card fill-none"
+              strokeWidth={1}
+            />
+          </svg>
+        </TooltipPrimitive.Arrow>
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );
