@@ -2,7 +2,6 @@
 
 import ErrorDigest from "@/components/ui/ErrorDigest";
 import { useEffect } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
@@ -43,13 +42,13 @@ export default function Error({
                 <span>Try again</span>
               </Button>
               <Button asChild className="w-full sm:w-auto">
-                <Link href="/">
+                <a href="/">
                   <Icon
                     icon="heroicons-outline:arrow-left"
                     className="h-5 w-5"
                   />
                   <span>Back to home</span>
-                </Link>
+                </a>
               </Button>
             </div>
           </div>

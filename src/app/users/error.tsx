@@ -3,7 +3,6 @@
 import ErrorDigest from "@/components/ui/ErrorDigest";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect } from "react";
-import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { reportAppError } from "@/utils/analytics/reportAppError";
@@ -60,13 +59,13 @@ export default function Error({
                 asChild
                 className="w-full sm:w-auto"
               >
-                <Link href="/">
+                <a href="/">
                   <Icon
                     icon="heroicons-outline:arrow-left"
                     className="h-5 w-5"
                   />
                   <span>Back to home</span>
-                </Link>
+                </a>
               </Button>
             </div>
           </div>

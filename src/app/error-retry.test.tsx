@@ -112,7 +112,7 @@ for (const path of paths) {
       ?.props.onClick?.();
     expect(calls).toEqual(["reload"]);
     if (path.startsWith("inventories/")) {
-      expect(tree.find((node) => node.type === "Link")?.props.href).toBe(
+      expect(tree.find((node) => node.type === "a")?.props.href).toBe(
         path === "inventories/error.tsx" ? "/" : "/inventories",
       );
     }

@@ -2,7 +2,6 @@
 
 import ErrorDigest from "@/components/ui/ErrorDigest";
 import { useEffect } from "react";
-import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { reportAppError } from "@/utils/analytics/reportAppError";
 import { createLogger } from "@/services/logger";
@@ -60,7 +59,7 @@ export default function Error({
                 Try again
               </Button>
               <Button asChild size="lg" variant="secondary">
-                <Link href="/values/changelogs">View all changelogs</Link>
+                <a href="/values/changelogs">View all changelogs</a>
               </Button>
             </div>
           </div>

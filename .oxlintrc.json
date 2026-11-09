@@ -154,6 +154,12 @@
         "prefer-rest-params": "error",
         "prefer-spread": "error"
       }
+    },
+    {
+      "files": ["src/app/**/error.tsx"],
+      "rules": {
+        "nextjs/no-html-link-for-pages": "off"
+      }
     }
   ]
 }
