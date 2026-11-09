@@ -11,6 +11,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { useTheme } from "@/contexts/ThemeContext";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
+import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import {
   competitionStatus,
   fetchCurrentCompetition,
@@ -136,6 +137,7 @@ function TopThemes({ id }: { id: number }) {
                       setCustomTheme(theme);
                       rememberSharedTheme(theme.share_code);
                       toast.success(`Using ${theme.label}`);
+                      offerThemePack(theme);
                     }}
                   >
                     {customTheme?.share_code === theme.share_code

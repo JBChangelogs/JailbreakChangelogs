@@ -46,6 +46,7 @@ import {
 } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
+import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { parseCompetitionEvent } from "@/utils/ui/marketplaceRealtime";
@@ -144,6 +145,7 @@ function UseThemeButton({ theme }: { theme: MarketplaceTheme }) {
         setCustomTheme(theme);
         rememberSharedTheme(theme.share_code);
         toast.success(`Using ${theme.label}`);
+        offerThemePack(theme);
       }}
     >
       {inUse ? "In use" : "Use theme"}

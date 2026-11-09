@@ -60,6 +60,7 @@ import type { ThemePreview as Preview } from "@/utils/ui/themeOptions";
 import { updateUserSettings } from "@/services/settingsService";
 import { fetchSharedTheme } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
+import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import {
   fetchOmniSearch,
   SearchRateLimitError,
@@ -413,7 +414,11 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   const applyTheme = async (theme: OmniTheme) => {
     try {
       if (!theme.custom) setTheme(theme.slug!);
-      else setCustomTheme(await fetchSharedTheme(theme.share_code!));
+      else {
+        const shared = await fetchSharedTheme(theme.share_code!);
+        setCustomTheme(shared);
+        offerThemePack(shared);
+      }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Couldn't apply that theme",

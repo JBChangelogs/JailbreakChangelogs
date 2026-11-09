@@ -18,7 +18,11 @@ import { useBottomPanel, useDesktopDock } from "@/components/ui/bottom-panel";
 import { cn } from "@/lib/utils";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
-import { ThemePackSection } from "@/components/Settings/ThemeDetailsActions";
+import {
+  offerThemePack,
+  ThemePackPrompt,
+  ThemePackSection,
+} from "@/components/Settings/ThemeDetailsActions";
 import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -101,7 +105,8 @@ export default function SharedThemeDialog() {
   const { isMobile } = bottomPanel;
   const collapsed = isMobile ? bottomPanel.collapsed : dock.minimized;
 
-  if (code === null) return null;
+  const packPrompt = <ThemePackPrompt />;
+  if (code === null) return packPrompt;
   const inUse = !!theme && customTheme?.share_code === theme.share_code;
   const creatorName =
     creator?.global_name && creator.global_name !== "None"
@@ -189,6 +194,7 @@ export default function SharedThemeDialog() {
         toast.success(`Using ${theme.label}`, {
           description: "Pick another theme in Settings anytime.",
         });
+        offerThemePack(theme);
         close();
       }}
     >
@@ -198,137 +204,140 @@ export default function SharedThemeDialog() {
   );
 
   return (
-    <Sheet open onOpenChange={(open) => !open && close()} modal={false}>
-      {/* Not modal and no overlay, so the site stays usable in the theme;
+    <>
+      {packPrompt}
+      <Sheet open onOpenChange={(open) => !open && close()} modal={false}>
+        {/* Not modal and no overlay, so the site stays usable in the theme;
           clicks on it don't close the sheet. */}
-      <SheetContent
-        side={isMobile ? bottomPanel.sheet.side : dock.side}
-        hideOverlay
-        onInteractOutside={(event) => event.preventDefault()}
-        // Non-modal, so it doesn't take focus (it'd light up after Alt+Tab).
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        style={bottomPanel.sheet.style}
-        className={cn(
-          "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
-          isMobile
-            ? bottomPanel.sheet.className
-            : dock.minimized
-              ? "bottom-auto! h-auto! sm:max-w-sm"
-              : "h-full sm:max-w-md",
-        )}
-      >
-        {isMobile ? (
-          // Like the editor's panel: the main button and X in the top row.
-          <div className="shrink-0 px-4 pt-1 pb-3">
-            {bottomPanel.handle}
-            <div className="flex items-center gap-2">
-              <SheetTitle className="min-w-0 flex-1 truncate text-base">
-                {title}
-              </SheetTitle>
-              {useButton}
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Close the preview"
-                onClick={close}
+        <SheetContent
+          side={isMobile ? bottomPanel.sheet.side : dock.side}
+          hideOverlay
+          onInteractOutside={(event) => event.preventDefault()}
+          // Non-modal, so it doesn't take focus (it'd light up after Alt+Tab).
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          style={bottomPanel.sheet.style}
+          className={cn(
+            "bg-secondary-bg @container flex w-full flex-col gap-0 p-0",
+            isMobile
+              ? bottomPanel.sheet.className
+              : dock.minimized
+                ? "bottom-auto! h-auto! sm:max-w-sm"
+                : "h-full sm:max-w-md",
+          )}
+        >
+          {isMobile ? (
+            // Like the editor's panel: the main button and X in the top row.
+            <div className="shrink-0 px-4 pt-1 pb-3">
+              {bottomPanel.handle}
+              <div className="flex items-center gap-2">
+                <SheetTitle className="min-w-0 flex-1 truncate text-base">
+                  {title}
+                </SheetTitle>
+                {useButton}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close the preview"
+                  onClick={close}
+                >
+                  <Icon icon="lucide:x" aria-hidden="true" />
+                </Button>
+              </div>
+              <SheetDescription
+                className={cn(
+                  "text-secondary-text mt-1 text-xs",
+                  collapsed && "sr-only",
+                )}
               >
-                <Icon icon="lucide:x" aria-hidden="true" />
-              </Button>
+                {description}
+              </SheetDescription>
             </div>
-            <SheetDescription
+          ) : (
+            <SheetHeader className="relative shrink-0 px-6 pt-6 pb-2">
+              <div className="absolute top-3 right-3 flex gap-1">
+                {dock.controls}
+              </div>
+              <SheetTitle className="pr-20">{title}</SheetTitle>
+              <SheetDescription
+                className={cn("text-secondary-text", collapsed && "sr-only")}
+              >
+                {description}
+              </SheetDescription>
+            </SheetHeader>
+          )}
+
+          {theme && (
+            <div
               className={cn(
-                "text-secondary-text mt-1 text-xs",
-                collapsed && "sr-only",
+                "min-h-0 flex-1 space-y-4 overflow-y-auto py-2",
+                isMobile ? "px-4 pb-4" : "px-6",
+                collapsed && "hidden",
               )}
             >
-              {description}
-            </SheetDescription>
-          </div>
-        ) : (
-          <SheetHeader className="relative shrink-0 px-6 pt-6 pb-2">
-            <div className="absolute top-3 right-3 flex gap-1">
-              {dock.controls}
-            </div>
-            <SheetTitle className="pr-20">{title}</SheetTitle>
-            <SheetDescription
-              className={cn("text-secondary-text", collapsed && "sr-only")}
-            >
-              {description}
-            </SheetDescription>
-          </SheetHeader>
-        )}
-
-        {theme && (
-          <div
-            className={cn(
-              "min-h-0 flex-1 space-y-4 overflow-y-auto py-2",
-              isMobile ? "px-4 pb-4" : "px-6",
-              collapsed && "hidden",
-            )}
-          >
-            {theme.description && (
-              <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
-                {theme.description}
+              {theme.description && (
+                <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
+                  {theme.description}
+                </p>
+              )}
+              <p className="text-secondary-text text-sm">
+                You&apos;re trying this theme on. Browse around the site to see
+                it anywhere; closing this puts your own theme back.
               </p>
-            )}
-            <p className="text-secondary-text text-sm">
-              You&apos;re trying this theme on. Browse around the site to see it
-              anywhere; closing this puts your own theme back.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={saveCopy}
-                // A second click mid-save would make a duplicate theme.
-                disabled={saving}
-              >
-                <Icon icon="lucide:copy" aria-hidden="true" />
-                {saving ? "Saving…" : "Save a copy"}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={copyLink}>
-                <Icon icon="lucide:link" aria-hidden="true" />
-                Copy link
-              </Button>
-            </div>
-            {!!theme.previews?.length && (
-              <section className="space-y-2">
-                <h3 className="text-primary-text text-sm font-medium">
-                  Preview screenshots
-                </h3>
-                <ThemePreviewImages
-                  previews={theme.previews}
-                  label={theme.label}
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={saveCopy}
+                  // A second click mid-save would make a duplicate theme.
+                  disabled={saving}
+                >
+                  <Icon icon="lucide:copy" aria-hidden="true" />
+                  {saving ? "Saving…" : "Save a copy"}
+                </Button>
+                <Button variant="secondary" size="sm" onClick={copyLink}>
+                  <Icon icon="lucide:link" aria-hidden="true" />
+                  Copy link
+                </Button>
+              </div>
+              {!!theme.previews?.length && (
+                <section className="space-y-2">
+                  <h3 className="text-primary-text text-sm font-medium">
+                    Preview screenshots
+                  </h3>
+                  <ThemePreviewImages
+                    previews={theme.previews}
+                    label={theme.label}
+                  />
+                </section>
+              )}
+              <details>
+                <summary className="text-link cursor-pointer text-sm font-medium">
+                  All colors
+                </summary>
+                <p className="text-secondary-text mt-1 mb-2 text-xs">
+                  Things the page might not show right now.
+                </p>
+                <CustomThemePreview
+                  vars={theme.vars}
+                  scheme={theme.scheme}
+                  logoFilter={theme.logo_filter}
                 />
-              </section>
-            )}
-            <details>
-              <summary className="text-link cursor-pointer text-sm font-medium">
-                All colors
-              </summary>
-              <p className="text-secondary-text mt-1 mb-2 text-xs">
-                Things the page might not show right now.
-              </p>
-              <CustomThemePreview
-                vars={theme.vars}
-                scheme={theme.scheme}
-                logoFilter={theme.logo_filter}
-              />
-            </details>
-            {/* The sheet would cover the profile, so the preview closes it. */}
-            <ThemePackSection theme={theme} onPreview={close} />
-          </div>
-        )}
+              </details>
+              {/* The sheet would cover the profile, so the preview closes it. */}
+              <ThemePackSection theme={theme} onPreview={close} />
+            </div>
+          )}
 
-        {!isMobile && (
-          <div className="border-border-card mt-auto flex shrink-0 justify-end gap-2 border-t px-6 py-4">
-            <Button variant="ghost" size="sm" onClick={close}>
-              Close
-            </Button>
-            {useButton}
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
+          {!isMobile && (
+            <div className="border-border-card mt-auto flex shrink-0 justify-end gap-2 border-t px-6 py-4">
+              <Button variant="ghost" size="sm" onClick={close}>
+                Close
+              </Button>
+              {useButton}
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

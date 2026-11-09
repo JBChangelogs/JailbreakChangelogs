@@ -100,6 +100,8 @@ function render(
         return { setCustomTheme: (theme: unknown) => applied.push(theme) };
       if (name.endsWith("recentThemes"))
         return { rememberSharedTheme: (code: string) => remembered.push(code) };
+      if (name.endsWith("ThemeDetailsActions"))
+        return { offerThemePack: () => {} };
       if (name === "sonner") return { toast: { success: () => {} } };
       if (name.endsWith("IconWrapper")) return { Icon: () => null };
       if (name.endsWith("ThemeIconPicker"))

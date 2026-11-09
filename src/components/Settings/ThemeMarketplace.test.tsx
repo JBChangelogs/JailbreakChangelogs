@@ -214,6 +214,8 @@ function marketplace({
           return { rememberSharedTheme: (code: string) => recent.push(code) };
         if (name === "@/utils/ui/searchShortcut")
           return { isItemSearchShortcut };
+        if (name === "@/components/Settings/ThemeDetailsActions")
+          return { offerThemePack: () => {} };
         if (name === "@/utils/ui/avatar") return { UserAvatar: "UserAvatar" };
         if (name === "@/components/Users/UserProfilePopover")
           return { UserProfilePopover: "UserProfilePopover" };

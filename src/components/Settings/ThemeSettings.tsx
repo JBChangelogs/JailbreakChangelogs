@@ -36,6 +36,7 @@ import CustomThemeControls, {
   useCustomThemes,
 } from "@/components/Settings/CustomThemeSettings";
 import { setCustomTheme } from "@/utils/ui/customTheme";
+import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { getThemeEditor, subscribeThemeEditor } from "@/utils/ui/themeEditor";
 import {
   getThemeCursorEnabled,
@@ -360,7 +361,10 @@ export default function ThemeSettings({
       key: `custom:${t.share_code}`,
       option: customThemeOption(t),
       checked: customTheme?.share_code === t.share_code,
-      pick: () => setCustomTheme(t),
+      pick: () => {
+        setCustomTheme(t);
+        if (custom.shared.includes(t)) offerThemePack(t);
+      },
       badge: custom.shared.includes(t) ? "Shared" : "Custom",
       wrap: (card: React.ReactNode) => (
         <CustomThemeMenu theme={t} custom={custom}>

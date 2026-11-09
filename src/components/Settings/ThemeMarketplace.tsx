@@ -36,6 +36,7 @@ import {
 } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
+import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { UserAvatar } from "@/utils/ui/avatar";
 import {
@@ -534,6 +535,7 @@ export default function ThemeMarketplace() {
                           setCustomTheme(theme);
                           rememberSharedTheme(theme.share_code);
                           toast.success(`Using ${theme.label}`);
+                          offerThemePack(theme);
                         }}
                       >
                         {inUse ? "In use" : "Use theme"}
