@@ -6,11 +6,13 @@ import { useEffect, useState } from "react";
 interface CountUpNumberProps {
   value: number;
   decimals?: number;
+  compact?: boolean;
 }
 
 export default function CountUpNumber({
   value,
   decimals = 0,
+  compact = false,
 }: CountUpNumberProps) {
   const [displayValue, setDisplayValue] = useState(0);
 
@@ -22,10 +24,15 @@ export default function CountUpNumber({
     <NumberFlow
       translate="no"
       value={displayValue}
-      format={{
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      }}
+      locales={compact ? "en-US" : undefined}
+      format={
+        compact
+          ? { notation: "compact", maximumFractionDigits: 2 }
+          : {
+              minimumFractionDigits: decimals,
+              maximumFractionDigits: decimals,
+            }
+      }
     />
   );
 }

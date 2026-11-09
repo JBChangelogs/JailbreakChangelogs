@@ -167,9 +167,6 @@ type HeroStatCard = {
   label: string;
   icon: string;
   value: number;
-  valueStr?: string;
-  decimals?: number;
-  prefix?: string;
   badge?: string;
 };
 
@@ -205,7 +202,6 @@ export default async function Home() {
       label: "Total Networth",
       icon: "mdi:cash-multiple",
       value: networthCap?.total_networth ?? 0,
-      valueStr: networthCap?.total_networth_str ?? "???",
       badge: "Last 24 hours",
     },
   ];
@@ -356,14 +352,11 @@ export default async function Home() {
                           {stat.label}
                         </span>
                       </div>
-                      <p className="text-primary-text text-2xl leading-none font-bold md:text-3xl">
-                        <span>{stat.prefix ?? ""}</span>
-                        {stat.valueStr ?? (
-                          <CountUpNumber
-                            value={stat.value}
-                            decimals={stat.decimals}
-                          />
-                        )}
+                      <p
+                        className="text-primary-text text-2xl leading-none font-bold md:text-3xl"
+                        title={stat.value.toLocaleString("en-US")}
+                      >
+                        <CountUpNumber value={stat.value} compact />
                       </p>
                       {stat.badge ? (
                         <p className="text-secondary-text mt-1.5 text-[10px] font-medium tracking-wide uppercase">
