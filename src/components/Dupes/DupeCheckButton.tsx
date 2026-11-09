@@ -18,6 +18,8 @@ import { checkDupe, type DupeCheckResult } from "@/utils/api/dupeCheck";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
 import { trackDupeEvent } from "@/utils/analytics/dupes";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getUserAvatar } from "@/utils/ui/images";
+import { TradeHistoryAvatar } from "./TradeHistoryList";
 import {
   formatShortDateTime,
   formatRelativeDate,
@@ -43,6 +45,7 @@ export default function DupeCheckButton({
   const [checkResult, setCheckResult] = useState<DupeCheckResult | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
   const [checkOpen, setCheckOpen] = useState(false);
+  const [noDupes, setNoDupes] = useState(false);
   const pendingCheck = useRef<AbortController | null>(null);
   const categoryIcon = item.categoryTitle
     ? getCategoryIcon(item.categoryTitle)
@@ -55,13 +58,17 @@ export default function DupeCheckButton({
     setChecking(true);
     setCheckError(null);
     setCheckResult(null);
+    setNoDupes(false);
     try {
       const result = await checkDupe(
         originalOwner,
         item.item_id,
         controller.signal,
       );
-      if (!controller.signal.aborted) setCheckResult(result);
+      if (!controller.signal.aborted) {
+        setCheckResult(result);
+        setNoDupes(!result);
+      }
     } catch (error) {
       if (!controller.signal.aborted) {
         setCheckError(
@@ -142,9 +149,19 @@ export default function DupeCheckButton({
                 </span>
               )}
             </div>
-            <DialogDescription className="wrap-anywhere">
-              Original owner:{" "}
-              <span className="text-primary-text font-medium">{ownerName}</span>
+            <DialogDescription asChild>
+              <div className="flex items-center gap-2 wrap-anywhere">
+                Original owner:
+                <span className="bg-tertiary-bg relative size-6 shrink-0 overflow-hidden rounded-full *:size-full">
+                  <TradeHistoryAvatar
+                    avatarUrl={getUserAvatar(originalOwner)}
+                    name={ownerName}
+                  />
+                </span>
+                <span className="text-primary-text font-medium">
+                  {ownerName}
+                </span>
+              </div>
             </DialogDescription>
           </DialogHeader>
           <div aria-live="polite" aria-busy={checking}>
@@ -159,6 +176,14 @@ export default function DupeCheckButton({
                 role="alert"
               >
                 {checkError}
+              </p>
+            ) : noDupes ? (
+              <p className="border-border-card bg-tertiary-bg text-secondary-text mt-4 rounded-lg border p-3 text-sm">
+                <span className="text-primary-text font-semibold">
+                  No dupe evidence found.
+                </span>{" "}
+                The check found no duplicated copy of this item, so it was
+                likely flagged by mistake. You can report it as a false dupe.
               </p>
             ) : checkResult ? (
               <div className="mt-4 space-y-3">

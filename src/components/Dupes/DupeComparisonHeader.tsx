@@ -20,6 +20,7 @@ import {
   handleImageError,
 } from "@/utils/ui/images";
 import DupeCheckButton from "./DupeCheckButton";
+import { getOwnerName } from "@/utils/helpers/ownerName";
 import ReportFalseDupeModal from "./ReportFalseDupeModal";
 import { OriginalOwnerCard } from "./TradeHistoryList";
 import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
@@ -212,11 +213,10 @@ export default function DupeComparisonHeader({
                 <DupeCheckButton
                   item={duplicateItem}
                   originalOwner={normalizedOriginalOwnerId}
-                  ownerName={
-                    robloxUsers[normalizedOriginalOwnerId]?.displayName ||
-                    robloxUsers[normalizedOriginalOwnerId]?.name ||
-                    normalizedOriginalOwnerId
-                  }
+                  ownerName={getOwnerName(
+                    robloxUsers[normalizedOriginalOwnerId],
+                    normalizedOriginalOwnerId,
+                  )}
                   onReport={openReportModal}
                   onViewTree={onExploreTree}
                 />
@@ -273,10 +273,10 @@ export default function DupeComparisonHeader({
           normalizedOriginalOwnerId
             ? {
                 id: normalizedOriginalOwnerId,
-                displayName:
-                  robloxUsers[normalizedOriginalOwnerId]?.displayName ||
-                  robloxUsers[normalizedOriginalOwnerId]?.name ||
+                displayName: getOwnerName(
+                  robloxUsers[normalizedOriginalOwnerId],
                   normalizedOriginalOwnerId,
+                ),
               }
             : undefined
         }

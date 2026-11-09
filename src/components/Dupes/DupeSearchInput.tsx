@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { MaxStreamsError, searchDupeOwners } from "@/utils/api/api";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { DefaultAvatar } from "@/utils/ui/avatar";
+import { getOwnerName } from "@/utils/helpers/ownerName";
 import type { DupeOwnerSearchResult } from "@/types";
 
 interface DupeSearchInputProps {
@@ -409,7 +410,7 @@ export default function DupeSearchInput({
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-primary-text truncate text-sm font-medium">
-                          {owner.displayName}
+                          {getOwnerName(owner, owner.id)}
                         </p>
                         <p className="text-secondary-text truncate text-xs">
                           @{owner.name}

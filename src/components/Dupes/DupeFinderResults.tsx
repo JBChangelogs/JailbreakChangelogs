@@ -1,5 +1,6 @@
 "use client";
 
+import { getOwnerName } from "@/utils/helpers/ownerName";
 import { useState, useMemo } from "react";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
@@ -118,10 +119,8 @@ export default function DupeFinderResults({
   };
 
   // Helper functions
-  const getUserDisplay = (userId: string) => {
-    const user = localRobloxUsers[userId];
-    return user?.displayName || user?.name || userId;
-  };
+  const getUserDisplay = (userId: string) =>
+    getOwnerName(localRobloxUsers[userId], userId);
 
   const getUsername = (userId: string) => {
     const user = localRobloxUsers[userId];

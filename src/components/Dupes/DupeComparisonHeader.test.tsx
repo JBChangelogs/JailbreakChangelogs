@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { parseAsStringLiteral } from "nuqs";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+import { getOwnerName } from "@/utils/helpers/ownerName";
 
 type Node = {
   type: unknown;
@@ -188,6 +189,7 @@ test("shared header preserves the original owner, login guard, report payload, a
         ];
       },
     },
+    "@/utils/helpers/ownerName": { getOwnerName },
     "@/hooks/useBatchUserData": {
       useBatchUserData: () => ({
         robloxUsers: {

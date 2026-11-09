@@ -21,6 +21,7 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   const checks: unknown[][] = [];
   const events: unknown[] = [];
   let checkFails = false;
+  let noDupesFound = false;
   let deferChecks = false;
   const pendingCheck = { current: null };
   const deferred: Array<() => void> = [];
@@ -73,9 +74,13 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
               if (deferChecks)
                 await new Promise<void>((resolve) => deferred.push(resolve));
               if (checkFails) throw new Error("Check failed");
-              return result;
+              return noDupesFound ? null : result;
             },
           };
+        if (name === "@/utils/ui/images")
+          return { getUserAvatar: (id: string) => `avatar:${id}` };
+        if (name === "./TradeHistoryList")
+          return { TradeHistoryAvatar: "TradeHistoryAvatar" };
         if (name === "@/utils/dupeComparisonUrl")
           return { getDupeComparisonUrl };
         if (name === "@/utils/items/categoryIcons")
@@ -141,6 +146,11 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   expect(
     flatten(categoryBadge).some((element) => element.type === "CategoryIcon"),
   ).toBe(true);
+  const avatar = elements.find(
+    (element) => element.type === "TradeHistoryAvatar",
+  )!;
+  expect(avatar.props.avatarUrl).toBe("avatar:123");
+  expect(avatar.props.name).toBe("Original Display");
   const button = (label: string) =>
     elements.find(
       (element) =>
@@ -334,6 +344,22 @@ test("shared dupe check preserves results, reporting, retry, and comparison acti
   await new Promise((resolve) => setTimeout(resolve, 0));
   stateIndex = 0;
   expect(JSON.stringify(exports.default(props))).not.toContain("Try again");
+  noDupesFound = true;
+  button("Dupe check").props.onClick!();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  stateIndex = 0;
+  const noDupes = JSON.stringify(exports.default(props));
+  expect(noDupes).toContain("No dupe evidence found.");
+  expect(noDupes).toContain("Report false dupe");
+  expect(noDupes).not.toContain("Try again");
+  expect(noDupes).not.toContain("View dupe tree");
+  noDupesFound = false;
+  button("Dupe check").props.onClick!();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  stateIndex = 0;
+  expect(JSON.stringify(exports.default(props))).not.toContain(
+    "No dupe evidence found.",
+  );
   stateIndex = 0;
   const comparisonView = exports.default(props);
   expect(JSON.stringify(comparisonView)).toContain("View dupe tree");

@@ -1,5 +1,6 @@
 "use client";
 
+import { getOwnerName } from "@/utils/helpers/ownerName";
 import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { useEffect, useRef } from "react";
 import { trackWebEvent } from "@/utils/analytics/web";
@@ -77,10 +78,8 @@ export default function DupeFinderClient({
   );
   const mergedUsers = { ...(initialRobloxUsers || {}), ...batchedUsers };
 
-  const getUserDisplay = (userId: string) => {
-    const user = mergedUsers[userId];
-    return user?.displayName || user?.name || userId;
-  };
+  const getUserDisplay = (userId: string) =>
+    getOwnerName(mergedUsers[userId], userId);
   const getUsername = (userId: string) => {
     const user = mergedUsers[userId];
     return user?.name || userId;
