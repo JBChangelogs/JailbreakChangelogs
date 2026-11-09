@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import { getDupeComparisonUrl } from "@/utils/dupeComparisonUrl";
-import { getOwnerName } from "@/utils/helpers/ownerName";
 
 type Node = {
   type: unknown;
@@ -87,7 +86,6 @@ function setup(authenticated: boolean) {
           };
         if (name === "@/components/ui/button") return { Button: "Button" };
         if (name === "./DupeCheckButton") return { default: "DupeCheckButton" };
-        if (name === "@/utils/helpers/ownerName") return { getOwnerName };
         if (name === "./ReportFalseDupeModal") return { default: "Modal" };
         throw new Error(`Unexpected import: ${name}`);
       },

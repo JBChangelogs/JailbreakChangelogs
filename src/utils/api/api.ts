@@ -61,6 +61,10 @@ import type { ValueHistory } from "@/components/Items/ItemValueChart";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { buildApiFetchRequest, buildApiLinkUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import {
+  withUsernameFallback,
+  withUsernameFallbacks,
+} from "@/utils/helpers/ownerName";
 
 const log = createLogger("API");
 
@@ -299,7 +303,7 @@ export const searchDupeOwners = async (
     throw new Error("Failed to search dupe owners");
   }
   const data = await response.json();
-  return Array.isArray(data) ? data : [];
+  return Array.isArray(data) ? data.map(withUsernameFallback) : [];
 };
 
 export const searchDupeItemsByOwner = async (
@@ -1566,7 +1570,7 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
       // The API returns an object with user IDs as keys, which is exactly what we need
       // We don't need to wrap it or merge chunks anymore
       if (data && typeof data === "object") {
-        return data as Record<string, RobloxUser>;
+        return withUsernameFallbacks(data as Record<string, RobloxUser>);
       }
 
       return {};
@@ -1623,7 +1627,7 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
 
       const data = await response.json();
       if (data && typeof data === "object") {
-        return data;
+        return withUsernameFallbacks(data);
       } else {
         log.warn(
           "fetchRobloxUsersBatchLeaderboard: Invalid data structure",
@@ -2138,7 +2142,7 @@ export async function fetchRobloxUserByUsername(username: string) {
     const data = await response.json();
 
     if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-      return data.data[0];
+      return withUsernameFallback(data.data[0]);
     } else {
       return null;
     }

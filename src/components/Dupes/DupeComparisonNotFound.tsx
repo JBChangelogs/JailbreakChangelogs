@@ -7,7 +7,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { Button } from "@/components/ui/button";
 import DupeCheckButton from "./DupeCheckButton";
-import { getOwnerName } from "@/utils/helpers/ownerName";
 import ReportFalseDupeModal from "./ReportFalseDupeModal";
 
 export default function DupeComparisonNotFound({
@@ -53,7 +52,11 @@ export default function DupeComparisonNotFound({
           <DupeCheckButton
             item={{ ...reportItem, id, item_id: reportItem.item_id }}
             originalOwner={originalOwner}
-            ownerName={getOwnerName(robloxUsers[originalOwner], originalOwner)}
+            ownerName={
+              robloxUsers[originalOwner]?.displayName ||
+              robloxUsers[originalOwner]?.name ||
+              originalOwner
+            }
             onReport={openReportModal}
             onViewTree={onExploreTree}
           />
@@ -95,10 +98,10 @@ export default function DupeComparisonNotFound({
             originalOwner
               ? {
                   id: originalOwner,
-                  displayName: getOwnerName(
-                    robloxUsers[originalOwner],
+                  displayName:
+                    robloxUsers[originalOwner]?.displayName ||
+                    robloxUsers[originalOwner]?.name ||
                     originalOwner,
-                  ),
                 }
               : undefined
           }

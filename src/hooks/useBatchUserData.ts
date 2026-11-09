@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createLogger } from "@/services/logger";
 import type { RobloxUser } from "@/types";
+import { withUsernameFallbacks } from "@/utils/helpers/ownerName";
 
 const log = createLogger("API");
 
@@ -58,10 +59,10 @@ export function useBatchUserData(
               Object.assign(userData, item);
             }
           });
-          return userData;
+          return withUsernameFallbacks(userData);
         }
         return data && typeof data === "object"
-          ? (data as Record<string, RobloxUser>)
+          ? withUsernameFallbacks(data as Record<string, RobloxUser>)
           : EMPTY_USERS;
       } catch (error) {
         if (!signal.aborted) log.error("Failed to fetch Roblox users", error);
