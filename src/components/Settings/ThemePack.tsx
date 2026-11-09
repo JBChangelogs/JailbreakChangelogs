@@ -61,6 +61,42 @@ const Swatch = ({ color }: { color: string }) => (
   />
 );
 
+export function PackPartDetail({
+  pack,
+  part,
+  imageClassName = "h-4 w-7",
+}: {
+  pack: ThemePack;
+  part: PackPart;
+  imageClassName?: string;
+}) {
+  switch (part) {
+    case "banner":
+    case "background":
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={pack[part]!}
+          alt=""
+          className={cn("rounded-sm object-cover", imageClassName)}
+        />
+      );
+    case "accent":
+      return (
+        <>
+          <Swatch color={pack.accent!.color} />
+          {pack.accent!.gradient && <Swatch color={pack.accent!.gradient} />}
+        </>
+      );
+    case "underglow":
+      return <Swatch color={pack.underglow!} />;
+    case "card_style":
+      return <span className="capitalize">{pack.card_style}</span>;
+    case "colored_profile_cards":
+      return pack.colored_profile_cards ? "On" : "Off";
+  }
+}
+
 export function ThemePackSummary({
   pack,
   className,
@@ -72,33 +108,6 @@ export function ThemePackSummary({
     (part) => pack?.[part] != null,
   );
   if (!pack || !parts.length) return null;
-  const detail = (part: PackPart) => {
-    switch (part) {
-      case "banner":
-      case "background":
-        return (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={pack[part]!}
-            alt=""
-            className="h-4 w-7 rounded-sm object-cover"
-          />
-        );
-      case "accent":
-        return (
-          <>
-            <Swatch color={pack.accent!.color} />
-            {pack.accent!.gradient && <Swatch color={pack.accent!.gradient} />}
-          </>
-        );
-      case "underglow":
-        return <Swatch color={pack.underglow!} />;
-      case "card_style":
-        return <span className="capitalize">{pack.card_style}</span>;
-      case "colored_profile_cards":
-        return pack.colored_profile_cards ? "On" : "Off";
-    }
-  };
   return (
     <ul
       aria-label="Customization pack"
@@ -111,7 +120,7 @@ export function ThemePackSummary({
         >
           {PART_LABELS[part]}
           <span className="text-secondary-text flex items-center gap-1">
-            {detail(part)}
+            <PackPartDetail pack={pack} part={part} />
           </span>
         </li>
       ))}

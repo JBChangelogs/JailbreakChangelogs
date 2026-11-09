@@ -12,6 +12,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
+  PackPartDetail,
   PART_LABELS,
   SupporterTier,
   ThemePackSummary,
@@ -326,6 +327,13 @@ export function ApplyPackDialog({
               }
             />
             {PART_LABELS[name] ?? name}
+            <span className="text-secondary-text ml-auto flex items-center gap-1 text-xs">
+              <PackPartDetail
+                pack={theme.pack!}
+                part={name}
+                imageClassName="h-9 w-16"
+              />
+            </span>
           </label>
         ))}
       </div>
