@@ -27,8 +27,11 @@ import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
+import type { UserData } from "@/types/auth";
 import { createMyTheme, fetchSharedTheme } from "@/utils/api/userThemes";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
+import { UserAvatar } from "@/utils/ui/avatar";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import {
   endCustomThemePreview,
   parseShareCode,
@@ -80,10 +83,9 @@ export default function SharedThemeDialog() {
   const { data: creator } = useQuery({
     queryKey: ["shared-theme-creator", theme?.user_id],
     queryFn: () =>
-      fetchUserById(theme!.user_id, PUBLIC_API_URL) as Promise<{
-        username?: string;
-        global_name?: string | null;
-      }>,
+      fetchUserById(theme!.user_id, PUBLIC_API_URL) as Promise<
+        Partial<UserData>
+      >,
     enabled: !!theme,
     staleTime: 5 * 60_000,
   });
@@ -171,9 +173,24 @@ export default function SharedThemeDialog() {
       {creatorName && (
         <>
           {" by "}
-          <Link href={`/users/${theme.user_id}`} className="text-link">
-            {creatorName}
-          </Link>
+          <UserProfilePopover user={{ ...creator, id: theme.user_id }}>
+            <Link
+              href={`/users/${theme.user_id}`}
+              className="text-link inline-flex items-center gap-1 align-middle"
+            >
+              <UserAvatar
+                userId={theme.user_id}
+                avatarHash={creator?.avatar ?? null}
+                username={creatorName}
+                custom_avatar={creator?.custom_avatar}
+                premiumType={creator?.premiumtype}
+                settings={creator?.settings}
+                size={5}
+                showBadge={false}
+              />
+              {creatorName}
+            </Link>
+          </UserProfilePopover>
         </>
       )}
       {" · "}
