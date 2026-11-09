@@ -137,7 +137,7 @@ export function SuggestionForm({
     return () => clearTimeout(id);
   }, [rateLimitUntil]);
 
-  const minChars = limits?.min_characters ?? 350;
+  const minChars = limits?.min_characters ?? 200;
   const maxChars = limits?.max_characters ?? 750;
   const maxNoteLength = limits?.max_note_length ?? 300;
   const validFields = (
@@ -818,7 +818,7 @@ export function SuggestionForm({
                 Reason for Suggested {fieldLabel(field)}
               </label>
               <textarea
-                placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
+                placeholder={`Explain why this value should change. Include evidence, market observations, or trade history. Must be at least ${minChars} characters.`}
                 value={reason}
                 onChange={(e) => {
                   setReason(e.target.value);
