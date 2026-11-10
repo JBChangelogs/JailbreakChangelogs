@@ -17,6 +17,8 @@ import {
   dropUnofferedFilters,
   getServerFilters,
   isValidFilterSort,
+  keepSingleTypeFilter,
+  toggleFilterSort,
 } from "./valuesFilterOptions";
 
 type Page = ItemsPage<Item>;
@@ -152,6 +154,8 @@ function harness(startPage = 1) {
             dropUnofferedFilters,
             getServerFilters,
             isValidFilterSort,
+            keepSingleTypeFilter,
+            toggleFilterSort,
           };
         if (name === "./ValuesItemsGrid") return { default: gridType };
         return {};

@@ -40,6 +40,8 @@ import {
   dropUnofferedFilters,
   getServerFilters,
   isValidFilterSort,
+  keepSingleTypeFilter,
+  toggleFilterSort,
 } from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { useSearchTracking } from "@/hooks/useSearchTracking";
@@ -242,13 +244,7 @@ export default function ValuesClient() {
         return;
       }
       setSelectedFilterSortsState((prev) => {
-        const next = prev.includes(value)
-          ? filterMode === "single"
-            ? []
-            : prev.filter((v) => v !== value)
-          : filterMode === "single"
-            ? [value]
-            : [...prev, value];
+        const next = toggleFilterSort(prev, value, filterMode);
         persistFilterSorts(next);
         publishFilterSorts(next);
         return next;
@@ -260,8 +256,8 @@ export default function ValuesClient() {
   useEffect(() => {
     if (!isFilterModeResolved || filterMode !== "single") return;
     setSelectedFilterSortsState((prev) => {
-      if (prev.length <= 1) return prev;
-      const next = [prev[prev.length - 1]];
+      const next = keepSingleTypeFilter(prev);
+      if (next.length === prev.length) return prev;
       persistFilterSorts(next);
       publishFilterSorts(next);
       return next;

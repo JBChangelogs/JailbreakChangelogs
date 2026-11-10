@@ -406,7 +406,7 @@ export default function ValuesSearchControls({
                         value={selectedTypeFilters[0] ?? "name-all-items"}
                         onValueChange={(newValue) => {
                           if (newValue === "name-all-items") {
-                            onClearFilterSorts();
+                            onClearFilterSorts(typeFilterValues);
                             return;
                           }
                           const nextValue = newValue as FilterSort;

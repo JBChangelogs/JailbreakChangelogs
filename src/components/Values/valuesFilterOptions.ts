@@ -107,6 +107,30 @@ export function isValidFilterSort(value: string): value is FilterSort {
   );
 }
 
+const typeFilterValues = new Set<FilterSort>(
+  filterGroups.flatMap((group) => group.options.map((option) => option.value)),
+);
+
+// Single mode (Multi-select off) only limits Category to one type; demand,
+// trend and status filters always stack, since the API ORs within a group
+// and ANDs across groups.
+export function toggleFilterSort(
+  prev: FilterSort[],
+  value: FilterSort,
+  mode: "single" | "multi",
+): FilterSort[] {
+  if (prev.includes(value)) return prev.filter((v) => v !== value);
+  if (mode === "single" && typeFilterValues.has(value))
+    return [...prev.filter((v) => !typeFilterValues.has(v)), value];
+  return [...prev, value];
+}
+
+// Switching to single mode keeps every filter plus only the latest type.
+export function keepSingleTypeFilter(prev: FilterSort[]): FilterSort[] {
+  const lastType = prev.findLast((v) => typeFilterValues.has(v));
+  return prev.filter((v) => !typeFilterValues.has(v) || v === lastType);
+}
+
 // Saved/URL demand & trend keys are accepted by shape before /filters loads;
 // once it has, drop any the API no longer offers so the items request doesn't
 // fail with invalid_filter. Other keys are validated locally and kept.
