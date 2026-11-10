@@ -35,6 +35,7 @@ import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
+import InventoryFAQ from "@/components/Inventory/InventoryFAQ";
 import InventoryHistory from "@/components/Inventory/InventoryHistory";
 import InventoryDataScopeNotice from "@/components/Inventory/InventoryDataScopeNotice";
 import DuplicatesTab from "@/components/Inventory/MultipleCopiesTab";
@@ -759,222 +760,229 @@ export default function InventoryCheckerClient({
         <>
           {/* Missing inventory is an empty state for every viewer. */}
           {error && !initialData && isInventoryNotFoundError && robloxId && (
-            <UserEmptyStateCard
-              robloxId={robloxId}
-              avatarSrc={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
-              displayName={
-                mergedRobloxUsers[robloxId]?.displayName ||
-                originalSearchTerm ||
-                robloxId
-              }
-              username={
-                mergedRobloxUsers[robloxId]?.name ||
-                originalSearchTerm ||
-                robloxId
-              }
-              icon="material-symbols:inventory-2-rounded"
-              title="No inventory found yet"
-              description={
-                isOwnInventory
-                  ? "Your inventory hasn’t been scanned yet. Join a trade server for an automatic scan. Manual scans require Supporter III."
-                  : "This user hasn’t been scanned by our bots yet. Inventories are updated automatically after a bot successfully scans their trade server."
-              }
-              tool="inventory"
-              profileLinks={
-                <>
-                  {linkedProfile && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={`https://discord.com/users/${linkedProfile.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          prefetch={false}
-                          className={profileLinkButtonClass}
-                        >
-                          <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
-                          Discord
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent>Discord profile</TooltipContent>
-                    </Tooltip>
-                  )}
-                  {linkedProfile && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={`/users/${linkedProfile.id}`}
-                          prefetch={false}
-                          className={profileLinkButtonClass}
-                        >
-                          <Image
-                            src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
-                            alt="JBCL Logo"
-                            width={16}
-                            height={16}
-                            className="h-3.5 w-3.5 shrink-0"
-                          />
-                          Website
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent>JBCL profile</TooltipContent>
-                    </Tooltip>
-                  )}
-                </>
-              }
-            >
-              {isOwnInventory && (
-                <div className="pl-0 sm:pl-11">
-                  <Button
-                    onClick={() => {
-                      trackEvent("Request Scan");
-                      // Show Turnstile modal before scan
-                      if (
-                        ENABLE_WS_SCAN &&
-                        scanWebSocket.status !== "scanning" &&
-                        scanWebSocket.status !== "connecting"
-                      ) {
-                        setShowScanModal(true);
-                      }
-                    }}
-                    disabled={
-                      !ENABLE_WS_SCAN ||
-                      scanWebSocket.status === "scanning" ||
-                      scanWebSocket.status === "connecting"
-                    }
-                    variant={
-                      scanWebSocket.status === "completed"
-                        ? "success"
-                        : scanWebSocket.status === "error"
-                          ? "destructive"
-                          : "default"
-                    }
-                    size="sm"
-                  >
-                    {scanWebSocket.status === "connecting" ? (
-                      <>
-                        <Spinner className="h-4 w-4" />
-                        <span>Connecting...</span>
-                      </>
-                    ) : scanWebSocket.status === "scanning" ? (
-                      <>
-                        <Spinner className="h-4 w-4" />
-                        <span>
-                          {getScanActiveButtonLabel(
-                            scanWebSocket.phase,
-                            scanWebSocket.message,
-                          )}
-                        </span>
-                      </>
-                    ) : scanWebSocket.status === "completed" ? (
-                      <>
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <span>Scan Complete</span>
-                      </>
-                    ) : scanWebSocket.status === "error" ? (
-                      <>
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                          />
-                        </svg>
-                        <span>Scan Failed</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <span>
-                          {!ENABLE_WS_SCAN
-                            ? "Scanning Disabled"
-                            : "Request a Scan"}
-                        </span>
-                      </>
+            <>
+              <UserEmptyStateCard
+                robloxId={robloxId}
+                avatarSrc={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
+                displayName={
+                  mergedRobloxUsers[robloxId]?.displayName ||
+                  originalSearchTerm ||
+                  robloxId
+                }
+                username={
+                  mergedRobloxUsers[robloxId]?.name ||
+                  originalSearchTerm ||
+                  robloxId
+                }
+                icon="material-symbols:inventory-2-rounded"
+                title="No inventory found yet"
+                description={
+                  isOwnInventory
+                    ? "Your inventory hasn’t been scanned yet. Join a trade server for an automatic scan. Manual scans require Supporter III."
+                    : "This user hasn’t been scanned by our bots yet. Inventories are updated automatically after a bot successfully scans their trade server."
+                }
+                tool="inventory"
+                profileLinks={
+                  <>
+                    {linkedProfile && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={`https://discord.com/users/${linkedProfile.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            prefetch={false}
+                            className={profileLinkButtonClass}
+                          >
+                            <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
+                            Discord
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>Discord profile</TooltipContent>
+                      </Tooltip>
                     )}
-                  </Button>
-                  {scanErrorBanner && (
-                    <div className="mt-2 flex items-start gap-1.5">
-                      <Icon
-                        icon="heroicons:exclamation-triangle"
-                        className="text-button-danger mt-0.5 h-3.5 w-3.5 shrink-0"
-                      />
-                      <p className="text-button-danger text-xs wrap-break-word">
-                        <span className="font-medium">
-                          {scanErrorBanner.title}
-                        </span>
-                        {scanErrorBanner.subtitle && (
-                          <> — {scanErrorBanner.subtitle}</>
-                        )}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div
-                className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 ${isOwnInventory ? "sm:pl-11" : ""}`}
+                    {linkedProfile && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={`/users/${linkedProfile.id}`}
+                            prefetch={false}
+                            className={profileLinkButtonClass}
+                          >
+                            <Image
+                              src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
+                              alt="JBCL Logo"
+                              width={16}
+                              height={16}
+                              className="h-3.5 w-3.5 shrink-0"
+                            />
+                            Website
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>JBCL profile</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </>
+                }
               >
-                <p className="text-secondary-text text-xs">
-                  {isLoadingQueuePosition ? (
-                    "Checking queue position..."
-                  ) : queuePosition ? (
-                    <span className="text-primary-text font-medium">
-                      Queue Position: #{queuePosition.position.toLocaleString()}
-                    </span>
-                  ) : isOwnInventory && wsQueuePosition !== undefined ? (
-                    <span className="text-primary-text font-medium">
-                      Queue Position: #{wsQueuePosition.toLocaleString()}
-                    </span>
-                  ) : (
-                    queueStatusMessage || "Not in scan queue"
-                  )}
-                </p>
-                <button
-                  type="button"
-                  onClick={fetchQueuePosition}
-                  disabled={isLoadingQueuePosition}
-                  className="text-link inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-xs font-medium hover:underline disabled:opacity-50"
+                {isOwnInventory && (
+                  <div className="pl-0 sm:pl-11">
+                    <Button
+                      onClick={() => {
+                        trackEvent("Request Scan");
+                        // Show Turnstile modal before scan
+                        if (
+                          ENABLE_WS_SCAN &&
+                          scanWebSocket.status !== "scanning" &&
+                          scanWebSocket.status !== "connecting"
+                        ) {
+                          setShowScanModal(true);
+                        }
+                      }}
+                      disabled={
+                        !ENABLE_WS_SCAN ||
+                        scanWebSocket.status === "scanning" ||
+                        scanWebSocket.status === "connecting"
+                      }
+                      variant={
+                        scanWebSocket.status === "completed"
+                          ? "success"
+                          : scanWebSocket.status === "error"
+                            ? "destructive"
+                            : "default"
+                      }
+                      size="sm"
+                    >
+                      {scanWebSocket.status === "connecting" ? (
+                        <>
+                          <Spinner className="h-4 w-4" />
+                          <span>Connecting...</span>
+                        </>
+                      ) : scanWebSocket.status === "scanning" ? (
+                        <>
+                          <Spinner className="h-4 w-4" />
+                          <span>
+                            {getScanActiveButtonLabel(
+                              scanWebSocket.phase,
+                              scanWebSocket.message,
+                            )}
+                          </span>
+                        </>
+                      ) : scanWebSocket.status === "completed" ? (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span>Scan Complete</span>
+                        </>
+                      ) : scanWebSocket.status === "error" ? (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                            />
+                          </svg>
+                          <span>Scan Failed</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span>
+                            {!ENABLE_WS_SCAN
+                              ? "Scanning Disabled"
+                              : "Request a Scan"}
+                          </span>
+                        </>
+                      )}
+                    </Button>
+                    {scanErrorBanner && (
+                      <div className="mt-2 flex items-start gap-1.5">
+                        <Icon
+                          icon="heroicons:exclamation-triangle"
+                          className="text-button-danger mt-0.5 h-3.5 w-3.5 shrink-0"
+                        />
+                        <p className="text-button-danger text-xs wrap-break-word">
+                          <span className="font-medium">
+                            {scanErrorBanner.title}
+                          </span>
+                          {scanErrorBanner.subtitle && (
+                            <> — {scanErrorBanner.subtitle}</>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div
+                  className={`flex flex-wrap items-center gap-x-1.5 gap-y-1 ${isOwnInventory ? "sm:pl-11" : ""}`}
                 >
-                  {isLoadingQueuePosition ? (
-                    <Spinner className="h-4 w-4" />
-                  ) : (
-                    <Icon icon="material-symbols:refresh" className="h-4 w-4" />
-                  )}
-                  <span>Check queue position</span>
-                </button>
-              </div>
-            </UserEmptyStateCard>
+                  <p className="text-secondary-text text-xs">
+                    {isLoadingQueuePosition ? (
+                      "Checking queue position..."
+                    ) : queuePosition ? (
+                      <span className="text-primary-text font-medium">
+                        Queue Position: #
+                        {queuePosition.position.toLocaleString()}
+                      </span>
+                    ) : isOwnInventory && wsQueuePosition !== undefined ? (
+                      <span className="text-primary-text font-medium">
+                        Queue Position: #{wsQueuePosition.toLocaleString()}
+                      </span>
+                    ) : (
+                      queueStatusMessage || "Not in scan queue"
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchQueuePosition}
+                    disabled={isLoadingQueuePosition}
+                    className="text-link inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 text-xs font-medium hover:underline disabled:opacity-50"
+                  >
+                    {isLoadingQueuePosition ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <Icon
+                        icon="material-symbols:refresh"
+                        className="h-4 w-4"
+                      />
+                    )}
+                    <span>Check queue position</span>
+                  </button>
+                </div>
+              </UserEmptyStateCard>
+              <InventoryFAQ />
+            </>
           )}
           {error &&
             !initialData &&
@@ -996,14 +1004,6 @@ export default function InventoryCheckerClient({
                 <p className="text-secondary-text wrap-break-word">{error}</p>
               </div>
             )}
-
-          {!initialData && robloxId && /^\d+$/.test(robloxId) && (
-            <InventoryHistory
-              key={robloxId}
-              userId={robloxId}
-              isOwnInventory={isOwnInventory}
-            />
-          )}
 
           {/* User Stats and Inventory Items - Only show when no error and has data */}
           {!error && initialData && currentData && (

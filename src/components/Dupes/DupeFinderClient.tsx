@@ -8,7 +8,6 @@ import { UserEmptyStateCard } from "@/components/ui/UserEmptyStateCard";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
-import DupeFinderFAQ from "./DupeFinderFAQ";
 import type { DupeFinderItem, RobloxUser, Item } from "@/types";
 
 interface UserConnectionData {
@@ -157,19 +156,16 @@ export default function DupeFinderClient({
 
       {/* No Dupes Found — user exists but has no dupes */}
       {error && !initialData && isUserFound && robloxId && (
-        <>
-          <UserEmptyStateCard
-            robloxId={robloxId}
-            avatarSrc={getUserAvatar(robloxId)}
-            displayName={getUserDisplay(robloxId)}
-            username={getUsername(robloxId)}
-            icon="material-symbols:content-copy-rounded"
-            title="No duped items found yet"
-            description="Our bots haven't recorded any duped items for this user yet. Dupes are logged automatically after a bot successfully scans their trade server."
-            tool="dupes"
-          />
-          <DupeFinderFAQ />
-        </>
+        <UserEmptyStateCard
+          robloxId={robloxId}
+          avatarSrc={getUserAvatar(robloxId)}
+          displayName={getUserDisplay(robloxId)}
+          username={getUsername(robloxId)}
+          icon="material-symbols:content-copy-rounded"
+          title="No duped items found yet"
+          description="Our bots haven't recorded any duped items for this user yet. Dupes are logged automatically after a bot successfully scans their trade server."
+          tool="dupes"
+        />
       )}
 
       {/* Error Display — user not found or server error */}
