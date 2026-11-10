@@ -1,5 +1,6 @@
 "use client";
 
+import { getDemandCssColor, getTrendCssColor } from "@/utils/items/badgeColors";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../ui/IconWrapper";
@@ -556,33 +557,70 @@ export default function ValuesSearchControls({
                 );
                 if (selected.length === 0) return null;
                 const labels = selected.map((option) => option.label);
-                const fullLabel = `${group.label}: ${labels.join(", ")}`;
+                const dot = (label: string) => (
+                  <span
+                    aria-hidden="true"
+                    className="mr-1 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{
+                      backgroundColor:
+                        group.label === "Trend"
+                          ? getTrendCssColor(label)
+                          : getDemandCssColor(label),
+                    }}
+                  />
+                );
+                const summary = (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="hover:bg-button-secondary-hover! min-w-0 shrink! rounded-r-none"
+                    aria-label={`Edit ${group.label.toLowerCase()} filters: ${labels.join(", ")}`}
+                    onClick={() => setShowAdvancedFilters(true)}
+                  >
+                    <span className="truncate">
+                      {group.label}:{" "}
+                      {labels.slice(0, 2).map((label, i) => (
+                        <span key={label}>
+                          {i > 0 && ", "}
+                          {dot(label)}
+                          {label}
+                        </span>
+                      ))}
+                      {labels.length > 2 && ` +${labels.length - 2}`}
+                    </span>
+                  </Button>
+                );
                 return (
                   <div
                     key={group.label}
-                    className="border-border-card bg-secondary-bg flex max-w-full items-center rounded-lg border"
+                    className="bg-button-secondary flex max-w-full items-center rounded-lg"
                   >
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="hover:bg-tertiary-bg! min-w-0 shrink! rounded-r-none"
-                      title={fullLabel}
-                      aria-label={`Edit ${group.label.toLowerCase()} filters: ${labels.join(", ")}`}
-                      onClick={() => setShowAdvancedFilters(true)}
-                    >
-                      <span className="truncate">
-                        {group.label}: {labels.slice(0, 2).join(", ")}
-                        {labels.length > 2 && ` +${labels.length - 2}`}
-                      </span>
-                    </Button>
+                    {labels.length > 2 ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>{summary}</TooltipTrigger>
+                        <TooltipContent>
+                          {labels.map((label) => (
+                            <span
+                              key={label}
+                              className="flex items-center py-0.5"
+                            >
+                              {dot(label)}
+                              {label}
+                            </span>
+                          ))}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      summary
+                    )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           type="button"
                           size="sm"
                           variant="ghost"
-                          className="border-border-card hover:bg-tertiary-bg! w-8! rounded-l-none border-l px-0!"
+                          className="border-border-card hover:bg-button-secondary-hover! w-8! rounded-l-none border-l px-0!"
                           aria-label={`Clear ${group.label.toLowerCase()} filters`}
                           onClick={() =>
                             onClearFilterSorts(

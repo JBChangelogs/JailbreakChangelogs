@@ -7,6 +7,7 @@ import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import type ValuesSearchControls from "./ValuesSearchControls";
 import type { FilterSort } from "@/types";
 import * as filterOptions from "./valuesFilterOptions";
+import * as badgeColors from "@/utils/items/badgeColors";
 import type { FilterGroup } from "./valuesFilterOptions";
 
 const advancedFilterGroups: FilterGroup[] = [
@@ -64,6 +65,7 @@ test("grouped filter summaries stay visible, open the panel, and clear only thei
           };
         if (name === "react/jsx-runtime") return jsxRuntime;
         if (name === "./valuesFilterOptions") return filterOptions;
+        if (name === "@/utils/items/badgeColors") return badgeColors;
         if (name === "@/hooks/useDebounce")
           return { useDebounce: (value: unknown) => value };
         if (name === "@/contexts/AuthContext")
@@ -117,7 +119,6 @@ test("grouped filter summaries stay visible, open the panel, and clear only thei
     "aria-label"?: string;
     "aria-expanded"?: boolean;
     onClick?: () => void;
-    title?: string;
   };
   function nodes(node: ReactNode): NodeProps[] {
     if (Array.isArray(node)) return node.flatMap(nodes);
@@ -154,7 +155,6 @@ test("grouped filter summaries stay visible, open the panel, and clear only thei
     "Demand: Average, Decent +1",
     "Trend: Projected",
   ]);
-  expect(summaries()[0].title).toBe("Demand: Average, Decent, High");
   expect(
     render().some((node) => text(node.children) === "Clear demand filters"),
   ).toBe(true);
