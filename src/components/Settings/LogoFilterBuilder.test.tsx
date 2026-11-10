@@ -4,6 +4,7 @@ import {
   isValidElement,
   type HTMLAttributes,
   type InputHTMLAttributes,
+  type ImgHTMLAttributes,
   type ButtonHTMLAttributes,
   type KeyboardEvent,
   type PointerEvent,
@@ -199,6 +200,12 @@ function harness(
     }) as unknown as PointerEvent<HTMLDivElement>;
   render();
   return {
+    get previewImage() {
+      return findElement<ImgHTMLAttributes<HTMLImageElement>>(
+        render(),
+        (props) => props.alt === "Logo color preview",
+      )!.props;
+    },
     get screenPicker() {
       return findElement<ButtonHTMLAttributes<HTMLButtonElement>>(
         render(),
@@ -259,6 +266,11 @@ function harness(
     cleanup: () => cleanup(),
   };
 }
+
+test("logo preview renders the full filter from the CSS editor", () => {
+  const filter = "grayscale(1) brightness(0.9)";
+  expect(harness(filter).previewImage.style?.filter).toBe(filter);
+});
 
 test("wheel maps pointer angles to hue and radius to vividness while preserving brightness", () => {
   const h = harness("saturate(0.55) brightness(0.9)");

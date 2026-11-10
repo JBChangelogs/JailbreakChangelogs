@@ -413,7 +413,7 @@ export default function LogoFilterBuilder({
             width={256}
             height={58}
             className="h-auto w-full max-w-xs"
-            style={{ filter: buildFilter(adjust) ?? "none" }}
+            style={{ filter: value ?? "none" }}
           />
         </div>
         <div className="mt-3 space-y-3">
