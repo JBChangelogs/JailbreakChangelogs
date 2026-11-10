@@ -612,6 +612,7 @@ export default function UserProfileClient({
   }
 
   const isOwnProfile = currentUserId === user.id;
+  const canEditMedia = isOwnProfile && !previewing;
   const avatarUrl = getAvatarUrl({
     userId: user.id,
     avatarHash: user.avatar,
@@ -658,11 +659,11 @@ export default function UserProfileClient({
       {previewing && (
         <div
           data-profile-preview-banner
-          className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative flex flex-wrap items-center justify-center gap-2 border-b px-12 py-2 text-center text-sm"
+          className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative flex flex-wrap items-center justify-center gap-x-2 border-b px-4 py-1.5 text-center text-xs sm:gap-2 sm:px-12 sm:py-2 sm:text-sm"
         >
           <Icon
             icon="lucide:eye"
-            className="text-button-info size-4 shrink-0"
+            className="text-button-info hidden size-4 shrink-0 sm:block"
             aria-hidden="true"
           />
           <p className="min-w-0">
@@ -700,7 +701,11 @@ export default function UserProfileClient({
                 </UserProfilePopover>
               </>
             )}
-            . Only you see this; nothing is saved until you apply it.
+            .
+            <span className="hidden sm:inline">
+              {" "}
+              Only you see this; nothing is saved until you apply it.
+            </span>
           </p>
           <ApplyPackButton theme={packTheme} size="sm" variant="link" />
           <Button
@@ -736,9 +741,9 @@ export default function UserProfileClient({
                   ? Math.max(user.premiumtype ?? 0, 2)
                   : user.premiumtype
               }
-              expandable={!isOwnProfile}
+              expandable={!canEditMedia}
             />
-            {isOwnProfile && (
+            {canEditMedia && (
               <BannerEditOverlay
                 userData={user}
                 onUploaded={handleProfileBannerUploaded}
@@ -777,7 +782,7 @@ export default function UserProfileClient({
                     settings={user.settings_v2}
                     premiumType={user.premiumtype}
                   />
-                  {!isOwnProfile && avatarUrl && (
+                  {!canEditMedia && avatarUrl && (
                     <ImageLightbox
                       src={avatarUrl}
                       alt={`${user.username}'s profile picture`}
@@ -790,7 +795,7 @@ export default function UserProfileClient({
                       {null}
                     </ImageLightbox>
                   )}
-                  {isOwnProfile && (
+                  {canEditMedia && (
                     <AvatarEditOverlay
                       userData={user}
                       onUploaded={handleProfileAvatarUploaded}
