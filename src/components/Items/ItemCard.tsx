@@ -675,16 +675,13 @@ function ItemCard({
             )}
 
             {isValuesPage && (
-              <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
-                <div className="flex items-center gap-1 sm:gap-2">
-                  <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
-                    Trend
-                  </span>
-                </div>
+              <div className="border-border-card bg-tertiary-bg flex flex-col gap-1 rounded-lg border p-1 sm:p-2.5">
+                <span className="text-secondary-text text-xs font-medium">
+                  {itemTrends(currentItemData).length > 1 ? "Trends" : "Trend"}
+                </span>
                 <TrendChips
                   trends={itemTrends(currentItemData)}
-                  className="justify-end"
-                  chipClassName="inline-flex h-5 items-center rounded-md px-1.5 text-[10px] leading-none font-bold whitespace-nowrap min-[480px]:px-3 sm:h-6 sm:text-xs"
+                  chipClassName="inline-flex items-center rounded-md px-1.5 py-1 text-[10px] leading-tight font-bold whitespace-nowrap sm:rounded-lg sm:px-2 sm:text-xs sm:leading-none"
                 />
               </div>
             )}
