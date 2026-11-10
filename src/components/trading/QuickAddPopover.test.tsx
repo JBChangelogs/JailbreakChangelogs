@@ -50,9 +50,9 @@ test("Quick Add fetches duped market fields for newly added items", async () => 
     );
 
     expect(selected.duped_value).toBe("33m");
-    expect(markup).toContain('title="Very Low"');
-    expect(markup).toContain('title="Stable"');
-    expect(markup).not.toContain('title="Unknown"');
+    expect(markup).toContain(">Very Low<");
+    expect(markup).toContain(">Stable<");
+    expect(markup).not.toContain(">Unknown<");
   } finally {
     fetch.mockRestore();
     request.mockRestore();

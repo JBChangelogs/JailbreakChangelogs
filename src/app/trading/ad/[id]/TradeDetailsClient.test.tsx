@@ -135,8 +135,8 @@ test("one item uses a horizontal card with visible market details and its listin
   expect(markup).not.toContain("max-w-md");
   expect(markup).toContain("Listed total");
   expect(markup).toContain("30,000,000");
-  expect(markup).toContain('title="High"');
-  expect(markup).toContain('title="Stable"');
+  expect(markup).toContain(">High<");
+  expect(markup).toContain(">Stable<");
   expect(markup).toContain('href="/item/Vehicle/Torpedo"');
   expect(markup).toContain("group/item-card");
   expect(markup).toContain("group-hover/item-card:text-link-hover");
@@ -157,7 +157,7 @@ test("two grouped cards share the panel width and totals retain condition and qu
   expect(markup).not.toContain("ml-3 w-2/5");
   expect(markup).toContain("70,000,000");
   expect(markup).toContain("Duped: 40,000,000");
-  expect(markup).toContain('title="Low"');
+  expect(markup).toContain(">Low<");
   expect(markup).toContain("×2");
   expect(markup).toContain("rotate-180");
 });

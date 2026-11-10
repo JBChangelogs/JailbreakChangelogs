@@ -81,7 +81,6 @@ export const TradeItemMarketDetails = ({
         <span className="text-primary-text w-11 shrink-0">Demand</span>
         <span
           className={`${getDemandColor(demand)} min-w-0 truncate rounded-md px-1.5 py-0.5 font-semibold whitespace-nowrap`}
-          title={hasItemValue(demand) ? demand : "Unknown"}
         >
           {hasItemValue(demand) ? demand : "Unknown"}
         </span>

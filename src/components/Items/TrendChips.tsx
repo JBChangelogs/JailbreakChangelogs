@@ -19,7 +19,6 @@ export function TrendChips({
         <span
           key={trend ?? "unknown"}
           className={cn(getTrendColor(trend), chipClassName)}
-          title={trend ?? "Unknown"}
         >
           {trend ?? "Unknown"}
         </span>

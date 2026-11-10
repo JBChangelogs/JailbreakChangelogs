@@ -25,14 +25,14 @@ describe("market badges shared by calculator and trading forms", () => {
       <TradeItemMarketDetails item={{ ...item, isDuped: true }} />,
     );
 
-    expect(clean).toContain('title="High"');
+    expect(clean).toContain(">High<");
     expect(clean).not.toContain("Duped Demand");
     expect(duped).not.toContain("Duped Demand");
     expect(duped).toContain(">Demand</span>");
-    expect(duped).toContain('title="Low"');
-    expect(duped).not.toContain('title="High"');
-    expect(clean).toContain('title="Rising"');
-    expect(duped).toContain('title="Rising"');
+    expect(duped).toContain(">Low<");
+    expect(duped).not.toContain(">High<");
+    expect(clean).toContain(">Rising<");
+    expect(duped).toContain(">Rising<");
   });
 
   test("API duped flag selects duped demand with the compact label", () => {
@@ -41,8 +41,8 @@ describe("market badges shared by calculator and trading forms", () => {
     );
     expect(markup).not.toContain("Duped Demand");
     expect(markup).toContain(">Demand</span>");
-    expect(markup).toContain('title="Low"');
-    expect(markup).not.toContain('title="High"');
+    expect(markup).toContain(">Low<");
+    expect(markup).not.toContain(">High<");
   });
 
   test("missing duped demand stays unknown instead of showing clean demand", () => {
@@ -53,8 +53,8 @@ describe("market badges shared by calculator and trading forms", () => {
       />,
     );
 
-    expect(markup).toContain('title="Unknown"');
-    expect(markup).not.toContain('title="High"');
-    expect(markup).toContain('title="Rising"');
+    expect(markup).toContain(">Unknown<");
+    expect(markup).not.toContain(">High<");
+    expect(markup).toContain(">Rising<");
   });
 });
