@@ -9,8 +9,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Trend chip whose meaning shows on hover, or on tap for touch screens
-// (Radix tooltips ignore touch, so taps toggle it manually).
 export function TrendChip({
   trend,
   description,
@@ -20,6 +18,7 @@ export function TrendChip({
   description: string;
   className?: string;
 }) {
+  // Radix tooltips ignore touch, so taps toggle it manually.
   const [open, setOpen] = useState(false);
   const tap = useRef({ touch: false, wasOpen: false });
   return (
