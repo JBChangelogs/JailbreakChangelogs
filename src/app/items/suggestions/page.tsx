@@ -136,10 +136,11 @@ export default function ValueSuggestionsPage() {
 
   // Form state
   const [showForm, setShowForm] = useState(false);
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const limitsQuery = useQuery({
     queryKey: ["value-suggestion-limits", user?.id],
-    enabled: showForm && isAuthenticated,
+    enabled: (showForm && isAuthenticated) || guidelinesOpen,
     queryFn: async ({ signal }): Promise<SuggestionLimits> => {
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
@@ -177,9 +178,6 @@ export default function ValueSuggestionsPage() {
     void doOpenForm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submit, isAuthLoading, isAuthenticated]);
-
-  // Guidelines dialog state
-  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   useEffect(() => {
     if (
@@ -626,6 +624,7 @@ export default function ValueSuggestionsPage() {
         <SuggestionGuidelinesDialog
           open={guidelinesOpen}
           onConfirm={handleGuidelinesConfirm}
+          limits={limits}
         />
 
         <ReportSuggestionModal

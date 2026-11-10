@@ -28,6 +28,22 @@ html:has([data-values-items-grid]) {
   pointer-events: none;
 }
 
+[data-slot="dialog-scroll-body"][data-fade-end] {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+}
+[data-slot="dialog-scroll-body"][data-fade-start] {
+  mask-image: linear-gradient(to top, #000 calc(100% - 24px), transparent);
+}
+[data-slot="dialog-scroll-body"][data-fade-start][data-fade-end] {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent
+  );
+}
+
 [data-slot="tabs-list"][data-fade-end] {
   mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
 }

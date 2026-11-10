@@ -37,5 +37,5 @@ export const stripHtml = (raw: string) =>
 export const badgeBase =
   "inline-flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
-export const GUIDELINES_DISMISSED_KEY = "suggestion_guidelines_v1_dismissed";
+export const GUIDELINES_DISMISSED_KEY = "suggestion_guidelines_v2_dismissed";
 import DOMPurify from "dompurify";

@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
     <LegalLayout
       title="Terms of Service"
       icon="heroicons-outline:document-text"
-      lastUpdated="November 5th, 2026"
+      lastUpdated="November 11th, 2026"
       toc={TOC}
       intro={
         <p>
@@ -157,7 +157,10 @@ export default function TermsOfServicePage() {
         <LegalList
           items={[
             "Do not be biased solely on your own trading experiences, as other players may have different experiences while trading an item.",
-            "Provide meaningful, effort-filled reasoning to support your suggestion. Padding with repeated characters, periods, or filler text does not count and will likely result in your suggestion being ignored by the Value Team.",
+            "Provide meaningful reasoning within the character limits shown in the suggestion form. Repeated characters, excessive repetition, placeholder text, and gibberish can cause your submission to be rejected. Meeting the character requirement does not guarantee acceptance by the Value Team.",
+            "For cash or duped value changes, provide 2–5 common trades in the Common Trades section. Each trade must include the suggested item exactly once, on either side, and at least one item on each side. Each side can contain up to 8 items, counting quantities.",
+            "Cash and duped value changes cannot exceed 10 million above or below an existing value. Hypershift 4 and 5 values are calculated automatically and cannot be suggested directly.",
+            "Do not submit duplicate suggestions. If the same change for the same item is already pending in the relevant suggestion category, vote on the existing suggestion instead, even if someone else submitted it.",
             "Do not bot or manipulate reactions with alternate accounts. Any form of vote manipulation is strictly prohibited.",
             "Your Roblox account must be at least 30 days old to submit or vote on item suggestions.",
             "Troll suggestions or bad-faith submissions may result in a permanent ban from value suggesting at the sole discretion of Value Team managers, website owners, or website moderators.",

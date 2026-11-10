@@ -4,27 +4,32 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogScrollBody,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/IconWrapper";
+import type { SuggestionLimits } from "./types";
 
 export function SuggestionGuidelinesDialog({
   open,
   onConfirm,
+  limits,
 }: {
   open: boolean;
   onConfirm: () => void;
+  limits: SuggestionLimits | null;
 }) {
   const rules = [
     "Not use any form of AI generated content to make any item suggestions (If found using AI, you will receive punishment for your actions).",
     "Not be biased solely on your trading experiences, as other people might have different experiences while trading an item.",
-    "Add a meaningful, effort-filled reasoning towards your suggestion. Padding with repeated characters or filler text does not count and will likely result in your suggestion being ignored by the Value Team.",
+    `Provide meaningful reasoning between ${limits?.min_characters ?? 200} and ${limits?.max_characters ?? 750} characters. Repeated characters, excessive repetition, placeholder text, and gibberish can cause your submission to be rejected. Meeting the character requirement does not guarantee acceptance by the Value Team.`,
     "Troll suggesters may be banned from value suggesting at the sole discretion of Value Team managers, website owners, or website moderators.",
-    "No botting reactions with alt accounts because any form of manipulation is not allowed on this value list.",
+    "Do not use bots or alternate accounts to manipulate votes. Any form of vote manipulation is prohibited.",
     "Your Roblox account must be at least 30 days old to submit or vote on item suggestions.",
-    "If you are suggesting a value change, you must add at least 2 common trades at the end of your reasoning.",
-    "You are not allowed to make duplicate suggestions (e.g. suggesting the same change multiple times).",
+    "For cash or duped value changes, add 2–5 trades showing what the item currently trades for in the Common Trades section. Each trade must include the suggested item exactly once, on either side, and at least one item on each side. Each side can contain up to 8 items, counting quantities.",
+    "Cash and duped value changes cannot exceed 10 million above or below an existing value. Hypershift 4 and 5 values are calculated automatically and cannot be suggested directly.",
+    "Do not submit duplicate suggestions. If the same change for the same item is already pending in the relevant suggestion category, vote on the existing suggestion instead, even if someone else submitted it.",
     "Please only speak English so everybody understands. If you cannot speak English, at least use a translator.",
   ];
 
@@ -48,16 +53,16 @@ export function SuggestionGuidelinesDialog({
             Suggestion Guidelines
           </DialogTitle>
           <p className="text-secondary-text text-center text-xs">
-            Last updated: June 10, 2026
+            Last updated: November 11, 2026
           </p>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-2 pb-4">
+        <DialogScrollBody className="px-6 pt-2 pb-4">
           <div className="space-y-4">
             <div>
               <p className="text-primary-text mb-2 text-sm font-semibold">
-                This should serve as a reminder towards making any form of
-                suggestions to:
+                Follow these rules when submitting or voting on item
+                suggestions:
               </p>
               <ul className="space-y-2">
                 {rules.map((rule, i) => (
@@ -78,7 +83,7 @@ export function SuggestionGuidelinesDialog({
               suggestions following these rules.
             </p>
           </div>
-        </div>
+        </DialogScrollBody>
 
         <div className="flex shrink-0 items-center justify-center px-6 py-4 sm:justify-end">
           <Button onClick={onConfirm} size="sm">

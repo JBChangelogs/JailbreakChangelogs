@@ -63,6 +63,39 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+const DialogScrollBody = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    {...props}
+    data-slot="dialog-scroll-body"
+    className={cn("min-h-0 flex-1 overflow-y-auto", className)}
+    ref={(node) => {
+      if (!node) return;
+      const updateFades = () => {
+        node.toggleAttribute("data-fade-start", node.scrollTop > 1);
+        node.toggleAttribute(
+          "data-fade-end",
+          node.scrollTop + node.clientHeight < node.scrollHeight - 1,
+        );
+      };
+      updateFades();
+      const observer = new ResizeObserver(updateFades);
+      observer.observe(node);
+      if (node.firstElementChild) observer.observe(node.firstElementChild);
+      node.addEventListener("scroll", updateFades, { passive: true });
+      return () => {
+        observer.disconnect();
+        node.removeEventListener("scroll", updateFades);
+      };
+    }}
+  >
+    <div>{children}</div>
+  </div>
+);
+
 const DialogHeader = ({
   className,
   ...props
@@ -123,6 +156,7 @@ export {
   DialogTrigger,
   DialogClose,
   DialogContent,
+  DialogScrollBody,
   DialogDescription,
   DialogFooter,
   DialogHeader,
