@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Fragment,
-  type FormEventHandler,
-  type ReactNode,
-  type RefObject,
-} from "react";
+import { Fragment, type FormEventHandler, type RefObject } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,9 +14,9 @@ import { getSortLabel, type SortGroup } from "@/utils/api/sortGroups";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UpdatePill } from "@/components/ui/UpdatePill";
 import { SuggestionFilterBar } from "@/components/Items/Suggestions/SuggestionFilterBar";
+import { fieldLabel } from "@/components/Items/Suggestions/shared";
 
 interface SuggestionsToolbarProps {
-  actions: ReactNode;
   loadingSuggestions: boolean;
   total: number;
   urlQuery: string;
@@ -47,7 +42,6 @@ interface SuggestionsToolbarProps {
 }
 
 export function SuggestionsToolbar({
-  actions,
   loadingSuggestions,
   total,
   urlQuery,
@@ -131,16 +125,6 @@ export function SuggestionsToolbar({
 
   return (
     <>
-      {/* Title row */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-primary-text font-semibold">
-          {loadingSuggestions
-            ? "Loading suggestions…"
-            : `${total} ${urlQuery ? (total === 1 ? "Search Result" : "Search Results") : "Recent Suggestions"}`}
-        </h2>
-        <div className="flex flex-wrap items-center gap-3">{actions}</div>
-      </div>
-
       {/* Search + filter */}
       <SuggestionFilterBar
         searchInputRef={searchInputRef}
@@ -158,6 +142,27 @@ export function SuggestionsToolbar({
         suggestionFields={suggestionFields}
         sortControl={sortControl}
       />
+
+      <p className="text-secondary-text mb-4">
+        {loadingSuggestions
+          ? "Loading suggestions…"
+          : [
+              total,
+              fieldFilter.map(fieldLabel).join(", ") ||
+                (urlQuery || sort ? "" : "Recent"),
+              urlQuery
+                ? total === 1
+                  ? "Search Result"
+                  : "Search Results"
+                : total === 1
+                  ? "Suggestion"
+                  : "Suggestions",
+            ]
+              .filter(Boolean)
+              .join(" ") +
+            (typeFilter !== "All" ? ` in ${typeFilter}` : "") +
+            (sort ? `, sorted by ${getSortLabel(sortGroups, sort)}` : "")}
+      </p>
 
       {(pendingNew > 0 || pendingTypes.size > 0) && !loadingSuggestions && (
         <UpdatePill onClick={onRefresh}>

@@ -125,7 +125,6 @@ test("multiple field chips stay selected during loading with no results", () => 
 test("sort moves into the search row and remains available for empty feeds", () => {
   const props = {
     ...baseProps,
-    actions: <span>Actions</span>,
     loadingSuggestions: false,
     total: 2,
     sortGroups: [

@@ -452,7 +452,46 @@ export default function ValueSuggestionsPage() {
           <div className="mb-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
               <div className="flex-1">
-                <h1 className="page-heading mb-2">Item Suggestions</h1>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+                  <h1 className="page-heading">Item Suggestions</h1>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => setGuidelinesOpen(true)}
+                    >
+                      <Icon
+                        icon="material-symbols:info-outline-rounded"
+                        className="h-5 w-5"
+                        inline
+                      />
+                      Guidelines
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={showForm ? "secondary" : "default"}
+                      disabled={Boolean(ban)}
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          openForm();
+                        } else {
+                          toast.info(
+                            "You need to be logged in to submit item suggestions.",
+                          );
+                          setLoginModal({ open: true });
+                        }
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Icon
+                        icon={showForm ? "heroicons:x-mark" : "heroicons:plus"}
+                        className="h-5 w-5"
+                        inline
+                      />
+                      {showForm ? "Close Form" : "Submit Suggestion"}
+                    </Button>
+                  </div>
+                </div>
                 <p className="text-secondary-text text-sm">
                   Help keep item values accurate. Submit a suggestion with your
                   reasoning. The community votes, and our team reviews before
@@ -478,45 +517,6 @@ export default function ValueSuggestionsPage() {
           {ban && <BanBanner ban={ban} className="mb-4" />}
 
           <SuggestionsToolbar
-            actions={
-              <>
-                <Button
-                  type="button"
-                  variant="link"
-                  onClick={() => setGuidelinesOpen(true)}
-                >
-                  <Icon
-                    icon="material-symbols:info-outline-rounded"
-                    className="h-5 w-5"
-                    inline
-                  />
-                  Guidelines
-                </Button>
-                <Button
-                  type="button"
-                  variant={showForm ? "secondary" : "default"}
-                  disabled={Boolean(ban)}
-                  onClick={() => {
-                    if (isAuthenticated) {
-                      openForm();
-                    } else {
-                      toast.info(
-                        "You need to be logged in to submit item suggestions.",
-                      );
-                      setLoginModal({ open: true });
-                    }
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Icon
-                    icon={showForm ? "heroicons:x-mark" : "heroicons:plus"}
-                    className="h-5 w-5"
-                    inline
-                  />
-                  {showForm ? "Close Form" : "Submit Suggestion"}
-                </Button>
-              </>
-            }
             loadingSuggestions={loadingSuggestions}
             total={total}
             urlQuery={urlQuery}
