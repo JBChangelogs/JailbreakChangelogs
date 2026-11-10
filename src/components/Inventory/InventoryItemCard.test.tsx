@@ -232,6 +232,11 @@ for (const cardPath of ["./InventoryItemCard.tsx", "../OG/OGItemCard.tsx"]) {
         dupedView.find((node) => node.type === "market-summary")!.props.isDuped,
       ).toBe(true);
     }
+    const inventoryLink = view.find(
+      (node) => node.props.children === "Check inventory",
+    )!;
+    expect(inventoryLink.props.href).toBe("/inventories/123");
+    expect(inventoryLink.props.prefetch).toBe(false);
     expect(view.find((node) => node.type === "a")!.props.href).toBe(
       "https://www.roblox.com/users/123/profile",
     );
@@ -261,5 +266,26 @@ for (const cardPath of ["./InventoryItemCard.tsx", "../OG/OGItemCard.tsx"]) {
     expect(view.find((node) => node.type === "a")!.props.href).toBe(
       `https://www.roblox.com/users/${cardPath.includes("OG/") ? "123" : "456"}/profile`,
     );
+    if (cardPath.includes("OG/")) {
+      expect(
+        view.find((node) => node.props.children === "Check inventory")!.props
+          .href,
+      ).toBe("/inventories/123");
+    } else {
+      expect(
+        view.some((node) => node.props.children === "Check inventory"),
+      ).toBe(false);
+      for (const unknownItem of [
+        { ...item, id: "missing-copy" },
+        { ...item, info: [] },
+      ]) {
+        const unknownView = descendants(
+          exports.default({ ...props, item: unknownItem }),
+        );
+        expect(
+          unknownView.some((node) => node.props.children === "Check inventory"),
+        ).toBe(false);
+      }
+    }
   });
 }

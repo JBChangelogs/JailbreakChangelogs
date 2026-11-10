@@ -123,6 +123,20 @@ test("card actions pass the original owner to the shared check and preserve hist
     "Run a check or compare ownership histories to review this record.",
   );
   const elements = flatten(card);
+  expect(elements.find((element) => element.type === "a")?.props.href).toBe(
+    "https://www.roblox.com/users/123/profile",
+  );
+  const inventoryLink = elements.find(
+    (element) => element.props.children === "Check inventory",
+  )!;
+  expect(inventoryLink.props.href).toBe("/inventories/123");
+  expect(inventoryLink.props.prefetch).toBe(false);
+  stateIndex = 0;
+  expect(
+    flatten(exports.default({ ...props, item: { ...item, info: [] } })).find(
+      (element) => element.props.children === "Check inventory",
+    )?.props.href,
+  ).toBe("/inventories/999");
   expect(
     elements.some((element) => element.props.children === "Original owner"),
   ).toBe(true);

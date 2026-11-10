@@ -260,6 +260,13 @@ export default function DupeItemCard({
             >
               {getUsername(originalOwner)}
             </a>
+            <Link
+              href={`/inventories/${encodeURIComponent(originalOwner)}`}
+              prefetch={false}
+              className="text-link hover:text-link-hover text-xs hover:underline"
+            >
+              Check inventory
+            </Link>
           </div>
         </div>
         <p className="text-secondary-text text-sm">

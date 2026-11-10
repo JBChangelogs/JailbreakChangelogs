@@ -82,7 +82,6 @@ export default function OGItemCard({
   duplicateOrder = 1,
 }: OGItemCardProps) {
   const [avatarError, setAvatarError] = useState(false);
-  const isOriginalOwner = item.isOriginalOwner;
   const isDuplicate = duplicateCount > 1;
   const displayedSeason = itemData?.season ?? undefined;
   const displayedLevel = unlockLevel(itemData?.level);
@@ -98,12 +97,6 @@ export default function OGItemCard({
       {isDuplicate && (
         <div className="bg-button-info text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
           #{duplicateOrder}
-        </div>
-      )}
-
-      {isOriginalOwner && !isDuplicate && (
-        <div className="bg-status-success text-button-success-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
-          OG
         </div>
       )}
 
@@ -260,6 +253,13 @@ export default function OGItemCard({
                 <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
               )}
             </a>
+            <Link
+              href={`/inventories/${encodeURIComponent(item.user_id)}`}
+              prefetch={false}
+              className="text-link hover:text-link-hover text-xs hover:underline"
+            >
+              Check inventory
+            </Link>
           </div>
         </div>
         <div className="mt-auto flex items-center justify-between gap-3">

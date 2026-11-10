@@ -168,6 +168,15 @@ export default function InventoryItemCard({
             ) : (
               <p className="text-secondary-text text-sm">Unknown</p>
             )}
+            {originalOwnerId && !isMissingItem && !isOriginalOwner && (
+              <Link
+                href={`/inventories/${encodeURIComponent(originalOwnerId)}`}
+                prefetch={false}
+                className="text-link hover:text-link-hover text-xs hover:underline"
+              >
+                Check inventory
+              </Link>
+            )}
           </div>
         </div>
         <div className="mt-auto flex items-center justify-between gap-3">
