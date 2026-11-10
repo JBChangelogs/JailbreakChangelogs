@@ -4,6 +4,7 @@ import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import type * as React from "react";
 import type * as Dropdown from "./dropdown-menu";
+import { cn } from "@/lib/utils";
 
 type TriggerHandlers = {
   onPointerDown: (input: ReturnType<typeof event>) => void;
@@ -40,6 +41,7 @@ function harness() {
       HTMLElement: class {},
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "@/lib/utils") return { cn };
         if (name === "react")
           return {
             createContext: () => ({ Provider: "Provider" }),

@@ -49,40 +49,46 @@ const DropdownMenu = ({
 const DropdownMenuTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
->(({ onPointerDown, onClick, onKeyDown, disabled, ...props }, ref) => {
-  const menu = React.useContext(DropdownMenuTouchContext);
-  const touch = React.useRef(false);
-  // Radix closes an open menu on any pointerdown outside its content, the
-  // trigger included, so read the state before that and flip it on click.
-  const wasOpen = React.useRef(false);
-  return (
-    <DropdownMenuPrimitive.Trigger
-      {...props}
-      ref={ref}
-      disabled={disabled}
-      onPointerDown={(event) => {
-        onPointerDown?.(event);
-        touch.current =
-          event.pointerType === "touch" && !event.defaultPrevented;
-        wasOpen.current = menu?.open ?? false;
-        // Wait for a native click: scrolling cancels it, unlike pointerdown.
-        if (touch.current) event.preventDefault();
-      }}
-      onKeyDown={(event) => {
-        // Enter/Space also fire a click, which Radix already handles.
-        touch.current = false;
-        onKeyDown?.(event);
-      }}
-      onClick={(event) => {
-        onClick?.(event);
-        // Not event.detail: Samsung Internet sends some taps with detail 0.
-        if (!event.defaultPrevented && !disabled && touch.current) {
-          menu?.setOpen(!wasOpen.current);
-        }
-      }}
-    />
-  );
-});
+>(
+  (
+    { className, onPointerDown, onClick, onKeyDown, disabled, ...props },
+    ref,
+  ) => {
+    const menu = React.useContext(DropdownMenuTouchContext);
+    const touch = React.useRef(false);
+    // Radix closes an open menu on any pointerdown outside its content, the
+    // trigger included, so read the state before that and flip it on click.
+    const wasOpen = React.useRef(false);
+    return (
+      <DropdownMenuPrimitive.Trigger
+        {...props}
+        ref={ref}
+        className={cn("enabled:cursor-pointer", className)}
+        disabled={disabled}
+        onPointerDown={(event) => {
+          onPointerDown?.(event);
+          touch.current =
+            event.pointerType === "touch" && !event.defaultPrevented;
+          wasOpen.current = menu?.open ?? false;
+          // Wait for a native click: scrolling cancels it, unlike pointerdown.
+          if (touch.current) event.preventDefault();
+        }}
+        onKeyDown={(event) => {
+          // Enter/Space also fire a click, which Radix already handles.
+          touch.current = false;
+          onKeyDown?.(event);
+        }}
+        onClick={(event) => {
+          onClick?.(event);
+          // Not event.detail: Samsung Internet sends some taps with detail 0.
+          if (!event.defaultPrevented && !disabled && touch.current) {
+            menu?.setOpen(!wasOpen.current);
+          }
+        }}
+      />
+    );
+  },
+);
 DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName;
 
 const DropdownMenuSub = DropdownMenuPrimitive.Sub;
