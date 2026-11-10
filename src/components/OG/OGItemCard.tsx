@@ -256,6 +256,8 @@ export default function OGItemCard({
             <Link
               href={`/inventories/${encodeURIComponent(item.user_id)}`}
               prefetch={false}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-link hover:text-link-hover text-xs hover:underline"
             >
               Check inventory

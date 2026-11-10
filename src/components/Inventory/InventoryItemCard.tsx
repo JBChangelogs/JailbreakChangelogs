@@ -172,6 +172,8 @@ export default function InventoryItemCard({
               <Link
                 href={`/inventories/${encodeURIComponent(originalOwnerId)}`}
                 prefetch={false}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-link hover:text-link-hover text-xs hover:underline"
               >
                 Check inventory

@@ -263,6 +263,8 @@ export default function DupeItemCard({
             <Link
               href={`/inventories/${encodeURIComponent(originalOwner)}`}
               prefetch={false}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-link hover:text-link-hover text-xs hover:underline"
             >
               Check inventory
