@@ -22,6 +22,8 @@ interface BadgeProgress {
   description: string;
   earned: boolean;
   earned_at: number | null;
+  number: number | null;
+  holders: number;
   current: number;
   target: number | null;
 }
@@ -29,12 +31,26 @@ interface BadgeProgress {
 const formatNumber = (n: number) =>
   n.toLocaleString(undefined, { maximumFractionDigits: 1 });
 
+const compactNumber = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 const BADGE_ICONS = [
   { prefix: "networth_", icon: "heroicons:chart-bar" },
   { prefix: "cash_", icon: "heroicons:banknotes" },
+  { prefix: "on_the_grind", icon: "heroicons:bolt" },
+  { prefix: "money_to_spare", icon: "heroicons:banknotes" },
+  { prefix: "offshore_grinding", icon: "heroicons:globe-alt" },
+  { prefix: "no_life", icon: "heroicons:fire" },
   { prefix: "collector_seasons_", icon: "heroicons:calendar-days" },
   { prefix: "collector_all", icon: "heroicons:trophy" },
   { prefix: "limited_", icon: "heroicons:sparkles" },
+  { prefix: "true_dedication", icon: "heroicons:heart" },
+  { prefix: "dealer", icon: "heroicons:currency-dollar" },
+  { prefix: "businessman", icon: "heroicons:briefcase" },
+  { prefix: "art_of_the_deal", icon: "heroicons:document-check" },
+  { prefix: "con_artist", icon: "heroicons:face-smile" },
   { prefix: "verified", icon: "heroicons:check-badge" },
   { prefix: "theme_winner", icon: "heroicons:paint-brush" },
   { prefix: "veteran", icon: "heroicons:clock" },
@@ -46,6 +62,9 @@ const BADGE_ICONS = [
   { prefix: "power_user", icon: "heroicons:computer-desktop" },
   { prefix: "economist", icon: "heroicons:scale" },
   { prefix: "market_expert", icon: "heroicons:presentation-chart-line" },
+  { prefix: "gifter", icon: "heroicons:gift" },
+  { prefix: "local_celebrity", icon: "heroicons:megaphone" },
+  { prefix: "unanimous", icon: "heroicons:hand-thumb-up" },
 ];
 const CATEGORY_ICONS = [
   { category: "networth", icon: "heroicons:chart-bar" },
@@ -96,6 +115,10 @@ export default function BadgesSection({ userId }: { userId: string }) {
 
   const renderBadge = (badge: BadgeProgress) => {
     const { earned } = badge;
+    const badgeNumber =
+      earned && badge.number != null
+        ? `#${badge.number.toLocaleString("en-US")} of ${badge.holders.toLocaleString("en-US")}`
+        : null;
     const { icon, tier } = badgeIcon(badge.id, badge.category);
     const showProgress = !earned && badge.target != null && badge.target > 1;
     const percent = showProgress
@@ -154,11 +177,23 @@ export default function BadgesSection({ userId }: { userId: string }) {
               >
                 {badge.name}
               </span>
+              {badgeNumber && (
+                <span
+                  aria-label={badgeNumber}
+                  className="text-secondary-text text-center text-xs whitespace-nowrap"
+                >
+                  #{compactNumber.format(badge.number!)} of{" "}
+                  {compactNumber.format(badge.holders)}
+                </span>
+              )}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-60 space-y-1 p-3 text-sm">
             <p className="font-semibold">{badge.name}</p>
             <p className="text-secondary-text">{badge.description}</p>
+            {badgeNumber && (
+              <p className="text-secondary-text text-xs">{badgeNumber}</p>
+            )}
             <p className="text-secondary-text text-xs">
               {earned
                 ? badge.earned_at
