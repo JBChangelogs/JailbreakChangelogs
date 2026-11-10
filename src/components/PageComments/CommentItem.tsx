@@ -91,12 +91,12 @@ function SuggestionVoteBadge({ userId }: { userId: string }) {
     : "Downvoted this suggestion";
 
   return (
-    <Tooltip>
+    <Tooltip delayDuration={500}>
       <TooltipTrigger asChild>
         <span
           tabIndex={0}
           aria-label={description}
-          className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] leading-none font-medium ${
+          className={`inline-flex shrink-0 cursor-help items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] leading-none font-medium ${
             upvoted
               ? "text-button-success border-button-success/20 bg-button-success/10"
               : "text-button-danger border-button-danger/20 bg-button-danger/10"

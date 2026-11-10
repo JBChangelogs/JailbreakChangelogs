@@ -143,7 +143,7 @@ export default function UserProfileSection({
                     Discord
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Discord profile</TooltipContent>
+                <TooltipContent side="bottom">Discord profile</TooltipContent>
               </Tooltip>
             )}
 
@@ -161,7 +161,7 @@ export default function UserProfileSection({
                   Roblox
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Roblox profile</TooltipContent>
+              <TooltipContent side="bottom">Roblox profile</TooltipContent>
             </Tooltip>
 
             {/* Website Profile */}
@@ -183,7 +183,7 @@ export default function UserProfileSection({
                     Website
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>JBCL profile</TooltipContent>
+                <TooltipContent side="bottom">JBCL profile</TooltipContent>
               </Tooltip>
             )}
           </div>
