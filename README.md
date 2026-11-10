@@ -34,7 +34,15 @@
 
 Leave us a ⭐ if you like the project, and consider [supporting us on Ko-fi](https://ko-fi.com/jailbreakchangelogs).
 
-[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%23121317&axis=%23fffffe&line=%23017ffe)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+## Star History
+
+<a href="https://www.star-history.com/?repos=jbchangelogs%2Fjailbreakchangelogs&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=jbchangelogs/jailbreakchangelogs&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=jbchangelogs/jailbreakchangelogs&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=jbchangelogs/jailbreakchangelogs&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ---
 
