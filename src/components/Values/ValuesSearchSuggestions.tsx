@@ -3,23 +3,28 @@
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import type { PartialItem } from "@/utils/api/api";
+import type { Item } from "@/types";
+import { hasItemValue } from "@/utils/items/itemValue";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 
 export const VALUES_SUGGESTIONS_ID = "values-search-suggestions";
 const SUGGESTIONS_LIMIT = 8;
 
+export type ValueSearchItem = PartialItem &
+  Pick<Item, "cash_value" | "duped_value">;
+
 export const getItemHref = (item: PartialItem) =>
   `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
 
 export function getItemSuggestions(
-  items: PartialItem[] | undefined,
+  items: ValueSearchItem[] | undefined,
   term: string,
-): PartialItem[] {
+): ValueSearchItem[] {
   const query = term.trim().toLowerCase();
   if (!items || !query) return [];
 
-  const ranked: { item: PartialItem; rank: number }[] = [];
+  const ranked: { item: ValueSearchItem; rank: number }[] = [];
   for (const item of items) {
     const name = item.name.toLowerCase();
     const index = name.indexOf(query);
@@ -41,10 +46,10 @@ export function getItemSuggestions(
 }
 
 interface ValuesSearchSuggestionsProps {
-  suggestions: PartialItem[];
+  suggestions: ValueSearchItem[];
   highlightedIndex: number;
   onHighlight: (index: number) => void;
-  onSelect: (item: PartialItem) => void;
+  onSelect: (item: ValueSearchItem) => void;
 }
 
 export default function ValuesSearchSuggestions({
@@ -111,6 +116,20 @@ export default function ValuesSearchSuggestions({
                   )}
                   <span className="truncate">{item.type}</span>
                 </span>
+              </div>
+              <div className="text-secondary-text shrink-0 text-right text-xs">
+                <p>
+                  Clean:{" "}
+                  <span className="text-primary-text font-medium">
+                    {hasItemValue(item.cash_value) ? item.cash_value : "N/A"}
+                  </span>
+                </p>
+                <p className="mt-1">
+                  Duped:{" "}
+                  <span className="text-primary-text font-medium">
+                    {hasItemValue(item.duped_value) ? item.duped_value : "N/A"}
+                  </span>
+                </p>
               </div>
             </button>
           </li>

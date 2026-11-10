@@ -70,7 +70,7 @@ test("grouped filter summaries stay visible, open the panel, and clear only thei
           return { useIsAuthenticated: () => true };
         if (name === "nextjs-toploader/app") return { useRouter: () => ({}) };
         if (name === "@/hooks/usePartialItems")
-          return { usePartialItems: () => ({}) };
+          return { usePartialItemFields: () => ({}) };
         if (name === "./ValuesSearchSuggestions")
           return { getItemSuggestions: () => [] };
         return {};

@@ -36,14 +36,22 @@ import {
 import { AdvancedFilterChip } from "./AdvancedFilterChip";
 import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 import { useRouter } from "nextjs-toploader/app";
-import { usePartialItems } from "@/hooks/usePartialItems";
+import { usePartialItemFields } from "@/hooks/usePartialItems";
 import type { PartialItem } from "@/utils/api/api";
 import { filterByTypes } from "@/utils/trading/values";
 import ValuesSearchSuggestions, {
   VALUES_SUGGESTIONS_ID,
   getItemHref,
   getItemSuggestions,
+  type ValueSearchItem,
 } from "./ValuesSearchSuggestions";
+
+const SEARCH_ITEM_FIELDS = [
+  "name",
+  "type",
+  "cash_value",
+  "duped_value",
+] as const;
 
 interface ValuesSearchControlsProps {
   onDebouncedSearchChange: (term: string) => void;
@@ -103,7 +111,10 @@ export default function ValuesSearchControls({
   // Set when navigating to a suggestion so the pending debounced search
   // doesn't rewrite the URL on the way out
   const skipSearchCommitRef = useRef(false);
-  const { data: partialItems } = usePartialItems(hasFocusedSearch);
+  const { data: partialItems } = usePartialItemFields<ValueSearchItem>(
+    SEARCH_ITEM_FIELDS,
+    hasFocusedSearch,
+  );
 
   useEffect(() => {
     setSearchTerm((prev) =>
