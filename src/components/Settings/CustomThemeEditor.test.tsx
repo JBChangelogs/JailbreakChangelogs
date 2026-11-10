@@ -96,7 +96,8 @@ function editor({
               return [
                 states[index],
                 (value: unknown) => {
-                  states[index] = value;
+                  states[index] =
+                    typeof value === "function" ? value(states[index]) : value;
                 },
               ];
             },
@@ -485,10 +486,24 @@ for (const independentEdit of [false, true]) {
   });
 }
 
+test("a new theme starts with an empty name field and saves a typed name", async () => {
+  const view = editor({ collapsed: false });
+  const field = view
+    .render()
+    .find((node) => node.props.placeholder === "My theme")!.props;
+  expect(field.value).toBe("");
+  (field.onChange as (event: unknown) => void)({
+    target: { value: "Monochrome" },
+  });
+  await view.save();
+  expect(view.inputs[0].label).toBe("Monochrome");
+});
+
 test("saving a new desktop theme asks before applying and Not now leaves it inactive", async () => {
   const view = editor();
   await view.save();
   expect(view.requests).toEqual(["create"]);
+  expect(view.inputs[0].label).toBe("My theme");
   expect(view.savedEvents).toEqual([view.saved]);
   expect(view.applied).toEqual([]);
   expect(view.prompt().isOpen).toBe(true);

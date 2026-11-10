@@ -280,9 +280,7 @@ export default function CustomThemeEditor({
       : null;
   const current: CustomThemeInput | null =
     draft ??
-    (start
-      ? { label: "My theme", description: "", published: false, ...start }
-      : null);
+    (start ? { label: "", description: "", published: false, ...start } : null);
   // What the theme was when the editor opened or last saved, to tell
   // whether closing would lose changes.
   const snapshot = current && JSON.stringify(current);
@@ -439,14 +437,16 @@ export default function CustomThemeEditor({
     // icon is sent only when it changed, so themes without one save on
     // API versions that don't know the field yet.
     const { icon = null, ...rest } = theme;
-    const input =
-      icon !== (savedTheme?.icon ?? null)
-        ? { ...rest, icon, label: rest.label.trim() }
-        : { ...rest, label: rest.label.trim() };
-    if (!input.label) {
+    const defaultLabel = !savedTheme && !rest.label.trim();
+    const label = defaultLabel ? "My theme" : rest.label.trim();
+    if (!label) {
       toast.error("Give your theme a name.");
       return null;
     }
+    const input =
+      icon !== (savedTheme?.icon ?? null)
+        ? { ...rest, icon, label }
+        : { ...rest, label };
     setSaving(true);
     try {
       const saved = savedTheme
@@ -459,7 +459,15 @@ export default function CustomThemeEditor({
       }
       toast.success(savedTheme ? "Theme saved" : "Theme created");
       setSavedTheme(saved);
-      baselineRef.current = JSON.stringify(theme);
+      if (defaultLabel) {
+        setDraft((draft) => {
+          const latest = draft ?? theme;
+          return latest.label === theme.label ? { ...latest, label } : latest;
+        });
+      }
+      baselineRef.current = JSON.stringify(
+        defaultLabel ? { ...theme, label } : theme,
+      );
       onSaved(saved);
       return saved;
     } catch (err) {
@@ -984,6 +992,7 @@ export default function CustomThemeEditor({
                       </span>
                       <Input
                         value={current.label}
+                        placeholder="My theme"
                         maxLength={64}
                         onChange={(event) =>
                           update({ label: event.target.value })
