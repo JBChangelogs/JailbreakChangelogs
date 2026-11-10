@@ -174,3 +174,17 @@ test("proxy forwards each visitor's verification cookie without forwarding stale
     expect(redirectHeaders.has("Authorization")).toBe(false);
   }
 });
+
+test("browsers without the cache reset cookie get a one-time cache wipe", async () => {
+  const first = await proxy(new NextRequest("https://example.com/values"));
+  expect(first.headers.get("clear-site-data")).toBe('"cache"');
+  expect(first.cookies.get("jbcl_cache_reset")?.value).toBe("1");
+
+  const again = await proxy(
+    new NextRequest("https://example.com/values", {
+      headers: { cookie: "jbcl_cache_reset=1" },
+    }),
+  );
+  expect(again.headers.get("clear-site-data")).toBeNull();
+  expect(again.cookies.get("jbcl_cache_reset")).toBeUndefined();
+});

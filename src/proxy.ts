@@ -192,7 +192,27 @@ export async function proxy(request: NextRequest) {
   const legacyRedirect = await getLegacyItemRedirectResponse(request);
   if (legacyRedirect) return legacyRedirect;
 
-  return NextResponse.next();
+  return clearStaleBrowserCache(request, NextResponse.next());
+}
+
+// Pages used to ship with a one-year stale-while-revalidate header, so browsers
+// still hold copies of old deploys that crash against current chunks and API
+// data. Wipe each browser's HTTP cache once; cookies and storage are untouched.
+// ponytail: bump the cookie value to force another one-time wipe.
+const CACHE_RESET_COOKIE = "jbcl_cache_reset";
+const CACHE_RESET_VERSION = "1";
+
+function clearStaleBrowserCache(request: NextRequest, response: NextResponse) {
+  if (request.cookies.get(CACHE_RESET_COOKIE)?.value === CACHE_RESET_VERSION)
+    return response;
+  response.headers.set("Clear-Site-Data", '"cache"');
+  response.cookies.set(CACHE_RESET_COOKIE, CACHE_RESET_VERSION, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    secure: true,
+  });
+  return response;
 }
 
 export const config = {
