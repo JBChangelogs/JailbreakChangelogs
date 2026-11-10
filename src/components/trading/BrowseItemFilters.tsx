@@ -78,24 +78,44 @@ export function BrowseItemFilters({
         hidden={!open}
         className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-4"
       >
-        {advancedFilterGroups.map((group) => (
-          <fieldset key={group.label}>
-            <legend className="text-primary-text mb-2 text-sm font-medium">
-              {group.label === "Demand" ? "Demand (clean)" : group.label}
-            </legend>
-            <div className="flex flex-wrap gap-2">
-              {group.options.map((option) => (
-                <AdvancedFilterChip
-                  key={option.value}
-                  group={group.label}
-                  label={option.label}
-                  selected={filters.includes(option.value)}
-                  onToggle={() => onToggle(option.value)}
-                />
-              ))}
-            </div>
-          </fieldset>
-        ))}
+        {advancedFilterGroups.map((group) => {
+          const selected = group.options
+            .filter((option) => filters.includes(option.value))
+            .map((option) => option.value);
+          return (
+            <fieldset key={group.label}>
+              <legend className="text-primary-text mb-2 flex items-center gap-3 text-sm font-medium">
+                <span>
+                  {group.label === "Demand" ? "Demand (clean)" : group.label}
+                  {selected.length > 0 && (
+                    <span className="text-link ml-1">({selected.length})</span>
+                  )}
+                </span>
+                {selected.length > 0 && (
+                  <button
+                    type="button"
+                    aria-label={`Clear ${group.label.toLowerCase()} filters`}
+                    onClick={() => selected.forEach(onToggle)}
+                    className="text-link hover:text-link-hover cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                )}
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                {group.options.map((option) => (
+                  <AdvancedFilterChip
+                    key={option.value}
+                    group={group.label}
+                    label={option.label}
+                    selected={filters.includes(option.value)}
+                    onToggle={() => onToggle(option.value)}
+                  />
+                ))}
+              </div>
+            </fieldset>
+          );
+        })}
       </div>
       <ValueRangeFilter
         rangeValue={rangeValue}

@@ -140,17 +140,6 @@ export default function ValuesSearchControls({
       .flatMap((group) => group.options)
       .find((option) => option.value === valueSort)?.label ?? "Sort by";
 
-  const advancedFilterValues = useMemo(
-    () =>
-      advancedFilterGroups.flatMap((group) =>
-        group.options.map((o) => o.value),
-      ),
-    [advancedFilterGroups],
-  );
-  const hasActiveAdvancedFilters = selectedFilterSorts.some((value) =>
-    advancedFilterValues.includes(value),
-  );
-
   const suggestions = useMemo(
     () =>
       isItemIdSearch
@@ -547,56 +536,59 @@ export default function ValuesSearchControls({
                 inline={true}
               />
             </Button>
-            {advancedFilterGroups.map((group) => {
-              const selected = group.options.filter((option) =>
-                selectedFilterSorts.includes(option.value),
-              );
-              if (selected.length === 0) return null;
-              const labels = selected.map((option) => option.label);
-              const fullLabel = `${group.label}: ${labels.join(", ")}`;
-              return (
-                <div
-                  key={group.label}
-                  className="border-border-card bg-secondary-bg flex max-w-full items-center rounded-lg border"
-                >
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    className="hover:bg-tertiary-bg! min-w-0 shrink! rounded-r-none"
-                    title={fullLabel}
-                    aria-label={`Edit ${group.label.toLowerCase()} filters: ${labels.join(", ")}`}
-                    onClick={() => setShowAdvancedFilters(true)}
+            {/* Summaries only while the panel is closed; when open, the
+                highlighted chips already show the selection. */}
+            {!showAdvancedFilters &&
+              advancedFilterGroups.map((group) => {
+                const selected = group.options.filter((option) =>
+                  selectedFilterSorts.includes(option.value),
+                );
+                if (selected.length === 0) return null;
+                const labels = selected.map((option) => option.label);
+                const fullLabel = `${group.label}: ${labels.join(", ")}`;
+                return (
+                  <div
+                    key={group.label}
+                    className="border-border-card bg-secondary-bg flex max-w-full items-center rounded-lg border"
                   >
-                    <span className="truncate">
-                      {group.label}: {labels.slice(0, 2).join(", ")}
-                      {labels.length > 2 && ` +${labels.length - 2}`}
-                    </span>
-                  </Button>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="border-border-card hover:bg-tertiary-bg! w-8! rounded-l-none border-l px-0!"
-                        aria-label={`Clear ${group.label.toLowerCase()} filters`}
-                        onClick={() =>
-                          onClearFilterSorts(
-                            selected.map((option) => option.value),
-                          )
-                        }
-                      >
-                        <Icon icon="heroicons:x-mark" aria-hidden="true" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Clear {group.label.toLowerCase()} filters
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              );
-            })}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="hover:bg-tertiary-bg! min-w-0 shrink! rounded-r-none"
+                      title={fullLabel}
+                      aria-label={`Edit ${group.label.toLowerCase()} filters: ${labels.join(", ")}`}
+                      onClick={() => setShowAdvancedFilters(true)}
+                    >
+                      <span className="truncate">
+                        {group.label}: {labels.slice(0, 2).join(", ")}
+                        {labels.length > 2 && ` +${labels.length - 2}`}
+                      </span>
+                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="border-border-card hover:bg-tertiary-bg! w-8! rounded-l-none border-l px-0!"
+                          aria-label={`Clear ${group.label.toLowerCase()} filters`}
+                          onClick={() =>
+                            onClearFilterSorts(
+                              selected.map((option) => option.value),
+                            )
+                          }
+                        >
+                          <Icon icon="heroicons:x-mark" aria-hidden="true" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Clear {group.label.toLowerCase()} filters
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                );
+              })}
             {chipFilterOptions.map((option) => (
               <Button
                 key={option.value}
@@ -626,45 +618,60 @@ export default function ValuesSearchControls({
           {showAdvancedFilters && (
             <div className="bg-secondary-bg border-border-card rounded-lg border p-4">
               <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-primary-text text-sm font-semibold">
-                    Advanced Filters
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onClearFilterSorts(advancedFilterValues)}
-                    className={`text-link hover:text-link-hover cursor-pointer text-sm font-medium ${
-                      hasActiveAdvancedFilters ? "visible" : "invisible"
-                    }`}
-                  >
-                    Clear Demand & Trend Filters
-                  </button>
-                </div>
-                {advancedFilterGroups.map((group) => (
-                  <div key={group.label} className="flex flex-col gap-2">
-                    <span className="text-primary-text text-sm font-medium">
-                      {group.label}:
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {group.options.map((option) => (
-                        <AdvancedFilterChip
-                          key={option.value}
-                          group={group.label}
-                          label={option.label}
-                          selected={selectedFilterSorts.includes(option.value)}
-                          onToggle={() => {
-                            onToggleFilterSort(option.value);
-                            trackFilterSortEvent(
-                              "values",
-                              "filter",
+                <span className="text-primary-text text-sm font-semibold">
+                  Advanced Filters
+                </span>
+                {advancedFilterGroups.map((group) => {
+                  const selected = group.options
+                    .filter((option) =>
+                      selectedFilterSorts.includes(option.value),
+                    )
+                    .map((option) => option.value);
+                  return (
+                    <div key={group.label} className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <span className="text-primary-text text-sm font-medium">
+                          {group.label}
+                          {selected.length > 0 && (
+                            <span className="text-link ml-1">
+                              ({selected.length})
+                            </span>
+                          )}
+                        </span>
+                        {selected.length > 0 && (
+                          <button
+                            type="button"
+                            aria-label={`Clear ${group.label.toLowerCase()} filters`}
+                            onClick={() => onClearFilterSorts(selected)}
+                            className="text-link hover:text-link-hover cursor-pointer text-sm font-medium"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {group.options.map((option) => (
+                          <AdvancedFilterChip
+                            key={option.value}
+                            group={group.label}
+                            label={option.label}
+                            selected={selectedFilterSorts.includes(
                               option.value,
-                            );
-                          }}
-                        />
-                      ))}
+                            )}
+                            onToggle={() => {
+                              onToggleFilterSort(option.value);
+                              trackFilterSortEvent(
+                                "values",
+                                "filter",
+                                option.value,
+                              );
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

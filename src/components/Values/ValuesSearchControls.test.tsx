@@ -163,6 +163,11 @@ test("grouped filter summaries stay visible, open the panel, and clear only thei
   ).toBe(true);
   summaries()[0].onClick!();
   expect(panelIsOpen()).toBe(true);
+  // Open panel shows its own per-group clears instead of the summaries.
+  expect(summaries()).toHaveLength(0);
+  expect(
+    render().filter((node) => node["aria-label"]?.startsWith("Clear ")),
+  ).toHaveLength(2);
   toggle();
   expect(panelIsOpen()).toBe(false);
   expect(summaries()).toHaveLength(2);
