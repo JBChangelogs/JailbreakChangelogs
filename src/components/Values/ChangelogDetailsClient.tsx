@@ -1,6 +1,7 @@
 "use client";
 
 import { SuggestionValue } from "@/components/Items/TrendChips";
+import { SUGGESTION_FIELDS } from "@/components/Items/Suggestions/shared";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
@@ -450,7 +451,13 @@ export default function ChangelogDetailsClient({
         .filter((change) => change.suggestion?.metadata?.suggestion_type)
         .map((change) => change.suggestion?.metadata?.suggestion_type),
     ),
-  ).sort();
+  ).sort((a, b) => {
+    const rank = (t: string | undefined) => {
+      const i = SUGGESTION_FIELDS.indexOf(t ?? "");
+      return i === -1 ? SUGGESTION_FIELDS.length : i;
+    };
+    return rank(a) - rank(b) || (a ?? "").localeCompare(b ?? "");
+  });
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredChanges.length / itemsPerPage);
@@ -515,39 +522,30 @@ export default function ChangelogDetailsClient({
 
       {/* Search and Filter Section */}
       <div className="space-y-6">
-        {/* Search - match Values page styling */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search changes..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-          />
-          <Icon
-            icon="heroicons:magnifying-glass"
-            className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-          />
-          {searchQuery && (
-            <button
-              onClick={clearSearch}
-              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-              aria-label="Clear search"
-            >
-              <Icon icon="heroicons:x-mark" />
-            </button>
-          )}
-        </div>
-
-        {/* Filter Dropdowns */}
-        <div className="grid grid-cols-2 gap-4 lg:flex lg:flex-row">
-          {/* Item Type Filter */}
-          <div className="min-w-0 lg:w-1/2">
-            <div className="mb-2">
-              <h3 className="text-secondary-text text-sm font-medium">
-                Item type
-              </h3>
-            </div>
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="relative min-w-0 flex-1">
+            <input
+              type="text"
+              placeholder="Search changes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            />
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                aria-label="Clear search"
+              >
+                <Icon icon="heroicons:x-mark" />
+              </button>
+            )}
+          </div>
+          <div className="min-w-0 sm:w-64">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -590,75 +588,52 @@ export default function ChangelogDetailsClient({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+        </div>
 
-          {/* Suggestion Type Filter */}
-          <div className="min-w-0 lg:w-1/2">
-            <div className="mb-2">
-              <h3 className="text-secondary-text text-sm font-medium">
-                Suggestion type
-              </h3>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                  aria-label="Filter by suggestion type"
-                >
-                  <span className="truncate">
-                    {selectedSuggestionType === "all"
-                      ? "All Suggestion Types"
-                      : selectedSuggestionType
-                        ? selectedSuggestionType
-                            .replace(/_/g, " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())
-                        : "Unknown"}
-                  </span>
-                  <Icon
-                    icon="heroicons:chevron-down"
-                    className="text-secondary-text h-5 w-5"
-                    inline={true}
-                  />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-              >
-                <DropdownMenuRadioGroup
-                  value={selectedSuggestionType}
-                  onValueChange={setSelectedSuggestionType}
-                >
-                  <DropdownMenuRadioItem
-                    value="all"
-                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                  >
-                    All Suggestion Types
-                  </DropdownMenuRadioItem>
-                  {suggestionTypes.map((type) => (
-                    <DropdownMenuRadioItem
-                      key={type || ""}
-                      value={type || ""}
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      {type
-                        ? type
-                            .replace(/_/g, " ")
-                            .replace(/\b\w/g, (l) => l.toUpperCase())
-                        : "Unknown"}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+        <div
+          role="group"
+          aria-label="Suggestion type"
+          className="flex flex-wrap gap-2"
+        >
+          {["all", ...suggestionTypes].map((type) => (
+            <Button
+              key={type || "unknown"}
+              type="button"
+              size="sm"
+              variant={
+                selectedSuggestionType === (type || "")
+                  ? "default"
+                  : "secondary"
+              }
+              aria-pressed={selectedSuggestionType === (type || "")}
+              onClick={() =>
+                setSelectedSuggestionType(
+                  selectedSuggestionType === (type || "") ? "all" : type || "",
+                )
+              }
+            >
+              {type === "all"
+                ? "All fields"
+                : type
+                  ? type
+                      .replace(/_/g, " ")
+                      .replace(/\b\w/g, (l) => l.toUpperCase())
+                  : "Unknown"}
+            </Button>
+          ))}
         </div>
 
         <div className="mb-2">
           <p className="text-secondary-text">
-            {searchQuery
-              ? `Found ${filteredChanges.length} ${filteredChanges.length === 1 ? "change" : "changes"} matching "${displayQuery}"${selectedType ? ` in ${selectedType}` : ""}${selectedSuggestionType && selectedSuggestionType !== "all" ? ` with ${selectedSuggestionType.replace(/_/g, " ")} suggestions` : ""}`
-              : `Total ${selectedType ? `${selectedType} changes` : "Changes"}: ${filteredChanges.length}${selectedSuggestionType && selectedSuggestionType !== "all" ? ` (${selectedSuggestionType.replace(/_/g, " ")} suggestions)` : ""}`}
+            {`${filteredChanges.length} ${
+              selectedSuggestionType && selectedSuggestionType !== "all"
+                ? `${selectedSuggestionType
+                    .replace(/_/g, " ")
+                    .replace(/\b\w/g, (l) => l.toUpperCase())} `
+                : ""
+            }${filteredChanges.length === 1 ? "change" : "changes"}${
+              searchQuery ? ` matching "${displayQuery}"` : ""
+            }${selectedType !== "All Items" ? ` in ${selectedType}` : ""}`}
           </p>
         </div>
       </div>
@@ -1045,7 +1020,9 @@ export default function ChangelogDetailsClient({
                                       ).toUpperCase()}`}
                                     </div>
                                     {Array.isArray(oldValue) ? (
-                                      <SuggestionValue value={oldValue} />
+                                      <div className="text-secondary-text text-lg font-bold wrap-break-word line-through">
+                                        <SuggestionValue value={oldValue} />
+                                      </div>
                                     ) : (
                                       (() => {
                                         const formatted = formatValue(
@@ -1143,7 +1120,9 @@ export default function ChangelogDetailsClient({
                                       ).toUpperCase()}`}
                                     </div>
                                     {Array.isArray(newValue) ? (
-                                      <SuggestionValue value={newValue} />
+                                      <div className="text-primary-text text-lg font-bold wrap-break-word">
+                                        <SuggestionValue value={newValue} />
+                                      </div>
                                     ) : (
                                       (() => {
                                         const formatted = formatValue(
