@@ -46,8 +46,9 @@ test("badge numbers appear only on earned badges with a number", () => {
   }
 });
 
-test("new badges render their mapped icons instead of category fallbacks", () => {
+test("new badges have icons and unknown trading badges use the category icon", () => {
   const icons = [
+    ["cash_5m", "cash", "banknotes"],
     ["on_the_grind", "cash", "bolt"],
     ["money_to_spare", "cash", "banknotes"],
     ["offshore_grinding", "cash", "globe-alt"],
@@ -60,6 +61,7 @@ test("new badges render their mapped icons instead of category fallbacks", () =>
     ["gifter", "website", "gift"],
     ["local_celebrity", "website", "megaphone"],
     ["unanimous", "website", "hand-thumb-up"],
+    ["unknown_trading_badge", "trading", "arrows-right-left"],
   ];
   for (const [id, category, icon] of icons) {
     const client = new QueryClient();
@@ -87,6 +89,7 @@ test("new badges render their mapped icons instead of category fallbacks", () =>
     );
     expect(markup).toContain(`data-icon="heroicons:${icon}"`);
     expect(markup).toContain("<svg");
+    if (id === "cash_5m") expect(markup).toContain(">5M</span>");
     client.clear();
   }
 });

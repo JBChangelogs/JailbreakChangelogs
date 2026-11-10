@@ -70,6 +70,7 @@ const CATEGORY_ICONS = [
   { category: "networth", icon: "heroicons:chart-bar" },
   { category: "cash", icon: "heroicons:banknotes" },
   { category: "collector", icon: "heroicons:archive-box" },
+  { category: "trading", icon: "heroicons:arrows-right-left" },
   { category: "website", icon: "heroicons:globe-alt" },
 ];
 
