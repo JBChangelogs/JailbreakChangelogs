@@ -1180,13 +1180,20 @@ export default function TradeItemPickerV2({
                           );
                         })()}
                       </div>
-                      <div className="bg-secondary-bg flex flex-wrap items-center justify-between gap-2 rounded-lg p-1.5">
-                        <span className="text-primary-text shrink-0 text-xs font-medium whitespace-nowrap">
-                          Trend
+                      <div
+                        className={`bg-secondary-bg flex gap-1.5 rounded-lg p-1.5 ${
+                          getTradeItemMarketDetails(item).trends.length > 1
+                            ? "flex-col"
+                            : "items-center justify-between"
+                        }`}
+                      >
+                        <span className="text-primary-text text-xs font-medium whitespace-nowrap">
+                          {getTradeItemMarketDetails(item).trends.length > 1
+                            ? "Trends"
+                            : "Trend"}
                         </span>
                         <TrendChips
                           trends={getTradeItemMarketDetails(item).trends}
-                          className="justify-end"
                           chipClassName="inline-flex min-h-6 max-w-full items-center rounded-md px-2 py-1 text-center text-xs leading-tight font-bold whitespace-normal"
                         />
                       </div>
