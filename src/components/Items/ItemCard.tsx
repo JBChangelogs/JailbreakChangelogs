@@ -685,7 +685,7 @@ function ItemCard({
                 </span>
                 <TrendChips
                   trends={itemTrends(currentItemData)}
-                  chipClassName="inline-flex items-center rounded-md px-1.5 py-1 text-[10px] leading-tight font-bold whitespace-nowrap sm:rounded-lg sm:px-2 sm:text-xs sm:leading-none"
+                  chipClassName="relative z-20 inline-flex items-center rounded-md px-1.5 py-1 text-[10px] leading-tight font-bold whitespace-nowrap sm:rounded-lg sm:px-2 sm:text-xs sm:leading-none"
                 />
               </div>
             )}
