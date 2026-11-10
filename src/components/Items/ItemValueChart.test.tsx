@@ -43,7 +43,8 @@ test("market suggestion fields open the relevant available chart metric; notes h
     trend: "Cash Value",
   };
   expect(Object.keys(SUGGESTION_CHART_METRICS).sort()).toEqual(
-    SUGGESTION_FIELDS.filter((field) => field !== "notes").sort(),
+    // `trend` is the legacy single-trend field: no chip, but old suggestions still chart.
+    [...SUGGESTION_FIELDS.filter((field) => field !== "notes"), "trend"].sort(),
   );
   expect(SUGGESTION_CHART_METRICS.notes).toBeUndefined();
   expect(SUGGESTION_CHART_METRICS.unknown).toBeUndefined();

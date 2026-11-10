@@ -1,7 +1,6 @@
 export const SUGGESTION_FIELDS = [
   "cash_value",
   "duped_value",
-  "trend",
   "trends",
   "demand",
   "duped_demand",

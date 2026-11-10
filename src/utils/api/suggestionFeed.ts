@@ -15,7 +15,14 @@ export function getSuggestionFeedRequest({
 }: SuggestionFeedOptions) {
   const search = urlQuery.trim();
   const type = typeFilter === "All" ? "" : typeFilter;
-  const fields = [...new Set(fieldFilter)].sort().join(",");
+  // "Trends" also covers suggestions made with the legacy single `trend` field.
+  const fields = [
+    ...new Set(
+      fieldFilter.flatMap((f) => (f === "trends" ? ["trend", "trends"] : [f])),
+    ),
+  ]
+    .sort()
+    .join(",");
   const query = new URLSearchParams({ page: String(page) });
   if (sort !== null) query.set("sort", sort);
   if (search) query.set("query", search);
