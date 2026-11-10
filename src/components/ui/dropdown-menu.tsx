@@ -222,17 +222,17 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      "hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text relative flex cursor-pointer items-center rounded-sm px-3 py-1.5 pr-8 text-sm transition-colors outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50",
+      "hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text relative flex cursor-pointer items-center gap-2 rounded-sm px-3 py-1.5 text-sm transition-colors outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50",
       className,
     )}
     {...props}
   >
-    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+    {children}
+    <span className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
         <Icon icon="lucide:check" className="h-4 w-4" inline={true} />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
-    {children}
   </DropdownMenuPrimitive.RadioItem>
 ));
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName;
