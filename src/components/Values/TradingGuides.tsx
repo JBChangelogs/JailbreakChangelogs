@@ -213,30 +213,37 @@ function TradingGuides({
                 Demand Levels Guide
               </h3>
               <div className="mb-2 flex flex-wrap gap-2">
-                {demandOrder.map((demand) => (
-                  <button
-                    key={demand}
-                    onClick={() => handleDemandClick(demand)}
-                    className={`bg-tertiary-bg flex cursor-pointer items-center rounded-lg border px-2.5 py-1.5 transition-all hover:bg-(--hover-bg) focus:outline-none ${
-                      selectedFilterSorts.includes(
-                        getDemandValue(demand) as FilterSort,
-                      )
-                        ? "ring-2"
-                        : ""
-                    }`}
-                    style={
-                      {
-                        borderColor: getDemandCssColor(demand),
-                        "--tw-ring-color": getDemandCssColor(demand),
-                        "--hover-bg": `color-mix(in srgb, ${getDemandCssColor(demand)} 10%, transparent)`,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <span className="text-primary-text text-sm font-semibold">
-                      {demand}
-                    </span>
-                  </button>
-                ))}
+                {demandOrder.map((demand) => {
+                  const selected = selectedFilterSorts.includes(
+                    getDemandValue(demand) as FilterSort,
+                  );
+                  return (
+                    <button
+                      key={demand}
+                      onClick={() => handleDemandClick(demand)}
+                      aria-pressed={selected}
+                      className={`bg-tertiary-bg text-primary-text flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 transition-all hover:bg-(--hover-bg) focus:outline-none ${
+                        selected ? "ring-2" : ""
+                      }`}
+                      style={
+                        {
+                          borderColor: getDemandCssColor(demand),
+                          "--tw-ring-color": getDemandCssColor(demand),
+                          "--hover-bg": `color-mix(in srgb, ${getDemandCssColor(demand)} 10%, transparent)`,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <span className="text-sm font-semibold">{demand}</span>
+                      {selected && (
+                        <Icon
+                          icon="heroicons:check"
+                          className="h-4 w-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
               <p className="text-secondary-text text-sm">
                 <strong>Note:</strong> Demand levels are ranked from lowest to
@@ -252,35 +259,44 @@ function TradingGuides({
 
           <TabsContent value="trends" className="mt-4">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {trendOrder.map((trend) => (
-                <button
-                  key={trend}
-                  onClick={() => handleTrendClick(trend)}
-                  className={`bg-secondary-bg flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-2 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
-                    selectedFilterSorts.includes(
-                      getTrendValue(trend) as FilterSort,
-                    )
-                      ? "ring-2"
-                      : ""
-                  }`}
-                  style={
-                    {
-                      borderColor: getTrendCssColor(trend),
-                      "--tw-ring-color": getTrendCssColor(trend),
-                      "--hover-bg": `color-mix(in srgb, ${getTrendCssColor(trend)} 10%, transparent)`,
-                    } as React.CSSProperties
-                  }
-                >
-                  <span
-                    className={`rounded px-2 py-0.5 text-xs font-bold tracking-wider uppercase ${getTrendColor(trend)}`}
+              {trendOrder.map((trend) => {
+                const selected = selectedFilterSorts.includes(
+                  getTrendValue(trend) as FilterSort,
+                );
+                return (
+                  <button
+                    key={trend}
+                    onClick={() => handleTrendClick(trend)}
+                    aria-pressed={selected}
+                    className={`bg-secondary-bg relative flex cursor-pointer flex-col items-start gap-1 rounded-lg border p-2 text-left transition-all hover:bg-(--hover-bg) focus:outline-none ${
+                      selected ? "ring-2" : ""
+                    }`}
+                    style={
+                      {
+                        borderColor: getTrendCssColor(trend),
+                        "--tw-ring-color": getTrendCssColor(trend),
+                        "--hover-bg": `color-mix(in srgb, ${getTrendCssColor(trend)} 10%, transparent)`,
+                      } as React.CSSProperties
+                    }
                   >
-                    {trend}
-                  </span>
-                  <p className="text-secondary-text text-xs leading-snug">
-                    {trendDescriptions[trend]}
-                  </p>
-                </button>
-              ))}
+                    <span
+                      className={`rounded px-2 py-0.5 text-xs font-bold tracking-wider uppercase ${getTrendColor(trend)}`}
+                    >
+                      {trend}
+                    </span>
+                    <p className="text-secondary-text text-xs leading-snug">
+                      {trendDescriptions[trend]}
+                    </p>
+                    {selected && (
+                      <Icon
+                        icon="heroicons:check"
+                        className="text-primary-text absolute top-2 right-2 h-4 w-4"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </TabsContent>
 

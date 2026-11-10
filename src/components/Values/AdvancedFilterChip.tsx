@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { Icon } from "@/components/ui/IconWrapper";
 import { getDemandCssColor, getTrendCssColor } from "@/utils/items/badgeColors";
 
 // Color-coded toggle chip for a Demand/Trend filter, using the same badge
@@ -41,6 +42,13 @@ export function AdvancedFilterChip({
         style={{ backgroundColor: color }}
       />
       {label}
+      {selected && (
+        <Icon
+          icon="heroicons:check"
+          className="h-4 w-4 shrink-0"
+          aria-hidden="true"
+        />
+      )}
     </button>
   );
 }
