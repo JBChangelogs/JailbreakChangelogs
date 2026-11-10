@@ -142,7 +142,7 @@ test("item cards preserve prices and support values layout and favorites on item
       changelog_id: 1,
       suggestion_id: 1,
       changed_by: "user",
-      created_at: 1,
+      created_at: Date.now() / 1000,
       field: "cash_value",
       current_value: "1m",
       suggested_value: "2m",
@@ -151,7 +151,7 @@ test("item cards preserve prices and support values layout and favorites on item
       changelog_id: 1,
       suggestion_id: 1,
       changed_by: "user",
-      created_at: 1,
+      created_at: Date.now() / 1000 - 6 * 86400,
       field: "duped_value",
       current_value: "500k",
       suggested_value: "250k",
@@ -171,6 +171,12 @@ test("item cards preserve prices and support values layout and favorites on item
   expect(changeLabels(false)).toEqual(["+1,000,000", "-250,000"]);
   pathname = "/item/Furniture/Blue%20Fire";
   expect(changeLabels(true)).toEqual(["+1m", "-250k"]);
+  // Changes older than a week no longer show.
+  recentChanges = recentChanges.map((change) => ({
+    ...change,
+    created_at: Date.now() / 1000 - 8 * 86400,
+  }));
+  expect(changeLabels(true)).toEqual([]);
   recentChanges = undefined;
   mobile = true;
   const sharedCard = renderCard("28m", "Furniture", 1, true);

@@ -624,15 +624,20 @@ const formatSinglePrice = (price: string): string => {
   return fullNumber.toLocaleString("en-US");
 };
 
+// Older changes stop showing as +/- so a months-old drop doesn't read as recent.
+export const VALUE_CHANGE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
 /**
  * Gets the most recent value change for cash_value or duped_value from recent_changes
  * @param recentChanges - The recent_changes array from an item
  * @param valueType - Either "cash_value" or "duped_value"
  * @returns Object with oldValue and difference, or null if no change found
+ *   or the change is older than VALUE_CHANGE_MAX_AGE_SECONDS
  */
 export const getValueChange = (
   recentChanges: import("@/types").RecentChange[] | null | undefined,
   valueType: "cash_value" | "duped_value",
+  nowSeconds = Date.now() / 1000,
 ): { oldValue: string; difference: number } | null => {
   if (!recentChanges || recentChanges.length === 0) return null;
 
@@ -641,6 +646,8 @@ export const getValueChange = (
   );
 
   if (!valueChange) return null;
+  if (nowSeconds - valueChange.created_at > VALUE_CHANGE_MAX_AGE_SECONDS)
+    return null;
 
   const oldValue = valueChange.current_value;
   const newValue = valueChange.suggested_value;
