@@ -9,7 +9,6 @@ import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ValueRangeFilter } from "./ValueRangeFilter";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -34,6 +33,7 @@ import {
   getFilterSortsButtonLabel,
   getFilterSortsDisplayNames,
 } from "./valuesFilterOptions";
+import { AdvancedFilterChip } from "./AdvancedFilterChip";
 import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 import { useRouter } from "nextjs-toploader/app";
 import { usePartialItems } from "@/hooks/usePartialItems";
@@ -645,29 +645,22 @@ export default function ValuesSearchControls({
                     <span className="text-primary-text text-sm font-medium">
                       {group.label}:
                     </span>
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-2">
                       {group.options.map((option) => (
-                        <label
+                        <AdvancedFilterChip
                           key={option.value}
-                          htmlFor={`advanced-filter-${option.value}`}
-                          className="flex cursor-pointer items-center gap-2"
-                        >
-                          <Checkbox
-                            id={`advanced-filter-${option.value}`}
-                            checked={selectedFilterSorts.includes(option.value)}
-                            onCheckedChange={() => {
-                              onToggleFilterSort(option.value);
-                              trackFilterSortEvent(
-                                "values",
-                                "filter",
-                                option.value,
-                              );
-                            }}
-                          />
-                          <span className="text-primary-text text-sm">
-                            {option.label}
-                          </span>
-                        </label>
+                          group={group.label}
+                          label={option.label}
+                          selected={selectedFilterSorts.includes(option.value)}
+                          onToggle={() => {
+                            onToggleFilterSort(option.value);
+                            trackFilterSortEvent(
+                              "values",
+                              "filter",
+                              option.value,
+                            );
+                          }}
+                        />
                       ))}
                     </div>
                   </div>

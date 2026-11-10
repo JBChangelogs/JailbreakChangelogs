@@ -8,7 +8,7 @@ import {
   DEFAULT_MAX_VALUE_RANGE,
   ValueRangeFilter,
 } from "@/components/Values/ValueRangeFilter";
-import { Checkbox } from "@/components/ui/checkbox";
+import { AdvancedFilterChip } from "@/components/Values/AdvancedFilterChip";
 import {
   chipFilterOptions,
   type FilterGroup,
@@ -83,20 +83,15 @@ export function BrowseItemFilters({
             <legend className="text-primary-text mb-2 text-sm font-medium">
               {group.label === "Demand" ? "Demand (clean)" : group.label}
             </legend>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <div className="flex flex-wrap gap-2">
               {group.options.map((option) => (
-                <label
+                <AdvancedFilterChip
                   key={option.value}
-                  htmlFor={`${panelId}-${option.value}`}
-                  className="text-primary-text flex cursor-pointer items-center gap-2 text-sm"
-                >
-                  <Checkbox
-                    id={`${panelId}-${option.value}`}
-                    checked={filters.includes(option.value)}
-                    onCheckedChange={() => onToggle(option.value)}
-                  />
-                  {option.label}
-                </label>
+                  group={group.label}
+                  label={option.label}
+                  selected={filters.includes(option.value)}
+                  onToggle={() => onToggle(option.value)}
+                />
               ))}
             </div>
           </fieldset>
