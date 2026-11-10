@@ -488,7 +488,7 @@ function ItemCard({
                         <span className="font-semibold">{placementLimit}</span>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="bottom">
                       You can place up to {placementLimit} of this item in your
                       home
                     </TooltipContent>
@@ -516,7 +516,7 @@ function ItemCard({
                       {formatChange(cashChange.difference)}
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="bottom">
                     Cash Value{" "}
                     {cashChange.difference > 0 ? "increased" : "decreased"} by{" "}
                     {formatChange(cashChange.difference)}
@@ -537,7 +537,7 @@ function ItemCard({
                       {formatChange(dupedChange.difference)}
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent>
+                  <TooltipContent side="bottom">
                     Duped Value{" "}
                     {dupedChange.difference > 0 ? "increased" : "decreased"} by{" "}
                     {formatChange(dupedChange.difference)}
