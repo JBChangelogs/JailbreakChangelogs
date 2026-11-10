@@ -10,11 +10,12 @@ import {
 } from "@/components/Values/ValueRangeFilter";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  advancedFilterGroups,
   chipFilterOptions,
+  type FilterGroup,
 } from "@/components/Values/valuesFilterOptions";
 
 export function BrowseItemFilters({
+  advancedFilterGroups,
   filters,
   onToggle,
   onClear,
@@ -22,6 +23,7 @@ export function BrowseItemFilters({
   maxValue,
   onRangeChange,
 }: {
+  advancedFilterGroups: FilterGroup[];
   filters: FilterSort[];
   onToggle: (filter: FilterSort) => void;
   onClear: () => void;

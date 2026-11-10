@@ -7,6 +7,25 @@ import { JsxEmit, ModuleKind, transpileModule } from "typescript";
 import type ValuesSearchControls from "./ValuesSearchControls";
 import type { FilterSort } from "@/types";
 import * as filterOptions from "./valuesFilterOptions";
+import type { FilterGroup } from "./valuesFilterOptions";
+
+const advancedFilterGroups: FilterGroup[] = [
+  {
+    label: "Demand",
+    options: [
+      { value: "demand-average", label: "Average" },
+      { value: "demand-decent", label: "Decent" },
+      { value: "demand-high", label: "High" },
+    ],
+  },
+  {
+    label: "Trend",
+    options: [
+      { value: "trend-projected", label: "Projected" },
+      { value: "trend-stable", label: "Stable" },
+    ],
+  },
+];
 
 test("grouped filter summaries stay visible, open the panel, and clear only their own group", () => {
   const states: unknown[] = [];
@@ -84,6 +103,7 @@ test("grouped filter summaries stay visible, open the panel, and clear only thei
     valueSort: "cash-desc",
     setValueSort: () => {},
     valueSortGroups: [],
+    advancedFilterGroups,
     rangeValue: [0, 50_000_000],
     setRangeValue: () => {},
     setAppliedMinValue: () => {},

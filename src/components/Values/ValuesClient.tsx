@@ -36,24 +36,20 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { useValueSortState } from "@/hooks/useValueSortState";
 import { useValuesFilterMode } from "@/hooks/useValuesFilterMode";
 import { useValuesRangePreference } from "@/hooks/useValuesRangePreference";
-import { filterOptions, getServerFilters } from "./valuesFilterOptions";
+import {
+  dropUnofferedFilters,
+  getServerFilters,
+  isValidFilterSort,
+} from "./valuesFilterOptions";
 import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import { useSearchTracking } from "@/hooks/useSearchTracking";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
+import { useAdvancedFilterGroups } from "@/hooks/useAdvancedFilterGroups";
 import RelatedValuePages from "./RelatedValuePages";
 import LatestItemUpdate, { LatestItemUpdateSkeleton } from "./LatestItemUpdate";
 
-const parseFilterSorts = (
-  raw: string | null,
-  validValues: FilterSort[],
-): FilterSort[] =>
-  raw
-    ? raw
-        .split(",")
-        .filter((value): value is FilterSort =>
-          validValues.includes(value as FilterSort),
-        )
-    : [];
+const parseFilterSorts = (raw: string | null): FilterSort[] =>
+  raw ? raw.split(",").filter(isValidFilterSort) : [];
 
 const MAX_VALUE_RANGE = 50_000_000;
 
@@ -91,6 +87,7 @@ export default function ValuesClient() {
   );
 
   const valueSortGroups = useItemSortGroups();
+  const advancedFilterGroups = useAdvancedFilterGroups();
   const valueSortOptions = useMemo(
     () => valueSortGroups.flatMap((group) => group.options),
     [valueSortGroups],
@@ -108,10 +105,6 @@ export default function ValuesClient() {
 
   const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
 
-  const validFilterSorts = useMemo(
-    () => filterOptions.map((option) => option.value),
-    [],
-  );
   const validValueSorts = useMemo(
     () => valueSortOptions.map((option) => option.value as ValueSort),
     [valueSortOptions],
@@ -162,15 +155,13 @@ export default function ValuesClient() {
     if (didRestoreFilterSortsRef.current) return;
     didRestoreFilterSortsRef.current = true;
 
-    const fromUrl = parseFilterSorts(
-      searchParams.get("filterSort"),
-      validFilterSorts,
-    );
+    const fromUrl = parseFilterSorts(searchParams.get("filterSort"));
     const cached = getCachedPreference(FILTER_SORT_PREFERENCE_KEY);
     const hasCachedFilters = Array.isArray(cached);
     const fromCache = hasCachedFilters
-      ? cached.filter((value): value is FilterSort =>
-          validFilterSorts.includes(value as FilterSort),
+      ? cached.filter(
+          (value): value is FilterSort =>
+            typeof value === "string" && isValidFilterSort(value),
         )
       : [];
     const restored =
@@ -180,20 +171,20 @@ export default function ValuesClient() {
           ? fromCache
           : parseFilterSorts(
               safeSessionStorage.getItem(FILTER_SORT_STORAGE_KEY),
-              validFilterSorts,
             );
     setSelectedFilterSortsState(restored);
     if (fromUrl.length > 0) {
       persistFilterSorts(fromUrl);
       publishFilterSorts(fromUrl);
     }
-  }, [persistFilterSorts, publishFilterSorts, searchParams, validFilterSorts]);
+  }, [persistFilterSorts, publishFilterSorts, searchParams]);
 
   useEffect(() => {
     const applyFilters = (value: unknown) => {
       if (!Array.isArray(value)) return;
-      const next = value.filter((filter): filter is FilterSort =>
-        validFilterSorts.includes(filter as FilterSort),
+      const next = value.filter(
+        (filter): filter is FilterSort =>
+          typeof filter === "string" && isValidFilterSort(filter),
       );
       setSelectedFilterSortsState(next);
       persistFilterSorts(next);
@@ -230,7 +221,19 @@ export default function ValuesClient() {
       window.removeEventListener("realtimePreferences", handlePreferences);
       window.removeEventListener("realtimePreferenceDeleted", handleDeleted);
     };
-  }, [persistFilterSorts, validFilterSorts]);
+  }, [persistFilterSorts]);
+
+  // Once /filters loads, drop saved demand/trend keys it no longer offers.
+  useEffect(() => {
+    if (advancedFilterGroups.length === 0) return;
+    setSelectedFilterSortsState((prev) => {
+      const next = dropUnofferedFilters(prev, advancedFilterGroups);
+      if (next.length === prev.length) return prev;
+      persistFilterSorts(next);
+      publishFilterSorts(next);
+      return next;
+    });
+  }, [advancedFilterGroups, persistFilterSorts, publishFilterSorts]);
 
   const handleToggleFilterSort = useCallback(
     (value: FilterSort) => {
@@ -574,6 +577,7 @@ export default function ValuesClient() {
         valueSort={valueSort}
         setValueSort={setValueSort}
         valueSortGroups={valueSortGroups}
+        advancedFilterGroups={advancedFilterGroups}
         rangeValue={rangeValue}
         setRangeValue={setRangeValue}
         setAppliedMinValue={setAppliedMinValue}

@@ -649,6 +649,26 @@ function applyItemsPageOptions(url: URL, options: ItemsPageOptions) {
     url.searchParams.set("max_value", String(options.maxValue));
 }
 
+export async function fetchItemFilterGroups(
+  signal?: AbortSignal,
+): Promise<{ group: string; filters: { value: string; label: string }[] }[]> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL,
+    "/v2/items/filters",
+  );
+  const response = await fetch(url, {
+    headers,
+    credentials: "include",
+    signal,
+  });
+  if (!response.ok)
+    throw new Error(`Failed to fetch item filters (${response.status})`);
+  return (await response.json()) as {
+    group: string;
+    filters: { value: string; label: string }[];
+  }[];
+}
+
 export async function fetchItemSortGroups(
   signal?: AbortSignal,
 ): Promise<{ group: string; sorts: { value: string; label: string }[] }[]> {

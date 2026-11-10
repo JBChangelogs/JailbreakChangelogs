@@ -28,8 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  advancedFilterGroups,
   chipFilterOptions,
+  type FilterGroup,
   filterGroups,
   getFilterSortsButtonLabel,
   getFilterSortsDisplayNames,
@@ -60,6 +60,7 @@ interface ValuesSearchControlsProps {
     label: string;
     options: { value: string; label: string }[];
   }[];
+  advancedFilterGroups: FilterGroup[];
   rangeValue: number[];
   setRangeValue: (value: number[]) => void;
   setAppliedMinValue: (value: number) => void;
@@ -81,6 +82,7 @@ export default function ValuesSearchControls({
   valueSort,
   setValueSort,
   valueSortGroups,
+  advancedFilterGroups,
   rangeValue,
   setRangeValue,
   setAppliedMinValue,
@@ -143,7 +145,7 @@ export default function ValuesSearchControls({
       advancedFilterGroups.flatMap((group) =>
         group.options.map((o) => o.value),
       ),
-    [],
+    [advancedFilterGroups],
   );
   const hasActiveAdvancedFilters = selectedFilterSorts.some((value) =>
     advancedFilterValues.includes(value),

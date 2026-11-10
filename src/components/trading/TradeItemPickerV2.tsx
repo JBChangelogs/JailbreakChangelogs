@@ -44,6 +44,7 @@ import {
   getServerFilters,
 } from "@/components/Values/valuesFilterOptions";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
+import { useAdvancedFilterGroups } from "@/hooks/useAdvancedFilterGroups";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
@@ -241,6 +242,7 @@ export default function TradeItemPickerV2({
   };
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
   const valueSortGroups = useItemSortGroups();
+  const advancedFilterGroups = useAdvancedFilterGroups();
   const valueSortOptions = useMemo(
     () => valueSortGroups.flatMap((group) => group.options),
     [valueSortGroups],
@@ -814,6 +816,7 @@ export default function TradeItemPickerV2({
         </div>
 
         <BrowseItemFilters
+          advancedFilterGroups={advancedFilterGroups}
           filters={extraFilters}
           onToggle={(filter) => {
             setExtraFilters((current) =>

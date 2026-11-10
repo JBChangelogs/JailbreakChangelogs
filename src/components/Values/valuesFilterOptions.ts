@@ -1,6 +1,6 @@
 import { FilterSort, type ItemType } from "@/types";
 
-type FilterGroup = {
+export type FilterGroup = {
   label: string;
   options: { value: FilterSort; label: string }[];
 };
@@ -55,39 +55,6 @@ export const filterGroups: ItemTypeFilterGroup[] = [
   },
 ];
 
-// Rendered in a collapsible "Advanced Filters" panel (toggled by a Filter
-// button) rather than the main dropdown, since these are more granular,
-// less frequently used than item type
-export const advancedFilterGroups: FilterGroup[] = [
-  {
-    label: "Demand",
-    options: [
-      { value: "demand-close-to-none", label: "Close To None" },
-      { value: "demand-very-low", label: "Very Low" },
-      { value: "demand-low", label: "Low" },
-      { value: "demand-below-average", label: "Below Average" },
-      { value: "demand-average", label: "Average" },
-      { value: "demand-decent", label: "Decent" },
-      { value: "demand-high", label: "High" },
-      { value: "demand-very-high", label: "Very High" },
-    ],
-  },
-  {
-    label: "Trend",
-    options: [
-      { value: "trend-dropping", label: "Dropping" },
-      { value: "trend-unstable", label: "Unstable" },
-      { value: "trend-hoarded", label: "Hoarded" },
-      { value: "trend-projected", label: "Projected" },
-      { value: "trend-manipulated", label: "Manipulated" },
-      { value: "trend-stable", label: "Stable" },
-      { value: "trend-recovering", label: "Recovering" },
-      { value: "trend-rising", label: "Rising" },
-      { value: "trend-hyped", label: "Hyped" },
-    ],
-  },
-];
-
 // Toggled as standalone chips below the filter/sort dropdowns rather than
 // buried in the dropdown, since they're the most frequently used filters
 export const chipFilterOptions: {
@@ -124,9 +91,36 @@ export const chipFilterOptions: {
 
 export const filterOptions = [
   ...filterGroups.flatMap((group) => group.options),
-  ...advancedFilterGroups.flatMap((group) => group.options),
   ...chipFilterOptions,
 ];
+
+const localFilterValues = new Set<string>(
+  filterOptions.map((option) => option.value),
+);
+
+// Demand/trend options load from the API after URL/saved filters are restored,
+// so accept their key shape here and let the API reject unknown values.
+export function isValidFilterSort(value: string): value is FilterSort {
+  return (
+    localFilterValues.has(value) ||
+    /^(demand|trend)-[a-z]+(-[a-z]+)*$/.test(value)
+  );
+}
+
+// Saved/URL demand & trend keys are accepted by shape before /filters loads;
+// once it has, drop any the API no longer offers so the items request doesn't
+// fail with invalid_filter. Other keys are validated locally and kept.
+export function dropUnofferedFilters(
+  prev: FilterSort[],
+  groups: FilterGroup[],
+): FilterSort[] {
+  const offered = new Set<FilterSort>(
+    groups.flatMap((group) => group.options.map((option) => option.value)),
+  );
+  return prev.filter(
+    (value) => !/^(demand|trend)-/.test(value) || offered.has(value),
+  );
+}
 
 export function getServerFilters(filters: FilterSort[]): FilterSort[] {
   return filters.filter(
@@ -150,6 +144,17 @@ function getFilterDisplayName(filterSort: string): string {
   const explicitLabel = filterLabelMap[filterSort as FilterSort];
   if (explicitLabel) {
     return explicitLabel;
+  }
+
+  // Demand/trend options come from the API, so derive their label from the key
+  // ("demand-very-low" -> "Very Low") instead of a hardcoded list.
+  const advanced = filterSort.match(/^(?:demand|trend)-(.+)$/);
+  if (advanced) {
+    return advanced[1].replace(
+      /(^|-)(\w)/g,
+      (_, dash: string, char: string) =>
+        `${dash ? " " : ""}${char.toUpperCase()}`,
+    );
   }
 
   return filterSort

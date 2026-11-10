@@ -13,7 +13,11 @@ import type ValuesItemsGrid from "./ValuesItemsGrid";
 import type { FavoriteItem, FilterSort, Item } from "@/types";
 import type { ItemsPage, ItemsPageOptions } from "@/utils/api/api";
 import { filterFavoriteItems } from "@/utils/items/favorites";
-import { filterOptions, getServerFilters } from "./valuesFilterOptions";
+import {
+  dropUnofferedFilters,
+  getServerFilters,
+  isValidFilterSort,
+} from "./valuesFilterOptions";
 
 type Page = ItemsPage<Item>;
 type Node = { type: unknown; props: Record<string, unknown> };
@@ -141,8 +145,14 @@ function harness(startPage = 1) {
           return { useSearchTracking: () => {} };
         if (name === "@/hooks/useItemSortGroups")
           return { useItemSortGroups: () => [] };
+        if (name === "@/hooks/useAdvancedFilterGroups")
+          return { useAdvancedFilterGroups: () => [] };
         if (name === "./valuesFilterOptions")
-          return { filterOptions, getServerFilters };
+          return {
+            dropUnofferedFilters,
+            getServerFilters,
+            isValidFilterSort,
+          };
         if (name === "./ValuesItemsGrid") return { default: gridType };
         return {};
       },

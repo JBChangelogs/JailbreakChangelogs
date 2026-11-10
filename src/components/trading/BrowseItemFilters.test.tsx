@@ -3,10 +3,30 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { BrowseItemFilters } from "./BrowseItemFilters";
 import { filterByTypes } from "@/utils/trading/values";
 import type { TradeItem } from "@/types/trading";
+import type { FilterGroup } from "@/components/Values/valuesFilterOptions";
+
+const advancedFilterGroups: FilterGroup[] = [
+  {
+    label: "Demand",
+    options: [
+      { value: "demand-average", label: "Average" },
+      { value: "demand-decent", label: "Decent" },
+      { value: "demand-high", label: "High" },
+    ],
+  },
+  {
+    label: "Trend",
+    options: [
+      { value: "trend-projected", label: "Projected" },
+      { value: "trend-stable", label: "Stable" },
+    ],
+  },
+];
 
 test("browse filters keep demand/trend collapsed and the shared range visible", () => {
   const markup = renderToStaticMarkup(
     <BrowseItemFilters
+      advancedFilterGroups={advancedFilterGroups}
       filters={["favorites"]}
       minValue={1_000_000}
       maxValue={5_000_000}
