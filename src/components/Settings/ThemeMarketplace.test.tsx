@@ -164,6 +164,8 @@ function marketplace({
           return {
             useQueryClient: () => client,
             useQuery: (options: { queryKey: unknown[] }) => {
+              if (options.queryKey[0] === "my-themes")
+                return { data: undefined, isPending: true, error: null };
               queryKey = options.queryKey;
               const nextKey = JSON.stringify(queryKey);
               if (cacheKey !== nextKey) {

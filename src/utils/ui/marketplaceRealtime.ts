@@ -4,6 +4,7 @@ import {
   type MarketplaceThemesPage,
   type MarketplaceSort,
   type ThemeCompetition,
+  type CustomTheme,
 } from "@/utils/api/userThemes";
 import { SHARE_CODE } from "@/utils/ui/customTheme";
 
@@ -188,5 +189,34 @@ export function applyMarketplaceEvent(
     items,
     total,
     total_pages: Math.ceil(total / previous.size),
+  };
+}
+
+// Pages locally: a user has at most their theme limit (25).
+export function ownMarketplacePage(
+  themes: CustomTheme[],
+  user: MarketplaceTheme["user"],
+  query: string,
+  sort: MarketplaceSort,
+  page: number,
+  size = 24,
+): MarketplaceThemesPage {
+  const items = themes
+    .filter((theme) => theme.published_at != null)
+    .map((theme) => ({ ...theme, user }))
+    .filter((theme) => marketplaceMatchesSearch(theme, query))
+    .sort((a, b) =>
+      sort === "newest"
+        ? b.published_at! - a.published_at!
+        : a.published_at! - b.published_at!,
+    );
+  const totalPages = Math.ceil(items.length / size);
+  const current = Math.min(Math.max(page, 1), Math.max(totalPages, 1));
+  return {
+    items: items.slice((current - 1) * size, current * size),
+    total: items.length,
+    page: current,
+    total_pages: totalPages,
+    size,
   };
 }

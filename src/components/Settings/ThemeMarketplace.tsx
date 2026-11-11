@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { UpdatePill } from "@/components/ui/UpdatePill";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Pagination } from "@/components/ui/Pagination";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ import {
   applyMarketplaceEvent,
   parseMarketplaceEvent,
   marketplaceMatchesSearch,
+  ownMarketplacePage,
 } from "@/utils/ui/marketplaceRealtime";
 
 export default function ThemeMarketplace() {
@@ -53,6 +55,7 @@ export default function ThemeMarketplace() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState<MarketplaceSort>("newest");
+  const [tab, setTab] = useState<"all" | "mine">("all");
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
   const [pendingNew, setPendingNew] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -77,7 +80,22 @@ export default function ThemeMarketplace() {
     queryFn: ({ signal }) => fetchMarketplaceThemes(page, sort, query, signal),
     retry: false,
   });
-  const searching = isFetching || input.trim() !== query;
+  const mineTab = tab === "mine" && isAuthenticated && !!user;
+  const mine = useQuery({
+    queryKey: ["my-themes", user?.id],
+    queryFn: listMyThemes,
+    enabled: mineTab,
+  });
+  const shown = mineTab
+    ? mine.data && user
+      ? ownMarketplacePage(mine.data.themes, user, query, sort, page)
+      : undefined
+    : data;
+  const shownPending = mineTab ? mine.isPending : isPending;
+  const shownError = mineTab ? mine.error : error;
+  const shownRefetch = mineTab ? mine.refetch : refetch;
+  const searching =
+    (mineTab ? mine.isFetching : isFetching) || input.trim() !== query;
 
   useEffect(() => setPendingNew(new Set()), [query, sort, isAuthenticated]);
   useEffect(() => {
@@ -162,9 +180,9 @@ export default function ThemeMarketplace() {
   }, [queryClient, query, page, sort, isAuthenticated]);
 
   useEffect(() => {
-    if (data && page > Math.max(1, data.total_pages))
-      setPage(Math.max(1, data.total_pages));
-  }, [data, page]);
+    if (shown && page > Math.max(1, shown.total_pages))
+      setPage(Math.max(1, shown.total_pages));
+  }, [shown, page]);
 
   const unpublishTheme = async (theme: MarketplaceTheme) => {
     if (!isAuthenticated || !user || theme.user?.id !== user.id || unpublishing)
@@ -196,7 +214,7 @@ export default function ThemeMarketplace() {
 
   return (
     <div ref={marketplaceRef} className="space-y-6">
-      {pendingNew.size > 0 && !isPending && (
+      {pendingNew.size > 0 && !isPending && !mineTab && (
         <UpdatePill
           centerOn={marketplaceRef}
           onClick={() => {
@@ -226,6 +244,24 @@ export default function ThemeMarketplace() {
             : `${pendingNew.size} new themes`}{" "}
           — click to load
         </UpdatePill>
+      )}
+      {isAuthenticated && (
+        <Tabs
+          value={tab}
+          onValueChange={(value) => {
+            setTab(value as "all" | "mine");
+            setPage(1);
+          }}
+        >
+          <TabsList fullWidth className="w-full min-w-0">
+            <TabsTrigger fullWidth value="all">
+              All themes
+            </TabsTrigger>
+            <TabsTrigger fullWidth value="mine">
+              Your themes
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       )}
       <div>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -354,30 +390,30 @@ export default function ThemeMarketplace() {
         </div>
       </div>
 
-      {isPending ? (
+      {shownPending ? (
         <div role="status">
           <span className="sr-only">Loading themes…</span>
           <Skeleton aria-hidden="true" className="h-6 w-36" />
         </div>
       ) : (
-        !error &&
-        !!data?.total && (
+        !shownError &&
+        !!shown?.total && (
           <p role="status" className="text-secondary-text">
             {query
-              ? `Found ${data.total} ${data.total === 1 ? "theme" : "themes"} matching "${query}"`
-              : `Total Themes: ${data.total}`}
+              ? `Found ${shown.total} ${shown.total === 1 ? "theme" : "themes"} matching "${query}"`
+              : `Total Themes: ${shown.total}`}
           </p>
         )
       )}
-      {error && (
+      {shownError && (
         <div role="alert" className="space-y-3">
-          <p>{error.message}</p>
-          <Button variant="secondary" onClick={() => void refetch()}>
+          <p>{shownError.message}</p>
+          <Button variant="secondary" onClick={() => void shownRefetch()}>
             Try again
           </Button>
         </div>
       )}
-      {!error && !isPending && data?.items.length === 0 && (
+      {!shownError && !shownPending && shown?.items.length === 0 && (
         <div
           role="status"
           className="border-border-card bg-secondary-bg rounded-lg border px-6 py-12 text-center"
@@ -388,12 +424,18 @@ export default function ThemeMarketplace() {
             className="text-secondary-text mx-auto mb-4 size-12 opacity-50"
           />
           <h2 className="text-primary-text mb-2 text-xl font-semibold">
-            {query ? "No matching themes" : "No themes published yet"}
+            {query
+              ? "No matching themes"
+              : mineTab
+                ? "You haven't published any themes"
+                : "No themes published yet"}
           </h2>
           <p className="text-secondary-text mx-auto max-w-md text-sm">
             {query
               ? `No themes match “${query}”. Try another name, description, author, or share code.`
-              : "Community themes will appear here once published. You can share a custom theme from your theme settings."}
+              : mineTab
+                ? "Publish one of your custom themes from your theme settings and it will show here."
+                : "Community themes will appear here once published. You can share a custom theme from your theme settings."}
           </p>
           {query ? (
             <Button
@@ -417,10 +459,10 @@ export default function ThemeMarketplace() {
         </div>
       )}
       <div
-        aria-busy={isPending}
+        aria-busy={shownPending}
         className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
       >
-        {isPending
+        {shownPending
           ? Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
@@ -438,7 +480,7 @@ export default function ThemeMarketplace() {
                 <Skeleton className="h-8 w-28" />
               </div>
             ))
-          : data?.items.map((theme) => {
+          : shown?.items.map((theme) => {
               const author =
                 theme.user?.global_name && theme.user.global_name !== "None"
                   ? theme.user.global_name
@@ -565,10 +607,10 @@ export default function ThemeMarketplace() {
               );
             })}
       </div>
-      {data && data.total_pages > 1 && (
+      {shown && shown.total_pages > 1 && (
         <Pagination
-          count={data.total_pages}
-          page={data.page}
+          count={shown.total_pages}
+          page={shown.page}
           onChange={(_event, value) => setPage(value)}
         />
       )}

@@ -6,6 +6,7 @@ import type {
 import {
   applyMarketplaceEvent,
   marketplaceMatchesSearch,
+  ownMarketplacePage,
   parseMarketplaceEvent,
   type MarketplaceEvent,
 } from "./marketplaceRealtime";
@@ -122,4 +123,27 @@ test("updates replace in place, remove themes that stop matching, and removals a
   expect(removed.items).toEqual([other]);
   expect(removed.total).toBe(1);
   expect(applyMarketplaceEvent(removed, removal, "", "newest")).toBe(removed);
+});
+
+test("your themes tab lists published themes only, searched, sorted and paged", () => {
+  const me = { id: "1", username: "builder" };
+  const mine = [
+    { ...theme, share_code: "AAAAAAAA", label: "Old", published_at: 1 },
+    { ...theme, share_code: "BBBBBBBB", label: "New", published_at: 3 },
+    { ...theme, share_code: "CCCCCCCC", label: "Draft", published_at: null },
+  ];
+  const newest = ownMarketplacePage(mine, me, "", "newest", 1);
+  expect(newest.items.map((t) => t.label)).toEqual(["New", "Old"]);
+  expect(newest.items[0].user).toEqual(me);
+  expect(newest.total).toBe(2);
+  expect(
+    ownMarketplacePage(mine, me, "", "oldest", 1).items.map((t) => t.label),
+  ).toEqual(["Old", "New"]);
+  expect(ownMarketplacePage(mine, me, "new", "newest", 1).total).toBe(1);
+  const paged = ownMarketplacePage(mine, me, "", "newest", 5, 1);
+  expect([paged.page, paged.total_pages, paged.items[0].label]).toEqual([
+    2,
+    2,
+    "Old",
+  ]);
 });
