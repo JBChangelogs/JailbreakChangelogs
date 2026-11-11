@@ -2,16 +2,11 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import { UserAvatar } from "@/utils/ui/avatar";
-import { useTheme } from "@/contexts/ThemeContext";
-import { setCustomTheme } from "@/utils/ui/customTheme";
-import { rememberSharedTheme } from "@/utils/ui/recentThemes";
-import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import {
   competitionStatus,
   fetchCurrentCompetition,
@@ -25,7 +20,6 @@ const MEDALS: Record<number, string> = {
 };
 
 function TopThemes({ id }: { id: number }) {
-  const { customTheme } = useTheme();
   const { data, isPending, error, refetch } = useQuery({
     queryKey: ["theme-competition", id, "standings"],
     queryFn: () => fetchCompetitionStandings(id),
@@ -137,21 +131,6 @@ function TopThemes({ id }: { id: number }) {
                       : `${user_days.toLocaleString()} points`}{" "}
                     · {current_users.toLocaleString()} users today
                   </p>
-                  <Button
-                    size="sm"
-                    className="relative z-10 mt-2"
-                    disabled={customTheme?.share_code === theme.share_code}
-                    onClick={() => {
-                      setCustomTheme(theme);
-                      rememberSharedTheme(theme.share_code);
-                      toast.success(`Using ${theme.label}`);
-                      offerThemePack(theme);
-                    }}
-                  >
-                    {customTheme?.share_code === theme.share_code
-                      ? "In use"
-                      : "Use theme"}
-                  </Button>
                 </div>
               </li>
             );

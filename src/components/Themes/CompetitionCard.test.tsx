@@ -215,18 +215,11 @@ test.each([1.93, 0])(
   },
 );
 
-test("use theme applies and remembers an entry while the active theme is disabled", () => {
-  const view = render({ activeTheme: "THEME001" });
-  expect(
-    view.buttons.map(({ children, disabled }) => [children, disabled]),
-  ).toEqual([
-    ["Use theme", false],
-    ["In use", true],
-    ["Use theme", false],
-  ]);
-  view.buttons[0].onClick?.();
-  expect(view.applied).toEqual([standings.standings[0].theme]);
-  expect(view.remembered).toEqual(["THEME000"]);
+test("top themes are information only, with no use theme button", () => {
+  // A button here would skew votes toward whoever is already on top.
+  const view = render({});
+  expect(view.html).not.toContain("Use theme");
+  expect(view.buttons).toEqual([]);
 });
 
 test("creator names prefer display names and handle entries without a creator", () => {
