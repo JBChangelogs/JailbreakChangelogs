@@ -28,7 +28,12 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
-import { createMyTheme, fetchSharedTheme } from "@/utils/api/userThemes";
+import {
+  copyLabel,
+  createMyTheme,
+  fetchSharedTheme,
+  listMyThemes,
+} from "@/utils/api/userThemes";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
 import { openThemeEditor } from "@/utils/ui/themeEditor";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -124,8 +129,12 @@ export default function SharedThemeDialog() {
     }
     setSaving(true);
     try {
+      const { themes: mine } = await listMyThemes();
       const saved = await createMyTheme({
-        label: theme.label,
+        label: copyLabel(
+          theme.label,
+          mine.map((t) => t.label),
+        ),
         description: theme.description ?? null,
         scheme: theme.scheme,
         vars: theme.vars,

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, test } from "bun:test";
 import {
   checkMyTheme,
+  copyLabel,
   createMyTheme,
   updateMyTheme,
   fetchMarketplaceThemes,
@@ -318,4 +319,14 @@ test("marketplace fetches pass cancellation signals through to the API", async (
     });
   }) as unknown as typeof fetch;
   await fetchMarketplaceThemes(1, "newest", "", signal);
+});
+
+test("copies get the first free #n name", () => {
+  expect(copyLabel("Fall", [])).toBe("Fall");
+  expect(copyLabel("Fall", ["fall"])).toBe("Fall #2");
+  expect(copyLabel("Fall", ["Fall", "Fall #2"])).toBe("Fall #3");
+  expect(copyLabel("Fall #2", ["Fall", "Fall #2"])).toBe("Fall #3");
+  expect(copyLabel("x".repeat(64), ["x".repeat(64)])).toBe(
+    `${"x".repeat(61)} #2`,
+  );
 });

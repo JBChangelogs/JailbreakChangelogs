@@ -251,6 +251,17 @@ export function sanitizeCustomTheme<T extends CustomTheme>(theme: T): T {
   };
 }
 
+export function copyLabel(label: string, taken: string[]): string {
+  const used = new Set(taken.map((name) => name.trim().toLowerCase()));
+  if (!used.has(label.trim().toLowerCase())) return label;
+  const base = label.replace(/ #\d+$/, "");
+  for (let n = 2; ; n++) {
+    const suffix = ` #${n}`;
+    const name = base.slice(0, 64 - suffix.length) + suffix;
+    if (!used.has(name.toLowerCase())) return name;
+  }
+}
+
 export const listMyThemes = async () => {
   const data = await request<{ themes: UserTheme[]; limit: number }>(
     "/v2/users/me/themes",
