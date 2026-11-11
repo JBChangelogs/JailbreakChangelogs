@@ -119,6 +119,11 @@ function settings({ published = false, own = true, fail = false } = {}) {
                 errors.push({ message, options }),
             },
           };
+        if (name === "@/components/Settings/ThemeDetailsActions")
+          return {
+            ApplyPackDialog: "ApplyPackDialog",
+            hasThemePack: () => false,
+          };
         if (name.startsWith("@/components/"))
           return new Proxy({}, { get: (_target, key) => String(key) });
         if (name.startsWith("@/utils/") || name === "@/config/settings")

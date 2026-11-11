@@ -1,5 +1,6 @@
 "use client";
 
+import { hasThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { FRONTEND_SETTINGS } from "@/config/settings";
 
 import { useEffect, useId, useState, useSyncExternalStore } from "react";
@@ -36,7 +37,6 @@ import CustomThemeControls, {
   useCustomThemes,
 } from "@/components/Settings/CustomThemeSettings";
 import { setCustomTheme } from "@/utils/ui/customTheme";
-import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { getThemeEditor, subscribeThemeEditor } from "@/utils/ui/themeEditor";
 import {
   getThemeCursorEnabled,
@@ -117,6 +117,7 @@ export function ThemeCard({
   onChange,
   compact,
   badge,
+  hasPack,
 }: {
   option: ThemeOption;
   name: string;
@@ -124,6 +125,7 @@ export function ThemeCard({
   onChange: () => void;
   /** Marks a custom theme on its preview, e.g. "Custom" or "Shared". */
   badge?: string;
+  hasPack?: boolean;
   /** Smaller, for the theme editor. */
   compact?: boolean;
 }) {
@@ -160,13 +162,29 @@ export function ThemeCard({
               className="text-secondary-text size-4 shrink-0"
             />
           )}
-          <span
-            className={cn(
-              "text-primary-text font-medium",
-              compact ? "text-xs leading-tight" : "text-sm leading-tight",
+          <span className="min-w-0">
+            <span
+              className={cn(
+                "text-primary-text block font-medium",
+                compact ? "text-xs leading-tight" : "text-sm leading-tight",
+              )}
+            >
+              {label}
+            </span>
+            {hasPack && !compact && (
+              <span
+                title="Includes a customization pack"
+                className="text-secondary-text mt-0.5 flex items-center gap-1 text-xs whitespace-nowrap"
+              >
+                <Icon
+                  icon="lucide:sparkles"
+                  aria-hidden="true"
+                  className="text-link size-3 shrink-0"
+                />
+                <span aria-hidden="true">Includes a pack</span>
+                <span className="sr-only">Includes a customization pack</span>
+              </span>
             )}
-          >
-            {label}
           </span>
         </span>
         <span
@@ -186,6 +204,7 @@ interface PickerItem {
   pick: () => void;
   /** Set on custom themes only. */
   badge?: string;
+  hasPack?: boolean;
   /** Wraps a custom theme's card with its menu (also on right-click). */
   wrap?: (card: React.ReactNode) => React.ReactNode;
 }
@@ -315,6 +334,7 @@ function AllThemesSheet({
                             name={name}
                             checked={item.checked}
                             badge={item.badge}
+                            hasPack={item.hasPack}
                             onChange={item.pick}
                           />,
                         )}
@@ -361,11 +381,10 @@ export default function ThemeSettings({
       key: `custom:${t.share_code}`,
       option: customThemeOption(t),
       checked: customTheme?.share_code === t.share_code,
-      pick: () => {
-        setCustomTheme(t);
-        offerThemePack(t);
-      },
+      // No pack popup here: people flick through themes. The card menu offers it.
+      pick: () => setCustomTheme(t),
       badge: custom.shared.includes(t) ? "Shared" : "Custom",
+      hasPack: hasThemePack(t),
       wrap: (card: React.ReactNode) => (
         <CustomThemeMenu theme={t} custom={custom}>
           {card}

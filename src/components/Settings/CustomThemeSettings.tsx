@@ -29,6 +29,10 @@ import {
   type UserTheme,
 } from "@/utils/api/userThemes";
 import { openThemeEditor } from "@/utils/ui/themeEditor";
+import {
+  ApplyPackDialog,
+  hasThemePack,
+} from "@/components/Settings/ThemeDetailsActions";
 import { setCustomTheme, SHARE_PARAM, shareUrl } from "@/utils/ui/customTheme";
 import { themePreview, type ThemeOption } from "@/utils/ui/themeOptions";
 import {
@@ -256,6 +260,7 @@ export function CustomThemeMenu({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [packOpen, setPackOpen] = useState(false);
   const own = custom.mine.find((t) => t.share_code === theme.share_code);
   const openShared = useOpenSharedTheme();
   const item =
@@ -296,6 +301,19 @@ export function CustomThemeMenu({
               <Icon icon="lucide:link" aria-hidden="true" className="size-4" />
               Copy share link
             </DropdownMenuItem>
+            {custom.isAuthenticated && hasThemePack(theme) && (
+              <DropdownMenuItem
+                className={item}
+                onSelect={() => setPackOpen(true)}
+              >
+                <Icon
+                  icon="lucide:sparkles"
+                  aria-hidden="true"
+                  className="size-4"
+                />
+                Apply customization pack…
+              </DropdownMenuItem>
+            )}
             {own ? (
               <>
                 <DropdownMenuItem
@@ -373,6 +391,13 @@ export function CustomThemeMenu({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {packOpen && (
+        <ApplyPackDialog
+          theme={theme}
+          open
+          onClose={() => setPackOpen(false)}
+        />
+      )}
     </div>
   );
 }

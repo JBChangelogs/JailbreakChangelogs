@@ -214,8 +214,11 @@ type PackOffer = CustomTheme & {
 };
 let showPackOffer: ((theme: PackOffer) => void) | null = null;
 
+export const hasThemePack = (theme: CustomTheme) =>
+  Object.values(theme.pack ?? {}).some((part) => part != null);
+
 export function offerThemePack(theme: PackOffer) {
-  if (Object.keys(theme.pack ?? {}).length) showPackOffer?.(theme);
+  if (hasThemePack(theme)) showPackOffer?.(theme);
 }
 
 export function ThemePackPrompt() {
