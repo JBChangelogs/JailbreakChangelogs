@@ -177,6 +177,7 @@ export default function SharedThemeDialog() {
   ) : (
     "Theme not found"
   );
+  // A div, not the default <p>: it holds the creator's avatar.
   const description = theme ? (
     <>
       Shared theme
@@ -271,12 +272,13 @@ export default function SharedThemeDialog() {
                 </Button>
               </div>
               <SheetDescription
+                asChild
                 className={cn(
                   "text-secondary-text mt-1 text-xs",
                   collapsed && "sr-only",
                 )}
               >
-                {description}
+                <div>{description}</div>
               </SheetDescription>
             </div>
           ) : (
@@ -286,9 +288,10 @@ export default function SharedThemeDialog() {
               </div>
               <SheetTitle className="pr-20">{title}</SheetTitle>
               <SheetDescription
+                asChild
                 className={cn("text-secondary-text", collapsed && "sr-only")}
               >
-                {description}
+                <div>{description}</div>
               </SheetDescription>
             </SheetHeader>
           )}
