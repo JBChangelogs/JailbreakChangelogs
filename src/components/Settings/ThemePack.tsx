@@ -164,6 +164,7 @@ export function ThemePackEditor({
     [onBusyChange],
   );
   const [opened, setOpened] = useState<Set<PackPart>>(new Set());
+  const removed = useRef<ThemePack>({});
   const [expanded] = useState(
     () =>
       Object.keys(pack).some((k) => pack[k as PackPart] != null) ||
@@ -190,14 +191,15 @@ export function ThemePackEditor({
       ? toggleOpened(field.name, true)
       : set(
           field.name,
-          field.type === "accent"
-            ? { color: DEFAULT_COLOR, gradient: null }
-            : field.type === "color"
-              ? // Like profile underglow: start from the pack's accent.
-                (pack.accent?.color ?? DEFAULT_COLOR)
-              : field.type === "enum"
-                ? (field.options?.[0] ?? null)
-                : true,
+          removed.current[field.name] ??
+            (field.type === "accent"
+              ? { color: DEFAULT_COLOR, gradient: null }
+              : field.type === "color"
+                ? // Like profile underglow: start from the pack's accent.
+                  (pack.accent?.color ?? DEFAULT_COLOR)
+                : field.type === "enum"
+                  ? (field.options?.[0] ?? null)
+                  : true),
         );
 
   const removeImage = async (kind: "banner" | "background") => {
@@ -258,7 +260,10 @@ export function ThemePackEditor({
         size="sm"
         aria-label={`Remove ${PART_LABELS[name]}`}
         disabled={disabled}
-        onClick={() => set(name, null)}
+        onClick={() => {
+          removed.current = { ...removed.current, [name]: pack[name] };
+          set(name, null);
+        }}
       >
         <Icon icon="lucide:x" aria-hidden="true" />
       </Button>
