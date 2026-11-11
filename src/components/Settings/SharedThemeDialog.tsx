@@ -238,7 +238,7 @@ export default function SharedThemeDialog() {
             isMobile
               ? bottomPanel.sheet.className
               : dock.minimized
-                ? "bottom-auto! h-auto! sm:max-w-sm"
+                ? dock.minimizedClassName
                 : "h-full sm:max-w-md",
           )}
         >

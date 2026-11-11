@@ -272,5 +272,8 @@ export function useDesktopDock(label: string) {
           )}
     </>
   );
-  return { side, minimized, controls };
+  const minimizedClassName = `top-[calc(var(--header-height,0px)+0.75rem)]! bottom-auto! h-auto! sm:max-w-sm rounded-xl border! shadow-lg ${
+    side === "right" ? "right-3!" : "left-3!"
+  }`;
+  return { side, minimized, controls, minimizedClassName };
 }

@@ -736,7 +736,7 @@ export default function CustomThemeEditor({
           isMobile
             ? bottomPanel.sheet.className
             : minimized
-              ? "bottom-auto! h-auto! sm:max-w-sm"
+              ? dock.minimizedClassName
               : "h-full sm:max-w-xl",
         )}
       >
@@ -856,21 +856,23 @@ export default function CustomThemeEditor({
           <>
             <div className="absolute top-3 right-3 flex gap-1">
               {dock.controls}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Close the editor"
-                    onClick={(event) => cancel(event.shiftKey)}
-                  >
-                    <Icon icon="lucide:x" aria-hidden="true" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  Close (Shift+click to skip unsaved changes)
-                </TooltipContent>
-              </Tooltip>
+              {!minimized && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Close the editor"
+                      onClick={(event) => cancel(event.shiftKey)}
+                    >
+                      <Icon icon="lucide:x" aria-hidden="true" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Close (Shift+click to skip unsaved changes)
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
             <SheetHeader className="shrink-0 px-6 pt-6 pb-2">
               <SheetTitle className="pr-28">
@@ -1581,6 +1583,24 @@ export default function CustomThemeEditor({
               {saving ? "Saving…" : "Save"}
             </Button>
           </BottomPanelFooter>
+        ) : minimized ? (
+          <div className="flex shrink-0 justify-end gap-2 px-4 pb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(event) => cancel(event.shiftKey)}
+            >
+              Close
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => void save()}
+              disabled={!current || saving || updatingPreviews}
+              title="Save (Ctrl+S)"
+            >
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </div>
         ) : (
           <div className="border-border-card shrink-0 border-t px-6 py-4">
             <Button
