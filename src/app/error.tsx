@@ -21,7 +21,7 @@ export default function Error({
         <div className="flex min-h-[calc(100vh-8rem)] items-center">
           <div className="mx-auto w-full max-w-xl text-center">
             <Icon
-              icon="heroicons-outline:exclamation-triangle"
+              icon="heroicons:exclamation-triangle"
               className="text-secondary-text mx-auto mb-4 h-10 w-10"
             />
             <p className="text-secondary-text text-sm font-medium">
