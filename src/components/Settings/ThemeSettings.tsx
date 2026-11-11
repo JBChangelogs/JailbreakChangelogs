@@ -271,9 +271,13 @@ function AllThemesSheet({
           side={bottomPanel.sheet.side}
           hideOverlay={isMobile}
           // The page stays usable under the panel; only the X closes it.
-          onInteractOutside={
-            isMobile ? (event) => event.preventDefault() : undefined
-          }
+          // Clicks in a sheet opened from here (the shared theme preview)
+          // aren't outside clicks; closing that one returns here.
+          onInteractOutside={(event) => {
+            const target = event.target as Element | null;
+            if (isMobile || target?.closest?.('[role="dialog"]'))
+              event.preventDefault();
+          }}
           style={bottomPanel.sheet.style}
           className={cn(
             "bg-secondary-bg flex w-full flex-col gap-0 p-0",
