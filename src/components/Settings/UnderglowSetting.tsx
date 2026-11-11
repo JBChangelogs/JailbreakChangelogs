@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import SupporterModal from "@/components/Modals/SupporterModal";
@@ -32,9 +32,11 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
   });
   const saved = accentColorToHex(profile?.underglow);
   // Turning it on starts from the profile's accent, so it matches the cards.
+  // The profile API returns the custom accent here when set, else Discord's.
+  const accentColor = accentColorToHex(profile?.accent_color);
   const startColor =
     accentColorToHex(profile?.custom_accent_color) ??
-    accentColorToHex(profile?.accent_color) ??
+    accentColor ??
     DEFAULT_COLOR;
   const { modalState, closeModal, checkAccentColorAccess } =
     useSupporterModal();
@@ -43,12 +45,13 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
   // Picks save after the picker settles, like the accent color.
   const [draft, setDraft] = useState<string | null>(null);
   const debounced = useDebounce(draft, 600);
-  const save = async (color: string | null) => {
+  const save = async (color: string | null, successMessage?: string) => {
     try {
       await saveUnderglow(color);
       queryClient.setQueryData<Record<string, unknown>>(profileKey, (data) =>
         data ? { ...data, underglow: color } : data,
       );
+      if (successMessage) toast.success(successMessage);
     } catch (error) {
       toast.error("Couldn't save underglow", {
         description: error instanceof Error ? error.message : undefined,
@@ -75,6 +78,27 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
           </label>
           <p className="text-secondary-text text-sm">
             A soft colored glow under your profile cards.
+            {accentColor &&
+              color &&
+              color.toLowerCase() !== accentColor.toLowerCase() && (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!canEdit()) return;
+                      setDraft(accentColor);
+                      void save(
+                        accentColor,
+                        "Underglow now matches your accent color",
+                      );
+                    }}
+                    className="text-link hover:text-link-hover cursor-pointer underline-offset-4 hover:underline"
+                  >
+                    Match accent color
+                  </button>
+                </>
+              )}
           </p>
         </div>
         <Switch
@@ -89,15 +113,21 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
         />
       </div>
       {color && (
-        <div
-          className="underglow w-fit rounded-xl"
-          style={{ "--underglow": color } as CSSProperties}
-        >
+        // Same layout as the accent color card: swatch plus a wide preview.
+        <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-2 rounded-xl border p-2 sm:flex-nowrap">
           <ColorSwatch
             label="Color"
             value={color}
             onChange={setDraft}
             canOpen={canEdit}
+          />
+          {/* A card-colored bar glowing up from its bottom edge. */}
+          <div
+            aria-hidden="true"
+            className="border-border-card bg-secondary-bg order-first h-11 min-w-0 flex-1 basis-full rounded-lg border sm:order-none sm:basis-0"
+            style={{
+              backgroundImage: `radial-gradient(ellipse 60% 120% at 50% 130%, ${color}, transparent)`,
+            }}
           />
         </div>
       )}
