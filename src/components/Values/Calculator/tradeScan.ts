@@ -258,6 +258,10 @@ export function parseTradeScan(
     }
   }
 
+  // OCR boxes come sorted by top edge, so a label 1px higher jumps the queue.
+  // Each side is one row, so left-to-right matches the in-game order.
+  labels.sort((a, b) => a.x0 - b.x0);
+
   // Step 7: dedupe candidates.
   candidates = candidates.filter(
     (d, i) =>

@@ -167,3 +167,31 @@ test("names that resemble labels or short items still match", () => {
     "HyperOrange Level 1",
   ]);
 });
+
+test("items keep in-game left-to-right order when a label sits higher", () => {
+  const det = (text: string, x: number, y: number) => ({
+    x0: x,
+    y0: y,
+    x1: x + 120,
+    y1: y + 20,
+    text,
+    conf: 0.9,
+  });
+  const catalog = [
+    { id: 1, name: "Polaire", type: "Vehicle" },
+    { id: 2, name: "Snowchain", type: "Tire Style" },
+  ];
+  // OCR order: the higher "Tire Style" label (rightmost) comes first.
+  const { requesting } = parseTradeScan(
+    [
+      det("Tire Style", 600, 99),
+      det("Vehicle", 100, 100),
+      det("POLAIRE", 100, 125),
+      det("SNOWCHAIN", 600, 125),
+      det("Exit", 100, 300),
+    ],
+    400,
+    catalog,
+  );
+  expect(requesting.map((i) => i.id)).toEqual([1, 2]);
+});
