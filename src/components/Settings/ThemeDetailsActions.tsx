@@ -1,5 +1,7 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -250,6 +252,7 @@ export function ApplyPackDialog({
 }) {
   const { isAuthenticated, user, refreshUser } = useAuthContext();
   const [unchecked, setUnchecked] = useState<Set<PackPart>>(new Set());
+  const queryClient = useQueryClient();
   const [applying, setApplying] = useState(false);
   const { data: fields } = usePackFields(isAuthenticated);
 
@@ -274,6 +277,14 @@ export function ApplyPackDialog({
       await applyThemePack(theme.share_code, chosen);
       await refreshUser();
       toast.success("Customizations applied to your profile");
+      // Settings caches these apart from the user, so refetch them too.
+      if (user?.id)
+        for (const key of [
+          ["custom-background", user.id],
+          appearanceProfileKey(user.id),
+          ["accent-color", user.id],
+        ])
+          void queryClient.invalidateQueries({ queryKey: key });
       onClose();
     } catch (err) {
       toast.error("Couldn't apply the customizations", {
