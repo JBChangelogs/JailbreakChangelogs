@@ -363,7 +363,7 @@ export default function ThemeSettings({
       checked: customTheme?.share_code === t.share_code,
       pick: () => {
         setCustomTheme(t);
-        if (custom.shared.includes(t)) offerThemePack(t);
+        offerThemePack(t);
       },
       badge: custom.shared.includes(t) ? "Shared" : "Custom",
       wrap: (card: React.ReactNode) => (

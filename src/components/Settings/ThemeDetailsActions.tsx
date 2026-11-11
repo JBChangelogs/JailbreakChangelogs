@@ -217,7 +217,6 @@ export function offerThemePack(theme: PackOffer) {
 }
 
 export function ThemePackPrompt() {
-  const { user } = useAuthContext();
   const [theme, setTheme] = useState<PackOffer | null>(null);
   useEffect(() => {
     showPackOffer = setTheme;
@@ -225,9 +224,8 @@ export function ThemePackPrompt() {
       if (showPackOffer === setTheme) showPackOffer = null;
     };
   }, []);
-  const owner = theme?.user_id ?? theme?.user?.id;
-  if (!theme || (owner != null && String(owner) === String(user?.id)))
-    return null;
+  // Offered for your own themes too: you may be wearing someone else's pack.
+  if (!theme) return null;
   return (
     <ApplyPackDialog
       key={theme.share_code}

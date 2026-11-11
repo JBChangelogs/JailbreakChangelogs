@@ -1,5 +1,6 @@
 "use client";
 
+import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -1602,6 +1603,7 @@ export default function CustomThemeEditor({
           if (themeToApply) {
             setCustomTheme(themeToApply);
             toast.success("Theme applied");
+            offerThemePack(themeToApply);
           }
         }}
         title="Apply this theme?"

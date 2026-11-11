@@ -45,6 +45,7 @@ function editor({
   const states: unknown[] = [];
   let cursor = 0;
   const applied: UserTheme[] = [];
+  const packOffers: UserTheme[] = [];
   const savedEvents: UserTheme[] = [];
   const closedEvents: string[] = [];
   const requests: string[] = [];
@@ -118,6 +119,10 @@ function editor({
               error: (message: string) => errors.push(message),
             },
           };
+        if (name === "@/components/Settings/ThemeDetailsActions")
+          return {
+            offerThemePack: (theme: UserTheme) => packOffers.push(theme),
+          };
         if (name === "@/contexts/ThemeContext")
           return { useTheme: () => ({ theme: "dark", customTheme: null }) };
         if (name === "@/contexts/AuthContext")
@@ -183,6 +188,7 @@ function editor({
   return {
     saved,
     applied,
+    packOffers,
     savedEvents,
     closedEvents,
     requests,
@@ -519,8 +525,10 @@ test("saving an inactive mobile theme applies only after confirmation", async ()
   await view.save();
   expect(view.requests).toEqual(["update"]);
   expect(view.applied).toEqual([]);
+  expect(view.packOffers).toEqual([]);
   (view.prompt().onConfirm as () => void)();
   expect(view.applied).toEqual([view.saved]);
+  expect(view.packOffers).toEqual([view.saved]);
 });
 
 test("saving an active theme updates it without an unnecessary apply prompt", async () => {
