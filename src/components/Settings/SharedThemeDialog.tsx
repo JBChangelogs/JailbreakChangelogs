@@ -30,6 +30,7 @@ import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
 import { createMyTheme, fetchSharedTheme } from "@/utils/api/userThemes";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
+import { openThemeEditor } from "@/utils/ui/themeEditor";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import {
@@ -131,9 +132,9 @@ export default function SharedThemeDialog() {
         logo_filter: theme.logo_filter,
       });
       await queryClient.invalidateQueries({ queryKey: ["my-themes"] });
-      toast.success("Saved to your themes", {
-        description: `You can edit your copy (${saved.share_code}) in Settings.`,
-      });
+      toast.success("Saved to your themes");
+      close();
+      openThemeEditor(saved);
     } catch (err) {
       toast.error("Couldn't save a copy", {
         description: err instanceof Error ? err.message : undefined,
