@@ -2,7 +2,7 @@
 
 import { FRONTEND_SETTINGS } from "@/config/settings";
 
-import { useId } from "react";
+import { useId, useRef } from "react";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
@@ -85,13 +85,21 @@ export function AccentColorSetting({
     gradient: null,
     style: "solid" as const,
   };
+  const lastGradient = useRef<string | null>(null);
   const update = (patch: Partial<Accent>) => onChange({ ...current, ...patch });
   const setGradient = (on: boolean) => {
     if (!canEdit()) return;
-    // Start the gradient a little further round the color wheel.
+    if (!on) {
+      // Remember the end color so switching back to Gradient restores it.
+      if (current.gradient) lastGradient.current = current.gradient;
+      update({ gradient: null });
+      return;
+    }
+    // First time: start the gradient a little further round the color wheel.
     const hsv = hexToHsv(current.color);
     update({
-      gradient: on ? hsvToHex({ ...hsv, h: (hsv.h + 60) % 360 }) : null,
+      gradient:
+        lastGradient.current ?? hsvToHex({ ...hsv, h: (hsv.h + 60) % 360 }),
     });
   };
 
