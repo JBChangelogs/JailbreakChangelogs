@@ -8,27 +8,43 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { trackWebEvent } from "@/utils/analytics/web";
-
-interface ScannedTradeItem {
-  name: string;
-  type: string;
-  id: number;
-  score?: number;
-}
-
-interface ScanTradeResponse {
-  offering: ScannedTradeItem[];
-  requesting: ScannedTradeItem[];
-}
+import { fetchTradeCatalog } from "@/utils/api/fetchTradeItemsByIds";
+import { parseTradeScan, TradeScanError, type ScannedItem } from "./tradeScan";
+import type { TradeScreenshotRead } from "./tradeScanOcr";
 
 interface ScanTradeFromImageProps {
-  onScanSuccess: (result: ScanTradeResponse) => void;
+  onScanSuccess: (result: {
+    offering: ScannedItem[];
+    requesting: ScannedItem[];
+  }) => void;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === "object" && !Array.isArray(value);
+// One worker per page, kept alive so the OCR models load once. Scans never
+// overlap (the dropzone is disabled while scanning), so one handler at a time.
+let ocrWorker: Worker | null = null;
+
+function readTradeScreenshotInWorker(file: File): Promise<TradeScreenshotRead> {
+  ocrWorker ??= new Worker(
+    new URL("./tradeScanOcr.worker.ts", import.meta.url),
+    { type: "module" },
+  );
+  const worker = ocrWorker;
+  return new Promise((resolve, reject) => {
+    worker.onmessage = (
+      event: MessageEvent<{ result?: TradeScreenshotRead; error?: string }>,
+    ) => {
+      if (event.data.result) resolve(event.data.result);
+      else reject(new Error(event.data.error ?? "OCR failed"));
+    };
+    worker.onerror = () => {
+      worker.terminate();
+      ocrWorker = null; // start fresh on the next scan
+      reject(new Error("The scanner failed to start"));
+    };
+    worker.postMessage(file);
+  });
+}
 
 const isSupportedImage = (file: File): boolean => {
   const supportedTypes = new Set(["image/png", "image/jpeg", "image/jpg"]);
@@ -37,50 +53,6 @@ const isSupportedImage = (file: File): boolean => {
   return (
     name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg")
   );
-};
-
-const getScanErrorMessage = (payload: unknown): string | null => {
-  const withExtras = (
-    message: string,
-    obj: Record<string, unknown>,
-  ): string => {
-    const pieces: string[] = [];
-    const width = typeof obj.width === "number" ? obj.width : null;
-    const height = typeof obj.height === "number" ? obj.height : null;
-    if (width && height) pieces.push(`${width}×${height}`);
-
-    const maxSize = typeof obj.max_size === "string" ? obj.max_size : null;
-    if (maxSize && !message.toLowerCase().includes(maxSize.toLowerCase())) {
-      pieces.push(`max ${maxSize}`);
-    }
-
-    return pieces.length ? `${message} (${pieces.join(", ")})` : message;
-  };
-
-  // Some deployments return `[errorObj, statusCode]` with HTTP 200.
-  if (Array.isArray(payload)) {
-    const first = payload[0];
-    if (isRecord(first)) {
-      const message =
-        (typeof first.message === "string" ? first.message : null) ??
-        (typeof first.detail === "string" ? first.detail : null);
-      return message ? withExtras(message, first) : null;
-    }
-    return null;
-  }
-
-  if (!isRecord(payload)) return null;
-
-  const message =
-    (typeof payload.message === "string" ? payload.message : null) ??
-    (typeof payload.detail === "string" ? payload.detail : null);
-  return message ? withExtras(message, payload) : null;
-};
-
-const getEmbeddedStatus = (payload: unknown): number | null => {
-  if (!Array.isArray(payload)) return null;
-  const maybeStatus = payload[1];
-  return typeof maybeStatus === "number" ? maybeStatus : null;
 };
 
 export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
@@ -122,94 +94,35 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_SCANNING_API_URL;
-      if (!baseUrl) {
-        trackWebEvent("trade_scan_failed", {
-          mode: "upload",
-          code: "not_configured",
-        });
-        const message = "API is not configured (NEXT_PUBLIC_API_URL missing).";
-        setLastErrorMessage(message);
-        toast.error(message);
-        return;
-      }
-
       setIsScanning(true);
       setLastFileName(file.name);
       setLastErrorMessage(null);
 
       const toastId = toast.loading("Scanning trade screenshot...");
-      let failureCode = "network_error";
+      let failureCode = "ocr_failed";
       try {
-        const formData = new FormData();
-        formData.set("image", file);
+        const catalogRequest = fetchTradeCatalog();
+        // Keep a catalog failure from surfacing as an unhandled rejection while OCR runs.
+        catalogRequest.catch(() => {});
+        const { detections, height, timings } =
+          await readTradeScreenshotInWorker(file);
+        failureCode = "catalog_failed";
+        const catalog = await catalogRequest;
 
-        const { url, headers } = buildApiFetchRequest(baseUrl, "/trade");
-        const response = await fetch(url, {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-          cache: "no-store",
-          headers,
-        });
-
-        failureCode = "invalid_response";
-        const data = (await response.json()) as unknown;
-        const embeddedStatus = getEmbeddedStatus(data);
-        const effectiveStatus = embeddedStatus ?? response.status;
-
-        if (
-          !response.ok ||
-          (embeddedStatus !== null && embeddedStatus >= 400)
-        ) {
-          if (effectiveStatus === 429) {
-            trackWebEvent("trade_scan_failed", {
-              mode: "upload",
-              code: "rate_limited",
-            });
-            const message =
-              "Too many scans — please wait a moment and try again.";
-            setLastErrorMessage(message);
-            toast.error(message, { id: toastId });
-            return;
-          }
-
-          failureCode = `http_${effectiveStatus}`;
-          const message =
-            getScanErrorMessage(data) ??
-            `Scan failed${effectiveStatus ? ` (${effectiveStatus})` : ""}`;
-          setLastErrorMessage(message);
-          throw new Error(message);
-        }
-
-        // Defensive: some backends return an error payload with HTTP 200.
-        const okButErrorMessage = getScanErrorMessage(data);
-        if (okButErrorMessage) {
-          failureCode = "api_error";
-          setLastErrorMessage(okButErrorMessage);
-          throw new Error(okButErrorMessage);
-        }
-
-        if (!data || typeof data !== "object" || Array.isArray(data)) {
-          setLastErrorMessage("Unexpected scan response");
-          throw new Error("Unexpected scan response");
-        }
-
+        failureCode = "parse_failed";
         const parseStartedAt = performance.now();
-        const offering = Array.isArray((data as ScanTradeResponse).offering)
-          ? (data as ScanTradeResponse).offering
-          : [];
-        const requesting = Array.isArray((data as ScanTradeResponse).requesting)
-          ? (data as ScanTradeResponse).requesting
-          : [];
+        const { offering, requesting } = parseTradeScan(detections, height, [
+          ...catalog.values(),
+        ]);
 
-        // The upload API exposes parsed items, without raw detections or OCR timings.
         trackWebEvent("trade_scan", {
           mode: "upload",
           scope: "area",
           offering: offering.length,
           requesting: requesting.length,
+          detections: detections.length,
           parse_ms: Math.round(performance.now() - parseStartedAt),
+          ...timings,
         });
 
         if (offering.length === 0 && requesting.length === 0) {
@@ -232,11 +145,13 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       } catch (error) {
         trackWebEvent("trade_scan_failed", {
           mode: "upload",
-          code: failureCode,
+          code: error instanceof TradeScanError ? error.code : failureCode,
         });
         log.error("Scan trade image failed", error);
         const message =
-          error instanceof Error ? error.message : "Failed to scan image";
+          error instanceof TradeScanError
+            ? "Too much text in that image. Crop it to the trade window and try again."
+            : "Failed to scan image. Please try again.";
         setLastErrorMessage(message);
         toast.error(message, { id: toastId });
       } finally {

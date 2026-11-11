@@ -2,18 +2,20 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+import { TradeScanError } from "./tradeScan";
+
+const TIMINGS = { ocr_ms: 300, det_ms: 100, rec_ms: 200 };
 
 function setup({
-  data = {
+  parsed = {
     offering: [{ id: 1 }],
     requesting: [{ id: 2 }, { id: 3 }],
   } as unknown,
-  status = 200,
-  networkError = false,
-  invalidJson = false,
-  configured = true,
+  workerError = null as string | null,
+  workerCrash = false,
+  catalogError = false,
+  parseError = null as Error | null,
   rybbitThrows = false,
-  elapsed = 0,
 } = {}) {
   const events: Array<{ name: string; props: Record<string, unknown> }> = [];
   const rybbit: unknown[][] = [];
@@ -27,12 +29,36 @@ function setup({
   let now = 100;
   const jsx = () => null;
   const exports = {} as typeof import("./ScanTradeFromImage");
+
+  class FakeWorker {
+    onmessage: ((event: { data: unknown }) => void) | null = null;
+    onerror: (() => void) | null = null;
+    terminate() {}
+    postMessage() {
+      queueMicrotask(() => {
+        if (workerCrash) return this.onerror?.();
+        this.onmessage?.({
+          data: workerError
+            ? { error: workerError }
+            : {
+                result: {
+                  detections: [{}, {}, {}, {}],
+                  height: 1000,
+                  timings: TIMINGS,
+                },
+              },
+        });
+      });
+    }
+  }
+
   runInNewContext(
     transpileModule(
+      // `import.meta` can't run in this CommonJS sandbox; the worker URL is unused anyway.
       readFileSync(
         new URL("./ScanTradeFromImage.tsx", import.meta.url),
         "utf8",
-      ),
+      ).replace("import.meta.url", "moduleUrl"),
       {
         compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
       },
@@ -40,15 +66,11 @@ function setup({
     {
       exports,
       Event,
-      FormData,
+      URL,
+      Worker: FakeWorker,
+      queueMicrotask,
+      moduleUrl: "file:///ScanTradeFromImage.tsx",
       performance: { now: () => now++ },
-      process: {
-        env: {
-          NEXT_PUBLIC_SCANNING_API_URL: configured
-            ? "https://scan.example.com"
-            : "",
-        },
-      },
       window: {
         rybbit: {
           event: (...args: unknown[]) => {
@@ -56,18 +78,6 @@ function setup({
             if (rybbitThrows) throw new Error("analytics blocked");
           },
         },
-      },
-      fetch: async () => {
-        now += elapsed;
-        if (networkError) throw new Error("offline");
-        return {
-          ok: status < 400,
-          status,
-          json: async () => {
-            if (invalidJson) throw new Error("invalid JSON");
-            return data;
-          },
-        };
       },
       require: (name: string) => {
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
@@ -90,12 +100,20 @@ function setup({
             trackWebEvent: (name: string, props: Record<string, unknown>) =>
               events.push({ name, props }),
           };
-        if (name === "@/utils/api/apiDevToken")
+        if (name === "@/utils/api/fetchTradeItemsByIds")
           return {
-            buildApiFetchRequest: () => ({
-              url: "https://scan.example.com/trade",
-              headers: {},
-            }),
+            fetchTradeCatalog: () =>
+              catalogError
+                ? Promise.reject(new Error("catalog down"))
+                : Promise.resolve(new Map()),
+          };
+        if (name === "./tradeScan")
+          return {
+            TradeScanError,
+            parseTradeScan: () => {
+              if (parseError) throw parseError;
+              return parsed;
+            },
           };
         if (name === "@/services/logger")
           return { createLogger: () => ({ error: () => {} }) };
@@ -125,8 +143,8 @@ function setup({
   };
 }
 
-test("successful uploads use the app scan fields and exclude request time from parse_ms", async () => {
-  const app = setup({ elapsed: 5000 });
+test("successful scans report the app's scan fields, OCR timings included", async () => {
+  const app = setup();
   await app.scan();
   expect(app.results).toHaveLength(1);
   expect(app.events).toEqual([
@@ -137,7 +155,9 @@ test("successful uploads use the app scan fields and exclude request time from p
         scope: "area",
         offering: 1,
         requesting: 2,
+        detections: 4,
         parse_ms: 1,
+        ...TIMINGS,
       },
     },
   ]);
@@ -147,14 +167,19 @@ test("successful uploads use the app scan fields and exclude request time from p
 });
 
 for (const [code, options] of [
-  ["network_error", { networkError: true }],
-  ["invalid_response", { invalidJson: true }],
-  ["invalid_response", { data: null }],
-  ["rate_limited", { status: 429 }],
-  ["rate_limited", { data: [{ message: "Slow down" }, 429] }],
-  ["http_500", { status: 500 }],
-  ["api_error", { data: { message: "Failed" } }],
-  ["not_configured", { configured: false }],
+  ["ocr_failed", { workerError: "model download failed" }],
+  ["ocr_failed", { workerCrash: true }],
+  ["catalog_failed", { catalogError: true }],
+  ["parse_failed", { parseError: new Error("boom") }],
+  [
+    "too_many_text_regions",
+    {
+      parseError: new TradeScanError(
+        "too_many_text_regions",
+        "Too much text in the image to read a trade.",
+      ),
+    },
+  ],
 ] as const) {
   test(`scan failure reports ${code} once`, async () => {
     const app = setup(options);
@@ -192,7 +217,7 @@ test("a Rybbit exception cannot turn a successful scan into a failure", async ()
 });
 
 test("empty scans report zero counts like the app without applying items", async () => {
-  const app = setup({ data: { offering: [], requesting: [] } });
+  const app = setup({ parsed: { offering: [], requesting: [] } });
   await app.scan();
   expect(app.events).toEqual([
     {
@@ -202,7 +227,9 @@ test("empty scans report zero counts like the app without applying items", async
         scope: "area",
         offering: 0,
         requesting: 0,
+        detections: 4,
         parse_ms: 1,
+        ...TIMINGS,
       },
     },
   ]);
