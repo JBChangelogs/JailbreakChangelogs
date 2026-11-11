@@ -2,7 +2,7 @@
 
 import { FRONTEND_SETTINGS } from "@/config/settings";
 
-import { useId, useRef } from "react";
+import { useId } from "react";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
@@ -16,14 +16,10 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import {
   ACCENT_STYLES,
   accentCardTheme,
-  hexToHsv,
-  hsvToHex,
   type Accent,
   type AccentStyle,
 } from "@/utils/ui/accentColor";
-import { Icon } from "@/components/ui/IconWrapper";
-import { ColorSwatch } from "@/components/ui/color-picker";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AccentFillPicker } from "@/components/Settings/ColorFillPickers";
 
 const DEFAULT_COLOR = "#2462cd";
 
@@ -85,23 +81,7 @@ export function AccentColorSetting({
     gradient: null,
     style: "solid" as const,
   };
-  const lastGradient = useRef<string | null>(null);
   const update = (patch: Partial<Accent>) => onChange({ ...current, ...patch });
-  const setGradient = (on: boolean) => {
-    if (!canEdit()) return;
-    if (!on) {
-      // Remember the end color so switching back to Gradient restores it.
-      if (current.gradient) lastGradient.current = current.gradient;
-      update({ gradient: null });
-      return;
-    }
-    // First time: start the gradient a little further round the color wheel.
-    const hsv = hexToHsv(current.color);
-    update({
-      gradient:
-        lastGradient.current ?? hsvToHex({ ...hsv, h: (hsv.h + 60) % 360 }),
-    });
-  };
 
   return (
     <div className="space-y-5">
@@ -129,70 +109,11 @@ export function AccentColorSetting({
         </p>
       </div>
 
-      <div role="group" aria-label="Color" className="space-y-2">
-        {/* Full width and a touch taller, to match the color card below. */}
-        <Tabs
-          radio
-          value={current.gradient ? "gradient" : "single"}
-          onValueChange={(value) => setGradient(value === "gradient")}
-        >
-          <TabsList aria-label="Fill" fullWidth>
-            <TabsTrigger value="single" fullWidth className="py-2.5">
-              Single color
-            </TabsTrigger>
-            <TabsTrigger value="gradient" fullWidth className="py-2.5">
-              Gradient
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-2 rounded-xl border p-2 sm:flex-nowrap">
-          <ColorSwatch
-            label={current.gradient ? "Start" : "Color"}
-            value={current.color}
-            onChange={(color) => update({ color })}
-            canOpen={canEdit}
-          />
-          {/* Runs left to right so its ends line up with the swatches. On
-              small screens it sits above them, full width. */}
-          <div
-            className="relative order-first grid h-11 min-w-0 flex-1 basis-full place-items-center rounded-lg border border-black/10 shadow-inner sm:order-none sm:basis-0"
-            style={{
-              background: current.gradient
-                ? `linear-gradient(90deg, ${current.color}, ${current.gradient}) border-box`
-                : current.color,
-            }}
-          >
-            {current.gradient && (
-              <button
-                type="button"
-                aria-label="Swap start and end colors"
-                onClick={() =>
-                  canEdit() &&
-                  update({ color: current.gradient!, gradient: current.color })
-                }
-                className="border-border-card bg-secondary-bg text-secondary-text hover:text-primary-text focus-visible:ring-border-focus cursor-pointer rounded-full border p-1.5 shadow-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <Icon
-                  icon="lucide:arrow-left-right"
-                  aria-hidden="true"
-                  className="size-3.5"
-                />
-              </button>
-            )}
-          </div>
-          {current.gradient && (
-            <div className="ml-auto sm:ml-0">
-              <ColorSwatch
-                label="End"
-                value={current.gradient}
-                onChange={(gradient) => update({ gradient })}
-                canOpen={canEdit}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      <AccentFillPicker
+        value={current}
+        onChange={(fill) => update(fill)}
+        canEdit={canEdit}
+      />
 
       <fieldset>
         <legend className="text-primary-text mb-2 text-sm font-medium">

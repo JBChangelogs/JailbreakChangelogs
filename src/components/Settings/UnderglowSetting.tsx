@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import SupporterModal from "@/components/Modals/SupporterModal";
-import { ColorSwatch } from "@/components/ui/color-picker";
+import { UnderglowPicker } from "@/components/Settings/ColorFillPickers";
 import { Switch } from "@/components/ui/switch";
 import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -113,23 +113,7 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
         />
       </div>
       {color && (
-        // Same layout as the accent color card: swatch plus a wide preview.
-        <div className="border-border-card bg-tertiary-bg flex flex-wrap items-center gap-2 rounded-xl border p-2 sm:flex-nowrap">
-          <ColorSwatch
-            label="Color"
-            value={color}
-            onChange={setDraft}
-            canOpen={canEdit}
-          />
-          {/* A card-colored bar glowing up from its bottom edge. */}
-          <div
-            aria-hidden="true"
-            className="border-border-card bg-secondary-bg order-first h-11 min-w-0 flex-1 basis-full rounded-lg border sm:order-none sm:basis-0"
-            style={{
-              backgroundImage: `radial-gradient(ellipse 60% 120% at 50% 130%, ${color}, transparent)`,
-            }}
-          />
-        </div>
+        <UnderglowPicker value={color} onChange={setDraft} canEdit={canEdit} />
       )}
       <SupporterModal
         isOpen={modalState.isOpen}

@@ -5,7 +5,10 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ColorSwatch } from "@/components/ui/color-picker";
+import {
+  AccentFillPicker,
+  UnderglowPicker,
+} from "@/components/Settings/ColorFillPickers";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -264,49 +267,22 @@ export function ThemePackEditor({
     return (
       <div className="flex flex-wrap items-center gap-2">
         {field.type === "accent" && accent && (
-          <>
-            <ColorSwatch
-              label="Color"
-              value={accent.color}
-              canOpen={() => !disabled}
-              onChange={(color) => set(name, { ...accent, color })}
+          <div className="min-w-0 flex-1">
+            <AccentFillPicker
+              value={{ color: accent.color, gradient: accent.gradient ?? null }}
+              onChange={(fill) => set(name, fill)}
+              canEdit={() => !disabled}
             />
-            {accent.gradient ? (
-              <>
-                <ColorSwatch
-                  label="Gradient"
-                  value={accent.gradient}
-                  canOpen={() => !disabled}
-                  onChange={(gradient) => set(name, { ...accent, gradient })}
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={disabled}
-                  onClick={() => set(name, { ...accent, gradient: null })}
-                >
-                  Remove gradient
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={disabled}
-                onClick={() => set(name, { ...accent, gradient: accent.color })}
-              >
-                Add gradient
-              </Button>
-            )}
-          </>
+          </div>
         )}
         {field.type === "color" && (
-          <ColorSwatch
-            label={PART_LABELS[name]}
-            value={value as string}
-            canOpen={() => !disabled}
-            onChange={(color) => set(name, color)}
-          />
+          <div className="min-w-0 flex-1">
+            <UnderglowPicker
+              value={value as string}
+              onChange={(color) => set(name, color)}
+              canEdit={() => !disabled}
+            />
+          </div>
         )}
         {field.type === "enum" &&
           field.options?.map((option) => (
