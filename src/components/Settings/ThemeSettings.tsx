@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { hasThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { FRONTEND_SETTINGS } from "@/config/settings";
 
@@ -348,6 +350,13 @@ function AllThemesSheet({
                 </section>
               );
             })}
+            <Link
+              href="/themes"
+              onClick={() => setOpen(false)}
+              className="text-link hover:text-link-hover inline-block text-sm hover:underline"
+            >
+              Browse the theme marketplace
+            </Link>
           </div>
           {isMobile && (
             <BottomPanelFooter collapsed={bottomPanel.collapsed}>
