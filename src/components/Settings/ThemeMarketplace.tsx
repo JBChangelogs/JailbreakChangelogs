@@ -91,6 +91,9 @@ export default function ThemeMarketplace() {
       ? ownMarketplacePage(mine.data.themes, user, query, sort, page)
       : undefined
     : data;
+  const drafts = mineTab
+    ? (mine.data?.themes.filter((t) => t.published_at == null).length ?? 0)
+    : 0;
   const shownPending = mineTab ? mine.isPending : isPending;
   const shownError = mineTab ? mine.error : error;
   const shownRefetch = mineTab ? mine.refetch : refetch;
@@ -434,7 +437,9 @@ export default function ThemeMarketplace() {
             {query
               ? `No themes match “${query}”. Try another name, description, author, or share code.`
               : mineTab
-                ? "Publish one of your custom themes from your theme settings and it will show here."
+                ? drafts
+                  ? `You have ${drafts} ${drafts === 1 ? "theme that isn't" : "themes that aren't"} published yet. Publish one from your theme settings and it will show here.`
+                  : "Publish one of your custom themes from your theme settings and it will show here."
                 : "Community themes will appear here once published. You can share a custom theme from your theme settings."}
           </p>
           {query ? (
