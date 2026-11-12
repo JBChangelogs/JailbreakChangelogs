@@ -98,15 +98,17 @@ export function useCustomThemes() {
         try {
           return await fetchSharedTheme(code);
         } catch (err) {
-          // Deleted by its owner: drop it from the list.
-          if (err instanceof ThemeApiError && err.status === 404) {
+          // Deleted by its owner: drop it, unless in use (it'd be re-added).
+          if (
+            err instanceof ThemeApiError &&
+            err.status === 404 &&
+            code !== sharedInUse?.share_code
+          ) {
             forgetSharedTheme(code);
           }
           throw err;
         }
       },
-      // The one in use already loads with the page.
-      enabled: code !== sharedInUse?.share_code,
       staleTime: 10 * 60 * 1000,
       retry: false,
     })),
