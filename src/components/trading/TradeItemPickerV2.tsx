@@ -1026,7 +1026,7 @@ export default function TradeItemPickerV2({
                           }}
                           style={
                             {
-                              "--color-button-info":
+                              "--color-tab-active":
                                 condition === "clean"
                                   ? "var(--color-status-success)"
                                   : condition === "duped"

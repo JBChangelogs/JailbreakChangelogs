@@ -12,6 +12,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
 import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
@@ -691,32 +692,68 @@ function TradeSideEditor({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </label>
-              {(["og", "duped"] as const).map((condition) => (
-                <button
-                  key={condition}
-                  type="button"
-                  onClick={() =>
-                    onChange(
-                      selected.map((entry) =>
-                        entry.id === item.id
-                          ? {
-                              ...entry,
-                              [condition]: !entry[condition],
-                              [condition === "og" ? "duped" : "og"]: false,
-                            }
-                          : entry,
-                      ),
-                    )
-                  }
-                  className={`h-7 cursor-pointer rounded border px-2 text-xs font-medium capitalize transition-colors ${
-                    item[condition]
-                      ? "border-button-info bg-button-info/15 text-link"
-                      : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                  }`}
-                >
-                  {condition === "og" ? "OG" : "Duped"}
-                </button>
-              ))}
+              {(() => {
+                const condition = item.duped
+                  ? "duped"
+                  : item.og
+                    ? "og"
+                    : "clean";
+                return (
+                  <Tabs
+                    radio
+                    value={condition}
+                    onValueChange={(value) =>
+                      onChange(
+                        selected.map((entry) =>
+                          entry.id === item.id
+                            ? {
+                                ...entry,
+                                og: value === "og",
+                                duped: value === "duped",
+                              }
+                            : entry,
+                        ),
+                      )
+                    }
+                    style={
+                      {
+                        "--color-tab-active":
+                          condition === "clean"
+                            ? "var(--color-status-success)"
+                            : condition === "duped"
+                              ? "var(--color-status-error)"
+                              : "#FFD700",
+                        "--color-form-button-text":
+                          condition === "clean"
+                            ? "var(--color-button-success-text)"
+                            : condition === "duped"
+                              ? "var(--color-button-danger-text)"
+                              : "#000",
+                      } as React.CSSProperties
+                    }
+                  >
+                    <TabsList
+                      data-variant="filled"
+                      aria-label={`Condition for ${item.name}`}
+                      className="border-border-card bg-tertiary-bg gap-0.5 rounded-lg border p-0.5"
+                    >
+                      {(["clean", "duped", "og"] as const).map((option) => (
+                        <TabsTrigger
+                          key={option}
+                          value={option}
+                          className="px-2 py-1 text-[10px] leading-none"
+                        >
+                          {option === "og"
+                            ? "OG"
+                            : option === "duped"
+                              ? "Duped"
+                              : "Clean"}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                );
+              })()}
             </div>
           </div>
         );
@@ -774,7 +811,6 @@ function TradeSideEditor({
                           },
                         ]);
                         setSearch("");
-                        setOpen(false);
                       }}
                     />
                   ))
