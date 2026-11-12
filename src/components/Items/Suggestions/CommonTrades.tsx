@@ -5,6 +5,13 @@ import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { getTextSearchRank } from "@/utils/helpers/itemSearch";
 import { useItemCatalogPage } from "@/hooks/useItemCatalogPage";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
@@ -634,29 +641,55 @@ function TradeSideEditor({
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <label className="text-secondary-text flex items-center gap-1 text-xs">
                 Qty
-                <input
-                  type="number"
-                  min={1}
-                  max={
-                    MAX_QTY_PER_SIDE - (totalQty - (Number(item.amount) || 0))
-                  }
-                  value={item.amount}
-                  onChange={(event) => {
-                    const maxForItem =
-                      MAX_QTY_PER_SIDE -
-                      (totalQty - (Number(item.amount) || 0));
-                    const amount = Math.min(
-                      maxForItem,
-                      Math.max(1, Number(event.target.value) || 1),
-                    );
-                    onChange(
-                      selected.map((entry) =>
-                        entry.id === item.id ? { ...entry, amount } : entry,
-                      ),
-                    );
-                  }}
-                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info h-7 w-14 rounded border px-1.5 text-xs outline-none"
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`Quantity for ${item.name}`}
+                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info flex h-7 w-14 cursor-pointer items-center justify-between rounded border px-1.5 text-xs outline-none"
+                    >
+                      {item.amount}
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-3 w-3"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-card bg-secondary-bg text-primary-text max-h-60 min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-y-auto rounded-lg border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={String(item.amount)}
+                      onValueChange={(value) =>
+                        onChange(
+                          selected.map((entry) =>
+                            entry.id === item.id
+                              ? { ...entry, amount: Number(value) }
+                              : entry,
+                          ),
+                        )
+                      }
+                    >
+                      {Array.from(
+                        {
+                          length:
+                            MAX_QTY_PER_SIDE -
+                            (totalQty - (Number(item.amount) || 0)),
+                        },
+                        (_, i) => String(i + 1),
+                      ).map((n) => (
+                        <DropdownMenuRadioItem
+                          key={n}
+                          value={n}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded px-3 py-1.5 text-xs"
+                        >
+                          {n}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </label>
               {(["og", "duped"] as const).map((condition) => (
                 <button
