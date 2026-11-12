@@ -156,38 +156,36 @@ export function ThemeCard({
           compact ? "min-h-10 px-2 py-1.5" : "min-h-14 px-3 py-2",
         )}
       >
-        <span className="flex min-w-0 items-center gap-2">
-          {!compact && (
-            <Icon
-              icon={icon}
-              aria-hidden="true"
-              className="text-secondary-text size-4 shrink-0"
-            />
-          )}
-          <span className="min-w-0">
-            <span
-              className={cn(
-                "text-primary-text block font-medium",
-                compact ? "text-xs leading-tight" : "text-sm leading-tight",
-              )}
-            >
-              {label}
-            </span>
-            {hasPack && !compact && (
-              <span
-                title="Includes a customization pack"
-                className="text-secondary-text mt-0.5 flex items-center gap-1 text-xs whitespace-nowrap"
-              >
-                <Icon
-                  icon="lucide:sparkles"
-                  aria-hidden="true"
-                  className="text-link size-3 shrink-0"
-                />
-                <span aria-hidden="true">Includes a pack</span>
-                <span className="sr-only">Includes a customization pack</span>
-              </span>
+        <span className="min-w-0">
+          <span
+            className={cn(
+              "text-primary-text flex items-start gap-1.5 font-medium",
+              compact ? "text-xs leading-tight" : "text-sm leading-tight",
             )}
+          >
+            {!compact && (
+              <Icon
+                icon={icon}
+                aria-hidden="true"
+                className="text-secondary-text size-4 shrink-0"
+              />
+            )}
+            <span className="min-w-0">{label}</span>
           </span>
+          {hasPack && !compact && (
+            <span
+              title="Includes a customization pack"
+              className="text-secondary-text mt-0.5 flex items-center gap-1 text-xs whitespace-nowrap"
+            >
+              <Icon
+                icon="lucide:sparkles"
+                aria-hidden="true"
+                className="text-link size-3 shrink-0"
+              />
+              <span aria-hidden="true">Includes a pack</span>
+              <span className="sr-only">Includes a customization pack</span>
+            </span>
+          )}
         </span>
         <span
           aria-hidden="true"
