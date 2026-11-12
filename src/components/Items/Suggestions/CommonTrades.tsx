@@ -5,6 +5,7 @@ import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -970,19 +971,23 @@ export function CommonTradesEditor({
             {![...trade.requesting, ...trade.offering].some(
               (item) => item.id === suggestedItemId,
             ) && (
-              <div className="text-secondary-text mb-3 flex flex-wrap items-center gap-2 text-sm">
-                <span>Add {suggestedItem.name} to either side:</span>
+              <div className="bg-button-info/10 border-button-info text-primary-text mb-3 flex w-fit max-w-full flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm shadow-sm">
+                <span>
+                  This common trade needs <strong>{suggestedItem.name}</strong>.
+                  Add it to:
+                </span>
                 {(["offering", "requesting"] as const).map((side) => (
-                  <button
+                  <Button
                     key={side}
                     type="button"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => addSuggestedItem(index, side)}
                     disabled={!canAddSuggestedItem(trade[side])}
-                    className="border-border-card bg-secondary-bg text-link hover:border-button-info/60 inline-flex h-8 cursor-pointer items-center rounded-md border px-3 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     aria-label={`Add ${suggestedItem.name} to ${side}`}
                   >
-                    Add to {side === "offering" ? "Offering" : "Requesting"}
-                  </button>
+                    {side === "offering" ? "Offering" : "Requesting"}
+                  </Button>
                 ))}
               </div>
             )}
