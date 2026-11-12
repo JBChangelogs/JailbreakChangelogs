@@ -21,6 +21,8 @@ interface ConfirmDialogProps {
   confirmVariant?: "default" | "destructive" | "secondary" | "ghost" | "link";
   confirmDisabled?: boolean;
   closeOnConfirm?: boolean;
+  /** False keeps a stray click outside from dismissing it unseen. */
+  closeOnOutsideClick?: boolean;
   children?: React.ReactNode;
 }
 
@@ -35,6 +37,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmVariant = "destructive",
   confirmDisabled = false,
   closeOnConfirm = true,
+  closeOnOutsideClick = true,
   children,
 }) => {
   const pageSettled = usePageSettled();
@@ -45,6 +48,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     >
       <DialogContent
         showClose
+        onInteractOutside={
+          closeOnOutsideClick ? undefined : (event) => event.preventDefault()
+        }
         aria-describedby={undefined}
         className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
       >

@@ -337,6 +337,7 @@ export function ApplyPackDialog({
       confirmVariant="default"
       confirmDisabled={applying || !chosen.length}
       closeOnConfirm={false}
+      closeOnOutsideClick={false}
     >
       <p className="text-secondary-text mb-3 text-sm">
         {available.length

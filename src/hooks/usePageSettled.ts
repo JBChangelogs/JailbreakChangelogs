@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 
+// Once the page has settled, hydration is long over, so dialogs mounted later
+// (e.g. a prompt after a click) can open straight away instead of waiting idle.
+let settledOnce = false;
+
 export function usePageSettled() {
-  const [settled, setSettled] = useState(false);
+  const [settled, setSettled] = useState(() => settledOnce);
 
   useEffect(() => {
+    if (settledOnce) return;
     let idleId: number | undefined;
+    const done = () => {
+      settledOnce = true;
+      setSettled(true);
+    };
     const settle = () => {
       idleId =
         typeof window.requestIdleCallback === "function"
-          ? window.requestIdleCallback(() => setSettled(true), {
-              timeout: 2000,
-            })
-          : window.setTimeout(() => setSettled(true), 200);
+          ? window.requestIdleCallback(done, { timeout: 2000 })
+          : window.setTimeout(done, 200);
     };
     if (document.readyState === "complete") settle();
     else window.addEventListener("load", settle, { once: true });
