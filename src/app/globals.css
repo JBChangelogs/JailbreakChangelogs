@@ -505,12 +505,17 @@ body:has([data-sheet-side="right"][data-state="open"])
 
 @layer base {
   * {
-    outline-color: hsla(
-      231,
-      100%,
-      62%,
-      0.3
-    ); /* Button info color with opacity */
+    outline-color: color-mix(in srgb, var(--color-button-info) 30%, transparent);
+  }
+
+  /* Firefox ignores outline-color on its default ring; tint the border instead. */
+  :where(
+      textarea,
+      select,
+      input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"])
+    ):focus-visible {
+    outline: 1px solid var(--color-button-info);
+    outline-offset: -1px;
   }
 
   /* Recharts makes inner layers focusable; hide the ring on tap/click */
