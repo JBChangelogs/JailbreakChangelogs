@@ -1,6 +1,8 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import { Icon } from "@/components/ui/IconWrapper";
 import { UserData } from "@/types/auth";
 import {
   APP_ONLY_SETTINGS,
@@ -45,7 +47,10 @@ import {
   EmailConnection,
   EmailNotificationSettings,
 } from "@/components/Settings/EmailNotificationSettings";
-import { SettingsSidebar } from "@/components/Settings/SettingsSidebar";
+import {
+  SettingsSidebar,
+  type SettingsNavSection,
+} from "@/components/Settings/SettingsSidebar";
 import { useSectionHighlight } from "@/hooks/useSectionHighlight";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import { useSupporterLevelActions } from "@/hooks/useSupporterLevelActions";
@@ -139,6 +144,9 @@ export default function SettingsPage() {
   // The section at the top of the screen, marked in the sidebar the way the
   // site's own sidebar marks the current page.
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  // Below 1200px the sidebar is hidden, so a collapsible copy sits above the
+  // content instead.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // While a sidebar click scrolls, the clicked section stays marked instead
   // of each section it passes.
   const scrollLockRef = useRef(0);
@@ -382,6 +390,66 @@ export default function SettingsPage() {
   });
   const hasSupporterHistory = sortedSupporterHistory.length > 0;
   const currentSupporterLevel = userData.premiumtype ?? 0;
+  const navSections: SettingsNavSection[] = [
+    {
+      title: "Preferences",
+      items: [
+        ...(hasAppearance ? [] : displayNavItems),
+        ...sortedCategories.flatMap((cat) => [
+          {
+            id: cat.name,
+            title: cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
+            icon: sectionIcon(cat.name),
+          },
+          ...(cat.name === "appearance" ? displayNavItems : []),
+        ]),
+        {
+          id: "notifications",
+          title: "Notifications",
+          icon: sectionIcon("notifications"),
+        },
+      ],
+    },
+    {
+      title: "Account",
+      items: [
+        {
+          id: "account-standing",
+          title: FRONTEND_SETTINGS["account-standing"].title,
+          icon: sectionIcon("account-standing"),
+        },
+        {
+          id: "connections",
+          title: FRONTEND_SETTINGS["connections"].title,
+          icon: sectionIcon("connections"),
+        },
+        {
+          id: "export",
+          title: FRONTEND_SETTINGS["export"].title,
+          icon: sectionIcon("export"),
+        },
+        ...(hasSupporterHistory
+          ? [
+              {
+                id: "supporter-history",
+                title: FRONTEND_SETTINGS["supporter-history"].title,
+                icon: sectionIcon("supporter-history"),
+              },
+            ]
+          : []),
+        {
+          id: "gifts",
+          title: FRONTEND_SETTINGS["gifts"].title,
+          icon: sectionIcon("gifts"),
+        },
+        {
+          id: "danger",
+          title: FRONTEND_SETTINGS["danger"].title,
+          icon: sectionIcon("danger"),
+        },
+      ],
+    },
+  ];
   return (
     // Full width, so the background fills the page like on the profile;
     // the content stays centered inside.
@@ -400,69 +468,44 @@ export default function SettingsPage() {
               className={`${cardClassName} p-3`}
               active={activeSection}
               onSelect={selectSection}
-              sections={[
-                {
-                  title: "Preferences",
-                  items: [
-                    ...(hasAppearance ? [] : displayNavItems),
-                    ...sortedCategories.flatMap((cat) => [
-                      {
-                        id: cat.name,
-                        title:
-                          cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
-                        icon: sectionIcon(cat.name),
-                      },
-                      ...(cat.name === "appearance" ? displayNavItems : []),
-                    ]),
-                    {
-                      id: "notifications",
-                      title: "Notifications",
-                      icon: sectionIcon("notifications"),
-                    },
-                  ],
-                },
-                {
-                  title: "Account",
-                  items: [
-                    {
-                      id: "account-standing",
-                      title: FRONTEND_SETTINGS["account-standing"].title,
-                      icon: sectionIcon("account-standing"),
-                    },
-                    {
-                      id: "connections",
-                      title: FRONTEND_SETTINGS["connections"].title,
-                      icon: sectionIcon("connections"),
-                    },
-                    {
-                      id: "export",
-                      title: FRONTEND_SETTINGS["export"].title,
-                      icon: sectionIcon("export"),
-                    },
-                    ...(hasSupporterHistory
-                      ? [
-                          {
-                            id: "supporter-history",
-                            title: FRONTEND_SETTINGS["supporter-history"].title,
-                            icon: sectionIcon("supporter-history"),
-                          },
-                        ]
-                      : []),
-                    {
-                      id: "gifts",
-                      title: FRONTEND_SETTINGS["gifts"].title,
-                      icon: sectionIcon("gifts"),
-                    },
-                    {
-                      id: "danger",
-                      title: FRONTEND_SETTINGS["danger"].title,
-                      icon: sectionIcon("danger"),
-                    },
-                  ],
-                },
-              ]}
+              sections={navSections}
             />
           </div>
+
+          <nav
+            aria-label="Jump to section"
+            className={`settings-mobile-nav ${cardClassName} mb-4 p-3`}
+          >
+            <button
+              type="button"
+              aria-expanded={mobileNavOpen}
+              aria-controls="settings-mobile-nav-links"
+              onClick={() => setMobileNavOpen((open) => !open)}
+              className="focus-visible:ring-link flex min-h-10 w-full cursor-pointer items-center justify-between gap-3 rounded-lg px-3 text-left focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <span className="text-primary-text text-sm font-semibold">
+                Jump to section
+              </span>
+              <Icon
+                icon="heroicons:chevron-down"
+                className={`text-secondary-text size-4 shrink-0 transition-transform ${mobileNavOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {mobileNavOpen && (
+              <div id="settings-mobile-nav-links" className="mt-3">
+                <SettingsSidebar
+                  active={activeSection}
+                  onSelect={(id) => {
+                    // Collapse first so the scroll target is measured
+                    // without the open list above it.
+                    flushSync(() => setMobileNavOpen(false));
+                    selectSection(id);
+                  }}
+                  sections={navSections}
+                />
+              </div>
+            )}
+          </nav>
 
           {/* Settings Content */}
           <div className="settings-content">
@@ -944,6 +987,10 @@ export default function SettingsPage() {
             grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
             gap: 2rem;
             align-items: start;
+          }
+
+          .settings-mobile-nav {
+            display: none;
           }
 
           .settings-sidebar,
