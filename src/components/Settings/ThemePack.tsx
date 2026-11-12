@@ -10,6 +10,12 @@ import {
   UnderglowPicker,
 } from "@/components/Settings/ColorFillPickers";
 import { Icon } from "@/components/ui/IconWrapper";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
@@ -239,6 +245,7 @@ export function ThemePackEditor({
         >
           {(_open, isUploading, cropImage) => (
             <PackImageDrop
+              kind={kind}
               label={PART_LABELS[name]}
               url={url ?? null}
               busy={isUploading}
@@ -377,6 +384,7 @@ export function ThemePackEditor({
 
 /** Paste goes to the hovered or focused zone, ahead of the screenshot uploader. */
 function PackImageDrop({
+  kind,
   label,
   url,
   busy,
@@ -384,6 +392,7 @@ function PackImageDrop({
   onUpload,
   onRemove,
 }: {
+  kind: "banner" | "background";
   label: string;
   url: string | null;
   busy: boolean;
@@ -436,12 +445,15 @@ function PackImageDrop({
   // One image per part, so a set one hides the uploader, like a full set of screenshots.
   if (url)
     return (
-      <ThemePreviewImages
-        previews={[{ id: label, url, kind: "desktop" }]}
-        label={label}
-        disabled={disabled}
-        onDelete={onRemove}
-      />
+      <div className="space-y-2">
+        <ThemePreviewImages
+          previews={[{ id: label, url, kind: "desktop" }]}
+          label={label}
+          disabled={disabled}
+          onDelete={onRemove}
+        />
+        <PackCropPreview url={url} kind={kind} />
+      </div>
     );
 
   return (
@@ -479,6 +491,100 @@ function PackImageDrop({
         </span>
       </div>
       {remove}
+    </div>
+  );
+}
+
+// Frames shaped like the profile on a desktop and a phone (390×844):
+// the banner is 1280×280 / 366×160 (h-40 md:h-70), the background
+// covers the viewport from the top, as in ProfileBackground.
+const CROP_FRAMES = {
+  banner: [
+    ["Desktop", 1280 / 280, "object-center"],
+    ["Phone", 366 / 160, "object-center"],
+  ],
+  background: [
+    ["Desktop", 16 / 9, "object-top"],
+    ["Phone", 390 / 844, "object-top"],
+  ],
+} as const;
+
+/** The image as one frame shows it: cover-cropped to the frame's ratio. */
+const CropImage = ({
+  url,
+  aspect,
+  position,
+  className,
+}: {
+  url: string;
+  aspect: number;
+  position: string;
+  className: string;
+}) => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src={url}
+    alt=""
+    style={{ aspectRatio: aspect }}
+    className={cn(
+      "border-border-card max-w-full rounded-md border object-cover",
+      position,
+      className,
+    )}
+  />
+);
+
+/** Shows how a pack image crops on the profile, since phones cut it differently. */
+function PackCropPreview({
+  url,
+  kind,
+}: {
+  url: string;
+  kind: "banner" | "background";
+}) {
+  return (
+    <div className="flex flex-wrap items-end gap-3">
+      {CROP_FRAMES[kind].map(([name, aspect, position]) => (
+        <figure key={name} className="space-y-1">
+          {/* Opens the crop itself large, which a plain image lightbox can't show. */}
+          <Dialog>
+            <DialogTrigger
+              aria-label={`Enlarge the ${name.toLowerCase()} crop`}
+              className="block max-w-full cursor-zoom-in rounded-md"
+            >
+              {/* Fixed height, width from the ratio, so each frame keeps its shape. */}
+              <CropImage
+                url={url}
+                aspect={aspect}
+                position={position}
+                className={cn("w-auto", kind === "banner" ? "h-16" : "h-28")}
+              />
+            </DialogTrigger>
+            <DialogContent
+              showClose
+              aria-describedby={undefined}
+              className="max-w-none space-y-3"
+              // As large as fits: 75dvh tall at most, plus the padding.
+              style={{
+                width: `min(calc(100vw - 2rem), 64rem, calc(75dvh * ${aspect} + 3rem + 2px))`,
+              }}
+            >
+              <DialogTitle className="text-primary-text text-sm font-medium">
+                {name} crop
+              </DialogTitle>
+              <CropImage
+                url={url}
+                aspect={aspect}
+                position={position}
+                className="w-full"
+              />
+            </DialogContent>
+          </Dialog>
+          <figcaption className="text-secondary-text text-xs">
+            {name} crop
+          </figcaption>
+        </figure>
+      ))}
     </div>
   );
 }
