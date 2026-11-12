@@ -2,6 +2,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Dark themes set color-scheme: dark; a cross-origin ad iframe whose document
+   doesn't match gets an opaque white canvas painted behind it. Match the
+   iframe's default (light) so its empty/unfilled area stays transparent. */
+[id^="np-"] iframe {
+  color-scheme: light;
+}
+
 /* Prevent scroll anchoring from repeatedly loading pages. */
 html:has([data-values-items-grid]) {
   overflow-anchor: none;
