@@ -350,6 +350,28 @@ export async function fetchMarketplaceThemes(
   return { ...data, items: data.items.map(sanitizeCustomTheme) };
 }
 
+export interface MarketplaceThemeAnalytics {
+  share_code: string;
+  current_users: number;
+  applied_today: number;
+  all_time_users: number;
+  interval: number;
+  /** One per UTC day, oldest first, ending today. */
+  points: { timestamp: number; users: number; applied: number }[];
+  generated_at: string;
+}
+
+export const fetchMarketplaceThemeAnalytics = (
+  code: string,
+  baseUrl?: string,
+  days = 30,
+) =>
+  request<MarketplaceThemeAnalytics>(
+    `/v2/themes/marketplace/${encodeURIComponent(code)}/analytics?days=${days}`,
+    {},
+    baseUrl,
+  );
+
 export const reportMarketplaceTheme = (code: string, reason: string) =>
   request<{ success: boolean }>(
     `/v2/themes/marketplace/${encodeURIComponent(code)}/reports`,

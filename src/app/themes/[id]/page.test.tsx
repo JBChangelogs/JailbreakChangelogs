@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { createElement, type ReactNode } from "react";
+import { createElement, Fragment, type ReactNode } from "react";
 import * as jsxRuntime from "react/jsx-runtime";
 import { renderToStaticMarkup } from "react-dom/server";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
@@ -33,7 +33,8 @@ function page(
     exports,
     require: (name: string) => {
       if (name === "react/jsx-runtime") return jsxRuntime;
-      if (name === "react") return { cache: (fn: unknown) => fn };
+      if (name === "react")
+        return { cache: (fn: unknown) => fn, Suspense: Fragment };
       if (name === "next/navigation")
         return {
           notFound: () => {
@@ -49,6 +50,9 @@ function page(
             calls.push(code);
             if (options.error) throw options.error;
             return options.theme ?? theme;
+          },
+          fetchMarketplaceThemeAnalytics: async () => {
+            throw new Error("theme_not_found");
           },
         };
       if (name === "@/utils/api/api")

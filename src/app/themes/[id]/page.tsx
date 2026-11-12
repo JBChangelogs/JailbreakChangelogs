@@ -1,4 +1,4 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,7 +12,12 @@ import ThemePreviewImages from "@/components/Settings/ThemePreviewImages";
 import { Icon } from "@/components/ui/IconWrapper";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { BASE_API_URL, fetchUserById } from "@/utils/api/api";
-import { fetchSharedTheme, ThemeApiError } from "@/utils/api/userThemes";
+import ThemeAnalytics from "@/components/Themes/ThemeAnalytics";
+import {
+  fetchMarketplaceThemeAnalytics,
+  fetchSharedTheme,
+  ThemeApiError,
+} from "@/utils/api/userThemes";
 import { normalizeShareCode, SHARE_CODE } from "@/utils/ui/customTheme";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
@@ -66,6 +71,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ThemeDetailsPage({ params }: Props) {
   const theme = await getTheme((await params).id);
   // A removed or unavailable creator profile shouldn't hide their shared theme.
+  // Started, not awaited: 404 (unpublished) or failure hides the section.
+  const analytics = fetchMarketplaceThemeAnalytics(
+    theme.share_code,
+    BASE_API_URL,
+  ).catch(() => null);
   const creator = await fetchUserById(theme.user_id).catch(() => null);
   const author =
     creator?.global_name && creator.global_name !== "None"
@@ -222,6 +232,11 @@ export default async function ThemeDetailsPage({ params }: Props) {
               )}
             </div>
           )}
+        </div>
+        <div className="mt-10">
+          <Suspense>
+            <ThemeAnalytics promise={analytics} />
+          </Suspense>
         </div>
         <div className="mt-10">
           <ChangelogComments
