@@ -176,7 +176,7 @@ function harness(
 
 test("owners submit a published theme directly and refresh competition caches", async () => {
   const view = harness();
-  expect(view.render()).toContain("Enter competition");
+  expect(view.render()).toContain("Enter contest");
   expect(view.button?.disabled).toBe(false);
   const pending = view.button!.onClick();
   expect(view.render()).toContain("Entering…");
@@ -225,7 +225,7 @@ test("owners can withdraw at the entry limit and submit again after refreshing",
     ],
   };
   const view = harness({ competition: current });
-  expect(view.render()).toContain("Withdraw from competition");
+  expect(view.render()).toContain("Withdraw entry");
   expect(view.button?.disabled).toBe(false);
   const pending = view.button!.onClick();
   expect(view.render()).toContain("Withdrawing…");
@@ -239,7 +239,7 @@ test("owners can withdraw at the entry limit and submit again after refreshing",
     ["theme-competition-current"],
   ]);
   current.items = [];
-  expect(view.render()).toContain("Enter competition");
+  expect(view.render()).toContain("Enter contest");
   expect(view.button?.disabled).toBe(false);
 });
 
@@ -254,7 +254,7 @@ test("full entry limits prevent submitting another theme", async () => {
       items: [{ ...entry, theme: { ...entry.theme, share_code: "ANOTHER1" } }],
     },
   });
-  expect(view.render()).toContain("Competition entry limit reached");
+  expect(view.render()).toContain("Entry limit reached");
   expect(view.button?.disabled).toBe(true);
   await view.button!.onClick();
   expect(view.submitted).toEqual([]);
@@ -279,22 +279,22 @@ test("failed withdrawals preserve the entry and allow retry", async () => {
   expect(view.errors).toEqual(["Entries are closed"]);
   expect(view.success).toEqual([]);
   expect(view.invalidated).toEqual([]);
-  expect(view.render()).toContain("Withdraw from competition");
+  expect(view.render()).toContain("Withdraw entry");
   expect(view.button?.disabled).toBe(false);
 });
 
 test("loading and errors do not submit, and failed mutations allow retry", async () => {
   const loading = harness({ loading: true });
-  expect(loading.render()).toContain("Loading competition…");
+  expect(loading.render()).toContain("Loading…");
   expect(loading.button?.disabled).toBe(true);
   const error = harness({ queryError: new Error("Offline") });
-  expect(error.render()).toContain("Retry loading competition");
+  expect(error.render()).toContain(">Retry<");
   const failed = harness({ submitError: new Error("Submissions are closed") });
   failed.render();
   await failed.button!.onClick();
   expect(failed.errors).toEqual(["Submissions are closed"]);
   expect(failed.success).toEqual([]);
-  expect(failed.render()).toContain("Enter competition");
+  expect(failed.render()).toContain("Enter contest");
   expect(failed.button?.disabled).toBe(false);
 });
 
@@ -324,7 +324,7 @@ test("pending labels keep the clicked action when refreshed entry data arrives",
     finish();
     await pending;
     expect(view.render()).toContain(
-      entered ? "Enter competition" : "Withdraw from competition",
+      entered ? "Enter contest" : "Withdraw entry",
     );
   }
 });

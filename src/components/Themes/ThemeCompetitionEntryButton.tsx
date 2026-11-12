@@ -58,7 +58,7 @@ export default function ThemeCompetitionEntryButton({
   if (error)
     return (
       <Button variant="secondary" onClick={() => void refetch()}>
-        Retry loading competition
+        Retry
       </Button>
     );
 
@@ -112,14 +112,18 @@ export default function ThemeCompetitionEntryButton({
         }
       }}
     >
+      <Icon
+        icon={entered ? "lucide:log-out" : "lucide:medal"}
+        aria-hidden="true"
+      />
       {submitting ??
         (!data
-          ? "Loading competition…"
+          ? "Loading…"
           : entered
-            ? "Withdraw from competition"
+            ? "Withdraw entry"
             : full
-              ? "Competition entry limit reached"
-              : "Enter competition")}
+              ? "Entry limit reached"
+              : "Enter contest")}
     </Button>
   );
 }
@@ -133,11 +137,12 @@ export function CompetitionStandingsLink() {
   });
   if (!competition || competitionStatus(competition) !== "running") return null;
   return (
-    <Button asChild variant="secondary">
-      <Link href={`/themes/competitions/${competition.id}#standings`}>
-        <Icon icon="heroicons:trophy" aria-hidden="true" />
-        View contest standings
-      </Link>
-    </Button>
+    <Link
+      href={`/themes/competitions/${competition.id}#standings`}
+      className="text-link hover:text-link-hover flex items-center justify-center gap-1.5 text-sm font-medium"
+    >
+      <Icon icon="heroicons:trophy" aria-hidden="true" className="size-4" />
+      View contest standings
+    </Link>
   );
 }

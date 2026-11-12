@@ -1,6 +1,6 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -26,6 +26,7 @@ import ThemeCompetitionEntryButton, {
 } from "@/components/Themes/ThemeCompetitionEntryButton";
 import {
   applyThemePack,
+  listMyThemes,
   type MarketplaceTheme,
   type CustomTheme,
   type PackPart,
@@ -33,6 +34,7 @@ import {
 } from "@/utils/api/userThemes";
 import { setCustomTheme } from "@/utils/ui/customTheme";
 import { rememberSharedTheme } from "@/utils/ui/recentThemes";
+import { openThemeEditor } from "@/utils/ui/themeEditor";
 
 export default function ThemeDetailsActions({
   theme,
@@ -43,6 +45,14 @@ export default function ThemeDetailsActions({
 }) {
   const { customTheme } = useTheme();
   const inUse = customTheme?.share_code === theme.share_code;
+  const { user } = useAuthContext();
+  const isOwner = !!user && user.id === theme.user_id;
+  const { data: mine } = useQuery({
+    queryKey: ["my-themes", user?.id],
+    queryFn: listMyThemes,
+    enabled: isOwner,
+  });
+  const own = mine?.themes.find((t) => t.share_code === theme.share_code);
 
   return (
     <div className="flex flex-col gap-3">
@@ -58,27 +68,41 @@ export default function ThemeDetailsActions({
         <Icon icon="lucide:paintbrush" aria-hidden="true" />
         {inUse ? "In use" : "Use theme"}
       </Button>
-      <Button asChild variant="secondary">
-        <Link href={`/?theme=${theme.share_code}`}>Try on the site</Link>
-      </Button>
-      <ThemeCompetitionEntryButton theme={theme} />
+      <div className="grid grid-cols-2 gap-3">
+        <Button asChild variant="secondary">
+          <Link href={`/?theme=${theme.share_code}`}>
+            <Icon icon="lucide:eye" aria-hidden="true" />
+            Try on the site
+          </Link>
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(
+                `${window.location.origin}/themes/${theme.share_code}`,
+              );
+              toast.success("Theme link copied");
+            } catch {
+              toast.error("Couldn't copy the theme link");
+            }
+          }}
+        >
+          <Icon icon="lucide:share-2" aria-hidden="true" />
+          Share
+        </Button>
+      </div>
+      {own && (
+        // Entry renders nothing without a running competition, or a note to publish first.
+        <div className="grid grid-cols-2 gap-3 [&>:only-child]:col-span-2 [&>p]:col-span-2">
+          <Button variant="secondary" onClick={() => openThemeEditor(own)}>
+            <Icon icon="lucide:pencil" aria-hidden="true" />
+            Edit theme
+          </Button>
+          <ThemeCompetitionEntryButton theme={theme} />
+        </div>
+      )}
       <CompetitionStandingsLink />
-      <Button
-        variant="ghost"
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(
-              `${window.location.origin}/themes/${theme.share_code}`,
-            );
-            toast.success("Theme link copied");
-          } catch {
-            toast.error("Couldn't copy the theme link");
-          }
-        }}
-      >
-        <Icon icon="lucide:share-2" aria-hidden="true" />
-        Share theme
-      </Button>
       <ReportThemeButton theme={{ ...theme, user: author }} />
     </div>
   );
