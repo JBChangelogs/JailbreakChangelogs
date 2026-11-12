@@ -76,3 +76,34 @@ test("a pasted code or share link gives the share code", () => {
     expect(parseShareCode(input)).toBeNull();
   }
 });
+
+test("the theme in use keeps its pack, so its card still shows it", async () => {
+  const style = Object.assign([] as string[], {
+    setProperty: () => {},
+    removeProperty: () => {},
+    getPropertyValue: () => "",
+  });
+  Object.assign(globalThis, {
+    document: {
+      documentElement: { style, dataset: {} },
+      querySelectorAll: () => [],
+    },
+    window: { dispatchEvent: () => true },
+  });
+  const { getCustomTheme, setCustomTheme } = await import("./customTheme");
+  setCustomTheme(
+    {
+      share_code: "ABC123",
+      label: "Packed",
+      scheme: "dark",
+      vars: {},
+      logo_filter: null,
+      pack: { underglow: "#ff00aa" },
+    },
+    { sync: false },
+  );
+  expect(getCustomTheme()?.pack).toEqual({ underglow: "#ff00aa" });
+  setCustomTheme(null, { sync: false });
+  Reflect.deleteProperty(globalThis, "document");
+  Reflect.deleteProperty(globalThis, "window");
+});
