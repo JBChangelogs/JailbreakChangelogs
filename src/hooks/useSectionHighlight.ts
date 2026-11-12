@@ -50,8 +50,10 @@ export function useSectionHighlight(ready = true) {
     highlightSetting === sectionId && showHighlight
       ? {
           // A light touch: a faint tint and an accent border, not a full fill.
+          // Mixed into the card's own background, not transparent, so a
+          // custom background behind the settings cards doesn't show through.
           backgroundColor:
-            "color-mix(in srgb, var(--color-button-info), transparent 94%)",
+            "color-mix(in srgb, var(--color-button-info) 6%, var(--color-secondary-bg))",
           borderColor:
             "color-mix(in srgb, var(--color-button-info), transparent 50%)",
         }
