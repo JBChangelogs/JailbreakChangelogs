@@ -976,7 +976,12 @@ export function CommonTradesEditor({
                   This common trade needs <strong>{suggestedItem.name}</strong>.
                   Add it to:
                 </span>
-                {(["offering", "requesting"] as const).map((side) => (
+                {(["offering", "requesting"] as const).map((side) => [
+                  side === "requesting" && (
+                    <span key="or" className="text-secondary-text">
+                      or
+                    </span>
+                  ),
                   <Button
                     key={side}
                     type="button"
@@ -987,8 +992,8 @@ export function CommonTradesEditor({
                     aria-label={`Add ${suggestedItem.name} to ${side}`}
                   >
                     {side === "offering" ? "Offering" : "Requesting"}
-                  </Button>
-                ))}
+                  </Button>,
+                ])}
               </div>
             )}
             <div className="grid gap-3 sm:grid-cols-2">
