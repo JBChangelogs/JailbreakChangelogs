@@ -16,6 +16,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import {
   ACCENT_STYLES,
   accentCardTheme,
+  accentColorToHex,
   type Accent,
   type AccentStyle,
 } from "@/utils/ui/accentColor";
@@ -61,9 +62,11 @@ export function AccentColorSetting({
         banner?: string | null;
         custom_avatar?: string | null;
         custom_banner?: string | null;
+        underglow?: number | string | null;
       }>,
     staleTime: 60_000,
   });
+  const underglow = accentColorToHex(profile?.underglow);
   const banner = getProfileBanner({
     userId: userData.id,
     banner: profile?.banner ?? userData.banner,
@@ -137,7 +140,12 @@ export function AccentColorSetting({
               <span
                 aria-hidden="true"
                 data-accent-cards={style}
-                style={accentCardTheme({ ...current, style })}
+                data-style-preview
+                data-underglow={underglow ? "" : undefined}
+                style={{
+                  ...accentCardTheme({ ...current, style }),
+                  ...(underglow && { "--underglow": underglow }),
+                }}
                 className="relative flex h-20 items-end p-2"
               >
                 <Image

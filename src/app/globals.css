@@ -915,6 +915,13 @@ img.twemoji {
     0 8px 28px -10px color-mix(in srgb, var(--underglow) 45%, transparent);
 }
 
+/* Style previews clip below the card, so a tighter glow. */
+[data-style-preview][data-underglow] .bg-secondary-bg.border-border-card {
+  box-shadow:
+    0 4px 16px -2px color-mix(in srgb, var(--underglow) 80%, transparent),
+    0 2px 6px -1px color-mix(in srgb, var(--underglow) 50%, transparent);
+}
+
 /* Keep the glow below preview notices instead of washing over their text. */
 html[data-profile-underglow]:not(
     :has([data-profile-preview-banner], [data-header-banner] > *)
