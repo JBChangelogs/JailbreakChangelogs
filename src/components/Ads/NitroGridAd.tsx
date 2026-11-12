@@ -1,5 +1,6 @@
 "use client";
 
+import AdLabel from "@/components/Ads/AdLabel";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -127,11 +128,14 @@ export default function NitroGridAd({
 
   // Reserve space for the largest eligible creative.
   return (
-    <div
-      id={adId}
-      ref={containerRef}
-      className={`flex justify-center ${className || ""}`}
-      style={{ minHeight: desktop ? 90 : tallViewport ? 250 : 100 }}
-    />
+    <div className="flex flex-col gap-1">
+      <AdLabel />
+      <div
+        id={adId}
+        ref={containerRef}
+        className={`flex justify-center ${className || ""}`}
+        style={{ minHeight: desktop ? 90 : tallViewport ? 250 : 100 }}
+      />
+    </div>
   );
 }

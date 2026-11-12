@@ -1,5 +1,6 @@
 "use client";
 
+import AdLabel from "@/components/Ads/AdLabel";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -155,7 +156,8 @@ export default function NitroHomepageAd({ className }: Props) {
   }
 
   return (
-    <div className={`flex justify-center ${className || ""}`}>
+    <div className={`flex flex-col items-center gap-1 ${className || ""}`}>
+      <AdLabel />
       {/* Mobile ad container with min-height to prevent CLS (only for non-supporters) */}
       <div
         id={SLOT_ID_MOBILE}

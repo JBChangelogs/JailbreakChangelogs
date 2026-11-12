@@ -1,5 +1,6 @@
 "use client";
 
+import AdLabel from "@/components/Ads/AdLabel";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -98,11 +99,14 @@ export default function NitroItemMobileAd({ className }: Props) {
 
   // Apply min-height to prevent CLS
   return (
-    <div
-      id={SLOT_ID}
-      ref={containerRef}
-      className={className}
-      style={{ minHeight: tallViewport ? 250 : 100 }}
-    />
+    <div className="flex w-full flex-col items-center gap-1">
+      <AdLabel />
+      <div
+        id={SLOT_ID}
+        ref={containerRef}
+        className={className}
+        style={{ minHeight: tallViewport ? 250 : 100 }}
+      />
+    </div>
   );
 }

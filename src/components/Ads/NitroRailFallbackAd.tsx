@@ -1,5 +1,6 @@
 "use client";
 
+import AdLabel from "@/components/Ads/AdLabel";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRailAdSize } from "@/hooks/useRailAdSize";
@@ -102,7 +103,8 @@ export default function NitroRailFallbackAd({ adId }: { adId: string }) {
   if (!eligible) return null;
 
   return (
-    <div className="my-6 flex justify-center">
+    <div className="my-6 flex flex-col items-center gap-1">
+      <AdLabel />
       <div
         id={adId}
         ref={containerRef}

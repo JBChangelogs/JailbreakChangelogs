@@ -1,5 +1,6 @@
 "use client";
 
+import AdLabel from "@/components/Ads/AdLabel";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -95,10 +96,14 @@ export default function NitroValuesTopAd({ className }: Props) {
   // For safety/smoothness, let's just center it.
 
   return (
-    <div
-      id={SLOT_ID}
-      ref={containerRef}
-      className={`flex justify-center ${className || ""}`}
-    />
+    <>
+      {/* The ad only serves at CONFIG.mediaQuery widths; hide the label elsewhere. */}
+      <AdLabel className="mb-1 hidden min-[1025px]:block" />
+      <div
+        id={SLOT_ID}
+        ref={containerRef}
+        className={`flex justify-center ${className || ""}`}
+      />
+    </>
   );
 }

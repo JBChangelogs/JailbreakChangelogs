@@ -46,6 +46,7 @@ function mount(filename: string) {
       },
       jsxs: () => null,
     },
+    "@/components/Ads/AdLabel": { default: "ad-label" },
     "@/components/Ads/NitroLeftGutterAd": { default: "rail" },
     "@/utils/ui/desktopNavigation": {
       getDesktopNavigation: () => navigation,
