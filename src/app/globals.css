@@ -1090,3 +1090,16 @@ html[data-profile-underglow] [data-profile-preview-banner] {
 .site-layout:has([data-messages-shell]) > footer {
   display: none;
 }
+
+/* Custom themes tint the homepage title with their accent colors, mixed toward
+   white so it stays readable on the always-dark hero image. */
+[data-custom-theme] .hero-title {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--color-button-info) 60%, white),
+    color-mix(in oklch, var(--color-link) 60%, white)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
