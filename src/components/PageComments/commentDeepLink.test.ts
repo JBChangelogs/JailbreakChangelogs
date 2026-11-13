@@ -192,6 +192,7 @@ test("comment links show only their thread, and the list merges loaded pages", a
             useQuery: (options: { queryKey: unknown }) => ({
               data: cache.get(JSON.stringify(options.queryKey)),
             }),
+            infiniteQueryOptions: (options: unknown) => options,
             useInfiniteQuery: (options: { queryKey: unknown }) => ({
               data: cache.get(JSON.stringify(options.queryKey)),
               fetchNextPage: () => {},

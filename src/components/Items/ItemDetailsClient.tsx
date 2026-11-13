@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
@@ -63,6 +67,10 @@ import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
 import { fetchItemByIdClient, fetchItemScanCount } from "@/utils/api/api";
+import {
+  commentsListQueryOptions,
+  readCommentSortPreference,
+} from "@/components/PageComments/useCommentState";
 import { hasSeason } from "@/utils/items/season";
 import { hasItemValue, itemTrends } from "@/utils/items/itemValue";
 import { fetchFurniturePlacementLimits } from "@/utils/items/furniturePlacementLimits";
@@ -104,6 +112,9 @@ const TAB_NAME_TO_INDEX: Record<string, number> = {
   comments: 8,
 };
 
+const COMMENTS_TAB = TAB_NAME_TO_INDEX.comments;
+const TAB_ORDER = [0, 1, COMMENTS_TAB, 2, 3, 4, 5, 6, 7];
+
 const TAB_INDEX_TO_NAME: Record<number, string | null> = {
   0: null,
   1: "charts",
@@ -130,12 +141,12 @@ const ItemDetailsTabs = React.memo(
   function ItemDetailsTabs({
     value,
     onChange,
+    commentCount,
   }: {
     value: number;
     onChange: (v: number) => void;
+    commentCount?: number;
   }) {
-    const labels = TAB_LABELS;
-
     return (
       <div className="overflow-x-auto">
         <Tabs
@@ -143,14 +154,19 @@ const ItemDetailsTabs = React.memo(
           onValueChange={(tabValue) => onChange(Number(tabValue))}
         >
           <TabsList fullWidth>
-            {labels.map((label, idx) => (
+            {TAB_ORDER.map((idx) => (
               <TabsTrigger
-                key={label}
+                key={idx}
                 value={String(idx)}
                 id={`item-tab-${idx}`}
                 fullWidth
               >
-                {label}
+                {TAB_LABELS[idx]}
+                {idx === COMMENTS_TAB && !!commentCount && (
+                  <span className="ml-1.5 rounded-full bg-current/15 px-1.5 py-0.5 text-[10px] leading-none font-semibold tabular-nums">
+                    {commentCount.toLocaleString("en-US")}
+                  </span>
+                )}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -158,7 +174,8 @@ const ItemDetailsTabs = React.memo(
       </div>
     );
   },
-  (prev, next) => prev.value === next.value,
+  (prev, next) =>
+    prev.value === next.value && prev.commentCount === next.commentCount,
 );
 
 interface ItemMediaColumnProps {
@@ -461,6 +478,22 @@ export default function ItemDetailsClient({
     gcTime: 5 * 60_000,
     retry: false,
   });
+  // Same query as the comments tab, so opening it is instant.
+  const [commentsSort] = useQueryState("commentsSort");
+  const [savedCommentsSort, setSavedCommentsSort] = useState<
+    string | null | undefined
+  >(undefined);
+  useEffect(() => setSavedCommentsSort(readCommentSortPreference("item")), []);
+  const commentsList = useInfiniteQuery({
+    ...commentsListQueryOptions(
+      item.type,
+      String(item.id),
+      commentsSort ?? savedCommentsSort ?? null,
+      user?.id ?? null,
+    ),
+    enabled: !isLoading && savedCommentsSort !== undefined,
+  });
+  const commentCount = commentsList.data?.pages[0]?.totalComments;
   const { data: placementLimitsMap } = useQuery({
     queryKey: ["furniture-placement-limits"],
     queryFn: fetchFurniturePlacementLimits,
@@ -493,8 +526,17 @@ export default function ItemDetailsClient({
   );
 
   const handleTabChange = (newValue: number) => {
-    setTabDirection(newValue > activeTab ? 1 : -1);
+    setTabDirection(
+      TAB_ORDER.indexOf(newValue) > TAB_ORDER.indexOf(activeTab) ? 1 : -1,
+    );
     void setTabParam(TAB_INDEX_TO_NAME[newValue] ?? null);
+  };
+
+  const openComments = () => {
+    handleTabChange(COMMENTS_TAB);
+    document
+      .getElementById(`item-tab-${COMMENTS_TAB}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   const currentItem = item;
@@ -581,6 +623,25 @@ export default function ItemDetailsClient({
                   </>
                 ) : (
                   <span>Last updated: Never</span>
+                )}
+                {commentCount !== undefined && (
+                  <>
+                    <span aria-hidden="true"> · </span>
+                    <button
+                      type="button"
+                      onClick={openComments}
+                      className="text-link hover:text-link-hover inline-flex cursor-pointer items-center gap-1 font-medium transition-colors"
+                    >
+                      <Icon
+                        icon="heroicons:chat-bubble-left-right"
+                        className="h-4 w-4"
+                        aria-hidden="true"
+                      />
+                      {commentCount === 0
+                        ? "Start the discussion"
+                        : `${commentCount.toLocaleString("en-US")} ${commentCount === 1 ? "comment" : "comments"}`}
+                    </button>
+                  </>
                 )}
               </div>
 
@@ -852,7 +913,11 @@ export default function ItemDetailsClient({
               </div>
             </div>
 
-            <ItemDetailsTabs value={activeTab} onChange={handleTabChange} />
+            <ItemDetailsTabs
+              value={activeTab}
+              onChange={handleTabChange}
+              commentCount={commentCount}
+            />
 
             {/* clip, not hidden: hidden breaks the sticky comments title */}
             <div className="relative overflow-x-clip">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
+  infiniteQueryOptions,
   useInfiniteQuery,
   useQuery,
   useQueryClient,
@@ -53,6 +54,79 @@ type CommentsPage = {
   totalPages: number;
   totalComments: number;
   page: number;
+};
+
+async function fetchCommentsPage(
+  commentType: string,
+  changelogId: string | number,
+  targetPage: number,
+  effectiveSort: string | null,
+  currentUserId: string | null,
+  signal: AbortSignal,
+): Promise<CommentsPage> {
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/v2/comments",
+  );
+  const requestUrl = new URL(url);
+  requestUrl.searchParams.set("item_type", commentType);
+  requestUrl.searchParams.set("item_id", String(changelogId));
+  requestUrl.searchParams.set("page", String(targetPage));
+  if (effectiveSort !== null)
+    requestUrl.searchParams.set("sort", effectiveSort);
+  const response = await fetch(requestUrl.toString(), {
+    credentials: "include",
+    headers,
+    signal,
+  });
+  if (!response.ok) throw new Error("Failed to fetch comments");
+  const data = await response.json();
+  return {
+    ...flattenComments(data, currentUserId),
+    totalPages: data.total_pages ?? 1,
+    totalComments: data.total ?? 0,
+    page: data.page ?? targetPage,
+  };
+}
+
+export const commentsListQueryOptions = (
+  commentType: string,
+  changelogId: string | number,
+  sortOrder: string | null,
+  currentUserId: string | null,
+) =>
+  infiniteQueryOptions({
+    queryKey: [
+      "comments",
+      commentType,
+      changelogId,
+      "list",
+      sortOrder,
+      currentUserId,
+    ],
+    initialPageParam: 1,
+    queryFn: ({ pageParam, signal }) =>
+      fetchCommentsPage(
+        commentType,
+        changelogId,
+        pageParam,
+        sortOrder,
+        currentUserId,
+        signal,
+      ),
+    getNextPageParam: (last: CommentsPage) =>
+      last.page < last.totalPages ? last.page + 1 : undefined,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+export const readCommentSortPreference = (type: string): string | null => {
+  const cached = getCachedPreference(`comments_sort_${type}`);
+  return typeof cached === "string"
+    ? cached
+    : localStorage.getItem(`comments_sort_${type}`);
 };
 
 export function useCommentState(props: ChangelogCommentsProps) {
@@ -132,10 +206,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
   );
 
   useEffect(() => {
-    const cached = getCachedPreference(sortPrefKey);
-    const stored = localStorage.getItem(sortPrefKey);
-    setSortOrder(typeof cached === "string" ? cached : stored);
-  }, [sortPrefKey]);
+    setSortOrder(readCommentSortPreference(type));
+  }, [type]);
 
   // --- UI State (Modals & Loading) ---
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -179,55 +251,33 @@ export function useCommentState(props: ChangelogCommentsProps) {
     () => ["comments", commentType, changelogId],
     [commentType, changelogId],
   );
-  const fetchCommentsPage = useCallback(
-    async (
-      targetPage: number,
-      effectiveSort: string | null,
-      signal: AbortSignal,
-    ): Promise<CommentsPage> => {
-      const { url, headers } = buildApiFetchRequest(
-        PUBLIC_API_URL!,
-        "/v2/comments",
-      );
-      const requestUrl = new URL(url);
-      requestUrl.searchParams.set("item_type", commentType);
-      requestUrl.searchParams.set("item_id", String(changelogId));
-      requestUrl.searchParams.set("page", String(targetPage));
-      if (effectiveSort !== null)
-        requestUrl.searchParams.set("sort", effectiveSort);
-      const response = await fetch(requestUrl.toString(), {
-        credentials: "include",
-        headers,
+  const fetchPage = useCallback(
+    (targetPage: number, effectiveSort: string | null, signal: AbortSignal) =>
+      fetchCommentsPage(
+        commentType,
+        changelogId,
+        targetPage,
+        effectiveSort,
+        currentUserId,
         signal,
-      });
-      if (!response.ok) throw new Error("Failed to fetch comments");
-      const data = await response.json();
-      return {
-        ...flattenComments(data, currentUserId),
-        totalPages: data.total_pages ?? 1,
-        totalComments: data.total ?? 0,
-        page: data.page ?? targetPage,
-      };
-    },
+      ),
     [commentType, changelogId, currentUserId],
   );
   const queryEnabled = commentsReady && Boolean(changelogId && PUBLIC_API_URL);
-  const listKey = useMemo(
-    () => [...commentsKey, "list", sortOrder, currentUserId],
-    [commentsKey, sortOrder, currentUserId],
+  const listOptions = useMemo(
+    () =>
+      commentsListQueryOptions(
+        commentType,
+        changelogId,
+        sortOrder,
+        currentUserId,
+      ),
+    [commentType, changelogId, sortOrder, currentUserId],
   );
+  const listKey = listOptions.queryKey;
   const commentsQuery = useInfiniteQuery({
-    queryKey: listKey,
-    initialPageParam: 1,
-    queryFn: ({ pageParam, signal }) =>
-      fetchCommentsPage(pageParam, sortOrder, signal),
-    getNextPageParam: (last: CommentsPage) =>
-      last.page < last.totalPages ? last.page + 1 : undefined,
+    ...listOptions,
     enabled: queryEnabled && !focusedThread,
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
-    retry: false,
-    refetchOnWindowFocus: false,
   });
   // Page numbers from the comment lookup are for the newest sort.
   const threadKey = useMemo(
@@ -237,7 +287,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const threadQuery = useQuery({
     queryKey: threadKey,
     queryFn: ({ signal }) =>
-      fetchCommentsPage(focusedThread?.page ?? 1, "newest", signal),
+      fetchPage(focusedThread?.page ?? 1, "newest", signal),
     enabled: queryEnabled && Boolean(focusedThread),
     staleTime: 60_000,
     gcTime: 5 * 60_000,
@@ -298,8 +348,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     if (!hasMore || isFetchingMore) return;
     void fetchNextPage({ cancelRefetch: false });
   }, [hasMore, isFetchingMore, fetchNextPage]);
+  // Skip the loader for prefetched data, unless a comment link will swap it out.
+  const hasPrefetchedList =
+    Boolean(commentsQuery.data) &&
+    typeof window !== "undefined" &&
+    !window.location.hash.startsWith("#comment-");
   const isRefreshingComments =
-    (!commentsReady && initialComments.length === 0) ||
+    (!commentsReady && initialComments.length === 0 && !hasPrefetchedList) ||
     (focusedThread ? threadQuery.isLoading : commentsQuery.isLoading);
   const loadedUserMap = useMemo(
     () => Object.assign({}, ...loadedPages.map((result) => result.userMap)),
@@ -376,13 +431,21 @@ export function useCommentState(props: ChangelogCommentsProps) {
     [updateLoadedPages],
   );
   const adjustTotal = useCallback(
-    (delta: number) =>
-      updateLoadedPages((pages) =>
+    (delta: number) => {
+      const bump = (pages: CommentsPage[]) =>
         pages.map((p, i) =>
           i === 0 ? { ...p, totalComments: p.totalComments + delta } : p,
-        ),
-      ),
-    [updateLoadedPages],
+        );
+      updateLoadedPages(bump);
+      // Thread view edits its own cache; the item page reads the list's total.
+      if (focusedThread)
+        queryClient.setQueryData<InfiniteData<CommentsPage, number>>(
+          listKey,
+          (previous) =>
+            previous && { ...previous, pages: bump(previous.pages) },
+        );
+    },
+    [updateLoadedPages, focusedThread, queryClient, listKey],
   );
   const commentsRef = useRef(comments);
   commentsRef.current = comments;
@@ -449,7 +512,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       queryClient.getQueryData<InfiniteData<CommentsPage, number>>(listKey);
     const lastPage = data?.pageParams.at(-1);
     if (focusedThread || !hasNextPage || lastPage === undefined) return;
-    const fresh = await fetchCommentsPage(
+    const fresh = await fetchPage(
       lastPage,
       sortOrder,
       new AbortController().signal,
@@ -476,7 +539,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     listKey,
     focusedThread,
     hasNextPage,
-    fetchCommentsPage,
+    fetchPage,
     sortOrder,
     updateLoadedPages,
   ]);
