@@ -54,6 +54,9 @@ import { useTwemoji } from "@/contexts/TwemojiContext";
 import { toast } from "sonner";
 import { CommentTextarea } from "./CommentTextarea";
 
+// Replies shown before "View N more replies".
+const PREVIEW_REPLIES = 3;
+
 function CommentAuthorName({
   userId,
   name,
@@ -96,13 +99,18 @@ function SuggestionVoteBadge({ userId }: { userId: string }) {
         <span
           tabIndex={0}
           aria-label={description}
-          className={`inline-flex shrink-0 cursor-help items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] leading-none font-medium ${
+          className={`text-primary-text inline-flex shrink-0 cursor-help items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] leading-none font-medium ${
             upvoted
-              ? "text-button-success border-button-success/20 bg-button-success/10"
-              : "text-button-danger border-button-danger/20 bg-button-danger/10"
+              ? "border-button-success/20 bg-button-success/10"
+              : "border-button-danger/20 bg-button-danger/10"
           }`}
         >
-          <span aria-hidden="true">{upvoted ? "↑" : "↓"}</span>
+          <span
+            aria-hidden="true"
+            className={upvoted ? "text-button-success" : "text-button-danger"}
+          >
+            {upvoted ? "↑" : "↓"}
+          </span>
           {upvoted ? "Upvoted" : "Downvoted"}
         </span>
       </TooltipTrigger>
@@ -458,7 +466,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <div className="comment-link-surface flex gap-2 rounded-lg px-2 py-1 sm:gap-3">
-            <div className="flex w-10 shrink-0 items-start pt-1.5">
+            <div className="flex w-10 shrink-0 flex-col items-center pt-1.5">
               <div
                 className={`${
                   userData[comment.user_id]?.premiumtype === 3
@@ -495,6 +503,13 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   </button>
                 </UserProfilePopover>
               </div>
+              {replyCount > 0 && comment.replies && (
+                // Thread rail: continues into the reply elbows below.
+                <span
+                  aria-hidden="true"
+                  className="bg-border-card mt-1 -mb-1 w-0.5 flex-1"
+                />
+              )}
             </div>
 
             {/*
@@ -1039,11 +1054,12 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
       <div className="ml-12 sm:ml-[3.25rem]">
         {replyCount > 0 && comment.replies && (
           <>
-            <div className="border-border-card mt-3 space-y-3 border-l-2 pl-3 sm:pl-4">
+            {/* Pulled left so the rail sits under the parent avatar's center. */}
+            <div className="-ml-[calc(1.25rem+1px)] sm:-ml-[calc(1.5rem+1px)]">
               {(expandedReplies.has(comment.id)
                 ? comment.replies
-                : comment.replies.slice(0, 1)
-              ).map((reply) => {
+                : comment.replies.slice(0, PREVIEW_REPLIES)
+              ).map((reply, index, shown) => {
                 const replyUser = userData[reply.user_id];
                 const isUnknownReplyUser = !reply.user_id;
                 const replyDisplayName = isUnknownReplyUser
@@ -1073,20 +1089,31 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       replyToTarget.author
                   : null;
 
+                const hasQuote = Boolean(replyToTargetName && replyToTarget);
+
                 return (
-                  <React.Fragment key={reply.id}>
+                  <div key={reply.id} className="relative pt-3 pl-5 sm:pl-6">
+                    {index < shown.length - 1 && (
+                      <span
+                        aria-hidden="true"
+                        className="bg-border-card absolute inset-y-0 left-0 w-0.5"
+                      />
+                    )}
+                    {/* Elbow into the avatar; taller when the quote row sits above it. */}
+                    <span
+                      aria-hidden="true"
+                      className={`border-border-card absolute top-0 left-0 w-7 rounded-bl-lg border-b-2 border-l-2 sm:w-8 ${
+                        hasQuote ? "h-15" : "h-10"
+                      }`}
+                    />
                     <ContextMenu>
                       <ContextMenuTrigger asChild>
                         <div
                           id={`comment-${reply.id}`}
                           className="comment-link-surface grid grid-cols-[2rem_minmax(0,1fr)] gap-x-2 gap-y-1 rounded-lg px-2 py-2 sm:gap-x-3"
                         >
-                          {replyToTargetName && replyToTarget && (
-                            <div className="relative col-span-2 min-w-0 pl-10 sm:pl-11">
-                              <span
-                                aria-hidden="true"
-                                className="border-secondary-text/50 absolute top-1/2 -bottom-1 left-4 w-5 rounded-tl-md border-t-2 border-l-2 sm:w-6"
-                              />
+                          {hasQuote && replyToTargetName && replyToTarget && (
+                            <div className="col-span-2 min-w-0 pl-10 sm:pl-11">
                               <a
                                 href={`#comment-${replyToTarget.id}`}
                                 onClick={(event) => {
@@ -1123,6 +1150,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 aria-label={`Replying to ${replyToTargetName}: ${sanitizeText(replyToTarget.content || "")}`}
                                 className="text-secondary-text hover:text-primary-text focus-visible:ring-button-info flex min-w-0 items-center gap-1.5 rounded-sm text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
                               >
+                                <Icon
+                                  icon="heroicons:arrow-uturn-left"
+                                  className="h-3.5 w-3.5 shrink-0"
+                                  aria-hidden="true"
+                                />
                                 <UserAvatar
                                   userId={replyToTarget.user_id}
                                   avatarHash={
@@ -1679,12 +1711,12 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       </ContextMenuContent>
                     </ContextMenu>
                     {replyingToReplyId === reply.id && replyForm}
-                  </React.Fragment>
+                  </div>
                 );
               })}
             </div>
 
-            {replyCount > 1 && (
+            {replyCount > PREVIEW_REPLIES && (
               <button
                 type="button"
                 className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-xs font-medium transition-colors"
@@ -1702,7 +1734,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                 <span>
                   {expandedReplies.has(comment.id)
                     ? "Hide replies"
-                    : `View ${replyCount - 1} more ${replyCount - 1 === 1 ? "reply" : "replies"}`}
+                    : `View ${replyCount - PREVIEW_REPLIES} more ${replyCount - PREVIEW_REPLIES === 1 ? "reply" : "replies"}`}
                 </span>
               </button>
             )}
