@@ -531,9 +531,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                         />
 
                         <UserBadges
-                          usernumber={
-                            userData[comment.user_id]?.usernumber ?? 0
-                          }
+                          usernumber={userData[comment.user_id]?.usernumber}
                           premiumType={userData[comment.user_id]?.premiumtype}
                           flags={userData[comment.user_id]?.flags}
                           size="sm"
@@ -1231,7 +1229,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                         className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
                                       />
                                       <UserBadges
-                                        usernumber={replyUser?.usernumber ?? 0}
+                                        usernumber={replyUser?.usernumber}
                                         premiumType={replyUser?.premiumtype}
                                         flags={replyUser?.flags}
                                         size="sm"

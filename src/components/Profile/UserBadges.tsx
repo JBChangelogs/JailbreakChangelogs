@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/tooltip";
 
 interface UserBadgesProps {
-  usernumber: number;
+  /** /v2/users/me has none, so the session user can lack it. */
+  usernumber?: number;
   premiumType?: number;
   flags?: UserFlag[];
   size?: "sm" | "md" | "lg";
@@ -155,6 +156,7 @@ export const UserBadges = ({
   }
 
   if (
+    usernumber != null &&
     usernumber <= 100 &&
     !sortedFlags.some((f) => f.flag === "is_early_adopter")
   ) {

@@ -370,7 +370,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                   </p>
                 )}
                 <UserBadges
-                  usernumber={trade.user?.usernumber ?? 0}
+                  usernumber={trade.user?.usernumber}
                   premiumType={trade.user?.premiumtype}
                   size="sm"
                   noContainer={true}
