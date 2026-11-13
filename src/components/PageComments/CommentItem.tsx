@@ -1149,7 +1149,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 className="text-secondary-text hover:text-primary-text focus-visible:ring-button-info flex min-w-0 items-center gap-1.5 rounded-sm text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
                               >
                                 <Icon
-                                  icon="heroicons:arrow-uturn-left"
+                                  icon="heroicons:arrow-turn-down-right"
                                   className="h-3.5 w-3.5 shrink-0"
                                   aria-hidden="true"
                                 />
@@ -1181,10 +1181,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                   showBadge={false}
                                   bgClassName="bg-tertiary-bg"
                                 />
-                                <span className="text-primary-text/90 max-w-24 shrink-0 truncate font-medium sm:max-w-40">
+                                <span className="text-primary-text max-w-24 shrink-0 truncate font-medium sm:max-w-40">
                                   {replyToTargetName}
                                 </span>
-                                <span className="text-tertiary-text min-w-0 truncate">
+                                <span className="text-secondary-text min-w-0 truncate">
                                   {sanitizeText(replyToTarget.content || "")}
                                 </span>
                               </a>
