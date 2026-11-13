@@ -220,17 +220,22 @@ function CommentsLayout() {
             </div>
           ) : (
             <div className="flex flex-col">
-              {focusedThread && totalComments > filteredComments.length && (
-                <button
-                  type="button"
-                  onClick={showAllComments}
-                  className="text-link hover:text-link-hover mb-3 flex cursor-pointer items-center gap-1 self-start text-sm font-semibold"
-                >
-                  <Icon icon="heroicons:arrow-left" className="h-4 w-4" />
-                  View all {totalComments}{" "}
-                  {totalComments === 1 ? "comment" : "comments"}
-                </button>
-              )}
+              {focusedThread &&
+                totalComments >
+                  filteredComments.reduce(
+                    (n, c) => n + 1 + (c.replies?.length ?? 0),
+                    0,
+                  ) && (
+                  <button
+                    type="button"
+                    onClick={showAllComments}
+                    className="text-link hover:text-link-hover mb-3 flex cursor-pointer items-center gap-1 self-start text-sm font-semibold"
+                  >
+                    <Icon icon="heroicons:arrow-left" className="h-4 w-4" />
+                    View all {totalComments}{" "}
+                    {totalComments === 1 ? "comment" : "comments"}
+                  </button>
+                )}
               <div className="flex flex-col space-y-2">
                 {currentComments.map((item) => {
                   if (!item) return null;
