@@ -26,9 +26,12 @@ export function useUpdateAvailable() {
 
     const interval = window.setInterval(check, CHECK_INTERVAL_MS);
     document.addEventListener("visibilitychange", check);
+    // Returning from another app fires focus, not visibilitychange.
+    window.addEventListener("focus", check);
     return () => {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", check);
+      window.removeEventListener("focus", check);
     };
   }, []);
 
