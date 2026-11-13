@@ -220,6 +220,7 @@ export default async function RootLayout({
                   <NextTopLoader
                     color="var(--color-button-info)"
                     showSpinner={false}
+                    showForHashAnchor={false}
                     shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                   />
                   <Suspense fallback={null}>
@@ -375,6 +376,7 @@ export default async function RootLayout({
               <NextTopLoader
                 color="var(--color-button-info)"
                 showSpinner={false}
+                showForHashAnchor={false}
                 shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
               />
               <Suspense fallback={null}>
