@@ -347,7 +347,7 @@ export function SuggestionForm({
             Item
           </label>
           <div className="bg-button-info/10 border-button-info mb-2 rounded-lg border p-4 text-sm shadow-sm">
-            <span className="text-secondary-text">
+            <span className="text-primary-text">
               Only tradable items are shown in search results.
             </span>
           </div>
@@ -629,7 +629,7 @@ export function SuggestionForm({
                 ) : (
                   <div className="space-y-2">
                     <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
-                      <span className="text-secondary-text">
+                      <span className="text-primary-text">
                         Select every trend that applies. The first one you pick
                         is the primary trend.
                       </span>
@@ -684,7 +684,7 @@ export function SuggestionForm({
                 ) : (
                   <div className="space-y-2">
                     <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
-                      <span className="text-secondary-text">
+                      <span className="text-primary-text">
                         Select one of the options below as your suggested{" "}
                         {fieldLabel(field).toLowerCase()}.
                       </span>
@@ -735,7 +735,7 @@ export function SuggestionForm({
               ) : field === "notes" ? (
                 <div className="space-y-2">
                   <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
-                    <span className="text-secondary-text">
+                    <span className="text-primary-text">
                       Enter the note text you want to suggest for this item.
                     </span>
                   </div>
@@ -761,7 +761,7 @@ export function SuggestionForm({
                 <div className="space-y-2">
                   {["cash_value", "duped_value"].includes(field) && (
                     <div className="bg-button-info/10 border-button-info rounded-lg border p-4 text-sm shadow-sm">
-                      <span className="text-secondary-text">
+                      <span className="text-primary-text">
                         Enter a numeric value. Supported formats: 50m, 500k,
                         10,000,000.
                       </span>

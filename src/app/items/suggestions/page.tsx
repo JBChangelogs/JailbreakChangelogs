@@ -575,7 +575,7 @@ export default function ValueSuggestionsPage() {
             )}
           </div>
 
-          <p className="bg-button-info/10 border-button-info text-secondary-text mb-4 rounded-lg border p-4 text-sm shadow-sm">
+          <p className="bg-button-info/10 border-button-info text-primary-text mb-4 rounded-lg border p-4 text-sm shadow-sm">
             Please note that a high upvote count does not guarantee a suggestion
             will be accepted.
           </p>
