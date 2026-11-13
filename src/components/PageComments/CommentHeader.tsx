@@ -1,6 +1,7 @@
 "use client";
 
 import NumberFlow from "@number-flow/react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "../ui/IconWrapper";
 import {
   Fragment,
@@ -60,6 +61,7 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
 
   const {
     totalComments,
+    isRefreshingComments,
     type,
     changelogId,
     changelogTitle,
@@ -77,8 +79,18 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
         <div className="grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4">
           <h2 className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl">
             <span>
-              <NumberFlow translate="no" value={totalComments} />{" "}
-              {totalComments === 1 ? "Comment for" : "Comments for"}
+              {/* No "0" while loading, or it rolls up to the real count. */}
+              {isRefreshingComments ? (
+                <Skeleton
+                  className="inline-block h-5 w-8 align-middle"
+                  aria-hidden="true"
+                />
+              ) : (
+                <NumberFlow translate="no" value={totalComments} />
+              )}{" "}
+              {totalComments === 1 && !isRefreshingComments
+                ? "Comment for"
+                : "Comments for"}
             </span>{" "}
             <span>
               {type === "changelog" ? (
