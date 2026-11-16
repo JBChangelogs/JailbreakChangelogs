@@ -25,32 +25,6 @@ export function EmojiGlyph({
   );
 }
 
-/** Every allowed emoji, 7 to a row, as in the app's add-reaction picker. */
-export function EmojiGrid({
-  emojis,
-  twemojiEnabled,
-  renderCell,
-}: {
-  emojis: string[];
-  twemojiEnabled: boolean;
-  /** Wraps each cell, e.g. in a menu item; a button by default. */
-  renderCell: (emoji: string, glyph: React.ReactNode) => React.ReactNode;
-}) {
-  return (
-    <div className="grid max-h-64 grid-cols-7 gap-1 overflow-y-auto">
-      {emojis.map((emoji) =>
-        renderCell(
-          emoji,
-          <EmojiGlyph emoji={emoji} twemojiEnabled={twemojiEnabled} />,
-        ),
-      )}
-    </div>
-  );
-}
-
-export const EMOJI_CELL =
-  "hover:bg-quaternary-bg flex size-8 cursor-pointer items-center justify-center rounded-md p-0 text-lg";
-
 /** The chips under a message: each emoji, its count, and who reacted. */
 export function ReactionChips({
   reactions,

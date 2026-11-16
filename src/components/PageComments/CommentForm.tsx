@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
+
+import { useCallback, useRef, useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "../ui/button";
@@ -17,7 +19,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTwemoji } from "@/contexts/TwemojiContext";
-import Twemoji from "react-twemoji";
 
 export function CommentForm() {
   const {
@@ -40,11 +41,6 @@ export function CommentForm() {
   const [emojiOpen, setEmojiOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cursorPosRef = useRef<number | null>(null);
-
-  const emojiEntries = useMemo(
-    () => Object.entries(emojiStringMap).slice(0, 120),
-    [emojiStringMap],
-  );
 
   const insertEmoji = useCallback(
     (emoji: string, keepOpen = false) => {
@@ -159,36 +155,14 @@ export function CommentForm() {
                 align="start"
                 side="bottom"
                 sideOffset={8}
-                className="w-72 p-0"
+                className="w-auto p-0"
                 onOpenAutoFocus={(e) => e.preventDefault()}
               >
-                <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
-                  {emojiEntries.map(([name, emoji]) => (
-                    <Tooltip key={name} delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={(e) => insertEmoji(emoji, e.shiftKey)}
-                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
-                        >
-                          {twemojiEnabled ? (
-                            <Twemoji
-                              tag="span"
-                              options={{
-                                className: "twemoji pointer-events-none",
-                              }}
-                            >
-                              {emoji}
-                            </Twemoji>
-                          ) : (
-                            <span className="pointer-events-none">{emoji}</span>
-                          )}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>:{name}:</TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
+                <EmojiPicker
+                  quickEmojis={Object.values(emojiStringMap)}
+                  twemojiEnabled={twemojiEnabled}
+                  onSelect={insertEmoji}
+                />
               </PopoverContent>
             </Popover>
             {/* Mobile: show buttons */}

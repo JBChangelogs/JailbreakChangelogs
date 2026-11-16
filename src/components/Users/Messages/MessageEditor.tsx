@@ -1,7 +1,8 @@
 "use client";
 
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
+
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
-import Twemoji from "react-twemoji";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -140,38 +141,14 @@ export function MessageEditor({
               align="end"
               side="top"
               sideOffset={8}
-              className="w-72 p-0"
+              className="w-auto p-0"
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
-              <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
-                {Object.entries(emojiStringMap)
-                  .slice(0, 120)
-                  .map(([name, emoji]) => (
-                    <Tooltip key={name} delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={(e) => insertEditEmoji(emoji, e.shiftKey)}
-                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
-                        >
-                          {twemojiEnabled ? (
-                            <Twemoji
-                              tag="span"
-                              options={{
-                                className: "twemoji pointer-events-none",
-                              }}
-                            >
-                              {emoji}
-                            </Twemoji>
-                          ) : (
-                            <span className="pointer-events-none">{emoji}</span>
-                          )}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>:{name}:</TooltipContent>
-                    </Tooltip>
-                  ))}
-              </div>
+              <EmojiPicker
+                quickEmojis={Object.values(emojiStringMap)}
+                twemojiEnabled={twemojiEnabled}
+                onSelect={insertEditEmoji}
+              />
             </PopoverContent>
           </Popover>
         </div>

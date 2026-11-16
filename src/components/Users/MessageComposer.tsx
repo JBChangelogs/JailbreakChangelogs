@@ -1,5 +1,7 @@
 "use client";
 
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
+
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -23,7 +25,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTwemoji } from "@/contexts/TwemojiContext";
-import Twemoji from "react-twemoji";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { recordEmojiUse } from "@/hooks/useFrequentEmojis";
 import { mentionsToIds } from "@/utils/messages/mentions";
@@ -179,6 +180,14 @@ export function MessageComposer({
   const [draft, setDraft] = React.useState("");
   const [emojiOpen, setEmojiOpen] = React.useState(false);
   const cursorPosRef = React.useRef<number | null>(null);
+  const focusComposerAfterEmojiRef = React.useRef(false);
+  const focusComposer = React.useCallback(() => {
+    const textarea = inputRef.current?.parentElement?.querySelector("textarea");
+    if (!textarea) return;
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    cursorPosRef.current = textarea.value.length;
+  }, []);
   const emojiStringMap = useEmojiStringMap();
   const { twemojiEnabled } = useTwemoji();
   const isMobile = useMediaQuery("(max-width: 1023px)");
@@ -233,14 +242,13 @@ export function MessageComposer({
       setDraft(next);
       cursorPosRef.current = cursor + emoji.length;
       recordEmojiUse(emoji);
-      if (!keepOpen) setEmojiOpen(false);
+      if (!keepOpen) {
+        focusComposerAfterEmojiRef.current = true;
+        setEmojiOpen(false);
+        requestAnimationFrame(focusComposer);
+      }
     },
-    [draft],
-  );
-
-  const emojiEntries = React.useMemo(
-    () => Object.entries(emojiStringMap).slice(0, 120),
-    [emojiStringMap],
+    [draft, focusComposer],
   );
 
   return (
@@ -418,38 +426,20 @@ export function MessageComposer({
                   align="end"
                   side="top"
                   sideOffset={8}
-                  className="w-72 p-0"
+                  className="w-auto p-0"
                   onOpenAutoFocus={(e) => e.preventDefault()}
+                  onCloseAutoFocus={(event) => {
+                    if (!focusComposerAfterEmojiRef.current) return;
+                    event.preventDefault();
+                    focusComposerAfterEmojiRef.current = false;
+                    focusComposer();
+                  }}
                 >
-                  <div className="grid max-h-56 grid-cols-8 gap-px overflow-y-auto p-1.5">
-                    {emojiEntries.map(([name, emoji]) => (
-                      <Tooltip key={name} delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={(e) => insertEmoji(emoji, e.shiftKey)}
-                            className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-transparent text-lg transition-colors"
-                          >
-                            {twemojiEnabled ? (
-                              <Twemoji
-                                tag="span"
-                                options={{
-                                  className: "twemoji pointer-events-none",
-                                }}
-                              >
-                                {emoji}
-                              </Twemoji>
-                            ) : (
-                              <span className="pointer-events-none">
-                                {emoji}
-                              </span>
-                            )}
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>:{name}:</TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </div>
+                  <EmojiPicker
+                    quickEmojis={Object.values(emojiStringMap)}
+                    twemojiEnabled={twemojiEnabled}
+                    onSelect={insertEmoji}
+                  />
                 </PopoverContent>
               </Popover>
               <ChatToolbarButton

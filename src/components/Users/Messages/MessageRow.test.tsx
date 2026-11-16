@@ -520,3 +520,39 @@ test("invites, gifts and accepted offers have no text-message actions on mobile 
     }
   }
 });
+
+test("the context-menu reaction action opens the picker popover without stealing its focus", () => {
+  const h = harness(false);
+  const reactions: string[] = [];
+  h.props.onReact = (_message, emoji) => {
+    reactions.push(emoji);
+  };
+  let prevented = false;
+  const select = h
+    .render()
+    .find(
+      (node) =>
+        node.type === "ContextMenuItem" &&
+        Array.isArray(node.props.children) &&
+        node.props.children.includes("Add Reaction"),
+    )!;
+  (select.props.onSelect as () => void)();
+  const tree = h.render();
+  expect(
+    tree.some((node) => node.type === "Popover" && node.props.open === true),
+  ).toBe(true);
+  const menu = tree.find((node) => node.type === "ContextMenuContent")!;
+  (
+    menu.props.onCloseAutoFocus as (event: {
+      preventDefault: () => void;
+    }) => void
+  )({
+    preventDefault: () => {
+      prevented = true;
+    },
+  });
+  expect(prevented).toBe(true);
+  const picker = tree.find((node) => node.type === "EmojiPicker")!;
+  (picker.props.onSelect as (emoji: string) => void)("👩🏽‍💻");
+  expect(reactions).toEqual(["👩🏽‍💻"]);
+});

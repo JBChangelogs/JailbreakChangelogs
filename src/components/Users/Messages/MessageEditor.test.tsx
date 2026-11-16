@@ -135,17 +135,12 @@ test("edit typing stays local, saving submits the latest draft, and emoji insert
     )!,
     "onPointerDown",
   );
-  trigger(
-    tree.find(
-      (node) =>
-        node.type === "button" &&
-        nodes(node.props.children).some(
-          (child) => child.props.children === "🙂",
-        ),
-    )!,
-    "onClick",
-    { shiftKey: false },
-  );
+  (
+    tree.find((node) => node.type === "EmojiPicker")!.props.onSelect as (
+      emoji: string,
+      keepOpen: boolean,
+    ) => void
+  )("🙂", false);
   frames.forEach((frame) => frame());
   expect(input().props.value).toBe("f🙂ast typing");
   expect(focused).toBe(true);

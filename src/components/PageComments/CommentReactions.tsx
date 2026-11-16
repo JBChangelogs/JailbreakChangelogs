@@ -1,5 +1,7 @@
 "use client";
 
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
+
 import React, { useEffect, useRef, useState } from "react";
 import NumberFlow from "@number-flow/react";
 import { Icon } from "../ui/IconWrapper";
@@ -178,7 +180,7 @@ export function CommentReactions({
           </button>
         )}
 
-        {isLoggedIn && availableEmojis.length > 0 && !reactionBan && (
+        {isLoggedIn && !reactionBan && (
           <Popover
             open={reactionPickerInlineOpenId === commentId}
             onOpenChange={(open) => {
@@ -218,40 +220,15 @@ export function CommentReactions({
                 if (shiftPressedRef.current) e.preventDefault();
               }}
             >
-              <div className="grid grid-cols-5 gap-1">
-                {availableEmojis.map((emoji) => (
-                  <Tooltip key={emoji} delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          void handleReact(commentId, emoji);
-                          if (!e.shiftKey) {
-                            setReactionPickerInlineOpenId(null);
-                          }
-                        }}
-                        className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
-                      >
-                        {twemojiEnabled ? (
-                          <Twemoji
-                            tag="span"
-                            options={{
-                              className: "twemoji pointer-events-none",
-                            }}
-                          >
-                            {emoji}
-                          </Twemoji>
-                        ) : (
-                          <span className="pointer-events-none">{emoji}</span>
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <TwemojiText>{emoji}</TwemojiText>
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-              </div>
+              <EmojiPicker
+                quickEmojis={availableEmojis}
+                twemojiEnabled={twemojiEnabled}
+                disabled={isReactionBlocked}
+                onSelect={(emoji, keepOpen) => {
+                  void handleReact(commentId, emoji);
+                  if (!keepOpen) setReactionPickerInlineOpenId(null);
+                }}
+              />
             </PopoverContent>
           </Popover>
         )}

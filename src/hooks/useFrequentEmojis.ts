@@ -49,7 +49,7 @@ function subscribe(listener: () => void) {
 }
 
 /**
- * Your most-used allowed emoji, most first. Ties keep the API's order, so
+ * Your most-used quick emoji, most first. Ties keep the API's order, so
  * with no usage these are its first entries (👍 👎 ❤️ 😂).
  */
 export function useFrequentEmojis(emojiMap: EmojiStringMap, count: number) {

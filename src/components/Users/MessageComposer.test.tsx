@@ -20,7 +20,11 @@ function nodes(value: unknown): Node[] {
   if (Array.isArray(value)) return value.flatMap(nodes);
   if (!value || typeof value !== "object" || !("props" in value)) return [];
   const node = value as Node;
-  return [node, ...nodes(node.props.children)];
+  return [
+    node,
+    ...nodes(node.props.children),
+    ...nodes(node.props.rightOverlay),
+  ];
 }
 function harness() {
   const state: unknown[] = [];
@@ -31,6 +35,7 @@ function harness() {
   const requests: { resolve: (url: string) => void; signal: AbortSignal }[] =
     [];
   const sent: unknown[][] = [];
+  const frames: (() => void)[] = [];
   const errors: string[] = [];
   const infos: string[] = [];
   const exports = {} as { MessageComposer: typeof MessageComposer };
@@ -76,6 +81,7 @@ function harness() {
       useTwemoji: () => ({ twemojiEnabled: false }),
     },
     "@/hooks/useEmojiStringMap": { useEmojiStringMap: () => ({}) },
+    "@/hooks/useFrequentEmojis": { recordEmojiUse: () => {} },
     "@/hooks/useMediaQuery": { useMediaQuery: () => false },
     "@/utils/messages/mentions": { mentionsToIds: (text: string) => text },
     "@/utils/ui/sanitizeText": { sanitizeText: (text: string) => text },
@@ -96,6 +102,10 @@ function harness() {
       exports,
       crypto,
       AbortController,
+      requestAnimationFrame: (callback: () => void) => {
+        frames.push(callback);
+        return frames.length;
+      },
       document: { body: "document-body" },
       window: {
         addEventListener: (name: string, fn: (event?: unknown) => void) =>
@@ -128,6 +138,9 @@ function harness() {
   });
   return {
     render,
+    flushFrames: () => {
+      for (const frame of frames.splice(0)) frame();
+    },
     props,
     requests,
     sent,
@@ -364,3 +377,49 @@ test.each(["video/mp4", "image/svg+xml", "application/pdf"])(
     expect(h.render().some((node) => node.props.role === "status")).toBe(false);
   },
 );
+
+test("selecting an emoji restores the composer caret to the end and Enter sends the draft", () => {
+  const h = harness();
+  let focused = 0;
+  let selection: number[] = [];
+  const textarea = {
+    value: "hello",
+    focus: () => {
+      focused++;
+    },
+    setSelectionRange: (...args: number[]) => {
+      selection = args;
+    },
+  };
+  const fileInput = h.render().find((node) => node.type === "input")!.props
+    .ref as { current: unknown };
+  fileInput.current = { parentElement: { querySelector: () => textarea } };
+  h.render().find((node) => node.type === "ChatToolbarTextarea")!.props
+    .onChange!({ target: { value: "hello", selectionStart: 1 } });
+  const picker = h.render().find((node) => node.type === "EmojiPicker")!;
+  (picker.props.onSelect as (emoji: string, keepOpen: boolean) => void)(
+    "🐢",
+    false,
+  );
+  const tree = h.render();
+  const input = tree.find((node) => node.type === "ChatToolbarTextarea")!;
+  textarea.value = input.props.value as string;
+  h.flushFrames();
+  expect(textarea.value).toBe("h🐢ello");
+  expect(focused).toBe(1);
+  expect(selection).toEqual([textarea.value.length, textarea.value.length]);
+  let prevented = false;
+  const content = tree.find((node) => node.type === "PopoverContent")!;
+  (
+    content.props.onCloseAutoFocus as (event: {
+      preventDefault: () => void;
+    }) => void
+  )({
+    preventDefault: () => {
+      prevented = true;
+    },
+  });
+  expect(prevented).toBe(true);
+  input.props.onSubmit!();
+  expect(h.sent).toEqual([["h🐢ello", undefined]]);
+});

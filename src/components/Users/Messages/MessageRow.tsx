@@ -1,5 +1,7 @@
 "use client";
 
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
+
 import type React from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
@@ -11,9 +13,6 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import {
@@ -34,12 +33,7 @@ import {
   mentionedIds,
   mentionsToText,
 } from "@/utils/messages/mentions";
-import {
-  EMOJI_CELL,
-  EmojiGlyph,
-  EmojiGrid,
-  ReactionChips,
-} from "./MessageReactions";
+import { EmojiGlyph, ReactionChips } from "./MessageReactions";
 import {
   ChatEvent,
   ChatEventAddon,
@@ -291,8 +285,8 @@ export function MessageRow({
       (currentUserMessageUser?.id === id ? currentUserMessageUser : undefined);
     return user ? getDisplayName(user) : undefined;
   };
+  const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
   const topEmojis = useFrequentEmojis(emojiStringMap, 4);
-  const allEmojis = [...new Set(Object.values(emojiStringMap))];
   // In a group, a sender is any member; in a DM, the other person.
   const userFor = (id: string): MessageUser | null =>
     usersById ? (usersById.get(id) ?? placeholderUser(id)) : selectedUser;
@@ -1007,7 +1001,10 @@ export function MessageRow({
                       </button>
                     ))}
                     <span className="bg-border-primary mx-0.5 h-4 w-px" />
-                    <Popover>
+                    <Popover
+                      open={reactionPickerOpen}
+                      onOpenChange={setReactionPickerOpen}
+                    >
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <PopoverTrigger asChild>
@@ -1026,20 +1023,10 @@ export function MessageRow({
                         <TooltipContent side="top">Add Reaction</TooltipContent>
                       </Tooltip>
                       <PopoverContent align="end" className="w-auto p-1.5">
-                        <EmojiGrid
-                          emojis={allEmojis}
+                        <EmojiPicker
+                          quickEmojis={Object.values(emojiStringMap)}
                           twemojiEnabled={twemojiEnabled}
-                          renderCell={(emoji, glyph) => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              aria-label={`React with ${emoji}`}
-                              className={EMOJI_CELL}
-                              onClick={() => react(emoji)}
-                            >
-                              {glyph}
-                            </button>
-                          )}
+                          onSelect={(emoji) => react(emoji)}
                         />
                       </PopoverContent>
                     </Popover>
@@ -1052,7 +1039,12 @@ export function MessageRow({
         </div>
       </ContextMenuTrigger>
       {canOpenActions && (
-        <ContextMenuContent className="w-52">
+        <ContextMenuContent
+          className="w-52"
+          onCloseAutoFocus={(event) => {
+            if (reactionPickerOpen) event.preventDefault();
+          }}
+        >
           {canReact && (
             <>
               <div className="flex gap-1 p-1">
@@ -1067,28 +1059,10 @@ export function MessageRow({
                   </ContextMenuItem>
                 ))}
               </div>
-              <ContextMenuSub>
-                <ContextMenuSubTrigger>
-                  <Icon icon="heroicons-outline:face-smile" className="mr-2" />
-                  Add Reaction
-                </ContextMenuSubTrigger>
-                <ContextMenuSubContent className="p-1.5">
-                  <EmojiGrid
-                    emojis={allEmojis}
-                    twemojiEnabled={twemojiEnabled}
-                    renderCell={(emoji, glyph) => (
-                      <ContextMenuItem
-                        key={emoji}
-                        aria-label={`React with ${emoji}`}
-                        className={EMOJI_CELL}
-                        onClick={() => react(emoji)}
-                      >
-                        {glyph}
-                      </ContextMenuItem>
-                    )}
-                  />
-                </ContextMenuSubContent>
-              </ContextMenuSub>
+              <ContextMenuItem onSelect={() => setReactionPickerOpen(true)}>
+                <Icon icon="heroicons-outline:face-smile" className="mr-2" />
+                Add Reaction
+              </ContextMenuItem>
               <ContextMenuSeparator />
             </>
           )}
@@ -1149,6 +1123,31 @@ export function MessageRow({
                       />
                     </button>
                   ))}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="More reactions"
+                        className="bg-tertiary-bg flex h-11 flex-1 cursor-pointer items-center justify-center rounded-md"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <Icon icon="heroicons:face-smile" className="size-5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <EmojiPicker
+                        quickEmojis={Object.values(emojiStringMap)}
+                        twemojiEnabled={twemojiEnabled}
+                        onSelect={(emoji) => {
+                          react(emoji);
+                          closeMessageActions();
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
               {renderMenuItems(MessageSheetAction, SheetSeparator, true)}
