@@ -118,7 +118,9 @@ export function MessageComposer({
         });
     }
   };
-  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragState, setDragState] = React.useState<
+    "images" | "unsupported" | null
+  >(null);
   const addDroppedImages = React.useEffectEvent(addImages);
   React.useEffect(() => {
     let depth = 0;
@@ -126,30 +128,27 @@ export function MessageComposer({
       event.dataTransfer?.types.includes("Files");
     const clear = () => {
       depth = 0;
-      setIsDragging(false);
-    };
-    const enter = (event: DragEvent) => {
-      if (!isFileDrag(event)) return;
-      event.preventDefault();
-      depth++;
-      const items = Array.from(event.dataTransfer?.items ?? []);
-      if (
-        !disabled &&
-        !isSending &&
-        items.some(
-          (item) =>
-            item.kind === "file" &&
-            (!item.type || item.type.startsWith("image/")),
-        )
-      ) {
-        setIsDragging(true);
-      }
+      setDragState(null);
     };
     const over = (event: DragEvent) => {
       if (!isFileDrag(event)) return;
       event.preventDefault();
+      const unsupported = Array.from(event.dataTransfer?.items ?? []).some(
+        (item) =>
+          item.kind === "file" &&
+          item.type &&
+          !MESSAGE_IMAGE_TYPES.includes(item.type),
+      );
       if (event.dataTransfer)
-        event.dataTransfer.dropEffect = disabled || isSending ? "none" : "copy";
+        event.dataTransfer.dropEffect =
+          disabled || isSending || unsupported ? "none" : "copy";
+      if (!disabled && !isSending)
+        setDragState(unsupported ? "unsupported" : "images");
+    };
+    const enter = (event: DragEvent) => {
+      if (!isFileDrag(event)) return;
+      depth++;
+      over(event);
     };
     const leave = () => {
       if (--depth <= 0) clear();
@@ -246,18 +245,33 @@ export function MessageComposer({
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      {isDragging &&
+      {dragState &&
         createPortal(
           <div
             className="pointer-events-none fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/70 p-6"
             role="status"
             aria-live="polite"
           >
-            <div className="border-link bg-primary-bg text-primary-text flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center shadow-xl">
-              <Icon icon="heroicons:photo" className="text-link size-16" />
-              <p className="text-xl font-semibold">Drop images to attach</p>
+            <div
+              className={`bg-primary-bg text-primary-text flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center shadow-xl ${dragState === "unsupported" ? "border-button-danger" : "border-link"}`}
+            >
+              <Icon
+                icon={
+                  dragState === "unsupported"
+                    ? "heroicons:no-symbol"
+                    : "heroicons:photo"
+                }
+                className={`size-16 ${dragState === "unsupported" ? "text-button-danger" : "text-link"}`}
+              />
+              <p className="text-xl font-semibold">
+                {dragState === "unsupported"
+                  ? "File type not supported"
+                  : "Drop images to attach"}
+              </p>
               <p className="text-secondary-text text-sm">
-                Add up to 4 images. You can add a message before sending.
+                {dragState === "unsupported"
+                  ? "Only PNG, JPG, WEBP or GIF images can be attached."
+                  : "Add up to 4 images. You can add a message before sending."}
               </p>
             </div>
           </div>,

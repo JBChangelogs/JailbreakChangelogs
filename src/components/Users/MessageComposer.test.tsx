@@ -266,6 +266,13 @@ test("full-screen image drag overlay survives nested targets and clears on leave
       items: [{ kind: "file", type: "text/plain" }],
     },
   });
+  expect(overlayVisible()).toBe(true);
+  expect(
+    h
+      .render()
+      .some((node) => node.props.children === "File type not supported"),
+  ).toBe(true);
+  h.windowEvent("dragend");
   expect(overlayVisible()).toBe(false);
   h.props.disabled = true;
   h.changeConversation();
@@ -322,3 +329,38 @@ test("attachments sit above the input and actions, with filenames and expiry in 
   );
   expect(expiry?.type).toBe("TooltipContent");
 });
+
+test.each(["video/mp4", "image/svg+xml", "application/pdf"])(
+  "unsupported %s drags explain accepted formats before dropping",
+  (type) => {
+    const h = harness();
+    const event = {
+      dataTransfer: {
+        types: ["Files"],
+        items: [{ kind: "file", type }],
+        dropEffect: "copy",
+      },
+      preventDefault: () => {},
+    };
+    h.drag("dragenter", event);
+    expect(
+      h
+        .render()
+        .some((node) => node.props.children === "File type not supported"),
+    ).toBe(true);
+    expect(
+      h
+        .render()
+        .some(
+          (node) =>
+            node.props.children ===
+            "Only PNG, JPG, WEBP or GIF images can be attached.",
+        ),
+    ).toBe(true);
+    h.drag("dragover", event);
+    expect(event.dataTransfer.dropEffect).toBe("none");
+    expect(h.requests).toHaveLength(0);
+    h.drag("dragleave", event);
+    expect(h.render().some((node) => node.props.role === "status")).toBe(false);
+  },
+);
