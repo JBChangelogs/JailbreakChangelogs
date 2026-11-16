@@ -87,12 +87,6 @@ export const FRONTEND_SETTINGS: Record<string, FrontendSetting> = {
       "Show the “Change navigation layout” button next to your notifications. Saved on this browser.",
     target: "navigation-layout",
   },
-  twemoji_enabled: {
-    title: "Twemoji Emojis",
-    description:
-      "Use Twemoji for emojis instead of your browser's native emoji set",
-    target: "display",
-  },
   "accent-color": { title: "Accent color", requiresAccount: true },
   notifications: { title: "Notification Preferences", requiresAccount: true },
   "desktop-notifications": {

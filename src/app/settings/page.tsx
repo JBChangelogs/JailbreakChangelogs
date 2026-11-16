@@ -34,12 +34,10 @@ import { DeleteInventoryData } from "@/components/Settings/DeleteInventoryData";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { toast } from "sonner";
 import { NotificationTypeSettings } from "@/components/Settings/NotificationTypeSettings";
 import { SettingsSubsectionHeading } from "@/components/Settings/SettingsSubsectionHeading";
 import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
@@ -81,7 +79,6 @@ const sectionIcon = (id: string) =>
 
 export default function SettingsPage() {
   const { user, isLoading, refreshUser, setLoginModal } = useAuthContext();
-  const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
   const {
     prefs: notificationPrefs,
@@ -310,19 +307,6 @@ export default function SettingsPage() {
           >
             <DesktopNavigationSettings />
           </div>
-          <SettingToggle
-            name="twemoji_enabled"
-            value={twemojiEnabled}
-            description={FRONTEND_SETTINGS.twemoji_enabled.description!}
-            displayName={FRONTEND_SETTINGS.twemoji_enabled.title}
-            onChange={(_name, value) => {
-              setTwemojiEnabled(value);
-              toast.success("Setting Updated", {
-                description: `"${formatSettingName("twemoji_enabled")}" has been ${value ? "enabled" : "disabled"}.`,
-              });
-            }}
-            userData={userData}
-          />
         </div>
       </SettingsCard>
     </>

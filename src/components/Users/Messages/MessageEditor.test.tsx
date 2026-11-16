@@ -77,7 +77,6 @@ test("edit typing stays local, saving submits the latest draft, and emoji insert
       content: "hello",
     },
     emojiStringMap: { smile: "🙂" },
-    twemojiEnabled: false,
     isSending: false,
     onSave: (...args) => {
       saves.push(args);

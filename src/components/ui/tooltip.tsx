@@ -6,22 +6,16 @@ import twemoji from "@twemoji/api";
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 
 const TWEMOJI_OPTIONS = { className: "twemoji" } as const;
 
 function TooltipTwemojiInner({ children }: { children: React.ReactNode }) {
-  const { twemojiEnabled } = useTwemoji();
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    if (!twemojiEnabled || !ref.current) return;
+    if (!ref.current) return;
     twemoji.parse(ref.current, TWEMOJI_OPTIONS);
   });
-
-  if (!twemojiEnabled) {
-    return <>{children}</>;
-  }
 
   return <div ref={ref}>{children}</div>;
 }

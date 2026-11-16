@@ -38,7 +38,6 @@ import {
   prepareEmojiShortcodeContentForApi,
   prepareEmojiShortcodeDisplayContent,
 } from "@/utils/comments/emojiShortcodes";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import { MessageRow } from "@/components/Users/Messages/MessageRow";
 import { ActiveOfferReminder } from "@/components/Users/Messages/ActiveOfferReminder";
 import { ChatHeaderPanel } from "@/components/Users/Messages/ChatHeaderPanel";
@@ -142,7 +141,6 @@ export default function MessagesInbox() {
 
   const messageBan = bans["communication"] ?? null;
   const emojiStringMap = useEmojiStringMap();
-  const { twemojiEnabled } = useTwemoji();
 
   const prepareMessageContentForApi = useCallback(
     (text: string) =>
@@ -1210,7 +1208,6 @@ export default function MessagesInbox() {
                         editingMessageId={editingMessageId}
 
                         emojiStringMap={emojiStringMap}
-                        twemojiEnabled={twemojiEnabled}
                         isSending={isSending}
                         deletingMessageId={deletingMessageId}
 

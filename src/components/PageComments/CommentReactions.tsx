@@ -19,7 +19,6 @@ import {
 import { useCommentsContext } from "./CommentsContext";
 import { ReactionsDialog } from "./ReactionsDialog";
 import Twemoji from "react-twemoji";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import { TwemojiText } from "@/components/ui/TwemojiText";
 
 export function CommentReactions({
@@ -45,7 +44,6 @@ export function CommentReactions({
     setReactionPickerInlineOpenId,
     getStableReactionOrder,
   } = useCommentsContext();
-  const { twemojiEnabled } = useTwemoji();
 
   const isReactionBlocked = isRateLimited;
   const [tooltipResetKey, setTooltipResetKey] = useState(0);
@@ -152,13 +150,11 @@ export function CommentReactions({
                     : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
                 }`}
               >
-                {twemojiEnabled ? (
+                {
                   <Twemoji tag="span" options={{ className: "twemoji" }}>
                     {r.emoji}
                   </Twemoji>
-                ) : (
-                  <span>{r.emoji}</span>
-                )}
+                }
                 <NumberFlow
                   translate="no"
                   value={r.count}
@@ -222,7 +218,6 @@ export function CommentReactions({
             >
               <EmojiPicker
                 quickEmojis={availableEmojis}
-                twemojiEnabled={twemojiEnabled}
                 disabled={isReactionBlocked}
                 onSelect={(emoji, keepOpen) => {
                   void handleReact(commentId, emoji);

@@ -54,7 +54,6 @@ import {
 } from "@/components/Users/Messages/GroupChatDialogs";
 import { useEmojiStringMap } from "@/hooks/useEmojiStringMap";
 import { useOfferDetailsBatch } from "@/hooks/useOfferDetailsBatch";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import type { RealtimeGroupEventDetail } from "@/hooks/useGroupChats";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -289,7 +288,6 @@ export function GroupChatView({
   const queryClient = useQueryClient();
   const currentUserId = currentUser ? asId(currentUser.id) : null;
   const emojiStringMap = useEmojiStringMap();
-  const { twemojiEnabled } = useTwemoji();
   const offerDetails = useOfferDetailsBatch(NO_OFFERS);
 
   const groupKey = useMemo(() => ["group-chat", groupId], [groupId]);
@@ -952,7 +950,6 @@ export function GroupChatView({
                   replyingToMessage={replyingToMessage}
                   editingMessageId={editingMessageId}
                   emojiStringMap={emojiStringMap}
-                  twemojiEnabled={twemojiEnabled}
                   isSending={isSending}
                   deletingMessageId={deletingMessageId}
                   setActiveMessageId={setActiveMessageId}

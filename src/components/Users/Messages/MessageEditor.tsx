@@ -27,7 +27,6 @@ const NO_USERS: MessageUser[] = [];
 interface MessageEditorProps {
   message: Message;
   emojiStringMap: EmojiStringMap;
-  twemojiEnabled: boolean;
   isSending: boolean;
   onSave: (messageId: string, content: string) => void | Promise<void>;
   onCancel: () => void;
@@ -38,7 +37,6 @@ interface MessageEditorProps {
 export function MessageEditor({
   message,
   emojiStringMap,
-  twemojiEnabled,
   isSending,
   onSave,
   onCancel,
@@ -146,7 +144,6 @@ export function MessageEditor({
             >
               <EmojiPicker
                 quickEmojis={Object.values(emojiStringMap)}
-                twemojiEnabled={twemojiEnabled}
                 onSelect={insertEditEmoji}
               />
             </PopoverContent>

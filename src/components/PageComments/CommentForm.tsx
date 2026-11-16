@@ -18,7 +18,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 
 export function CommentForm() {
   const {
@@ -34,7 +33,6 @@ export function CommentForm() {
     setLoginModal,
     emojiStringMap,
   } = useCommentsContext();
-  const { twemojiEnabled } = useTwemoji();
   const inputBgClass = "bg-tertiary-bg";
 
   const [newComment, setNewComment] = useState("");
@@ -160,7 +158,6 @@ export function CommentForm() {
               >
                 <EmojiPicker
                   quickEmojis={Object.values(emojiStringMap)}
-                  twemojiEnabled={twemojiEnabled}
                   onSelect={insertEmoji}
                 />
               </PopoverContent>

@@ -108,7 +108,6 @@ interface MessageRowProps {
   replyingToMessage: Message | null;
   editingMessageId: string | null;
   emojiStringMap: EmojiStringMap;
-  twemojiEnabled: boolean;
   isSending: boolean;
   deletingMessageId: string | null;
   setActiveMessageId: Dispatch<SetStateAction<string | null>>;
@@ -261,7 +260,6 @@ export function MessageRow({
   replyingToMessage,
   editingMessageId,
   emojiStringMap,
-  twemojiEnabled,
   isSending,
   deletingMessageId,
   setActiveMessageId,
@@ -286,7 +284,7 @@ export function MessageRow({
     return user ? getDisplayName(user) : undefined;
   };
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
-  const topEmojis = useFrequentEmojis(emojiStringMap, 4);
+  const topEmojis = useFrequentEmojis(Object.values(emojiStringMap), 4);
   // In a group, a sender is any member; in a DM, the other person.
   const userFor = (id: string): MessageUser | null =>
     usersById ? (usersById.get(id) ?? placeholderUser(id)) : selectedUser;
@@ -878,7 +876,6 @@ export function MessageRow({
                     key={message.id}
                     message={message}
                     emojiStringMap={emojiStringMap}
-                    twemojiEnabled={twemojiEnabled}
                     isSending={isSending}
                     onSave={handleEditMessage}
                     onCancel={() => setEditingMessageId(null)}
@@ -905,7 +902,7 @@ export function MessageRow({
                             isMine={isOwnMessage}
                             senderLabel={getDisplayName(sender)}
                           />
-                        ) : twemojiEnabled ? (
+                        ) : (
                           <Twemoji
                             tag="span"
                             options={{
@@ -917,11 +914,6 @@ export function MessageRow({
                               nameOf={nameOf}
                             />
                           </Twemoji>
-                        ) : (
-                          <MessageText
-                            content={message.content ?? ""}
-                            nameOf={nameOf}
-                          />
                         )}
                         {message.updatedAt &&
                           message.updatedAt !== message.createdAt && (
@@ -939,7 +931,6 @@ export function MessageRow({
                     reactions={message.reactions}
                     currentUserId={currentUserId}
                     nameOf={nameOf}
-                    twemojiEnabled={twemojiEnabled}
                     onToggle={canReact ? react : undefined}
                   />
                 )}
@@ -994,10 +985,7 @@ export function MessageRow({
                         className={cn(TOOLBAR_BUTTON, "text-base")}
                         onClick={() => react(emoji)}
                       >
-                        <EmojiGlyph
-                          emoji={emoji}
-                          twemojiEnabled={twemojiEnabled}
-                        />
+                        <EmojiGlyph emoji={emoji} />
                       </button>
                     ))}
                     <span className="bg-border-primary mx-0.5 h-4 w-px" />
@@ -1022,10 +1010,12 @@ export function MessageRow({
                         </TooltipTrigger>
                         <TooltipContent side="top">Add Reaction</TooltipContent>
                       </Tooltip>
-                      <PopoverContent align="end" className="w-auto p-1.5">
+                      <PopoverContent
+                        align="end"
+                        className="w-auto overflow-hidden p-0"
+                      >
                         <EmojiPicker
                           quickEmojis={Object.values(emojiStringMap)}
-                          twemojiEnabled={twemojiEnabled}
                           onSelect={(emoji) => react(emoji)}
                         />
                       </PopoverContent>
@@ -1055,7 +1045,7 @@ export function MessageRow({
                     className="bg-tertiary-bg h-9 flex-1 justify-center p-0 text-lg"
                     onClick={() => react(emoji)}
                   >
-                    <EmojiGlyph emoji={emoji} twemojiEnabled={twemojiEnabled} />
+                    <EmojiGlyph emoji={emoji} />
                   </ContextMenuItem>
                 ))}
               </div>
@@ -1117,10 +1107,7 @@ export function MessageRow({
                       className="bg-tertiary-bg flex h-11 flex-1 cursor-pointer items-center justify-center rounded-md text-xl"
                       onClick={() => react(emoji)}
                     >
-                      <EmojiGlyph
-                        emoji={emoji}
-                        twemojiEnabled={twemojiEnabled}
-                      />
+                      <EmojiGlyph emoji={emoji} />
                     </button>
                   ))}
                   <Popover>
@@ -1140,7 +1127,6 @@ export function MessageRow({
                     >
                       <EmojiPicker
                         quickEmojis={Object.values(emojiStringMap)}
-                        twemojiEnabled={twemojiEnabled}
                         onSelect={(emoji) => {
                           react(emoji);
                           closeMessageActions();

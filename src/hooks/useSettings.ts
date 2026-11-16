@@ -12,7 +12,7 @@ import {
   updateUserSettings,
 } from "@/services/settingsService";
 import { toast } from "sonner";
-import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { formatSettingName } from "@/config/settings";
 import { useUserSettings } from "@/hooks/useUserSettings";
 
@@ -76,9 +76,6 @@ export const useSettings = (
     giftsQuery.isPending ||
     historyQuery.isPending;
 
-  const setSettings = (value: ApiSettingsResponse) => {
-    queryClient.setQueryData(settingsKey, value);
-  };
   const setSupporterGifts: Dispatch<SetStateAction<SupporterGift[]>> =
     useCallback(
       (value) => {
@@ -104,19 +101,6 @@ export const useSettings = (
 
   const handleSettingChange = async (name: string, value: boolean) => {
     if (!settings || !userData) return;
-
-    // Preferences are client-side only — no server API call
-    if (name === "twemoji_enabled") {
-      safeLocalStorage.setItem("twemoji_enabled", String(value));
-      window.dispatchEvent(
-        new CustomEvent("sendRealtimePreference", {
-          detail: { key: "twemoji_enabled", value },
-        }),
-      );
-      // Still update the local settings state so the toggle reflects correctly
-      setSettings(withSettingValue(settings, name, value));
-      return;
-    }
 
     const needsPremium =
       value === true &&

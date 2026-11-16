@@ -46,7 +46,6 @@ import {
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useCommentsContext } from "./CommentsContext";
 import Twemoji from "react-twemoji";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import { toast } from "sonner";
 import { CommentTextarea } from "./CommentTextarea";
 
@@ -155,7 +154,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
     getStableReactionOrder,
     canDeleteAnyComment,
   } = useCommentsContext();
-  const { twemojiEnabled } = useTwemoji();
 
   const isReplying = replyingToId === comment.id;
   const [replyDraft, setReplyDraft] = useState("");
@@ -343,7 +341,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
             >
               <EmojiPicker
                 quickEmojis={Object.values(emojiStringMap)}
-                twemojiEnabled={twemojiEnabled}
                 onSelect={insertReplyEmoji}
               />
             </PopoverContent>
@@ -596,7 +593,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       <PopoverContent className="w-auto p-2" align="end">
                         <EmojiPicker
                           quickEmojis={availableEmojis}
-                          twemojiEnabled={twemojiEnabled}
                           disabled={isRateLimited}
                           onSelect={(emoji, keepOpen) => {
                             void handleReact(comment.id, emoji);
@@ -840,20 +836,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                       )}
                       <div className="prose prose-sm max-w-none">
                         {isClient ? (
-                          twemojiEnabled ? (
-                            <Twemoji options={{ className: "twemoji" }}>
-                              <p
-                                className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                dangerouslySetInnerHTML={{
-                                  __html: convertUrlsToLinksHTML(
-                                    processMentions(
-                                      sanitizeHTML(visibleContent),
-                                    ),
-                                  ),
-                                }}
-                              />
-                            </Twemoji>
-                          ) : (
+                          <Twemoji options={{ className: "twemoji" }}>
                             <p
                               className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
                               dangerouslySetInnerHTML={{
@@ -862,7 +845,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 ),
                               }}
                             />
-                          )
+                          </Twemoji>
                         ) : (
                           <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
                             {visibleContent}
@@ -1287,7 +1270,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       >
                                         <EmojiPicker
                                           quickEmojis={availableEmojis}
-                                          twemojiEnabled={twemojiEnabled}
                                           disabled={isRateLimited}
                                           onSelect={(emoji, keepOpen) => {
                                             void handleReact(reply.id, emoji);
@@ -1487,22 +1469,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 </div>
                               </div>
                             ) : isClient ? (
-                              twemojiEnabled ? (
-                                <Twemoji options={{ className: "twemoji" }}>
-                                  <p
-                                    className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                    dangerouslySetInnerHTML={{
-                                      __html: convertUrlsToLinksHTML(
-                                        processMentions(
-                                          sanitizeHTML(
-                                            sanitizeText(reply.content || ""),
-                                          ),
-                                        ),
-                                      ),
-                                    }}
-                                  />
-                                </Twemoji>
-                              ) : (
+                              <Twemoji options={{ className: "twemoji" }}>
                                 <p
                                   className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
                                   dangerouslySetInnerHTML={{
@@ -1515,7 +1482,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                     ),
                                   }}
                                 />
-                              )
+                              </Twemoji>
                             ) : (
                               <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
                                 {sanitizeText(reply.content || "")}

@@ -32,7 +32,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   getDesktopNavigation,
@@ -428,7 +427,6 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
   // Browser-side preferences, changed the way the settings page does. A
   // switch flips; a choice steps to its next option.
   const [, rerender] = useReducer((count: number) => count + 1, 0);
-  const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const canSwitchNavigation = useMediaQuery("(min-width: 1536px)");
   type Preference =
     | { on: boolean; set: (on: boolean) => void }
@@ -457,8 +455,6 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
           on: !getLayoutShortcutHidden(),
           set: (on: boolean) => setLayoutShortcutHidden(!on),
         };
-      case "twemoji_enabled":
-        return { on: twemojiEnabled, set: setTwemojiEnabled };
       case "navigation-layout":
         return {
           options: [

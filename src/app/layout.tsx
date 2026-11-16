@@ -29,7 +29,6 @@ import {
   toThemeOptions,
 } from "@/utils/ui/themeOptions";
 import ThemeCursor from "@/components/Settings/ThemeCursor";
-import { TwemojiProvider } from "@/contexts/TwemojiContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
 import NitroVideoCloseSupporterModal from "@/components/Ads/NitroVideoCloseSupporterModal";
@@ -204,83 +203,81 @@ export default async function RootLayout({
             defaultTheme={defaultTheme}
           >
             <ThemeCursor />
-            <TwemojiProvider>
-              <QueryProvider>
-                <Toaster
-                  position="top-right"
-                  dir="ltr"
-                  expand
-                  offset={{
-                    top: "calc(var(--header-height, 0px) + 16px)",
-                    right: "var(--toast-runtime-right, 16px)",
-                  }}
+            <QueryProvider>
+              <Toaster
+                position="top-right"
+                dir="ltr"
+                expand
+                offset={{
+                  top: "calc(var(--header-height, 0px) + 16px)",
+                  right: "var(--toast-runtime-right, 16px)",
+                }}
+              />
+              <HumanVerificationProvider />
+              <MaintenanceBypass>
+                <NextTopLoader
+                  color="var(--color-button-info)"
+                  showSpinner={false}
+                  showForHashAnchor={false}
+                  shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                 />
-                <HumanVerificationProvider />
-                <MaintenanceBypass>
-                  <NextTopLoader
-                    color="var(--color-button-info)"
-                    showSpinner={false}
-                    showForHashAnchor={false}
-                    shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                  />
-                  <Suspense fallback={null}>
-                    <OfflineNavigationRecovery />
-                  </Suspense>
+                <Suspense fallback={null}>
+                  <OfflineNavigationRecovery />
+                </Suspense>
 
-                  <AuthProvider>
-                    <SiteBanGate>
-                      <RybbitIdentity />
-                      <Suspense fallback={null}>
-                        <SharedThemeDialog />
-                        <ThemeEditorHost />
-                      </Suspense>
-                      <AdErrorBoundary>
-                        <NitroBottomAnchor />
-                        <NitroVideoPlayer />
-                        <NitroAdNavigation />
-                        <NitroAnchorCloseSupporterModal />
-                        <NitroVideoCloseSupporterModal />
-                      </AdErrorBoundary>
-                      <div
-                        id="main-layout"
-                        className="site-layout flex min-h-screen flex-col"
-                      >
-                        <ExperimentOverridesIndicator />
-                        <Suspense
-                          fallback={
-                            <div
-                              data-desktop-sidebar-pending
-                              className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
-                            />
-                          }
-                        >
-                          <Header
-                            releaseAnnouncement={
-                              <Suspense fallback={null}>
-                                <LatestReleaseDialog />
-                              </Suspense>
-                            }
+                <AuthProvider>
+                  <SiteBanGate>
+                    <RybbitIdentity />
+                    <Suspense fallback={null}>
+                      <SharedThemeDialog />
+                      <ThemeEditorHost />
+                    </Suspense>
+                    <AdErrorBoundary>
+                      <NitroBottomAnchor />
+                      <NitroVideoPlayer />
+                      <NitroAdNavigation />
+                      <NitroAnchorCloseSupporterModal />
+                      <NitroVideoCloseSupporterModal />
+                    </AdErrorBoundary>
+                    <div
+                      id="main-layout"
+                      className="site-layout flex min-h-screen flex-col"
+                    >
+                      <ExperimentOverridesIndicator />
+                      <Suspense
+                        fallback={
+                          <div
+                            data-desktop-sidebar-pending
+                            className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
                           />
-                        </Suspense>
-                        <main className="min-h-screen flex-1">
-                          <NuqsAdapter>
-                            <Suspense>{children}</Suspense>
-                          </NuqsAdapter>
-                        </main>
-                        <Footer
-                          githubUrl={githubUrl}
-                          versionInfo={
-                            <Suspense fallback={<VersionInfoSkeleton />}>
-                              <VersionInfoWrapper />
+                        }
+                      >
+                        <Header
+                          releaseAnnouncement={
+                            <Suspense fallback={null}>
+                              <LatestReleaseDialog />
                             </Suspense>
                           }
                         />
-                      </div>
-                    </SiteBanGate>
-                  </AuthProvider>
-                </MaintenanceBypass>
-              </QueryProvider>
-            </TwemojiProvider>
+                      </Suspense>
+                      <main className="min-h-screen flex-1">
+                        <NuqsAdapter>
+                          <Suspense>{children}</Suspense>
+                        </NuqsAdapter>
+                      </main>
+                      <Footer
+                        githubUrl={githubUrl}
+                        versionInfo={
+                          <Suspense fallback={<VersionInfoSkeleton />}>
+                            <VersionInfoWrapper />
+                          </Suspense>
+                        }
+                      />
+                    </div>
+                  </SiteBanGate>
+                </AuthProvider>
+              </MaintenanceBypass>
+            </QueryProvider>
           </CustomThemeProvider>
         </body>
       </html>
@@ -361,77 +358,75 @@ export default async function RootLayout({
         </noscript>
         <CustomThemeProvider themes={themeOptions} defaultTheme={defaultTheme}>
           <ThemeCursor />
-          <TwemojiProvider>
-            <QueryProvider>
-              <Toaster
-                position="top-right"
-                dir="ltr"
-                expand
-                offset={{
-                  top: "calc(var(--header-height, 0px) + 16px)",
-                  right: "var(--toast-runtime-right, 16px)",
-                }}
-              />
-              <HumanVerificationProvider />
-              <NextTopLoader
-                color="var(--color-button-info)"
-                showSpinner={false}
-                showForHashAnchor={false}
-                shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-              />
-              <Suspense fallback={null}>
-                <OfflineNavigationRecovery />
-              </Suspense>
+          <QueryProvider>
+            <Toaster
+              position="top-right"
+              dir="ltr"
+              expand
+              offset={{
+                top: "calc(var(--header-height, 0px) + 16px)",
+                right: "var(--toast-runtime-right, 16px)",
+              }}
+            />
+            <HumanVerificationProvider />
+            <NextTopLoader
+              color="var(--color-button-info)"
+              showSpinner={false}
+              showForHashAnchor={false}
+              shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+            />
+            <Suspense fallback={null}>
+              <OfflineNavigationRecovery />
+            </Suspense>
 
-              <AuthProvider>
-                <SiteBanGate>
-                  <RybbitIdentity />
-                  <Suspense fallback={null}>
-                    <SharedThemeDialog />
-                    <ThemeEditorHost />
-                  </Suspense>
-                  <NitroBottomAnchor />
-                  <NitroVideoPlayer />
-                  <NitroAdNavigation />
-                  <NitroAnchorCloseSupporterModal />
-                  <NitroVideoCloseSupporterModal />
-                  <div className="site-layout flex min-h-screen flex-col">
-                    <ExperimentOverridesIndicator />
-                    <Suspense
-                      fallback={
-                        <div
-                          data-desktop-sidebar-pending
-                          className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
-                        />
-                      }
-                    >
-                      <Header
-                        banner={<CompetitionBanner />}
-                        releaseAnnouncement={
-                          <Suspense fallback={null}>
-                            <LatestReleaseDialog />
-                          </Suspense>
-                        }
+            <AuthProvider>
+              <SiteBanGate>
+                <RybbitIdentity />
+                <Suspense fallback={null}>
+                  <SharedThemeDialog />
+                  <ThemeEditorHost />
+                </Suspense>
+                <NitroBottomAnchor />
+                <NitroVideoPlayer />
+                <NitroAdNavigation />
+                <NitroAnchorCloseSupporterModal />
+                <NitroVideoCloseSupporterModal />
+                <div className="site-layout flex min-h-screen flex-col">
+                  <ExperimentOverridesIndicator />
+                  <Suspense
+                    fallback={
+                      <div
+                        data-desktop-sidebar-pending
+                        className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
                       />
-                    </Suspense>
-                    <main className="min-h-screen flex-1">
-                      <NuqsAdapter>
-                        <Suspense>{children}</Suspense>
-                      </NuqsAdapter>
-                    </main>
-                    <Footer
-                      githubUrl={githubUrl}
-                      versionInfo={
-                        <Suspense fallback={<VersionInfoSkeleton />}>
-                          <VersionInfoWrapper />
+                    }
+                  >
+                    <Header
+                      banner={<CompetitionBanner />}
+                      releaseAnnouncement={
+                        <Suspense fallback={null}>
+                          <LatestReleaseDialog />
                         </Suspense>
                       }
                     />
-                  </div>
-                </SiteBanGate>
-              </AuthProvider>
-            </QueryProvider>
-          </TwemojiProvider>
+                  </Suspense>
+                  <main className="min-h-screen flex-1">
+                    <NuqsAdapter>
+                      <Suspense>{children}</Suspense>
+                    </NuqsAdapter>
+                  </main>
+                  <Footer
+                    githubUrl={githubUrl}
+                    versionInfo={
+                      <Suspense fallback={<VersionInfoSkeleton />}>
+                        <VersionInfoWrapper />
+                      </Suspense>
+                    }
+                  />
+                </div>
+              </SiteBanGate>
+            </AuthProvider>
+          </QueryProvider>
         </CustomThemeProvider>
       </body>
     </html>

@@ -24,7 +24,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { recordEmojiUse } from "@/hooks/useFrequentEmojis";
 import { mentionsToIds } from "@/utils/messages/mentions";
@@ -189,7 +188,6 @@ export function MessageComposer({
     cursorPosRef.current = textarea.value.length;
   }, []);
   const emojiStringMap = useEmojiStringMap();
-  const { twemojiEnabled } = useTwemoji();
   const isMobile = useMediaQuery("(max-width: 1023px)");
 
   React.useEffect(() => {
@@ -437,7 +435,6 @@ export function MessageComposer({
                 >
                   <EmojiPicker
                     quickEmojis={Object.values(emojiStringMap)}
-                    twemojiEnabled={twemojiEnabled}
                     onSelect={insertEmoji}
                   />
                 </PopoverContent>

@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import twemoji from "@twemoji/api";
-import { useTwemoji } from "@/contexts/TwemojiContext";
 
 const TWEMOJI_OPTIONS = { className: "twemoji" } as const;
 
@@ -15,11 +14,7 @@ function parseSonnerToastEmojis(root: ParentNode) {
 }
 
 export function useSonnerTwemoji() {
-  const { twemojiEnabled } = useTwemoji();
-
   useEffect(() => {
-    if (!twemojiEnabled) return;
-
     let rafId = 0;
     const scheduleParse = (root: ParentNode) => {
       cancelAnimationFrame(rafId);
@@ -62,5 +57,5 @@ export function useSonnerTwemoji() {
       cleanup?.();
       cancelAnimationFrame(rafId);
     };
-  }, [twemojiEnabled]);
+  }, []);
 }

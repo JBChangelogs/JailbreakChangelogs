@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
 
 /** Same key and shape as the app: { emoji: count }. */
 const STORAGE_KEY = "jbcl:emoji-usage";
@@ -48,17 +47,15 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-/**
- * Your most-used quick emoji, most first. Ties keep the API's order, so
- * with no usage these are its first entries (👍 👎 ❤️ 😂).
- */
-export function useFrequentEmojis(emojiMap: EmojiStringMap, count: number) {
+export function useFrequentEmojis(defaults: string[], count: number) {
   const raw = useSyncExternalStore(subscribe, read, () => "{}");
+  const key = defaults.join(" ");
   return useMemo(() => {
     const counts = usage(raw);
-    // A stable sort, so ties stay in API order.
-    return [...new Set(Object.values(emojiMap))]
-      .sort((a, b) => (counts[b] ?? 0) - (counts[a] ?? 0))
-      .slice(0, count);
-  }, [emojiMap, count, raw]);
+    const used = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    return [...new Set([...used, ...key.split(" ").filter(Boolean)])].slice(
+      0,
+      count,
+    );
+  }, [key, count, raw]);
 }

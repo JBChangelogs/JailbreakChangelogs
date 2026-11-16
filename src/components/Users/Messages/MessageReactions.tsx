@@ -9,19 +9,11 @@ import {
 import { cn } from "@/lib/utils";
 import type { MessageReactions } from "@/utils/messages/types";
 
-export function EmojiGlyph({
-  emoji,
-  twemojiEnabled,
-}: {
-  emoji: string;
-  twemojiEnabled: boolean;
-}) {
-  return twemojiEnabled ? (
+export function EmojiGlyph({ emoji }: { emoji: string }) {
+  return (
     <Twemoji tag="span" options={{ className: "twemoji pointer-events-none" }}>
       {emoji}
     </Twemoji>
-  ) : (
-    <span className="pointer-events-none">{emoji}</span>
   );
 }
 
@@ -30,13 +22,11 @@ export function ReactionChips({
   reactions,
   currentUserId,
   nameOf,
-  twemojiEnabled,
   onToggle,
 }: {
   reactions: MessageReactions | undefined;
   currentUserId: string;
   nameOf: (id: string) => string | undefined;
-  twemojiEnabled: boolean;
   /** Missing when you can't react, e.g. a message still sending. */
   onToggle?: (emoji: string) => void;
 }) {
@@ -62,7 +52,7 @@ export function ReactionChips({
                     : "border-border-card bg-tertiary-bg hover:bg-quaternary-bg",
                 )}
               >
-                <EmojiGlyph emoji={emoji} twemojiEnabled={twemojiEnabled} />
+                <EmojiGlyph emoji={emoji} />
                 <span className="text-secondary-text text-sm font-semibold">
                   {users.length}
                 </span>
