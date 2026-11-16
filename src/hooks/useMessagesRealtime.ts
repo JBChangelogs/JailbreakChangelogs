@@ -369,7 +369,17 @@ export function useMessagesRealtime({
       const localConfirmation = isOwnSend
         ? findLocalMessageConfirmation(
             localThreadMessagesByUserIdRef.current.get(counterpartId) ?? [],
-            { id: messageId, senderId, receiverId, parentId, content },
+            {
+              id: messageId,
+              senderId,
+              receiverId,
+              parentId,
+              content,
+              metadata: payload.metadata as
+                | Record<string, unknown>
+                | null
+                | undefined,
+            },
           )
         : undefined;
       const realtimeMetadata =
@@ -383,7 +393,10 @@ export function useMessagesRealtime({
         receiverId,
         content,
         metadata: realtimeMetadata,
-        type: realtimeMetadata ? "system" : "user",
+        type:
+          realtimeMetadata && realtimeMetadata.type !== "images"
+            ? "system"
+            : "user",
         createdAt: Date.now(),
         status: "sent",
         ...(readMessageIdsRef.current.has(messageId)

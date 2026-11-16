@@ -83,11 +83,17 @@ export function useSendMessage({
 
     const targetUserId = selectedUserId;
     const targetUser = selectedUser;
-    const replyTarget = metadata ? null : replyingToMessage;
+    const replyTarget =
+      metadata && metadata.type !== "images" ? null : replyingToMessage;
 
     const apiContent = prepareMessageContentForApi(rawMessage);
     const displayContent = prepareMessageDisplayContent(rawMessage);
-    if (!apiContent || isSending) return;
+    if (
+      (!apiContent &&
+        !(metadata?.type === "images" && metadata.images.length)) ||
+      isSending
+    )
+      return;
     if (apiContent.length > MESSAGE_CHAR_LIMIT) {
       toast.error(`Message too long (max ${MESSAGE_CHAR_LIMIT} characters).`);
       return;
@@ -102,7 +108,7 @@ export function useSendMessage({
       receiverId: asId(targetUserId),
       content: displayContent,
       metadata,
-      type: metadata ? "system" : "user",
+      type: metadata && metadata.type !== "images" ? "system" : "user",
       createdAt: Date.now(),
       status: "pending",
     };

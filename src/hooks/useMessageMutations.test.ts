@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { JsxEmit, ModuleKind, transpileModule } from "typescript";
+import { getMessageImages } from "@/utils/messages/images";
 import * as parsing from "@/utils/messages/parsing";
 import type { Message } from "@/utils/messages/types";
 import type { useMessageMutations } from "./useMessageMutations";
@@ -118,4 +119,59 @@ test("edit saves use the submitted local draft and leave editing open on failure
     .handleEditMessage("message", "latest draft");
   expect(editingId).toBeNull();
   expect(requests).toHaveLength(2);
+});
+
+test("retrying an image-only message retains its uploaded URLs", async () => {
+  const url =
+    "https://uploads.jailbreakchangelogs.com/message-images/1/0123456789abcdef.webp";
+  const failed: Message = {
+    id: "client-image",
+    senderId: "me",
+    receiverId: "them",
+    content: "",
+    metadata: { type: "images", images: [url] },
+    status: "failed",
+  };
+  let messages = [failed];
+  const sent: unknown[][] = [];
+  const exports = {} as { useMessageMutations: typeof useMessageMutations };
+  runInNewContext(
+    transpileModule(
+      readFileSync(
+        new URL("./useMessageMutations.tsx", import.meta.url),
+        "utf8",
+      ),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      require: (name: string) => {
+        if (name === "@/utils/messages/images") return { getMessageImages };
+        if (name === "@/services/logger")
+          return { createLogger: () => ({ error: () => {} }) };
+        return {};
+      },
+    },
+  );
+  const options = {
+    selectedUserId: "them",
+    messages,
+    conversations: [],
+    isSending: false,
+    setMessages: (update: (list: Message[]) => Message[]) => {
+      messages = update(messages);
+    },
+    removeLocalThreadMessage: () => {},
+    setConversations: () => {},
+    setReplyingToMessage: () => {},
+    setDeletingMessageId: () => {},
+    handleSendMessage: async (...args: unknown[]) => {
+      sent.push(args);
+    },
+  } as unknown as Parameters<typeof useMessageMutations>[0];
+  await exports.useMessageMutations(options).handleRetryFailedMessage(failed);
+  expect(messages).toEqual([]);
+  expect(sent).toEqual([["", { type: "images", images: [url] }]]);
 });

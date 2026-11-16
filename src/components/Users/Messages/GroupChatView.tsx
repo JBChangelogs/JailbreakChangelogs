@@ -580,10 +580,17 @@ export function GroupChatView({
     text: string,
     metadata?: OutgoingMessageMetadata,
     // Invites never go out as replies, like DMs.
-    parentId = metadata ? null : (replyingToMessage?.id ?? null),
+    parentId = metadata && metadata.type !== "images"
+      ? null
+      : (replyingToMessage?.id ?? null),
   ) => {
     const content = prepareMessageContentForApi(text);
-    if (!content || !currentUserId) return;
+    if (
+      (!content && !(metadata?.type === "images" && metadata.images.length)) ||
+      !currentUserId ||
+      isSending
+    )
+      return;
     const clientId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const pending: Message = {
       id: clientId,
@@ -594,11 +601,11 @@ export function GroupChatView({
       content,
       metadata: metadata ?? null,
       createdAt: Date.now(),
-      type: metadata ? "system" : "user",
+      type: metadata && metadata.type !== "images" ? "system" : "user",
       status: "pending",
     };
     atBottomRef.current = true;
-    if (!metadata) setReplyingToMessage(null);
+    if (!metadata || metadata.type === "images") setReplyingToMessage(null);
     setMessages((list) => [...list, pending]);
     setIsSending(true);
     try {

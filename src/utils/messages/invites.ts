@@ -4,7 +4,7 @@ export function findLocalMessageConfirmation(
   messages: Message[],
   confirmation: Pick<
     Message,
-    "id" | "senderId" | "receiverId" | "parentId" | "content"
+    "id" | "senderId" | "receiverId" | "parentId" | "content" | "metadata"
   >,
   now = Date.now(),
 ): Message | undefined {
@@ -18,6 +18,9 @@ export function findLocalMessageConfirmation(
         message.receiverId === confirmation.receiverId &&
         (message.parentId ?? null) === (confirmation.parentId ?? null) &&
         message.content === confirmation.content &&
+        (confirmation.metadata?.type !== "images" ||
+          JSON.stringify(message.metadata?.images) ===
+            JSON.stringify(confirmation.metadata.images)) &&
         typeof message.createdAt === "number" &&
         now - message.createdAt <= 30_000,
     )
@@ -25,12 +28,14 @@ export function findLocalMessageConfirmation(
 }
 
 export type MessageEmbedMetadata =
-  | OutgoingMessageMetadata
+  | Exclude<OutgoingMessageMetadata, { type: "images" }>
   | { type: "gift_sent"; level: number };
 
 export function isUserMessage(message: Message): boolean {
   return (
-    message.type !== "system" || parseMessageEmbed(message.metadata) !== null
+    message.type !== "system" ||
+    message.metadata?.type === "images" ||
+    parseMessageEmbed(message.metadata) !== null
   );
 }
 

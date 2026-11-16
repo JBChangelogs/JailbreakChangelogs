@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
+import { getMessageImages } from "@/utils/messages/images";
 import { toast } from "sonner";
 import { createLogger } from "@/services/logger";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -339,9 +340,19 @@ export function useMessageMutations({
   const handleRetryFailedMessage = async (failedMessage: Message) => {
     if (isSending) return;
     if (failedMessage.status !== "failed") return;
-    if (!failedMessage.content?.trim()) return;
+    if (
+      !failedMessage.content?.trim() &&
+      failedMessage.metadata?.type !== "images"
+    )
+      return;
 
-    const metadata = parseMessageEmbed(failedMessage.metadata);
+    const metadata =
+      failedMessage.metadata?.type === "images"
+        ? {
+            type: "images" as const,
+            images: getMessageImages(failedMessage.metadata),
+          }
+        : parseMessageEmbed(failedMessage.metadata);
     if (metadata?.type === "gift_sent") return;
     await handleDeleteMessage(failedMessage.id, true);
     await handleSendMessage(failedMessage.content, metadata ?? undefined);

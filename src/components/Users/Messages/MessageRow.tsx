@@ -68,6 +68,7 @@ import {
   getDisplayName,
 } from "@/utils/messages/formatting";
 import { getMessageDomId } from "@/utils/messages/sorting";
+import { MessageImages } from "./MessageImages";
 import { isUserMessage, parseMessageEmbed } from "@/utils/messages/invites";
 import { MessageEmbedCard } from "./MessageEmbedCard";
 import { OfferAcceptedCard } from "./OfferAcceptedCard";
@@ -391,7 +392,7 @@ export function MessageRow({
       </div>
     );
   }
-  if (acceptedOffer || (message.type === "system" && !embedMetadata)) {
+  if (acceptedOffer || (!isUserMessage(message) && !embedMetadata)) {
     const systemContent = formatSystemMessageContent(
       message,
       currentUser ? asId(currentUser.id) : null,
@@ -935,6 +936,7 @@ export function MessageRow({
                             </span>
                           )}
                       </ChatEventContent>
+                      <MessageImages metadata={message.metadata} />
                     </div>
                   </div>
                 )}

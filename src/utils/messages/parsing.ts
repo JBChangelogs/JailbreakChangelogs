@@ -111,7 +111,11 @@ export function parseMessageRecord(item: unknown): Message | null {
     updatedAt,
     readAt,
     type:
-      sourceMetadata && typeof sourceMetadata === "object" ? "system" : "user",
+      sourceMetadata &&
+      typeof sourceMetadata === "object" &&
+      (sourceMetadata as Record<string, unknown>).type !== "images"
+        ? "system"
+        : "user",
     reactions: parseReactions(source.reactions),
   };
 }

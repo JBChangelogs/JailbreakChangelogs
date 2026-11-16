@@ -47,7 +47,8 @@ export type Message = {
 
 export type OutgoingMessageMetadata =
   | { type: "game_invite"; place_id: string; job_id: string | null }
-  | { type: "vip_server_invite"; server_id: number };
+  | { type: "vip_server_invite"; server_id: number }
+  | { type: "images"; images: string[] };
 
 export type OfferAcceptedMetadata = {
   type: "offer_accepted";

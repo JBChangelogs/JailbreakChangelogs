@@ -142,3 +142,28 @@ test("only valid invite and gift metadata becomes a card", () => {
   ])
     expect(parseMessageEmbed(metadata)).toBeNull();
 });
+
+test("image-only confirmations match the uploaded URLs when text is identical", () => {
+  const first: Message = {
+    id: "local-1",
+    clientId: "local-1",
+    senderId: "1",
+    receiverId: "2",
+    content: "",
+    metadata: { type: "images", images: ["first"] },
+    createdAt: 1000,
+  };
+  const second: Message = {
+    ...first,
+    id: "local-2",
+    clientId: "local-2",
+    metadata: { type: "images", images: ["second"] },
+  };
+  expect(
+    findLocalMessageConfirmation(
+      [first, second],
+      { ...second, id: "server" },
+      2000,
+    )?.id,
+  ).toBe("local-2");
+});
