@@ -9,6 +9,7 @@ import * as sorting from "@/utils/messages/sorting";
 import * as invites from "@/utils/messages/invites";
 import * as mentions from "@/utils/messages/mentions";
 import * as groupEvents from "@/utils/messages/groupEvents";
+import * as siteLinks from "@/utils/messages/siteLinks";
 import type { ComponentProps } from "react";
 import type { MessageRow } from "./MessageRow";
 
@@ -84,6 +85,7 @@ function harness(mobile: boolean) {
     "@/utils/messages/invites": invites,
     "@/utils/messages/mentions": mentions,
     "@/utils/messages/groupEvents": groupEvents,
+    "@/utils/messages/siteLinks": siteLinks,
     "@/hooks/useFrequentEmojis": {
       useFrequentEmojis: () => ["👍", "👎", "❤️", "😂"],
     },
@@ -157,6 +159,33 @@ function harness(mobile: boolean) {
     unmount: () => cleanups.forEach((cleanup) => cleanup()),
   };
 }
+
+test("site links remain clickable alongside mentions and previews hide during editing", () => {
+  const h = harness(false);
+  h.props.selectedUser = { ...h.props.selectedUser!, id: "123" };
+  h.props.message.content = "Hi <@123>, see jailbreakchangelogs.com/values";
+  const tree = h.render();
+  expect(
+    tree.find((node) => node.type === "MessageLinkEmbeds")?.props.text,
+  ).toBe(h.props.message.content);
+  const text = tree.find(
+    (node) =>
+      typeof node.type === "function" && node.type.name === "MessageText",
+  )!;
+  const rendered = nodes(
+    (text.type as (props: unknown) => unknown)(text.props),
+  );
+  expect(rendered.some((node) => node.props.href === "/users/123")).toBe(true);
+  expect(
+    rendered.find(
+      (node) => node.props.href === "https://jailbreakchangelogs.com/values",
+    )?.props.children,
+  ).toBe("jailbreakchangelogs.com/values");
+  h.props.editingMessageId = h.props.message.id;
+  expect(h.render().some((node) => node.type === "MessageLinkEmbeds")).toBe(
+    false,
+  );
+});
 
 test("image lightboxes receive the message sender's avatar, display name and send time", () => {
   const h = harness(false);

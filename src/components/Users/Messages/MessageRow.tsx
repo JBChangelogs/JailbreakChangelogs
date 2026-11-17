@@ -63,6 +63,8 @@ import {
 } from "@/utils/messages/formatting";
 import { getMessageDomId } from "@/utils/messages/sorting";
 import { MessageImages } from "./MessageImages";
+import { MessageLinkEmbeds } from "./MessageLinkEmbeds";
+import { splitSiteLinks } from "@/utils/messages/siteLinks";
 import { isUserMessage, parseMessageEmbed } from "@/utils/messages/invites";
 import { MessageEmbedCard } from "./MessageEmbedCard";
 import { OfferAcceptedCard } from "./OfferAcceptedCard";
@@ -211,7 +213,22 @@ function MessageText({
   return formatMessageText(content)
     .split(MENTION_SPLIT)
     .map((part, index) => {
-      if (index % 2 === 0) return part;
+      if (index % 2 === 0)
+        return splitSiteLinks(part).map((piece, linkIndex) =>
+          typeof piece === "string" ? (
+            piece
+          ) : (
+            <a
+              key={`${index}-${linkIndex}`}
+              href={piece.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-link hover:underline"
+            >
+              {piece.text}
+            </a>
+          ),
+        );
       const name = nameOf(part);
       return name ? (
         <UserProfilePopover key={index} user={{ id: part, username: name }}>
@@ -915,6 +932,11 @@ export function MessageRow({
                             </span>
                           )}
                       </ChatEventContent>
+                      {message.content && (
+                        <MessageLinkEmbeds
+                          text={formatMessageText(message.content)}
+                        />
+                      )}
                       <MessageImages
                         metadata={message.metadata}
                         header={
