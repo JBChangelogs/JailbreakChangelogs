@@ -177,33 +177,24 @@ export function withDiscordEmbed(
       ? title
       : ((title && "absolute" in title ? title.absolute : title?.default) ??
         "Jailbreak Changelogs");
-  const rawImages = og?.images;
-  const images = rawImages
-    ? Array.isArray(rawImages)
-      ? rawImages
-      : [rawImages]
-    : [];
+  const pageUrl = new URL(
+    metadata.alternates?.canonical &&
+      (typeof metadata.alternates.canonical === "string" ||
+        metadata.alternates.canonical instanceof URL)
+      ? metadata.alternates.canonical
+      : path,
+    SITE_URL,
+  );
+  const route = pageUrl.pathname.replace(/\/$/, "");
+  const imageUrl = `https://embeds.jailbreakchangelogs.com/og${route}.png`;
   const data: EmbedData = {
     ...profile,
     title: `${path === "/" && pageTitle === "Jailbreak Changelogs" ? "Home" : pageTitle.replace(/\s+[|–—-]\s+Jailbreak Changelogs$/, "")} | Jailbreak Changelogs`,
     description: [og?.description ?? metadata.description ?? "", details]
       .filter(Boolean)
       .join("\n"),
-    url: new URL(
-      metadata.alternates?.canonical &&
-        (typeof metadata.alternates.canonical === "string" ||
-          metadata.alternates.canonical instanceof URL)
-        ? metadata.alternates.canonical
-        : path,
-      SITE_URL,
-    ).href,
-    images: images.map(
-      (image) =>
-        new URL(
-          typeof image === "string" || image instanceof URL ? image : image.url,
-          SITE_URL,
-        ).href,
-    ),
+    url: pageUrl.href,
+    images: [imageUrl],
   };
   data.images = data.images
     .filter((image) => image.length <= 2048 && httpUrl(image))
@@ -225,6 +216,15 @@ export function withDiscordEmbed(
 
   return {
     ...metadata,
+    openGraph: {
+      ...og,
+      images: [{ url: imageUrl, type: "image/png", alt: pageTitle }],
+    },
+    twitter: {
+      ...metadata.twitter,
+      card: "summary_large_image",
+      images: [imageUrl],
+    },
     icons: {
       ...icons,
       other: [

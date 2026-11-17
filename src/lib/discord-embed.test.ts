@@ -23,6 +23,27 @@ function embedUrl(metadata: Metadata) {
   return new URL(String(links[0]?.url));
 }
 
+test("social and Discord images follow the route without query strings or trailing slashes", () => {
+  for (const [path, imagePath] of [
+    ["/", "/og.png"],
+    ["/users/1485213250244050965", "/og/users/1485213250244050965.png"],
+    ["/values/calculator/", "/og/values/calculator.png"],
+    ["/item/Vehicle/Proto%208?tab=history", "/og/item/Vehicle/Proto%208.png"],
+  ]) {
+    const image = `https://embeds.jailbreakchangelogs.com${imagePath}`;
+    const metadata = withDiscordEmbed({ title: "Preview" }, path);
+    expect(metadata.openGraph).toMatchObject({
+      images: [{ url: image, type: "image/png" }],
+    });
+    expect(metadata.twitter).toMatchObject({
+      card: "summary_large_image",
+      images: [image],
+    });
+    const data = JSON.parse(embedUrl(metadata).searchParams.get("data")!);
+    expect(data.images).toEqual([image]);
+  }
+});
+
 test("theme marketplace has route-specific canonical, social, and Discord metadata", () => {
   expect(themesMetadata.alternates?.canonical).toBe("/themes");
   expect(themesMetadata.openGraph).toMatchObject({
@@ -32,9 +53,8 @@ test("theme marketplace has route-specific canonical, social, and Discord metada
     type: "website",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
-        width: 2400,
-        height: 1260,
+        url: "https://embeds.jailbreakchangelogs.com/og/themes.png",
+        type: "image/png",
       },
     ],
   });
@@ -42,18 +62,14 @@ test("theme marketplace has route-specific canonical, social, and Discord metada
     title: "Theme Marketplace",
     description: themesMetadata.description,
     card: "summary_large_image",
-    images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
-    ],
+    images: ["https://embeds.jailbreakchangelogs.com/og/themes.png"],
   });
   const data = JSON.parse(embedUrl(themesMetadata).searchParams.get("data")!);
   expect(data).toMatchObject({
     title: "Theme Marketplace | Jailbreak Changelogs",
     description: themesMetadata.description,
     url: "https://jailbreakchangelogs.com/themes",
-    images: [
-      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
-    ],
+    images: ["https://embeds.jailbreakchangelogs.com/og/themes.png"],
   });
   expect(buildDiscordEmbed(data)).not.toBeNull();
 });
@@ -208,10 +224,10 @@ test("embed titles use page names with one consistent site suffix", () => {
   }
 });
 
-test("values and supporting previews keep their different images and plain titles", async () => {
-  for (const [metadata, path, image] of [
-    [valuesMetadata, "/values", "JBCL_X_TC_Embed_Graphic.png"],
-    [supportMetadata, "/supporting", "JBCL_Support_Us_Embed.png"],
+test("values and supporting previews use route images and plain titles", async () => {
+  for (const [metadata, path] of [
+    [valuesMetadata, "/values"],
+    [supportMetadata, "/supporting"],
   ] as const) {
     const url = embedUrl(metadata);
     const response = GET(new Request(url));
@@ -220,7 +236,9 @@ test("values and supporting previews keep their different images and plain title
     expect(payload.component.type).toBe(17);
     expect(payload.component.components[0].content).toStartWith("## ");
     expect(payload.component.components[0].content).not.toContain("](");
-    expect(payload.component.components[1].items[0].media.url).toEndWith(image);
+    expect(payload.component.components[1].items[0].media.url).toBe(
+      `https://embeds.jailbreakchangelogs.com/og${path}.png`,
+    );
     expect(payload.component.components.at(-1).components[0].url).toBe(
       `https://jailbreakchangelogs.com${path === "/values" ? "/changelogs" : "/testimonials"}`,
     );
@@ -251,8 +269,14 @@ test("child metadata replaces the parent link and preserves fallback metadata an
       "/ignored",
       "Cash value: $10,000,000",
     );
-    expect(metadata.openGraph).toBe(child.openGraph);
-    expect(metadata.twitter).toBe(child.twitter);
+    const image =
+      "https://embeds.jailbreakchangelogs.com/og/item/Vehicle/Torpedo.png";
+    expect(metadata.openGraph).toMatchObject({
+      title: "Torpedo",
+      description: "Vehicle",
+      images: [{ url: image, type: "image/png" }],
+    });
+    expect(metadata.twitter).toMatchObject({ images: [image] });
     expect((metadata.icons as { icon: string }).icon).toBe("/favicon.ico");
     const url = embedUrl(metadata);
     expect(url.origin).toBe(process.env.DISCORD_EMBED_ORIGIN);
@@ -294,7 +318,13 @@ test("oversized Unicode payloads keep Open Graph fallback instead of truncating 
     },
   };
   const fallback = withDiscordEmbed(original, "/seasons/30");
-  expect(fallback.openGraph).toBe(original.openGraph);
+  expect(fallback.openGraph).toMatchObject({
+    title: input.title,
+    description: input.description,
+    images: [
+      { url: "https://embeds.jailbreakchangelogs.com/og/seasons/30.png" },
+    ],
+  });
   expect((fallback.icons as { other: unknown[] }).other).toEqual([]);
 });
 
