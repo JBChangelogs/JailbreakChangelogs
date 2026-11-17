@@ -183,7 +183,7 @@ function StatusPageAction({ className = "" }: { className?: string }) {
   return (
     <div className={`mt-2 flex flex-col items-center gap-2 ${className}`}>
       <p className="text-secondary-text text-sm">
-        If this takes longer than usual, check our status page.
+        Taking longer than usual? Check our status page.
       </p>
       <Button asChild variant="secondary" size="sm">
         <a
@@ -192,7 +192,7 @@ function StatusPageAction({ className = "" }: { className?: string }) {
           rel="noopener noreferrer"
         >
           <Icon icon="heroicons:signal" className="h-4 w-4" />
-          View Uptime
+          View Status Page
         </a>
       </Button>
     </div>
@@ -217,9 +217,6 @@ function RobberiesInitialEmptyState() {
         <h3 className="text-secondary-text mb-2 text-lg font-medium">
           Loading robberies...
         </h3>
-        <p className="text-tertiary-text text-sm">
-          Connected. Waiting for the first robbery batch.
-        </p>
         <StatusPageAction />
       </>
     );
@@ -227,14 +224,15 @@ function RobberiesInitialEmptyState() {
 
   return (
     <>
-      <Icon
-        icon="mdi:clock"
-        className="text-tertiary-text mx-auto mb-4 h-16 w-16"
-      />
+      <div className="border-status-neutral/30 bg-status-neutral/20 mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border">
+        <Icon
+          icon="heroicons:signal-slash"
+          className="text-secondary-text h-7 w-7"
+        />
+      </div>
       <h3 className="text-secondary-text mb-2 text-lg font-medium">
-        No robberies tracked yet
+        No robberies tracked in the last 30 seconds
       </h3>
-      <p className="text-tertiary-text text-sm">Waiting for robbery data...</p>
       <StatusPageAction />
     </>
   );
@@ -1638,30 +1636,39 @@ function RobberyTrackerContent() {
                 />
               ) : (
                 <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                  <Icon
-                    icon="heroicons:magnifying-glass"
-                    className="text-tertiary-text mb-4 h-12 w-12"
-                  />
+                  {hasActiveRobberyFilters ? (
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-tertiary-text mb-4 h-12 w-12"
+                    />
+                  ) : (
+                    <div className="border-status-neutral/30 bg-status-neutral/20 mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border">
+                      <Icon
+                        icon="heroicons:signal-slash"
+                        className="text-secondary-text h-7 w-7"
+                      />
+                    </div>
+                  )}
                   <h3 className="text-primary-text text-lg font-medium">
                     {hasActiveRobberyFilters
                       ? "No robberies found"
-                      : "No robberies tracked yet"}
+                      : "No robberies tracked in the last 30 seconds"}
                   </h3>
-                  <p className="text-secondary-text">
-                    {selectedRobberyTypes.length > 0 && !searchQuery ? (
-                      <span>
-                        {`No robberies logged yet for the selected type${selectedRobberyTypes.length > 1 ? "s" : ""}`}
-                      </span>
-                    ) : selectedRobberyTypes.length > 0 && searchQuery ? (
-                      <span>No robberies match your filters and search</span>
-                    ) : searchQuery ? (
-                      <span>Try adjusting your search query</span>
-                    ) : hasActiveRobberyFilters ? (
-                      <span>No robberies found for your current filters</span>
-                    ) : (
-                      <span>Waiting for robbery data...</span>
-                    )}
-                  </p>
+                  {hasActiveRobberyFilters && (
+                    <p className="text-secondary-text">
+                      {selectedRobberyTypes.length > 0 && !searchQuery ? (
+                        <span>
+                          {`No robberies logged yet for the selected type${selectedRobberyTypes.length > 1 ? "s" : ""}`}
+                        </span>
+                      ) : selectedRobberyTypes.length > 0 && searchQuery ? (
+                        <span>No robberies match your filters and search</span>
+                      ) : searchQuery ? (
+                        <span>Try adjusting your search query</span>
+                      ) : (
+                        <span>No robberies found for your current filters</span>
+                      )}
+                    </p>
+                  )}
                   <StatusPageAction />
                 </div>
               )}

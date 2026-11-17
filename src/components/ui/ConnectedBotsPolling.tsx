@@ -187,25 +187,28 @@ export default function ConnectedBotsPolling() {
             />
           </div>
           <h4 className="text-primary-text mb-1 text-lg font-semibold">
-            {pollingStopped ? "Bots offline" : "No bots active"}
-          </h4>
-          <p className="text-secondary-text mx-auto max-w-sm text-sm">
             {pollingStopped
-              ? "No bots scanning inventories or logging robberies have been active for 2+ minutes. Please check back in a bit."
-              : "No bots scanning inventories or logging robberies have been active in the last 30 seconds."}
-          </p>
+              ? "Bots offline"
+              : "No bots active in the last 30 seconds"}
+          </h4>
+          {pollingStopped && (
+            <p className="text-secondary-text mx-auto max-w-sm text-sm">
+              No bots scanning inventories or logging robberies have been active
+              for 2+ minutes. Please check back in a bit.
+            </p>
+          )}
           <div className="mt-4 flex flex-col items-center gap-1.5">
             <p className="text-secondary-text text-xs">
               Taking longer than usual? Check our status page.
             </p>
-            <Button asChild size="sm">
+            <Button asChild variant="secondary" size="sm">
               <a
                 href="https://status.jailbreakchangelogs.com"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Icon icon="heroicons:signal" className="h-4 w-4" />
-                View Uptime
+                View Status Page
               </a>
             </Button>
           </div>

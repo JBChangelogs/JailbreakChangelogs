@@ -46,7 +46,7 @@ function StatusPageAction({ className = "" }: { className?: string }) {
   return (
     <div className={`mt-2 flex flex-col items-center gap-2 ${className}`}>
       <p className="text-secondary-text text-sm">
-        If this takes longer than usual, check our status page.
+        Taking longer than usual? Check our status page.
       </p>
       <Button asChild variant="secondary" size="sm">
         <a
@@ -55,7 +55,7 @@ function StatusPageAction({ className = "" }: { className?: string }) {
           rel="noopener noreferrer"
         >
           <Icon icon="heroicons:signal" className="h-4 w-4" />
-          View Uptime
+          View Status Page
         </a>
       </Button>
     </div>
@@ -722,7 +722,7 @@ function BountyTrackerContent() {
                     ? "No server groups match your search and total server bounty filter"
                     : groupedServerData.length > 0
                       ? `No servers in selected total server bounty range (${formatBountyAmount(totalBountyRange[0])} - ${formatBountyAmount(totalBountyRange[1])})`
-                      : "No bounties tracked yet"}
+                      : "No bounties tracked in the last 30 seconds"}
                 </p>
               </div>
             )}
@@ -733,16 +733,15 @@ function BountyTrackerContent() {
           !error && (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
-                <Icon
-                  icon="mdi:clock"
-                  className="text-tertiary-text mx-auto mb-4 h-16 w-16"
-                />
+                <div className="border-status-neutral/30 bg-status-neutral/20 mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border">
+                  <Icon
+                    icon="heroicons:signal-slash"
+                    className="text-secondary-text h-7 w-7"
+                  />
+                </div>
                 <h3 className="text-secondary-text mb-2 text-lg font-medium">
-                  No bounties tracked yet
+                  No bounties tracked in the last 30 seconds
                 </h3>
-                <p className="text-tertiary-text text-sm">
-                  Waiting for bounty data...
-                </p>
                 <StatusPageAction />
               </div>
             </div>
