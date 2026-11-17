@@ -14,6 +14,7 @@ test("message thumbnails share a gallery starting at the clicked image and retai
       initialIndex?: number;
       stopPropagation?: boolean;
       onError?: () => void;
+      className?: string;
     };
   };
   let failed = false;
@@ -55,6 +56,7 @@ test("message thumbnails share a gallery starting at the clicked image and retai
     metadata: { type: "images", images: urls },
   }) as unknown as Node;
   const image = (grid.props.children as Node[])[0];
+  expect(grid.props.className).toContain("grid-cols-2");
   const render = () => (image.type as (props: unknown) => Node)(image.props);
   const link = render();
   expect(link.type).toBe("ImageLightbox");
@@ -68,7 +70,23 @@ test("message thumbnails share a gallery starting at the clicked image and retai
     );
     expect(preview.props.images).toBe(link.props.images);
     expect(preview.props.initialIndex).toBe(index);
+    expect((preview.props.children as Node).props.className).toContain(
+      "aspect-square w-full object-cover",
+    );
   }
+  const singleGrid = exports.MessageImages({
+    metadata: { type: "images", images: [url] },
+  }) as unknown as Node;
+  expect(singleGrid.props.className).toContain(
+    "grid-cols-1 justify-items-start",
+  );
+  const singleImage = (singleGrid.props.children as Node[])[0];
+  const singlePreview = (singleImage.type as (props: unknown) => Node)(
+    singleImage.props,
+  );
+  expect((singlePreview.props.children as Node).props.className).toContain(
+    "max-h-80 max-w-full object-contain",
+  );
   expect(link.props.stopPropagation).toBe(true);
   (link.props.children as Node).props.onError!();
   expect(render().props.children).toBe("Image expired");

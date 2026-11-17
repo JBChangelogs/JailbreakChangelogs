@@ -33,7 +33,11 @@ function MessageImage({
         alt={`Attachment ${index + 1}`}
         loading="lazy"
         onError={() => setFailed(true)}
-        className="border-border-card max-h-48 max-w-full rounded-lg border object-contain"
+        className={`border-border-card rounded-lg border ${
+          images.length === 1
+            ? "max-h-80 max-w-full object-contain"
+            : "aspect-square w-full object-cover"
+        }`}
       />
     </ImageLightbox>
   );
@@ -51,7 +55,11 @@ export function MessageImages({
     alt: `Attachment ${index + 1}`,
   }));
   return (
-    <div className="mt-1 grid max-w-md grid-cols-2 gap-2">
+    <div
+      className={`mt-1 grid max-w-md gap-1 ${
+        images.length === 1 ? "grid-cols-1 justify-items-start" : "grid-cols-2"
+      }`}
+    >
       {images.map((url, index) => (
         <MessageImage key={url} url={url} index={index} images={gallery} />
       ))}

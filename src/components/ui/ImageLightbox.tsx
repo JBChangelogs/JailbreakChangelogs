@@ -5,9 +5,13 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import { Slot } from "radix-ui";
+import { toast } from "sonner";
 
 import { Icon } from "@/components/ui/IconWrapper";
 import { cn } from "@/lib/utils";
+
+const ACTION_CLASS =
+  "text-secondary-text hover:bg-tertiary-bg hover:text-primary-text focus-visible:outline-border-focus flex size-10 cursor-pointer items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-wait disabled:opacity-50";
 
 interface LightboxImage {
   src: string;
@@ -47,6 +51,7 @@ export const ImageLightbox = ({
 }: ImageLightboxProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const lightboxImages = images?.length
     ? images
     : src
@@ -96,6 +101,46 @@ export const ImageLightbox = ({
     if (lightboxImages.length) setActiveIndex(initialIndex);
   };
 
+  const copyLink = async () => {
+    if (!activeImage) return;
+    try {
+      await navigator.clipboard.writeText(
+        new URL(activeImage.src, window.location.href).href,
+      );
+      toast.success("Image link copied");
+    } catch {
+      toast.error("Couldn't copy the image link. Try opening it in a new tab.");
+    }
+  };
+
+  const downloadImage = async () => {
+    if (!activeImage || downloading) return;
+    setDownloading(true);
+    try {
+      const response = await fetch(activeImage.src, {
+        referrerPolicy: noReferrer ? "no-referrer" : undefined,
+      });
+      if (!response.ok) throw new Error("Image download failed");
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download =
+        new URL(activeImage.src, window.location.href).pathname
+          .split("/")
+          .pop() || "image";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      toast.error(
+        "Couldn't download this image. Open it in a new tab to save it.",
+      );
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const trigger = triggerAsChild ? (
     <Slot.Root onClick={openLightbox}>{children}</Slot.Root>
   ) : (
@@ -134,22 +179,60 @@ export const ImageLightbox = ({
           <div
             data-image-lightbox
             className="pointer-events-auto fixed inset-0 z-[10000] flex flex-col items-center justify-center gap-3 bg-black/90 p-4"
+            onContextMenu={(event) => event.stopPropagation()}
             onClick={(event) => {
               if (stopPropagation) event.stopPropagation();
               setActiveIndex(null);
             }}
           >
-            <button
-              type="button"
-              aria-label="Close image preview"
-              onClick={(event) => {
-                event.stopPropagation();
-                setActiveIndex(null);
-              }}
-              className="absolute top-4 right-4 cursor-pointer rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+            <div
+              className="absolute top-4 right-4 flex items-center gap-2"
+              onClick={(event) => event.stopPropagation()}
             >
-              <Icon icon="mdi:close" className="size-5" />
-            </button>
+              <div className="border-border-card bg-secondary-bg flex items-center gap-1 rounded-lg border p-1">
+                <button
+                  type="button"
+                  aria-label="Copy image link"
+                  title="Copy image link"
+                  onClick={copyLink}
+                  className={ACTION_CLASS}
+                >
+                  <Icon icon="lucide:copy" className="size-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Download image"
+                  title="Download image"
+                  onClick={downloadImage}
+                  disabled={downloading}
+                  className={ACTION_CLASS}
+                >
+                  <Icon icon="lucide:download" className="size-5" />
+                </button>
+                <a
+                  href={activeImage.src}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Open image in new tab"
+                  title="Open image in new tab"
+                  className={ACTION_CLASS}
+                >
+                  <Icon icon="lucide:external-link" className="size-5" />
+                </a>
+              </div>
+              <button
+                type="button"
+                aria-label="Close image preview"
+                title="Close image preview"
+                onClick={() => setActiveIndex(null)}
+                className={cn(
+                  ACTION_CLASS,
+                  "border-border-card bg-secondary-bg size-12 rounded-lg border",
+                )}
+              >
+                <Icon icon="mdi:close" className="size-5" />
+              </button>
+            </div>
             <Image
               placeholder={IMAGE_PLACEHOLDER}
               src={activeImage.src}

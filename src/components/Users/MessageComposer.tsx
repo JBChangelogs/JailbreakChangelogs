@@ -72,12 +72,22 @@ export function MessageComposer({
   const { user } = useAuthContext();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const uploadsRef = React.useRef<
-    { id: string; name: string; controller: AbortController; url?: string }[]
+    {
+      id: string;
+      name: string;
+      preview: string;
+      controller: AbortController;
+      url?: string;
+    }[]
   >([]);
   const [uploads, setUploads] = React.useState(uploadsRef.current);
   const syncUploads = () => setUploads([...uploadsRef.current]);
   const removeUpload = (id: string) => {
-    uploadsRef.current.find((item) => item.id === id)?.controller.abort();
+    const item = uploadsRef.current.find((item) => item.id === id);
+    if (item) {
+      item.controller.abort();
+      URL.revokeObjectURL(item.preview);
+    }
     uploadsRef.current = uploadsRef.current.filter((item) => item.id !== id);
     syncUploads();
   };
@@ -99,6 +109,7 @@ export function MessageComposer({
       const item = {
         id: crypto.randomUUID(),
         name: file.name,
+        preview: URL.createObjectURL(file),
         controller: new AbortController(),
         url: undefined as string | undefined,
       };
@@ -196,7 +207,10 @@ export function MessageComposer({
     uploadsRef.current = [];
     setUploads([]);
     return () => {
-      uploadsRef.current.forEach((item) => item.controller.abort());
+      uploadsRef.current.forEach((item) => {
+        item.controller.abort();
+        URL.revokeObjectURL(item.preview);
+      });
       uploadsRef.current = [];
     };
   }, [conversationId]);
@@ -229,6 +243,7 @@ export function MessageComposer({
       outgoing,
       images.length ? { type: "images", images } : undefined,
     );
+    uploadsRef.current.forEach((item) => URL.revokeObjectURL(item.preview));
     uploadsRef.current = [];
     setUploads([]);
     setDraft("");
@@ -335,9 +350,20 @@ export function MessageComposer({
                   </TooltipContent>
                 </Tooltip>
               ) : (
-                <div className="text-secondary-text flex h-28 items-center justify-center gap-1 text-xs sm:h-32">
-                  <Spinner className="size-4" />
-                  Uploading…
+                <div className="relative flex h-28 items-center justify-center overflow-hidden rounded sm:h-32">
+                  {/* oxlint-disable-next-line next/no-img-element */}
+                  <img
+                    src={item.preview}
+                    alt={item.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                  <div
+                    role="progressbar"
+                    aria-label={`Uploading ${item.name}`}
+                    className="absolute inset-0 flex items-center justify-center bg-black/40"
+                  >
+                    <Spinner className="size-6 text-white" />
+                  </div>
                 </div>
               )}
               <p
@@ -454,8 +480,6 @@ export function MessageComposer({
               </ChatToolbarButton>
             </div>
           }
-          // The app's text box: 16px on a 24px line with 8px padding, so one
-          // line fills the 40px box and sits centred beside the "+".
           className={`text-primary-text placeholder-secondary-text py-2 pl-3 text-base leading-6 md:text-base ${overLimit > 0 ? "pr-36" : "pr-24 lg:pr-20"}`}
         />
       </div>

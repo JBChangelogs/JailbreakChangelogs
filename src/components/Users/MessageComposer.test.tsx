@@ -38,6 +38,8 @@ function harness() {
   const frames: (() => void)[] = [];
   const errors: string[] = [];
   const infos: string[] = [];
+  const previews: string[] = [];
+  const revoked: string[] = [];
   const exports = {} as { MessageComposer: typeof MessageComposer };
   const jsx = (type: string, props: Node["props"]) => ({ type, props });
   const imports: Record<string, unknown> = {
@@ -102,6 +104,14 @@ function harness() {
       exports,
       crypto,
       AbortController,
+      URL: {
+        createObjectURL: () => {
+          const preview = `blob:preview-${previews.length}`;
+          previews.push(preview);
+          return preview;
+        },
+        revokeObjectURL: (preview: string) => revoked.push(preview),
+      },
       requestAnimationFrame: (callback: () => void) => {
         frames.push(callback);
         return frames.length;
@@ -146,6 +156,8 @@ function harness() {
     sent,
     errors,
     infos,
+    previews,
+    revoked,
     drag: (name: string, event?: unknown) => windowListeners.get(name)?.(event),
     windowEvent: (name: string) => windowListeners.get(name)?.(),
     changeConversation: () => {
@@ -191,13 +203,24 @@ test.each(["picker", "paste", "drop"])(
         },
       });
     expect(h.requests).toHaveLength(1);
+    const pending = h.render();
+    expect(pending.find((n) => n.type === "img")?.props.src).toBe(
+      h.previews[0],
+    );
+    const overlay = pending.find((n) => n.props.role === "progressbar")!;
+    expect(overlay.props["aria-label"]).toBe("Uploading test.png");
+    expect(overlay.props.className).toContain("absolute inset-0");
+    expect(nodes(overlay).some((n) => n.type === "Spinner")).toBe(true);
     if (source !== "picker") expect(prevented).toBe(true);
     h.render().find((n) => n.type === "ChatToolbarTextarea")!.props.onSubmit!();
     expect(h.sent).toHaveLength(0);
     h.requests[0].resolve(url);
     await flush();
+    expect(h.render().some((n) => n.props.role === "progressbar")).toBe(false);
+    expect(h.render().find((n) => n.type === "img")?.props.src).toBe(url);
     h.render().find((n) => n.type === "ChatToolbarTextarea")!.props.onSubmit!();
     expect(h.sent).toEqual([["", { type: "images", images: [url] }]]);
+    expect(h.revoked).toEqual(h.previews);
   },
 );
 
@@ -221,9 +244,11 @@ test("attachment cap, removal and switching conversations prevent stale uploads"
   h.render().find((n) => n.props["aria-label"] === "Remove test.png")!.props
     .onClick!();
   expect(h.requests[0].signal.aborted).toBe(true);
+  expect(h.revoked).toEqual([h.previews[0]]);
   h.props.conversationId = "group:next";
   h.changeConversation();
   expect(h.requests.every((request) => request.signal.aborted)).toBe(true);
+  expect(h.revoked).toEqual(h.previews);
   h.requests.forEach((request) => request.resolve(url));
   await flush();
   h.render().find((n) => n.type === "ChatToolbarTextarea")!.props.onSubmit!();
