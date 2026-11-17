@@ -77,6 +77,7 @@ export const ImageLightbox = ({
   const [zoomSize, setZoomSize] = useState<{
     width: number;
     height: number;
+    scale: number;
   } | null>(null);
   const zoomed = zoomSize !== null;
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -114,15 +115,20 @@ export const ImageLightbox = ({
   const toggleZoom = (event?: React.MouseEvent) => {
     const image = imageRef.current;
     if (!image?.clientWidth || !image.clientHeight) return;
-    setZoomSize((value) =>
-      value ? null : { width: image.clientWidth, height: image.clientHeight },
+    // Like Discord: zoom to the image's actual pixel size, at least 2x.
+    const scale = Math.max(2, image.naturalWidth / image.clientWidth || 0);
+    setZoomSize(
+      zoomed
+        ? null
+        : { width: image.clientWidth, height: image.clientHeight, scale },
     );
     if (!zoomed && event && event.detail > 0) {
       const rect = image.getBoundingClientRect();
       movePan(
-        (rect.left + rect.width / 2 - event.clientX) * 2,
-        (rect.top + rect.height / 2 - event.clientY) * 2,
+        (rect.left + rect.width / 2 - event.clientX) * scale,
+        (rect.top + rect.height / 2 - event.clientY) * scale,
         { width: window.innerWidth, height: window.innerHeight },
+        scale,
       );
     } else {
       setPan({ x: 0, y: 0 });
@@ -135,18 +141,20 @@ export const ImageLightbox = ({
     x: number,
     y: number,
     viewportSize?: { width: number; height: number },
+    scale = zoomSize?.scale ?? 2,
   ) => {
     const image = imageRef.current;
     const viewport = viewportRef.current;
     if (!image || !viewport) return;
     const maxX = Math.max(
       0,
-      (image.clientWidth * 2 - (viewportSize?.width ?? viewport.clientWidth)) /
+      (image.clientWidth * scale -
+        (viewportSize?.width ?? viewport.clientWidth)) /
         2,
     );
     const maxY = Math.max(
       0,
-      (image.clientHeight * 2 -
+      (image.clientHeight * scale -
         (viewportSize?.height ?? viewport.clientHeight)) /
         2,
     );
@@ -600,8 +608,8 @@ export const ImageLightbox = ({
                           maxHeight: "none",
                         }
                       : {}),
-                    transform: zoomed
-                      ? `translate(${pan.x}px, ${pan.y}px) scale(2)`
+                    transform: zoomSize
+                      ? `translate(${pan.x}px, ${pan.y}px) scale(${zoomSize.scale})`
                       : undefined,
                   }}
                   className={cn(
