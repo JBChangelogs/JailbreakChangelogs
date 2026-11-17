@@ -10,7 +10,7 @@ import {
   type RefObject,
   type SetStateAction,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -465,17 +465,19 @@ export function ConversationSidebar({
   const entries = mergeConversationList(conversations, groups);
   const hasSelection = !!selectedUserId || !!selectedGroupId;
   const [leaving, setLeaving] = useState<GroupChatSummary | null>(null);
-  // Names for "Sam is typing…" on group rows.
-  const typerIds = [
-    ...new Set([...groupTypingUserIds.values()].flatMap((ids) => [...ids])),
-  ].sort();
-  const { data: typers } = useQuery({
-    queryKey: ["message-users-batch", typerIds],
-    queryFn: () => fetchMessageUsers(typerIds),
-    enabled: typerIds.length > 0,
-    staleTime: 5 * 60_000,
-    retry: false,
+  const memberQueries = useQueries({
+    queries: groups.map((group) => {
+      const memberIds = [...group.memberIds].sort();
+      return {
+        queryKey: ["message-users-batch", memberIds],
+        queryFn: () => fetchMessageUsers(memberIds),
+        enabled: isAuthenticated && memberIds.length > 0,
+        staleTime: 5 * 60_000,
+        retry: false,
+      };
+    }),
   });
+  const members = memberQueries.flatMap((query) => query.data ?? []);
 
   return (
     <aside
@@ -550,11 +552,18 @@ export function ConversationSidebar({
             if (entry.kind === "group") {
               const { group } = entry;
               const active = selectedGroupId === group.id;
+              const online = members.some(
+                (user) =>
+                  user.id !== currentUserId &&
+                  group.memberIds.includes(user.id) &&
+                  user.presence?.status === "Online" &&
+                  user.settings?.hide_presence !== true,
+              );
               const typing = [...(groupTypingUserIds.get(group.id) ?? [])]
                 .filter((id) => id !== currentUserId)
                 .map(
                   (id) =>
-                    typers?.find((user) => user.id === id) ?? {
+                    members.find((user) => user.id === id) ?? {
                       id,
                       username: "Someone",
                       avatar_url: "",
@@ -581,11 +590,19 @@ export function ConversationSidebar({
                       : "hover:bg-quaternary-bg",
                   )}
                 >
-                  <GroupAvatar
-                    name={group.name}
-                    memberIds={group.memberIds}
-                    className="h-8 w-8"
-                  />
+                  <span className="relative shrink-0">
+                    <GroupAvatar
+                      name={group.name}
+                      memberIds={group.memberIds}
+                      className="h-8 w-8"
+                    />
+                    <PresenceDot online={online} typing={typing.length > 0} />
+                    <span className="sr-only">
+                      {online
+                        ? "A member is online"
+                        : "No other members online"}
+                    </span>
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="text-primary-text block truncate text-[15px] font-medium">
                       {group.name}

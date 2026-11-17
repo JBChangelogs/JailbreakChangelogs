@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { JsxEmit, ModuleKind, transpileModule } from "typescript";
-import type { GroupAvatar } from "./ConversationSidebar";
+import { JsxEmit, ModuleKind, ScriptTarget, transpileModule } from "typescript";
+import type { ConversationSidebar, GroupAvatar } from "./ConversationSidebar";
 import type { MessageUser } from "@/utils/messages/types";
 
 type Node = { type: unknown; props: Record<string, unknown> };
@@ -37,7 +37,11 @@ test("group icons use normal member avatars and their fallbacks in the shared si
         "utf8",
       ),
       {
-        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+        compilerOptions: {
+          module: ModuleKind.CommonJS,
+          jsx: JsxEmit.ReactJSX,
+          target: ScriptTarget.ES2022,
+        },
       },
     ).outputText,
     {
@@ -149,4 +153,122 @@ test("group icons use normal member avatars and their fallbacks in the shared si
   expect(squareMask).toContain(
     '<rect x="110" y="110" width="154" height="154" rx="38.5" fill="black"/>',
   );
+});
+
+test("group presence excludes self, hidden presence and nonmembers, while keeping typing", () => {
+  let users: MessageUser[] = [];
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  const exports = {} as {
+    ConversationSidebar: typeof ConversationSidebar;
+    PresenceDot: unknown;
+  };
+  const queries: { queryKey: unknown[]; enabled: boolean }[] = [];
+  runInNewContext(
+    transpileModule(
+      readFileSync(
+        new URL("./ConversationSidebar.tsx", import.meta.url),
+        "utf8",
+      ),
+      {
+        compilerOptions: {
+          module: ModuleKind.CommonJS,
+          jsx: JsxEmit.ReactJSX,
+          target: ScriptTarget.ES2022,
+        },
+      },
+    ).outputText,
+    {
+      exports,
+      require: (name: string) => {
+        if (name === "react") return { useState: () => [null, () => {}] };
+        if (name === "@/utils/messages/formatting")
+          return { getDisplayName: (user: MessageUser) => user.username };
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "@tanstack/react-query")
+          return {
+            useQueries: (options: { queries: typeof queries }) => {
+              queries.push(...options.queries);
+              return options.queries.map(() => ({ data: users }));
+            },
+          };
+        if (name === "@/lib/utils")
+          return {
+            cn: (...values: unknown[]) => values.filter(Boolean).join(" "),
+          };
+        return new Proxy({}, { get: (_, key) => String(key) });
+      },
+    },
+  );
+  const online = (id: string, hidden = false): MessageUser => ({
+    id,
+    username: id,
+    avatar_url: "",
+    presence: { status: "Online", last_updated: 1 },
+    settings: { hide_presence: hidden },
+  });
+  const render = () =>
+    nodes(
+      exports.ConversationSidebar({
+        userSearchQuery: "",
+        setUserSearchQuery: () => {},
+        isUserSearchLoading: false,
+        userSearchResults: [],
+        typingUserIds: new Set(),
+        selectedUserId: null,
+        selectedGroupId: null,
+        isLoadingConversations: false,
+        userSearchInputRef: { current: null },
+        selectConversation: () => {},
+        selectGroup: () => {},
+        onNewMessage: () => {},
+        onGroupRemoved: () => {},
+        hideConversation: () => {},
+        unhideRecentlyHiddenConversation: () => {},
+        conversations: [],
+        groups: [
+          {
+            id: "one",
+            name: "One",
+            memberIds: ["me", "member", "second"],
+            ownerId: "me",
+            createdAt: 1,
+            unreadCount: 0,
+            lastMessage: null,
+          },
+          {
+            id: "two",
+            name: "Two",
+            memberIds: ["me", "second"],
+            ownerId: "me",
+            createdAt: 0,
+            unreadCount: 0,
+            lastMessage: null,
+          },
+        ],
+        currentUserId: "me",
+        groupTypingUserIds: new Map([["one", new Set(["member"])]]),
+        recentlyHiddenConversations: [],
+        isAuthenticated: true,
+      }),
+    );
+  const dots = () =>
+    render().filter((node) => node.type === exports.PresenceDot);
+  expect(dots().map((node) => node.props.online)).toEqual([false, false]);
+  users = [online("me"), online("outsider"), online("member", true)];
+  expect(dots().map((node) => node.props.online)).toEqual([false, false]);
+  users = [online("member")];
+  expect(dots().map((node) => node.props.online)).toEqual([true, false]);
+  expect(dots()[0].props.typing).toBe(true);
+  users = [online("member"), online("second")];
+  users[0].presence!.status = "Offline";
+  expect(dots().map((node) => node.props.online)).toEqual([true, true]);
+  users[1].presence!.status = "Offline";
+  expect(dots().map((node) => node.props.online)).toEqual([false, false]);
+  expect(queries[0].queryKey).toEqual([
+    "message-users-batch",
+    ["me", "member", "second"],
+  ]);
+  expect(
+    render().some((node) => node.props.children === "No other members online"),
+  ).toBe(true);
 });

@@ -67,7 +67,6 @@ import type {
   Message,
   MessageUser,
   OutgoingMessageMetadata,
-  RealtimeMessageEventDetail,
 } from "@/utils/messages/types";
 import {
   addGroupMembers,
@@ -385,29 +384,6 @@ export function GroupChatView({
       map.set(currentUserMessageUser.id, currentUserMessageUser);
     return map;
   }, [membersQuery.data, currentUserMessageUser]);
-
-  // Keep members' presence live, like the DM list does.
-  useEffect(() => {
-    const onPresence = (event: Event) => {
-      const { action, data } = (
-        event as CustomEvent<RealtimeMessageEventDetail>
-      ).detail;
-      if (action !== "presence_update" || !data?.user_id || !data.status)
-        return;
-      const { user_id: userId, status } = data;
-      queryClient.setQueryData<MessageUser[]>(
-        ["message-users-batch", memberIds],
-        (users) =>
-          users?.map((user) =>
-            user.id === userId
-              ? { ...user, presence: { status, last_updated: Date.now() } }
-              : user,
-          ),
-      );
-    };
-    window.addEventListener("realtimeMessage", onPresence);
-    return () => window.removeEventListener("realtimeMessage", onPresence);
-  }, [queryClient, memberIds]);
 
   const setMessages = useCallback(
     (update: (messages: Message[]) => Message[]) =>

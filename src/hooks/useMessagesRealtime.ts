@@ -2,9 +2,11 @@
 
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type {
   ConversationSummary,
   Message,
+  MessageUser,
   RealtimeMessageEventDetail,
 } from "@/utils/messages/types";
 import { asId } from "@/utils/messages/parsing";
@@ -57,6 +59,7 @@ export function useMessagesRealtime({
   setConversations,
   setReplyingToMessage,
 }: UseMessagesRealtimeOptions) {
+  const queryClient = useQueryClient();
   const realtimeTransportConnected = useSyncExternalStore(
     subscribeRealtimeConnection,
     getRealtimeConnectionSnapshot,
@@ -98,6 +101,24 @@ export function useMessagesRealtime({
         const userId = asId(payload.user_id);
         const changedAt = Math.floor(Date.now() / 1000);
 
+        queryClient.setQueriesData<MessageUser[]>(
+          { queryKey: ["message-users-batch"] },
+          (users) =>
+            users?.map((user) =>
+              user.id === userId
+                ? {
+                    ...user,
+                    presence: {
+                      status: payload.status as "Online" | "Offline",
+                      last_updated: changedAt,
+                    },
+                    ...(payload.status === "Offline"
+                      ? { last_seen: changedAt }
+                      : {}),
+                  }
+                : user,
+            ),
+        );
         setConversations((prev) =>
           prev.map((conversation) =>
             conversation.user.id === userId
@@ -500,6 +521,7 @@ export function useMessagesRealtime({
       window.removeEventListener("realtimeMessage", handleRealtimeMessage);
     };
   }, [
+    queryClient,
     currentUserId,
     isAuthenticated,
     readMessageIdsRef,
