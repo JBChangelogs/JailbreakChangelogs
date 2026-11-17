@@ -14,7 +14,6 @@ import type { UserData } from "@/types/auth";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import { accentColorToHex } from "@/utils/ui/accentColor";
 
-// The accent picker's default, for profiles without an accent color.
 const DEFAULT_COLOR = "#2462cd";
 
 export function UnderglowSetting({ userData }: { userData: UserData }) {
@@ -25,19 +24,12 @@ export function UnderglowSetting({ userData }: { userData: UserData }) {
     queryFn: () =>
       fetchUserById(userData.id, PUBLIC_API_URL) as Promise<{
         underglow?: number | string | null;
-        accent_color?: number | string | null;
-        custom_accent_color?: number | string | null;
       }>,
     staleTime: 60_000,
   });
   const saved = accentColorToHex(profile?.underglow);
-  // Turning it on starts from the profile's accent, so it matches the cards.
-  // The profile API returns the custom accent here when set, else Discord's.
-  const accentColor = accentColorToHex(profile?.accent_color);
-  const startColor =
-    accentColorToHex(profile?.custom_accent_color) ??
-    accentColor ??
-    DEFAULT_COLOR;
+  const accentColor = accentColorToHex(userData.accent_color);
+  const startColor = accentColor ?? DEFAULT_COLOR;
   const { modalState, closeModal, checkAccentColorAccess } =
     useSupporterModal();
   const canEdit = () => checkAccentColorAccess(userData.premiumtype ?? 0);

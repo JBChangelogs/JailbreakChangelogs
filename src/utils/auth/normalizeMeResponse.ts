@@ -9,6 +9,9 @@ export interface MeResponse {
   banner_url?: string | null;
   /** Full CDN URL, unlike the hash other endpoints return. */
   banner?: string | null;
+  accent_color?: string | null;
+  accent_gradient?: number | null;
+  accent_style?: string | null;
   roblox?: {
     roblox_id?: string | null;
     roblox_username?: string | null;
@@ -29,6 +32,9 @@ export function normalizeMeResponse(raw: MeResponse): UserData {
     avatar_url: raw.avatar_url,
     banner_url: raw.banner_url ?? null,
     banner: raw.banner ?? null,
+    accent_color: raw.accent_color ?? null,
+    accent_gradient: raw.accent_gradient ?? null,
+    accent_style: raw.accent_style ?? "solid",
     premiumtype: raw.supporter,
     premiumduration: 0,
     roblox_id: raw.roblox?.roblox_id ?? "",
