@@ -13,9 +13,11 @@ import type { MessageLinkEmbeds } from "./MessageLinkEmbeds";
 function render(
   embed: Partial<LinkEmbed> | null,
   text = "https://jailbreakchangelogs.com/values",
+  header?: React.ReactNode,
 ) {
   const exports = {} as { MessageLinkEmbeds: typeof MessageLinkEmbeds };
   const queries: unknown[] = [];
+  const lightboxHeaders: React.ReactNode[] = [];
   const imports: Record<string, unknown> = {
     react: { ...React, lazy: () => ReactMarkdown },
     "react/jsx-runtime": runtime,
@@ -28,7 +30,16 @@ function render(
     "@/utils/messages/siteLinks": siteLinks,
     "@/services/messageLinkEmbedsService": {},
     "@/components/ui/ImageLightbox": {
-      ImageLightbox: ({ children }: { children: React.ReactNode }) => children,
+      ImageLightbox: ({
+        children,
+        header,
+      }: {
+        children: React.ReactNode;
+        header?: React.ReactNode;
+      }) => {
+        lightboxHeaders.push(header);
+        return children;
+      },
     },
     "@/components/ui/button": {
       Button: ({
@@ -51,8 +62,11 @@ function render(
     { exports, require: (name: string) => imports[name] },
   );
   return {
-    html: renderToStaticMarkup(<exports.MessageLinkEmbeds text={text} />),
+    html: renderToStaticMarkup(
+      <exports.MessageLinkEmbeds text={text} header={header} />,
+    ),
     queries,
+    lightboxHeaders,
   };
 }
 
@@ -155,4 +169,29 @@ test("component text renders markdown without HTML or unsafe links", () => {
   );
   expect(html).not.toContain("javascript:");
   expect(html).not.toContain("<script");
+});
+
+test("sender headers reach standard preview, gallery and section thumbnail lightboxes", () => {
+  const header = <div>Sender · sent time</div>;
+  const image = "https://embeds.jailbreakchangelogs.com/og/values.png";
+  for (const embed of [
+    { title: "Values", image },
+    {
+      component: {
+        type: 17,
+        components: [
+          { type: 12, items: [{ media: { url: image } }] },
+          {
+            type: 9,
+            components: [],
+            accessory: { type: 11, media: { url: image } },
+          },
+        ],
+      },
+    },
+  ]) {
+    const { lightboxHeaders } = render(embed, undefined, header);
+    expect(lightboxHeaders.length).toBeGreaterThan(0);
+    for (const received of lightboxHeaders) expect(received).toBe(header);
+  }
 });

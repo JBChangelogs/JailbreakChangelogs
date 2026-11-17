@@ -463,6 +463,30 @@ export function MessageRow({
   if (!sender) {
     return null;
   }
+  const lightboxHeader = (
+    <div className="flex min-w-0 items-center gap-3 text-white">
+      <UserAvatar
+        userId={sender.id}
+        bgClassName="bg-tertiary-bg"
+        avatarUrl={sender.avatar_url}
+        username={sender.username}
+        size={10}
+        showBadge={false}
+        settings={sender.settings}
+        premiumType={sender.premiumtype}
+      />
+      <div className="min-w-0">
+        <p className="truncate font-semibold">{getDisplayName(sender)}</p>
+        {typeof message.createdAt === "number" && (
+          <ChatEventTime
+            timestamp={message.createdAt}
+            format="discord"
+            className="text-white/70"
+          />
+        )}
+      </div>
+    </div>
+  );
   const currentDayKey = getDayKey(message.createdAt);
   const previousDayKey = getDayKey(messages[index - 1]?.createdAt);
   const showDaySeparator = !!currentDayKey && currentDayKey !== previousDayKey;
@@ -935,36 +959,12 @@ export function MessageRow({
                       {message.content && (
                         <MessageLinkEmbeds
                           text={formatMessageText(message.content)}
+                          header={lightboxHeader}
                         />
                       )}
                       <MessageImages
                         metadata={message.metadata}
-                        header={
-                          <div className="flex min-w-0 items-center gap-3 text-white">
-                            <UserAvatar
-                              userId={sender.id}
-                              bgClassName="bg-tertiary-bg"
-                              avatarUrl={sender.avatar_url}
-                              username={sender.username}
-                              size={10}
-                              showBadge={false}
-                              settings={sender.settings}
-                              premiumType={sender.premiumtype}
-                            />
-                            <div className="min-w-0">
-                              <p className="truncate font-semibold">
-                                {getDisplayName(sender)}
-                              </p>
-                              {typeof message.createdAt === "number" && (
-                                <ChatEventTime
-                                  timestamp={message.createdAt}
-                                  format="discord"
-                                  className="text-white/70"
-                                />
-                              )}
-                            </div>
-                          </div>
-                        }
+                        header={lightboxHeader}
                       />
                     </div>
                   </div>

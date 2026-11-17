@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,14 @@ function PreviewImage({
   thumbnail = false,
   spoiler = false,
   square = false,
+  header,
 }: {
   src?: string | null;
   alt?: string;
   thumbnail?: boolean;
   spoiler?: boolean;
   square?: boolean;
+  header?: ReactNode;
 }) {
   const url = safeEmbedUrl(src);
   if (!url) return null;
@@ -37,6 +39,7 @@ function PreviewImage({
       className={thumbnail ? "shrink-0 self-start" : "w-full"}
       stopPropagation
       noReferrer
+      header={header}
     >
       {/* oxlint-disable-next-line next/no-img-element */}
       <img
@@ -53,13 +56,15 @@ function PreviewImage({
 function Component({
   node,
   depth = 0,
+  header,
 }: {
   node: EmbedComponent;
   depth?: number;
+  header?: ReactNode;
 }) {
   if (depth > 8) return null;
   const children = node.components?.map((child, index) => (
-    <Component key={index} node={child} depth={depth + 1} />
+    <Component key={index} node={child} depth={depth + 1} header={header} />
   ));
   switch (node.type) {
     case 10:
@@ -99,13 +104,22 @@ function Component({
         <div className="flex gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-1">{children}</div>
           {node.accessory && (
-            <Component node={node.accessory} depth={depth + 1} />
+            <Component
+              node={node.accessory}
+              depth={depth + 1}
+              header={header}
+            />
           )}
         </div>
       );
     case 11:
       return (
-        <PreviewImage src={node.media?.url} alt={node.description} thumbnail />
+        <PreviewImage
+          src={node.media?.url}
+          alt={node.description}
+          thumbnail
+          header={header}
+        />
       );
     case 12:
       return (
@@ -119,6 +133,7 @@ function Component({
               alt={item.description}
               spoiler={item.spoiler}
               square={(node.items?.length ?? 0) > 1}
+              header={header}
             />
           ))}
         </div>
@@ -175,7 +190,7 @@ function Component({
   }
 }
 
-function LinkPreview({ url }: { url: string }) {
+function LinkPreview({ url, header }: { url: string; header?: ReactNode }) {
   const { data: embed } = useQuery({
     queryKey: ["message-link-embed", url],
     queryFn: ({ signal }) => fetchMessageLinkEmbed(url, signal),
@@ -206,7 +221,7 @@ function LinkPreview({ url }: { url: string }) {
     >
       {container ? (
         container.components?.map((node, index) => (
-          <Component key={index} node={node} />
+          <Component key={index} node={node} header={header} />
         ))
       ) : (
         <>
@@ -234,20 +249,26 @@ function LinkPreview({ url }: { url: string }) {
               {embed.description}
             </p>
           )}
-          <PreviewImage src={embed.image} />
+          <PreviewImage src={embed.image} header={header} />
         </>
       )}
     </article>
   );
 }
 
-export function MessageLinkEmbeds({ text }: { text: string }) {
+export function MessageLinkEmbeds({
+  text,
+  header,
+}: {
+  text: string;
+  header?: ReactNode;
+}) {
   const links = siteLinksIn(text);
   if (!links.length) return null;
   return (
     <div className="mt-1 flex flex-col gap-1">
       {links.map((url) => (
-        <LinkPreview key={url} url={url} />
+        <LinkPreview key={url} url={url} header={header} />
       ))}
     </div>
   );

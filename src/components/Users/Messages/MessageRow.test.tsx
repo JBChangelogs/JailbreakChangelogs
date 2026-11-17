@@ -189,7 +189,11 @@ test("site links remain clickable alongside mentions and previews hide during ed
 
 test("image lightboxes receive the message sender's avatar, display name and send time", () => {
   const h = harness(false);
-  const attachment = h.render().find((node) => node.type === "MessageImages")!;
+  const tree = h.render();
+  const attachment = tree.find((node) => node.type === "MessageImages")!;
+  expect(
+    tree.find((node) => node.type === "MessageLinkEmbeds")?.props.header,
+  ).toBe(attachment.props.header);
   const header = nodes(attachment.props.header);
   expect(header.find((node) => node.type === "UserAvatar")?.props.userId).toBe(
     "me",
