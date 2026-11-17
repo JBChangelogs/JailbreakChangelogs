@@ -73,6 +73,7 @@ test("inbox preserves pagination, realtime changes, sibling conversations and gu
   const router = { replace: (path: string) => redirects.push(path) };
   let redirectEffect = () => {};
   let threadLoading = false;
+  let navigationLoading = false;
   let conversationFetching = false;
   let threadError: Error | null = null;
   let routeUserError: { id: string; message: string } | null = null;
@@ -159,12 +160,17 @@ test("inbox preserves pagination, realtime changes, sibling conversations and gu
           return {
             getConversationIdFromPathname: () => "them",
             getGroupIdFromPathname: () => null,
-            useMessageNavigationScroll: () => ({
-              routeConversationId: "them",
-              selectedUserIdRef: ref("them"),
-              routeConversationIdRef: ref("them"),
-              messagesContainerRef: ref(null),
-            }),
+            useMessageNavigationScroll: (options: {
+              isLoadingMessages: boolean;
+            }) => {
+              navigationLoading = options.isLoadingMessages;
+              return {
+                routeConversationId: "them",
+                selectedUserIdRef: ref("them"),
+                routeConversationIdRef: ref("them"),
+                messagesContainerRef: ref(null),
+              };
+            },
           };
         if (name === "@/hooks/useGroupChats")
           return {
@@ -323,6 +329,8 @@ test("inbox preserves pagination, realtime changes, sibling conversations and gu
       render().find((node) => node.type === "ConversationSidebar")!.props
         .isLoadingConversations,
     ).toBe(true);
+    // The messages can arrive before the profile mounts the scroll container.
+    expect(navigationLoading).toBe(true);
     conversationFetching = false;
     expect(
       render().find((node) => node.type === "ConversationSidebar")!.props
@@ -342,6 +350,7 @@ test("inbox preserves pagination, realtime changes, sibling conversations and gu
     ).toBe(false);
     threadLoading = false;
     expect(render().some((node) => node.type === "ChatHeaderPanel")).toBe(true);
+    expect(navigationLoading).toBe(false);
     client.setQueryData(threadKey, { pages: [page([], 1)], pageParams: [1] });
     threadError = new Error("Unauthorized");
     expect(

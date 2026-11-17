@@ -385,6 +385,15 @@ export default function MessagesInbox() {
     };
   }, []);
 
+  const selectedConversation = useMemo(
+    () =>
+      conversations.find(
+        (conversation) => conversation.user.id === selectedUserId,
+      ),
+    [conversations, selectedUserId],
+  );
+  const selectedUser = selectedConversation?.user ?? null;
+
   const {
     routeConversationId,
     setRouteConversationId,
@@ -405,7 +414,8 @@ export default function MessagesInbox() {
     setSelectedUserId,
     messages,
     currentUserId: currentUser ? asId(currentUser.id) : null,
-    isLoadingMessages,
+    // The thread stays unmounted until its recipient's profile is available.
+    isLoadingMessages: isLoadingMessages || !selectedUser,
   });
 
   useEffect(() => {
@@ -463,14 +473,6 @@ export default function MessagesInbox() {
     );
   }, [selectedUserId]);
 
-  const selectedConversation = useMemo(
-    () =>
-      conversations.find(
-        (conversation) => conversation.user.id === selectedUserId,
-      ),
-    [conversations, selectedUserId],
-  );
-
   const currentUserMessageUser = useMemo<MessageUser | null>(() => {
     if (!currentUser) return null;
 
@@ -493,7 +495,6 @@ export default function MessagesInbox() {
     };
   }, [currentUser]);
 
-  const selectedUser = selectedConversation?.user ?? null;
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) return;
 
