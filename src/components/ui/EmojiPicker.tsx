@@ -254,7 +254,12 @@ export function EmojiPicker({
             }}
             onKeyDown={(event) => {
               const first = sections[0]?.items[0];
-              if (event.key === "Enter" && searching && first) {
+              if (
+                event.key === "Enter" &&
+                !event.nativeEvent.isComposing &&
+                searching &&
+                first
+              ) {
                 event.preventDefault();
                 if (!disabled) onSelect(first.emoji, event.shiftKey);
               }

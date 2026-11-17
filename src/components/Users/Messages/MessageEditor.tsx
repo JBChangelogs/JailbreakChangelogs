@@ -106,7 +106,11 @@ export function MessageEditor({
             if (e.key === "Escape") {
               onCancel();
             }
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (
+              e.key === "Enter" &&
+              !e.shiftKey &&
+              !e.nativeEvent.isComposing
+            ) {
               e.preventDefault();
               save();
             }

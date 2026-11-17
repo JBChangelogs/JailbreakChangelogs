@@ -377,7 +377,7 @@ export function SuggestionForm({
                 if (e.key === "Escape") {
                   setShowItemDropdown(false);
                   e.currentTarget.blur();
-                } else if (e.key === "Enter") {
+                } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                   e.preventDefault();
                   if (showItemDropdown && filteredItems.length > 0) {
                     const top = filteredItems[0];

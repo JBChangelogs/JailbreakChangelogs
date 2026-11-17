@@ -111,6 +111,14 @@ test("edit typing stays local, saving submits the latest draft, and emoji insert
   trigger(input(), "onKeyDown", {
     key: "Enter",
     shiftKey: false,
+    nativeEvent: { isComposing: true },
+    preventDefault: () => {},
+  });
+  expect(saves).toEqual([]);
+  trigger(input(), "onKeyDown", {
+    key: "Enter",
+    shiftKey: false,
+    nativeEvent: { isComposing: false },
     preventDefault: () => {},
   });
   expect(saves).toEqual([["message", "fast typing"]]);

@@ -300,7 +300,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
               setReplyingToReplyId(null);
               setReplyDraft("");
             }
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (
+              e.key === "Enter" &&
+              !e.shiftKey &&
+              !e.nativeEvent.isComposing
+            ) {
               e.preventDefault();
               if (replyDraft.trim() && !isSubmittingComment && !isBlocked) {
                 void handleSubmitReply(comment.id, replyDraft).then((ok) => {
@@ -729,7 +733,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                           setEditingCommentId(null);
                           setEditDraft("");
                         }
-                        if (e.key === "Enter" && !e.shiftKey) {
+                        if (
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          !e.nativeEvent.isComposing
+                        ) {
                           e.preventDefault();
                           if (
                             editDraft.trim() &&
@@ -1415,7 +1423,11 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                       setEditingCommentId(null);
                                       setEditDraft("");
                                     }
-                                    if (e.key === "Enter" && !e.shiftKey) {
+                                    if (
+                                      e.key === "Enter" &&
+                                      !e.shiftKey &&
+                                      !e.nativeEvent.isComposing
+                                    ) {
                                       e.preventDefault();
                                       if (
                                         editDraft.trim() &&

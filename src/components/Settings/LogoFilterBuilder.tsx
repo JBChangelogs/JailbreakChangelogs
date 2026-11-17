@@ -482,7 +482,10 @@ export default function LogoFilterBuilder({
                       applyHex(event.currentTarget);
                     }}
                     onKeyDown={(event) => {
-                      if (event.key === "Enter") {
+                      if (
+                        event.key === "Enter" &&
+                        !event.nativeEvent.isComposing
+                      ) {
                         event.preventDefault();
                         applyHex(event.currentTarget);
                       } else if (event.key === "Escape") {

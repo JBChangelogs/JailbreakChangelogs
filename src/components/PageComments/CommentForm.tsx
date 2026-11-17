@@ -117,7 +117,11 @@ export function CommentForm() {
                 setIsCommentFormExpanded(false);
                 setNewComment("");
               }
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
                 e.preventDefault();
                 if (newComment.trim() && !isSubmittingComment && !isBlocked) {
                   void handleFormSubmit(

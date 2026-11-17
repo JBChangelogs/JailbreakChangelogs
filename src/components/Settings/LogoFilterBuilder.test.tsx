@@ -474,6 +474,7 @@ test("Enter applies hex, Escape discards incomplete input, and reset restores th
   h.colorText.value = "#ff0000";
   input.onKeyDown!({
     key: "Enter",
+    nativeEvent: { isComposing: false },
     currentTarget: h.colorText,
     preventDefault() {},
   } as unknown as KeyboardEvent<HTMLInputElement>);

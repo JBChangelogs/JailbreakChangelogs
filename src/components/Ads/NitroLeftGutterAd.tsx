@@ -66,7 +66,7 @@ export default function NitroLeftGutterAd({
       ads?.removeAd?.(id);
       const el = document.getElementById(id);
       if (el && !ads?.removeAd) {
-        el.innerHTML = "";
+        el.replaceChildren();
       }
     };
 

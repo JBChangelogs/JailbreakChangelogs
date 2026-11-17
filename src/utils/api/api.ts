@@ -1922,9 +1922,6 @@ export async function fetchConnectedBots({
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
     try {
       if (!INVENTORY_API_URL) {
         throw new Error("Missing INVENTORY_API_URL");
@@ -1935,7 +1932,7 @@ export async function fetchConnectedBots({
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
-        signal: controller.signal,
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!response.ok) {
@@ -1972,8 +1969,6 @@ export async function fetchConnectedBots({
       //   err instanceof Error ? err.message : err,
       // );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
-    } finally {
-      clearTimeout(timeoutId);
     }
   }
 
@@ -2012,9 +2007,6 @@ export async function fetchQueueInfo({
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
     try {
       if (!INVENTORY_API_URL) {
         throw new Error("Missing INVENTORY_API_URL");
@@ -2025,7 +2017,7 @@ export async function fetchQueueInfo({
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
-        signal: controller.signal,
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!response.ok) {
@@ -2065,8 +2057,6 @@ export async function fetchQueueInfo({
       //   err instanceof Error ? err.message : err,
       // );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
-    } finally {
-      clearTimeout(timeoutId);
     }
   }
 
