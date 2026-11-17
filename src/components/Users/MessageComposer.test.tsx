@@ -189,7 +189,7 @@ test.each(["picker", "paste", "drop"])(
         target: { files: [file()], value: "" },
       });
     if (source === "paste")
-      tree.find((n) => n.type === "ChatToolbarTextarea")!.props.onPaste!({
+      h.drag("paste", {
         clipboardData: { files: [file()] },
         preventDefault: () => {
           prevented = true;

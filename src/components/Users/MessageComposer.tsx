@@ -177,7 +177,15 @@ export function MessageComposer({
     window.addEventListener("drop", drop);
     window.addEventListener("dragend", clear);
     window.addEventListener("blur", clear);
+    const paste = (event: ClipboardEvent) => {
+      const files = Array.from(event.clipboardData?.files ?? []);
+      if (event.defaultPrevented || !files.length) return;
+      event.preventDefault();
+      addDroppedImages(files);
+    };
+    window.addEventListener("paste", paste);
     return () => {
+      window.removeEventListener("paste", paste);
       clear();
       window.removeEventListener("dragenter", enter);
       window.removeEventListener("dragover", over);
@@ -391,12 +399,6 @@ export function MessageComposer({
             : () => inputRef.current?.click(),
         )}
         <ChatToolbarTextarea
-          onPaste={(event) => {
-            const files = Array.from(event.clipboardData.files);
-            if (!files.length) return;
-            event.preventDefault();
-            addImages(files);
-          }}
           value={draft}
           onChange={(event) => {
             setDraft(event.target.value);
