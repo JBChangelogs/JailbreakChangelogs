@@ -64,7 +64,7 @@ function Component({
   switch (node.type) {
     case 10:
       return node.content ? (
-        <div className="text-primary-text [&_a]:text-link text-sm wrap-break-word [&_a]:underline [&_h1]:mt-0 [&_h1]:mb-1 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:mt-0 [&_h2]:mb-1 [&_h2]:text-lg [&_h2]:font-bold [&_h3]:mt-0 [&_h3]:mb-1 [&_h3]:text-base [&_h3]:font-bold [&_p]:my-0 [&_p]:leading-[1.75]">
+        <div className="text-primary-text text-sm wrap-break-word [&_h1]:mt-0 [&_h1]:mb-1 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:mt-0 [&_h2]:mb-1 [&_h2]:text-lg [&_h2]:font-bold [&_h3]:mt-0 [&_h3]:mb-1 [&_h3]:text-base [&_h3]:font-bold [&_p]:my-0 [&_p]:leading-[1.75]">
           <Suspense
             fallback={<p className="whitespace-pre-line">{node.content}</p>}
           >
@@ -74,7 +74,12 @@ function Component({
                 a: ({ href, children }) => {
                   const url = safeEmbedUrl(href);
                   return url ? (
-                    <a href={url} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-link hover:text-link-hover underline transition-colors"
+                    >
                       {children}
                     </a>
                   ) : (
@@ -215,7 +220,7 @@ function LinkPreview({ url }: { url: string }) {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline"
+                  className="text-link hover:text-link-hover transition-colors hover:underline"
                 >
                   {embed.title}
                 </a>

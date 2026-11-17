@@ -223,7 +223,7 @@ function MessageText({
               href={piece.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:underline"
+              className="text-link hover:text-link-hover transition-colors hover:underline"
             >
               {piece.text}
             </a>
