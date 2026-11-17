@@ -326,7 +326,6 @@ export function MessageRow({
           : usersById?.get(id);
       return user ? getDisplayName(user) : `User #${id.slice(-6)}`;
     };
-    // The app's colours: a darkened green for joins, red for leaving.
     const [icon, tone] =
       groupEvent.type === "group_renamed"
         ? ["heroicons:pencil", "text-tertiary-text"]
@@ -539,7 +538,6 @@ export function MessageRow({
           </Item>
         </>
       ) : null;
-    // The app's order: reply, edit, copy; then delete and report; then id.
     return (
       <>
         <Item disabled={busy} onClick={() => setReplyingToMessage(message)}>
@@ -726,9 +724,7 @@ export function MessageRow({
                   : isReplyToMe || mentionsMe
                     ? "bg-status-warning/10 lg:group-hover/message:bg-status-warning/15 shadow-[inset_2px_0_0_var(--color-status-warning)]"
                     : isMessageMenuActive && "bg-tertiary-bg"),
-              // A new sender (or a reply) starts with a little room, like the app.
               (!isGroupedWithPrevious || message.parentId) && "mt-2",
-              // A reply's preview line is its own top padding.
               !isGroupedWithPrevious && !message.parentId && "pt-1",
             )}
           >
@@ -772,7 +768,6 @@ export function MessageRow({
                           `message-${getMessageDomId(parentMsg)}`,
                         );
                         if (!el) return;
-                        // The app's jump: centre the parent and tint it.
                         el.scrollIntoView({
                           behavior: "smooth",
                           block: "center",
@@ -922,7 +917,36 @@ export function MessageRow({
                             </span>
                           )}
                       </ChatEventContent>
-                      <MessageImages metadata={message.metadata} />
+                      <MessageImages
+                        metadata={message.metadata}
+                        header={
+                          <div className="flex min-w-0 items-center gap-3 text-white">
+                            <UserAvatar
+                              userId={sender.id}
+                              bgClassName="bg-tertiary-bg"
+                              avatarHash={sender.avatar}
+                              username={sender.username}
+                              custom_avatar={sender.custom_avatar}
+                              size={10}
+                              showBadge={false}
+                              settings={sender.settings_v2}
+                              premiumType={sender.premiumtype}
+                            />
+                            <div className="min-w-0">
+                              <p className="truncate font-semibold">
+                                {getDisplayName(sender)}
+                              </p>
+                              {typeof message.createdAt === "number" && (
+                                <ChatEventTime
+                                  timestamp={message.createdAt}
+                                  format="discord"
+                                  className="text-white/70"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        }
+                      />
                     </div>
                   </div>
                 )}
@@ -967,8 +991,6 @@ export function MessageRow({
               )}
             </div>
             {editingMessageId !== message.id && canOpenActions && (
-              // The app's hover bar, on the row's top edge (above a reply's
-              // preview line): quick reactions, the picker, then "…".
               <div
                 className={cn(
                   "border-border-primary bg-secondary-bg absolute -top-1 right-7 z-10 hidden -translate-y-1/2 items-center gap-0.5 rounded-md border p-0.5 opacity-0 transition-opacity group-hover/message:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 lg:flex",

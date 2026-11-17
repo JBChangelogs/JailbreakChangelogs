@@ -111,6 +111,7 @@ test("lightbox actions follow the active image, handle failures and keep the pre
       exports.ImageLightbox({
         images,
         children: "Thumbnail",
+        header: jsx("div", { children: "Sender and timestamp" }),
         noReferrer: true,
       }),
     );
@@ -118,16 +119,26 @@ test("lightbox actions follow the active image, handle failures and keep the pre
   const action = (label: string) =>
     render().find((node) => node.props["aria-label"] === label)!;
   const click = (label: string) =>
-    (action(label).props.onClick as () => Promise<void>)();
+    (action(label).props.onClick as (event: unknown) => Promise<void>)({
+      stopPropagation: () => {},
+    });
   (
     render().find((node) => node.type === "button")!.props.onClick as (
       event: unknown,
     ) => void
   )({});
+  expect(
+    render().some((node) => node.props.children === "Sender and timestamp"),
+  ).toBe(true);
+  expect(action("Show image 1: First").props["aria-pressed"]).toBe(true);
+  expect(action("Show image 2: Second").props["aria-pressed"]).toBe(false);
+  expect(action("Previous image").props.className).toContain("left-0");
+  expect(action("Next image").props.className).toContain("right-0");
   await click("Copy image link");
   expect(copied).toEqual(["https://jailbreakchangelogs.com/first.png"]);
   expect(successes).toEqual(["Image link copied"]);
   await click("Next image");
+  expect(action("Show image 2: Second").props["aria-pressed"]).toBe(true);
   expect(action("Open image in new tab").props.href).toBe(images[1].src);
   expect(action("Open image in new tab").props.target).toBe("_blank");
   expect(action("Open image in new tab").props.rel).toBe("noreferrer");
@@ -143,8 +154,8 @@ test("lightbox actions follow the active image, handle failures and keep the pre
   timers.forEach((fn) => fn());
   expect(revoked).toEqual(["blob:download"]);
   let stopped = false;
-  const toolbar = render().find((node) =>
-    String(node.props.className).includes("absolute top-4 right-4"),
+  const toolbar = render().find(
+    (node) => "data-lightbox-actions" in node.props,
   )!;
   (toolbar.props.onClick as (event: unknown) => void)({
     stopPropagation: () => {
@@ -174,6 +185,18 @@ test("lightbox actions follow the active image, handle failures and keep the pre
   expect(errors).toHaveLength(2);
   expect(downloads).toHaveLength(1);
   expect(action("Download image").props.disabled).toBe(false);
+  await click("Show image 1: First");
+  expect(action("Open image in new tab").props.href).toBe(images[0].src);
+  await click("Previous image");
+  expect(action("Open image in new tab").props.href).toBe(images[1].src);
+  await click("Show image 1: First");
+  images.pop();
+  expect(
+    render().some((node) => node.props["aria-label"] === "Next image"),
+  ).toBe(false);
+  expect(
+    render().some((node) => node.props["aria-label"] === "Image thumbnails"),
+  ).toBe(false);
   await click("Close image preview");
   expect(render().some((node) => "data-image-lightbox" in node.props)).toBe(
     false,

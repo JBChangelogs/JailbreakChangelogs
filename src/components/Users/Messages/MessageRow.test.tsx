@@ -158,6 +158,19 @@ function harness(mobile: boolean) {
   };
 }
 
+test("image lightboxes receive the message sender's avatar, display name and send time", () => {
+  const h = harness(false);
+  const attachment = h.render().find((node) => node.type === "MessageImages")!;
+  const header = nodes(attachment.props.header);
+  expect(header.find((node) => node.type === "UserAvatar")?.props.userId).toBe(
+    "me",
+  );
+  expect(header.find((node) => node.type === "p")?.props.children).toBe("Me");
+  expect(
+    header.find((node) => node.type === "ChatEventTime")?.props.timestamp,
+  ).toBe(h.props.message.createdAt);
+});
+
 test("invite joins render as a system line with a profile link and green join arrow", () => {
   const h = harness(false);
   h.props.message.metadata = { type: "member_joined", user_id: "them" };
@@ -355,7 +368,6 @@ test("desktop actions open from the app's single menu button; sending disables i
   let tree = h.render();
   const more = () =>
     tree.find((node) => node.props["aria-label"] === "More message actions")!;
-  // The hover bar holding it is hidden until the row is hovered.
   const bar = () =>
     tree.find((node) => node.props.className?.includes("right-7"))!;
   expect(bar().props.className!.split(" ")).toContain("opacity-0");
@@ -367,7 +379,6 @@ test("desktop actions open from the app's single menu button; sending disables i
       .filter((node) => node.type === "TooltipContent")
       .map((node) => node.props.children),
   ).toEqual(["More message actions"]);
-  // Reply and Edit are the menu's first items for your own message.
   const items = tree.filter((node) => node.type === "DropdownMenuItem");
   items[0].props.onClick!();
   items[1].props.onClick!();

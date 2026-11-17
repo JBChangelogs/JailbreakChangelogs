@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import { getMessageImages } from "@/utils/messages/images";
 
@@ -8,10 +8,12 @@ function MessageImage({
   url,
   index,
   images,
+  header,
 }: {
   url: string;
   index: number;
   images: { src: string; alt: string }[];
+  header?: ReactNode;
 }) {
   const [failed, setFailed] = useState(false);
   if (failed)
@@ -26,6 +28,7 @@ function MessageImage({
       initialIndex={index}
       alt={`Attachment ${index + 1}`}
       stopPropagation
+      header={header}
     >
       {/* oxlint-disable-next-line next/no-img-element */}
       <img
@@ -45,8 +48,10 @@ function MessageImage({
 
 export function MessageImages({
   metadata,
+  header,
 }: {
   metadata: Record<string, unknown> | null | undefined;
+  header?: ReactNode;
 }) {
   const images = getMessageImages(metadata);
   if (!images.length) return null;
@@ -61,7 +66,13 @@ export function MessageImages({
       }`}
     >
       {images.map((url, index) => (
-        <MessageImage key={url} url={url} index={index} images={gallery} />
+        <MessageImage
+          key={url}
+          url={url}
+          index={index}
+          images={gallery}
+          header={header}
+        />
       ))}
     </div>
   );

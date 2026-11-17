@@ -15,6 +15,7 @@ test("message thumbnails share a gallery starting at the clicked image and retai
       stopPropagation?: boolean;
       onError?: () => void;
       className?: string;
+      header?: string;
     };
   };
   let failed = false;
@@ -54,6 +55,7 @@ test("message thumbnails share a gallery starting at the clicked image and retai
   ];
   const grid = exports.MessageImages({
     metadata: { type: "images", images: urls },
+    header: "Sender and timestamp",
   }) as unknown as Node;
   const image = (grid.props.children as Node[])[0];
   expect(grid.props.className).toContain("grid-cols-2");
@@ -70,6 +72,7 @@ test("message thumbnails share a gallery starting at the clicked image and retai
     );
     expect(preview.props.images).toBe(link.props.images);
     expect(preview.props.initialIndex).toBe(index);
+    expect(preview.props.header).toBe("Sender and timestamp");
     expect((preview.props.children as Node).props.className).toContain(
       "aspect-square w-full object-cover",
     );
