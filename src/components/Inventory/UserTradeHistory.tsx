@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useInfiniteQuery, useQueries } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import TradeActivityChart from "@/components/Inventory/TradeActivityChart";
 import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { DupedBadge } from "@/components/trading/DupedBadge";
@@ -166,6 +167,24 @@ function ValueDifferenceBadge({
     </span>
   );
 }
+
+const mergeTrades = (pages: TradeList<UserTradeSummary>[]) => {
+  const byId = new Map<string, UserTradeSummary>();
+  for (const page of pages) {
+    for (const trade of [...page.completed, ...page.pending])
+      byId.set(trade.trade_id, trade);
+  }
+  return [...byId.values()].sort((a, b) => b.last_time - a.last_time);
+};
+
+const formatTradeDay = (day: string) =>
+  new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 
 const getErrorMessage = async (response: Response, fallback: string) => {
   const body = await response.json().catch(() => null);
@@ -404,6 +423,7 @@ export default function UserTradeHistory({
   itemsData,
 }: UserTradeHistoryProps) {
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const tradesQuery = useInfiniteQuery({
     queryKey: ["user-trade-history", userId, PAGE_SIZE],
     enabled: isActive && !!INVENTORY_API_URL,
@@ -466,21 +486,59 @@ export default function UserTradeHistory({
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const trades = useMemo(() => {
-    const byId = new Map<string, UserTradeSummary>();
-    for (const page of tradesQuery.data?.pages ?? []) {
-      for (const trade of [...page.completed, ...page.pending])
-        byId.set(trade.trade_id, trade);
-    }
-    return [...byId.values()].sort((a, b) => b.last_time - a.last_time);
-  }, [tradesQuery.data]);
+  const allTrades = useMemo(
+    () => mergeTrades(tradesQuery.data?.pages ?? []),
+    [tradesQuery.data],
+  );
+  const dayQuery = useQuery({
+    queryKey: ["user-trade-day", userId, selectedDay],
+    enabled: isActive && !!selectedDay && !!INVENTORY_API_URL,
+    queryFn: async ({ signal }): Promise<TradeList<UserTradeSummary>> => {
+      const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+      try {
+        const { url, headers } = buildApiFetchRequest(
+          INVENTORY_API_URL,
+          `/trades/user/${encodeURIComponent(userId)}/day?date=${encodeURIComponent(selectedDay ?? "")}&nocache=false`,
+        );
+        const response = await fetch(url, {
+          headers,
+          signal: AbortSignal.any([signal, timeout]),
+          cache: "no-store",
+        });
+        if (!response.ok)
+          throw new Error(
+            await getErrorMessage(
+              response,
+              `Failed to load trades for this day (${response.status})`,
+            ),
+          );
+        const data = (await response.json()) as TradeList<UserTradeSummary>;
+        if (!Array.isArray(data.completed) || !Array.isArray(data.pending))
+          throw new Error("Invalid trades response");
+        return data;
+      } catch (error) {
+        if (timeout.aborted)
+          throw new Error("The request timed out. Please try again.");
+        if (!signal.aborted) log.error("fetch user trade day failed", error);
+        throw error;
+      }
+    },
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const dayTrades = useMemo(
+    () => mergeTrades(dayQuery.data ? [dayQuery.data] : []),
+    [dayQuery.data],
+  );
+  const trades = selectedDay ? dayTrades : allTrades;
   const listState = tradesQuery.isFetching
     ? "loading"
     : tradesQuery.isError
       ? "error"
       : "idle";
   const listError = tradesQuery.error?.message ?? null;
-  const hasMore = tradesQuery.hasNextPage;
+  const hasMore = !selectedDay && tradesQuery.hasNextPage;
   const detailQueries = useQueries({
     queries: trades.map((trade) => ({
       queryKey: ["user-trade-detail", userId, trade.trade_id],
@@ -606,7 +664,7 @@ export default function UserTradeHistory({
     setExpandedTradeId((current) => (current === tradeId ? null : tradeId));
   };
 
-  if (listState === "loading" && trades.length === 0) {
+  if (listState === "loading" && allTrades.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg flex min-h-52 items-center justify-center rounded-lg border">
         <div className="text-secondary-text flex items-center gap-2 text-sm">
@@ -617,7 +675,7 @@ export default function UserTradeHistory({
     );
   }
 
-  if (listState === "error" && trades.length === 0) {
+  if (listState === "error" && allTrades.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
         <Icon
@@ -639,7 +697,7 @@ export default function UserTradeHistory({
     );
   }
 
-  if (trades.length === 0) {
+  if (allTrades.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <Icon
@@ -656,10 +714,78 @@ export default function UserTradeHistory({
 
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-primary-text font-semibold">Trade History</h3>
-        <p className="text-secondary-text text-sm">Newest trades first</p>
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h3 className="text-primary-text font-semibold">Trade History</h3>
+          <p className="text-secondary-text text-sm">
+            {selectedDay ? (
+              <>
+                {dayQuery.isSuccess &&
+                  `${trades.length} ${trades.length === 1 ? "trade" : "trades"} `}
+                on{" "}
+                <span className="text-primary-text font-medium">
+                  {formatTradeDay(selectedDay)} (UTC)
+                </span>
+              </>
+            ) : (
+              "Newest trades first"
+            )}
+          </p>
+        </div>
+        {selectedDay && (
+          <button
+            type="button"
+            onClick={() => setSelectedDay(null)}
+            className="border-border-card bg-tertiary-bg text-secondary-text hover:text-primary-text inline-flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors"
+          >
+            <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
+            Clear day filter
+          </button>
+        )}
       </div>
+
+      <TradeActivityChart
+        userId={userId}
+        selectedDay={selectedDay}
+        onSelectDay={(day) => {
+          setSelectedDay(day);
+          setExpandedTradeId(null);
+        }}
+      />
+
+      {selectedDay &&
+        dayQuery.isFetching &&
+        Array.from({ length: 3 }, (_, i) => (
+          <div
+            key={i}
+            aria-hidden="true"
+            className="border-border-card bg-tertiary-bg flex animate-pulse items-center gap-3 rounded-lg border p-3"
+          >
+            <div className="bg-quaternary-bg h-10 w-10 shrink-0 rounded-full" />
+            <div className="bg-quaternary-bg h-4 w-20 rounded" />
+            <div className="bg-quaternary-bg hidden h-3 w-24 rounded sm:block" />
+            <div className="bg-quaternary-bg h-10 w-10 shrink-0 rounded-full" />
+            <div className="bg-quaternary-bg h-4 w-28 rounded" />
+            <div className="bg-quaternary-bg ml-auto hidden h-4 w-32 rounded sm:block" />
+          </div>
+        ))}
+      {selectedDay && dayQuery.isError && (
+        <div className="py-6 text-center text-sm">
+          <p className="text-status-error">{dayQuery.error.message}</p>
+          <Button
+            className="mt-3"
+            size="sm"
+            onClick={() => void dayQuery.refetch()}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
+      {selectedDay && dayQuery.isSuccess && trades.length === 0 && (
+        <p className="text-secondary-text py-6 text-center text-sm">
+          No trades recorded on this day.
+        </p>
+      )}
 
       {trades.map((trade, index) => {
         const isExpanded = expandedTradeId === trade.trade_id;
