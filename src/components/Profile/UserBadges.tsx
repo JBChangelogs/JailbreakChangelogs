@@ -157,13 +157,13 @@ export const UserBadges = ({
 
   if (
     usernumber != null &&
-    usernumber <= 100 &&
+    usernumber <= 250 &&
     !sortedFlags.some((f) => f.flag === "is_early_adopter")
   ) {
     const handleEarlyAdopterClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       toast.success(
-        "This badge is awarded to the first 100 people to sign up to Jailbreak Changelogs!",
+        "This badge is awarded to the first 250 people to sign up to Jailbreak Changelogs!",
         {
           duration: 4000,
           icon: (
