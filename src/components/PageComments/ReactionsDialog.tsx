@@ -155,17 +155,13 @@ export function ReactionsDialog({
                           <div className="shrink-0">
                             <UserAvatar
                               userId={reactUser.id ?? ""}
-                              avatarHash={
-                                reactorData?.avatar ?? reactUser.avatar ?? null
+                              avatarUrl={
+                                reactorData?.avatar_url ??
+                                reactUser.avatar_url ??
+                                null
                               }
                               username={displayName}
                               size={9}
-                              cdnSize={128}
-                              custom_avatar={
-                                reactorData?.custom_avatar ??
-                                reactUser.custom_avatar ??
-                                undefined
-                              }
                               showBadge={false}
                               settings={reactorData?.settings ?? undefined}
                               premiumType={

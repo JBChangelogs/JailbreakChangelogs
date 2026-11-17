@@ -66,7 +66,7 @@ export function useEscapeLogin() {
       // Store user data in localStorage
       safeSetJSON("user", userData);
       safeLocalStorage.setItem("userid", userData.id);
-      safeLocalStorage.setItem("avatar", userData.avatar);
+      safeLocalStorage.setItem("avatar", userData.avatar_url);
 
       // Dispatch custom event for components to listen to
       window.dispatchEvent(

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { UserSettingsV2 } from "@/types/auth";
 
 interface EditOverlayProps {
-  userData: { premiumtype?: number; settings_v2?: UserSettingsV2 };
+  userData: { premiumtype?: number; settings?: UserSettingsV2 };
   onUploaded: (url: string, displayEnabled: boolean) => void;
   onUploadStateChange?: (isUploading: boolean) => void;
 }

@@ -207,10 +207,8 @@ function throwUserAccessErrorFrom403(data: unknown): never {
   throw new Error(`BANNED_USER: ${errorMessage}`);
 }
 
-const USER_LIST_FIELDS =
-  "id,username,global_name,avatar,banner,custom_banner,accent_color,custom_accent_color,accent_gradient,accent_style,usernumber,premiumtype,created_at,settings_v2,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
-const USER_SEARCH_FIELDS =
-  "id,username,global_name,avatar,banner,custom_banner,accent_color,custom_accent_color,accent_gradient,accent_style,usernumber,premiumtype,created_at,settings_v2,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
+const USER_CARD_FIELDS =
+  "id,username,global_name,avatar_url,banner_url,accent_color,accent_gradient,accent_style,usernumber,premiumtype,created_at,settings,presence,roblox_id,roblox_username,roblox_display_name,flags,primary_guild";
 const MAX_USER_PAGE_SIZE = 30;
 
 const clampUserPageSize = (value: number) =>
@@ -229,7 +227,7 @@ export const fetchPaginatedUsers = async (
   params.set("page", page.toString());
   params.set("size", clampUserPageSize(size).toString());
   if (seed) params.set("seed", seed);
-  params.set("fields", USER_LIST_FIELDS);
+  params.set("fields", USER_CARD_FIELDS);
 
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
@@ -258,7 +256,7 @@ export const searchUsers = async (
   const params = new URLSearchParams({
     query: username,
     limit: clampUserPageSize(limit).toString(),
-    fields: USER_SEARCH_FIELDS,
+    fields: USER_CARD_FIELDS,
   });
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
@@ -1326,7 +1324,8 @@ export async function fetchItemScanCount(itemId: number): Promise<{
 export interface CommentAuthor {
   id: string;
   username: string;
-  avatar: string | null;
+  avatar_url: string | null;
+  banner_url?: string | null;
   custom_avatar: string | null;
   premiumtype: number;
   usernumber: number;
@@ -1347,7 +1346,8 @@ export interface CommentAuthor {
 export interface ReactionUser {
   id: string;
   username: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   roblox_avatar?: string | null;
   roblox_display_name?: string;
@@ -2307,7 +2307,8 @@ export interface Supporter {
   id: string;
   username: string;
   global_name: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   created_at: string;
   premiumtype: number;
   usernumber: number;

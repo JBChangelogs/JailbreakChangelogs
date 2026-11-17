@@ -11,10 +11,11 @@ interface ProfileIdentityBarProps {
     id: string;
     username: string;
     global_name?: string;
-    avatar: string;
+    avatar_url: string;
+    banner_url?: string | null;
     custom_avatar?: string;
     premiumtype?: number;
-    settings_v2?: { custom_avatar?: boolean; hide_presence?: boolean };
+    settings?: { custom_avatar?: boolean; hide_presence?: boolean };
   };
 }
 
@@ -66,13 +67,11 @@ export default function ProfileIdentityBar({
         <div className="border-border-card bg-secondary-bg/95 flex h-16 items-center gap-3 rounded-b-xl border px-4 shadow-lg backdrop-blur-md sm:px-5">
           <UserAvatar
             userId={user.id}
-            avatarHash={user.avatar}
+            avatarUrl={user.avatar_url}
             username={user.username}
-            custom_avatar={user.custom_avatar}
             premiumType={user.premiumtype}
-            settings={user.settings_v2}
+            settings={user.settings}
             size={10}
-            cdnSize={128}
             showBadge={false}
           />
           <div className="min-w-0 flex-1">

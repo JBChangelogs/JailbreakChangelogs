@@ -1,25 +1,15 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Banner } from "@/components/Profile/Banner";
 import {
   AvatarEditOverlay,
   BannerEditOverlay,
 } from "@/components/Profile/EditableProfileImages";
 import { Switch } from "@/components/ui/switch";
-import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { cn } from "@/lib/utils";
 import type { UserData, UserSettingsV2 } from "@/types/auth";
-import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import { accentCardTheme, type Accent } from "@/utils/ui/accentColor";
 import { UserAvatar } from "@/utils/ui/avatar";
-
-interface PublicProfile {
-  avatar?: string | null;
-  banner?: string | null;
-  custom_avatar?: string | null;
-  custom_banner?: string | null;
-}
 
 interface AppearancePreviewProps {
   userData: UserData;
@@ -50,23 +40,8 @@ export function AppearancePreview({
   togglesDisabled,
   accent,
 }: AppearancePreviewProps) {
-  const queryClient = useQueryClient();
-  // /v2/users/me has no custom banner and pre-resolves the avatar, so read the
-  // raw images and effective accent color from the public profile instead.
-  const profileKey = appearanceProfileKey(userData.id);
-  const { data: profile } = useQuery({
-    queryKey: profileKey,
-    queryFn: () =>
-      fetchUserById(userData.id, PUBLIC_API_URL) as Promise<PublicProfile>,
-    staleTime: 60_000,
-  });
-  const updateProfile = (patch: Partial<PublicProfile>) =>
-    queryClient.setQueryData<PublicProfile>(profileKey, (current) =>
-      current ? { ...current, ...patch } : current,
-    );
-
   const settings = {
-    ...userData.settings_v2,
+    ...userData.settings,
     custom_avatar: customAvatarOn,
     custom_banner: customBannerOn,
   } as UserSettingsV2;
@@ -82,19 +57,11 @@ export function AppearancePreview({
           preview
           userId={userData.id}
           username={userData.username}
-          banner={(profile?.banner ?? userData.banner) || undefined}
-          customBanner={
-            (profile?.custom_banner ?? userData.custom_banner) || undefined
-          }
-          settings={settings}
-          premiumType={userData.premiumtype}
+          bannerUrl={userData.banner_url}
         />
         <BannerEditOverlay
           userData={userData}
-          onUploaded={(url, enabled) => {
-            updateProfile({ custom_banner: url });
-            onBannerUploaded(url, enabled);
-          }}
+          onUploaded={onBannerUploaded}
           onUploadStateChange={onUploadStateChange}
         />
       </div>
@@ -108,22 +75,16 @@ export function AppearancePreview({
         >
           <UserAvatar
             userId={userData.id}
-            avatarHash={profile?.avatar ?? userData.avatar}
+            avatarUrl={userData.avatar_url}
             username={userData.username}
             size={20}
-            custom_avatar={
-              (profile?.custom_avatar ?? userData.custom_avatar) || undefined
-            }
             settings={settings}
             premiumType={userData.premiumtype}
             showBadge={false}
           />
           <AvatarEditOverlay
             userData={userData}
-            onUploaded={(url, enabled) => {
-              updateProfile({ custom_avatar: url });
-              onAvatarUploaded(url, enabled);
-            }}
+            onUploaded={onAvatarUploaded}
             onUploadStateChange={onUploadStateChange}
             iconClassName="size-6"
           />

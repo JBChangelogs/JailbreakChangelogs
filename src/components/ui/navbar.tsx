@@ -495,11 +495,11 @@ export const NavbarModern = ({
                 >
                   <UserAvatar
                     userId={userData.id}
-                    avatarHash={userData.avatar}
+                    avatarUrl={userData.avatar_url}
                     username={userData.username}
                     size={8}
                     showBadge={false}
-                    settings={userData.settings_v2}
+                    settings={userData.settings}
                     premiumType={userData.premiumtype}
                   />
                   <span className="hidden max-w-28 truncate text-sm font-medium 2xl:block">

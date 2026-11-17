@@ -133,12 +133,11 @@ export default function GiftToUserDialog({
                       >
                         <UserAvatar
                           userId={result.id}
-                          avatarHash={result.avatar}
+                          avatarUrl={result.avatar_url}
                           username={result.username}
-                          custom_avatar={result.custom_avatar}
                           size={8}
                           showBadge={false}
-                          settings={result.settings_v2}
+                          settings={result.settings}
                           premiumType={result.premiumtype}
                         />
                         <div className="min-w-0 flex-1">
@@ -197,12 +196,11 @@ export default function GiftToUserDialog({
                 >
                   <UserAvatar
                     userId={selectedRecipient.id}
-                    avatarHash={selectedRecipient.avatar}
+                    avatarUrl={selectedRecipient.avatar_url}
                     username={selectedRecipient.username}
-                    custom_avatar={selectedRecipient.custom_avatar}
                     size={10}
                     showBadge={false}
-                    settings={selectedRecipient.settings_v2}
+                    settings={selectedRecipient.settings}
                     premiumType={selectedRecipient.premiumtype}
                   />
                   <div className="min-w-0 flex-1">

@@ -54,9 +54,8 @@ export function FriendRow({
         >
           <UserAvatar
             userId={user.id}
-            avatarHash={user.avatar ?? null}
+            avatarUrl={user.avatar_url ?? null}
             username={user.username}
-            custom_avatar={user.custom_avatar ?? undefined}
             premiumType={user.premiumtype}
             size={10}
             showBadge={false}
@@ -150,7 +149,7 @@ export function MutualFriendsCount({ userId }: { userId: string }) {
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto px-4 pb-6">
             {friends.map((friend) => (
-              <FriendRow key={friend.id} user={friend} />
+              <FriendRow key={friend.user.id} user={friend.user} />
             ))}
             {mutual.hasNextPage && (
               <Button
@@ -219,10 +218,10 @@ export function FriendsPage() {
     .filter(
       (f) =>
         !query ||
-        f.username.toLowerCase().includes(query) ||
-        f.global_name?.toLowerCase().includes(query),
+        f.user.username.toLowerCase().includes(query) ||
+        f.user.global_name?.toLowerCase().includes(query),
     )
-    .sort((a, b) => displayName(a).localeCompare(displayName(b)));
+    .sort((a, b) => displayName(a.user).localeCompare(displayName(b.user)));
   const loading = friends.isPending || requests.isPending;
   const failed = friends.isError || requests.isError;
 
@@ -287,11 +286,11 @@ export function FriendsPage() {
             ) : (
               shownFriends.map((friend) => (
                 <FriendRow
-                  key={friend.id}
-                  user={friend}
+                  key={friend.user.id}
+                  user={friend.user}
                   detail={`Friends since ${formatMonthDayYear(friend.friends_since)}`}
                 >
-                  <FriendButton userId={friend.id} />
+                  <FriendButton userId={friend.user.id} />
                 </FriendRow>
               ))
             )}
@@ -315,11 +314,11 @@ export function FriendsPage() {
                     </h2>
                     {list.map((request) => (
                       <FriendRow
-                        key={request.id}
-                        user={request}
+                        key={request.user.id}
+                        user={request.user}
                         detail={formatMonthDayYear(request.created_at)}
                       >
-                        <FriendButton userId={request.id} />
+                        <FriendButton userId={request.user.id} />
                       </FriendRow>
                     ))}
                   </section>

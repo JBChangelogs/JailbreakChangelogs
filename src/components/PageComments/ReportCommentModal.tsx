@@ -15,7 +15,6 @@ interface ReportCommentModalProps {
   commentId: number;
   commentUserId: string;
   commentAvatar?: string | null;
-  commentCustomAvatar?: string | null;
   commentDate: string;
   commentPremiumType?: number;
   commentSettings?: UserData["settings"];
@@ -32,7 +31,6 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   commentId,
   commentUserId,
   commentAvatar,
-  commentCustomAvatar,
   commentDate,
   commentPremiumType,
   commentSettings,
@@ -53,9 +51,8 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
             <div className="flex shrink-0 items-start pt-1.5">
               <UserAvatar
                 userId={commentUserId}
-                avatarHash={commentAvatar ?? null}
+                avatarUrl={commentAvatar ?? null}
                 username={commentOwner}
-                custom_avatar={commentCustomAvatar ?? undefined}
                 size={7}
                 showBadge={false}
                 settings={commentSettings}

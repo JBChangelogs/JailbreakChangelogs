@@ -6,6 +6,7 @@ import {
   useQueryClient,
   type QueryClient,
 } from "@tanstack/react-query";
+import type { UserData } from "@/types/auth";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { createLogger } from "@/services/logger";
@@ -14,17 +15,9 @@ import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 
-export interface FriendUser {
-  id: string;
-  username: string;
-  global_name?: string | null;
-  premiumtype?: number;
-  avatar?: string | null;
-  custom_avatar?: string | null;
-}
-
-export type Friend = FriendUser & { friends_since: number };
-type FriendRequest = FriendUser & { created_at: number };
+export type FriendUser = Pick<UserData, "id" | "username"> & Partial<UserData>;
+export type Friend = { user: FriendUser; friends_since: number };
+type FriendRequest = { user: FriendUser; created_at: number };
 
 export interface FriendsPage {
   items: Friend[];
@@ -94,7 +87,7 @@ export const fetchFriendsPage = (userId: string, page: number) =>
 
 /** Friends you and `userId` share; 403 `hidden` when they hide friends. */
 export const fetchMutualFriendsPage = (userId: string, page: number) =>
-  friendsFetch<FriendsPage>(
+  friendsFetch<Omit<FriendsPage, "items"> & { items: { user: FriendUser }[] }>(
     `/v2/users/${encodeURIComponent(userId)}/friends/mutual?page=${page}`,
   );
 
@@ -144,15 +137,15 @@ export function applyFriendUpdate(
   const requests =
     queryClient.getQueryData<FriendRequests>(FRIEND_REQUESTS_KEY);
   const friends = queryClient.getQueryData<Friend[]>(FRIENDS_KEY);
-  const isThem = (u: FriendUser) => u.id === userId;
-  const known: FriendUser | undefined =
+  const isThem = (item: { user: FriendUser }) => item.user.id === userId;
+  const known =
     requests?.outgoing.find(isThem) ??
     requests?.incoming.find(isThem) ??
     friends?.find(isThem);
-  const others = <T extends FriendUser>(list: T[]) =>
+  const others = <T extends { user: FriendUser }>(list: T[]) =>
     list.filter((u) => !isThem(u));
   const now = Date.now() / 1000;
-  const request = known && { ...known, created_at: now };
+  const request = known && { user: known.user, created_at: now };
 
   queryClient.setQueryData<FriendRequests>(
     FRIEND_REQUESTS_KEY,
@@ -171,7 +164,7 @@ export function applyFriendUpdate(
   queryClient.setQueryData<Friend[]>(FRIENDS_KEY, (list) => {
     if (!list) return list;
     return status === "friends" && known
-      ? [...others(list), { ...known, friends_since: now }]
+      ? [...others(list), { user: known.user, friends_since: now }]
       : others(list);
   });
 
@@ -186,9 +179,9 @@ export function friendshipStatus(
   friends: Friend[] | undefined,
   requests: FriendRequests | undefined,
 ): FriendshipStatus {
-  if (friends?.some((f) => f.id === userId)) return "friends";
-  if (requests?.incoming.some((r) => r.id === userId)) return "incoming";
-  if (requests?.outgoing.some((r) => r.id === userId)) return "outgoing";
+  if (friends?.some((f) => f.user.id === userId)) return "friends";
+  if (requests?.incoming.some((r) => r.user.id === userId)) return "incoming";
+  if (requests?.outgoing.some((r) => r.user.id === userId)) return "outgoing";
   return "none";
 }
 

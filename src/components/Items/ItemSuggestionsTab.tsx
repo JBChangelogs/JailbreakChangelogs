@@ -610,7 +610,7 @@ export default function ItemSuggestionsTab({
                   <div className="relative z-10 flex items-center gap-2">
                     <UserAvatar
                       userId={suggestion.user.id}
-                      avatarHash={null}
+                      avatarUrl={null}
                       username={
                         suggestion.user.roblox_username ??
                         suggestion.user.username ??
@@ -735,7 +735,7 @@ export default function ItemSuggestionsTab({
                           >
                             <UserAvatar
                               userId={v.user.id}
-                              avatarHash={null}
+                              avatarUrl={null}
                               username={
                                 v.user.roblox_username ?? v.user.username ?? ""
                               }

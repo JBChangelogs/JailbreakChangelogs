@@ -6,17 +6,13 @@ import {
   PROFILE_BANNER_HEIGHT,
   useProfileBannerAspectRatio,
 } from "@/hooks/useProfileBannerAspectRatio";
-import { UserSettingsV2 } from "@/types/auth";
 import { getBackgroundImageByIndex } from "@/utils/helpers/backgroundImages";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 
 interface BannerProps {
   userId: string;
   username: string;
-  banner?: string;
-  customBanner?: string;
-  settings?: UserSettingsV2;
-  premiumType?: number;
+  bannerUrl?: string | null;
   className?: string;
   preview?: boolean;
   expandable?: boolean;
@@ -32,71 +28,32 @@ const calculateSeed = (userId: string): number => {
   return Math.abs(seed);
 };
 
-interface ProfileBannerOptions {
-  userId: string;
-  banner?: string | null;
-  customBanner?: string | null;
-  settings?: UserSettingsV2;
-  premiumType?: number;
-  /** Discord CDN size for the banner image. */
-  size?: number;
-}
-
-/**
- * Picks a user's banner: their custom banner when they've turned it on and
- * have premium 2+, otherwise their Discord banner. `fallback` is a background
- * chosen from the user ID, for users with neither or when `primary` fails.
- */
+/** Keeps the site's decorative background separate from the user's banner. */
 export function getProfileBanner({
   userId,
-  banner,
-  customBanner,
-  settings,
-  premiumType,
-  size = 4096,
-}: ProfileBannerOptions) {
-  const fallback = getBackgroundImageByIndex(calculateSeed(userId));
-  if (
-    settings?.custom_banner === true &&
-    premiumType &&
-    premiumType >= 2 &&
-    customBanner &&
-    customBanner !== "N/A"
-  ) {
-    return { primary: customBanner, fallback };
-  }
-  if (banner && banner !== "None") {
-    // /v2/users/me returns a full URL; other endpoints return just the hash.
-    return {
-      primary: /^https?:\/\//i.test(banner)
-        ? banner
-        : `https://cdn.discordapp.com/banners/${userId}/${banner}?size=${size}`,
-      fallback,
-    };
-  }
-  return { primary: null, fallback };
+  bannerUrl,
+}: {
+  userId: string;
+  bannerUrl?: string | null;
+}) {
+  return {
+    primary: bannerUrl ?? null,
+    fallback: getBackgroundImageByIndex(calculateSeed(userId)),
+  };
 }
 
 export const Banner = ({
   userId,
   username,
-  banner,
-  customBanner,
-  settings,
-  premiumType,
+  bannerUrl,
   className,
   preview = false,
   expandable = false,
 }: BannerProps) => {
   const previewAspectRatio = useProfileBannerAspectRatio(preview);
-  const [primaryBannerFailed, setPrimaryBannerFailed] = useState(false);
-  const { primary, fallback } = getProfileBanner({
-    userId,
-    banner,
-    customBanner,
-    settings,
-    premiumType,
-  });
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const { primary, fallback } = getProfileBanner({ userId, bannerUrl });
+  const primaryBannerFailed = primary === failedUrl;
   const src = primary && !primaryBannerFailed ? primary : fallback;
 
   return (
@@ -115,9 +72,7 @@ export const Banner = ({
       <Image
         placeholder={IMAGE_PLACEHOLDER}
         src={src}
-        onError={
-          src === primary ? () => setPrimaryBannerFailed(true) : undefined
-        }
+        onError={src === primary ? () => setFailedUrl(primary) : undefined}
         fill
         priority // Add priority since banners are usually above fold or critical
         draggable={false}

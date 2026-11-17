@@ -513,6 +513,23 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
           typeof rawUser.id === "string"
             ? {
                 id: rawUser.id,
+                banner_url:
+                  typeof rawUser.banner_url === "string"
+                    ? rawUser.banner_url
+                    : null,
+                avatar_url:
+                  typeof rawUser.avatar_url === "string"
+                    ? rawUser.avatar_url
+                    : undefined,
+                flags: Array.isArray(rawUser.flags)
+                  ? (rawUser.flags as NonNullable<TradeAd["user"]>["flags"])
+                  : undefined,
+                settings:
+                  rawUser.settings && typeof rawUser.settings === "object"
+                    ? (rawUser.settings as NonNullable<
+                        TradeAd["user"]
+                      >["settings"])
+                    : undefined,
                 username:
                   typeof rawUser.username === "string"
                     ? rawUser.username
@@ -561,6 +578,10 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
             : allowCurrentUserFallback && user
               ? {
                   id: user.id,
+                  avatar_url: user.avatar_url,
+                  banner_url: user.banner_url,
+                  flags: user.flags,
+                  settings: user.settings,
                   username: user.username,
                   global_name: user.global_name,
                   roblox_id: user.roblox_id,

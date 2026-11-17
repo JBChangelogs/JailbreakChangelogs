@@ -9,7 +9,7 @@ type ApiTestimonialCard = {
   quote: string;
   url: string;
   userId: string;
-  avatarHash: string | null;
+  avatarUrl: string | null;
 };
 
 export type Testimonial = BadimoTestimonial | ApiTestimonialCard;
@@ -30,7 +30,8 @@ type ApiTestimonial = {
     id: string;
     username: string | null;
     global_name: string | null;
-    avatar: string | null;
+    avatar_url: string | null;
+    banner_url?: string | null;
   };
 };
 
@@ -48,7 +49,7 @@ function isApiTestimonial(value: unknown): value is ApiTestimonial {
     typeof user.id === "string" &&
     (typeof user.username === "string" || user.username === null) &&
     (typeof user.global_name === "string" || user.global_name === null) &&
-    (typeof user.avatar === "string" || user.avatar === null)
+    (typeof user.avatar_url === "string" || user.avatar_url === null)
   );
 }
 
@@ -105,7 +106,7 @@ export async function fetchTestimonials(
       quote: item.content,
       url: item.link || `/users/${item.user.id}`,
       userId: item.user.id,
-      avatarHash: item.user.avatar,
+      avatarUrl: item.user.avatar_url,
     })),
   };
 }

@@ -151,15 +151,17 @@ export const useSettings = (
         description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
       });
 
-      if (name === "custom_avatar" && refreshUser) {
-        // /users/me returns the effective avatar in `avatar`, so refresh it
-        // in the background after the setting itself has been saved.
+      if (
+        (name === "custom_avatar" || name === "custom_banner") &&
+        refreshUser
+      ) {
+        // Refresh the server-resolved image URLs after changing their settings.
         void refreshUser();
       } else {
         const updatedUser = {
           ...userData,
-          settings_v2: {
-            ...userData.settings_v2,
+          settings: {
+            ...userData.settings,
             [name]: value,
           },
         };

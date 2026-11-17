@@ -51,23 +51,8 @@ function mergeUserWithLatestPresence(
   };
 }
 
-const USER_LOOKUP_FIELDS = [
-  "id",
-  "username",
-  "global_name",
-  "avatar",
-  "banner",
-  "custom_avatar",
-  "custom_banner",
-  "accent_color",
-  "usernumber",
-  "premiumtype",
-  "settings",
-  "presence",
-  "last_seen",
-  "flags",
-  "primary_guild",
-].join(",");
+const USER_LOOKUP_FIELDS =
+  "id,username,global_name,avatar_url,banner_url,accent_color,usernumber,premiumtype,settings,presence,last_seen,flags,primary_guild";
 
 interface UseConversationListOptions {
   isAuthenticated: boolean;
@@ -105,7 +90,7 @@ export function useConversationList({
       options?: { forceRefresh?: boolean },
     ): Promise<MessageUser | null> => {
       if (!PUBLIC_API_URL) throw new Error("Public API URL is not configured");
-      const queryKey = ["message-user-lookup", id, USER_LOOKUP_FIELDS];
+      const queryKey = ["message-user-lookup", id];
       const cached = queryClient.getQueryData<MessageUser | null>(queryKey);
       try {
         return await queryClient.fetchQuery({
@@ -188,10 +173,7 @@ export function useConversationList({
         for (const raw of data) {
           const user = toMessageUser(raw);
           if (user) {
-            queryClient.setQueryData(
-              ["message-user-lookup", user.id, USER_LOOKUP_FIELDS],
-              user,
-            );
+            queryClient.setQueryData(["message-user-lookup", user.id], user);
             result.set(user.id, user);
           }
         }

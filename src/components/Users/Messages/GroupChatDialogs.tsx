@@ -229,12 +229,11 @@ export function UserPickerDialog({
                 <UserAvatar
                   userId={user.id}
                   bgClassName="bg-tertiary-bg"
-                  avatarHash={user.avatar}
+                  avatarUrl={user.avatar_url}
                   username={user.username}
-                  custom_avatar={user.custom_avatar}
                   size={8}
                   showBadge={false}
-                  settings={user.settings_v2}
+                  settings={user.settings}
                   premiumType={user.premiumtype}
                 />
                 <span className="text-primary-text min-w-0 flex-1 truncate text-sm font-medium">

@@ -96,7 +96,7 @@ export const getImageUploadRequirements = (imageType: ImageType) =>
 interface ImageUploadDialogProps {
   userData: {
     premiumtype?: number;
-    settings_v2?: UserSettingsV2;
+    settings?: UserSettingsV2;
   };
   activateAfterUpload?: boolean;
   onUploaded: (url: string, displayEnabled: boolean) => void;
@@ -347,7 +347,7 @@ const ImageUploadDialog = ({
         return;
       }
       const newImageUrl = await config.upload(croppedFile);
-      let displayEnabled = userData.settings_v2?.[settingName] === true;
+      let displayEnabled = userData.settings?.[settingName] === true;
 
       if (activateAfterUpload && !displayEnabled) {
         await updateUserSettings(settingName, true);

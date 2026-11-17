@@ -11,10 +11,10 @@ const user = (id: string) => ({ id, username: id });
 
 test("friend status prefers friends, then incoming, then outgoing", () => {
   const requests = {
-    incoming: [{ ...user("2"), created_at: 0 }],
-    outgoing: [{ ...user("3"), created_at: 0 }],
+    incoming: [{ user: user("2"), created_at: 0 }],
+    outgoing: [{ user: user("3"), created_at: 0 }],
   };
-  const friends = [{ ...user("1"), friends_since: 0 }];
+  const friends = [{ user: user("1"), friends_since: 0 }];
 
   expect(friendshipStatus("1", friends, requests)).toBe("friends");
   expect(friendshipStatus("2", friends, requests)).toBe("incoming");
@@ -27,7 +27,7 @@ test("friend status prefers friends, then incoming, then outgoing", () => {
 test("friend_update frames change the cached status without a refetch", () => {
   const client = new QueryClient();
   const them = "659865209741246514";
-  client.setQueryData(FRIENDS_KEY, [{ ...user(them), friends_since: 1 }]);
+  client.setQueryData(FRIENDS_KEY, [{ user: user(them), friends_since: 1 }]);
   client.setQueryData(FRIEND_REQUESTS_KEY, { incoming: [], outgoing: [] });
   const status = () =>
     friendshipStatus(
@@ -43,12 +43,13 @@ test("friend_update frames change the cached status without a refetch", () => {
   // You asked, they accepted: moves from sent to friends, profile kept.
   client.setQueryData(FRIEND_REQUESTS_KEY, {
     incoming: [],
-    outgoing: [{ ...user(them), created_at: 1 }],
+    outgoing: [{ user: user(them), created_at: 1 }],
   });
   applyFriendUpdate(client, them, "friends");
   expect(status()).toBe("friends");
   expect(
-    client.getQueryData<{ username: string }[]>(FRIENDS_KEY)?.[0]?.username,
+    client.getQueryData<{ user: { username: string } }[]>(FRIENDS_KEY)?.[0]
+      ?.user.username,
   ).toBe(them);
 });
 
@@ -57,7 +58,7 @@ test("friend_update reuses a known profile for any status, else refetches", () =
   const them = "42";
   client.setQueryData(FRIENDS_KEY, []);
   client.setQueryData(FRIEND_REQUESTS_KEY, {
-    incoming: [{ ...user(them), created_at: 1 }],
+    incoming: [{ user: user(them), created_at: 1 }],
     outgoing: [],
   });
   const status = () =>
@@ -78,7 +79,7 @@ test("friend_update reuses a known profile for any status, else refetches", () =
     incoming: [],
     outgoing: [],
   });
-  client.setQueryData(FRIENDS_KEY, [{ ...user(them), friends_since: 1 }]);
+  client.setQueryData(FRIENDS_KEY, [{ user: user(them), friends_since: 1 }]);
   applyFriendUpdate(client, them, "outgoing");
   expect(status()).toBe("outgoing");
 });
@@ -94,7 +95,7 @@ test("becoming friends invalidates the conversation list even without a cached p
     }
     if (known)
       client.setQueryData(FRIEND_REQUESTS_KEY, {
-        incoming: [{ ...user("42"), created_at: 1 }],
+        incoming: [{ user: user("42"), created_at: 1 }],
         outgoing: [],
       });
     applyFriendUpdate(client, "42", "friends");

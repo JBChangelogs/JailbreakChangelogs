@@ -36,6 +36,7 @@ interface GithubRelease {
   author: {
     login: string;
     avatar_url: string;
+    banner_url?: string | null;
   };
   tarball_url: string;
   zipball_url: string;

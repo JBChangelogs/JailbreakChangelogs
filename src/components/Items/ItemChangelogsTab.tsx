@@ -534,7 +534,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                   <div className="flex items-center gap-2">
                     <UserAvatar
                       userId={changelog.user.id}
-                      avatarHash={null}
+                      avatarUrl={null}
                       username={
                         changelog.user.roblox_username ??
                         changelog.user.username ??
@@ -654,7 +654,7 @@ export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
                           >
                             <UserAvatar
                               userId={v.user.id}
-                              avatarHash={null}
+                              avatarUrl={null}
                               username={
                                 v.user.roblox_username ?? v.user.username ?? ""
                               }

@@ -191,9 +191,8 @@ export default function SharedThemeDialog() {
             >
               <UserAvatar
                 userId={theme.user_id}
-                avatarHash={creator?.avatar ?? null}
+                avatarUrl={creator?.avatar_url ?? null}
                 username={creatorName}
-                custom_avatar={creator?.custom_avatar}
                 premiumType={creator?.premiumtype}
                 settings={creator?.settings}
                 size={5}

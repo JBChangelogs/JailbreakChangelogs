@@ -875,7 +875,7 @@ export default function ItemDetailsClient({
                               <UserAvatar
                                 userId={String(profileId)}
                                 username={sign}
-                                avatarHash={null}
+                                avatarUrl={null}
                                 forceAvatarUrl={getUserAvatar(
                                   String(profileId),
                                 )}

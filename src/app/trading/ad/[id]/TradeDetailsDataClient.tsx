@@ -34,6 +34,10 @@ interface V2TradeItem {
 }
 
 interface V2TradeUser {
+  avatar_url?: string;
+  banner_url?: string | null;
+  flags?: import("@/types/auth").UserFlag[];
+  settings?: import("@/types/auth").UserSettings;
   id?: string;
   roblox_id?: string;
   roblox_username?: string;
@@ -122,7 +126,10 @@ function normalizeV2Trade(raw: V2Trade): TradeAd {
           id: raw.user.id || "",
           username: raw.user.username || "Unknown",
           global_name: raw.user.global_name,
-          avatar: undefined,
+          avatar_url: raw.user.avatar_url,
+          banner_url: raw.user.banner_url,
+          flags: raw.user.flags,
+          settings: raw.user.settings,
           roblox_id: raw.user.roblox_id,
           roblox_username: raw.user.roblox_username,
           roblox_display_name: raw.user.roblox_display_name,

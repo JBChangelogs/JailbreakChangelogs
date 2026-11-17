@@ -207,9 +207,8 @@ function WinnerBanner({
             {theme.user?.id && (
               <UserAvatar
                 userId={theme.user.id}
-                avatarHash={theme.user.avatar ?? null}
+                avatarUrl={theme.user.avatar_url ?? null}
                 username={theme.user.username}
-                custom_avatar={theme.user.custom_avatar}
                 premiumType={theme.user.premiumtype}
                 settings={theme.user.settings}
                 size={6}
@@ -278,9 +277,8 @@ function EntryCard({ theme }: { theme: MarketplaceTheme }) {
           {theme.user?.id && (
             <UserAvatar
               userId={theme.user.id}
-              avatarHash={theme.user.avatar ?? null}
+              avatarUrl={theme.user.avatar_url ?? null}
               username={theme.user.username}
-              custom_avatar={theme.user.custom_avatar}
               premiumType={theme.user.premiumtype}
               settings={theme.user.settings}
               size={6}
@@ -738,9 +736,8 @@ function Standings({
                           {s.theme.user?.id && (
                             <UserAvatar
                               userId={s.theme.user.id}
-                              avatarHash={s.theme.user.avatar ?? null}
+                              avatarUrl={s.theme.user.avatar_url ?? null}
                               username={s.theme.user.username}
-                              custom_avatar={s.theme.user.custom_avatar}
                               premiumType={s.theme.user.premiumtype}
                               settings={s.theme.user.settings}
                               size={4}

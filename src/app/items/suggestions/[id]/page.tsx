@@ -118,7 +118,8 @@ interface SuggestionUser {
   id: string;
   username?: string;
   global_name?: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   premiumtype?: number;
   usernumber?: number;
@@ -212,7 +213,7 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
       <div className="relative h-10 w-10 shrink-0">
         <UserAvatar
           userId={v.user.id}
-          avatarHash={null}
+          avatarUrl={null}
           username={v.user.roblox_username ?? v.user.username ?? ""}
           forceAvatarUrl={v.user.roblox_avatar ?? undefined}
           premiumType={v.user.premiumtype ?? 0}
@@ -1325,7 +1326,7 @@ export default function ValueSuggestionDetailPage() {
                       <div className="mt-1 flex items-start gap-2.5">
                         <UserAvatar
                           userId={suggestion.user.id}
-                          avatarHash={null}
+                          avatarUrl={null}
                           username={
                             suggestion.user.roblox_username ??
                             suggestion.user.username ??

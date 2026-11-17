@@ -68,7 +68,8 @@ export interface SuggestionUser {
   id: string;
   username?: string;
   global_name?: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   premiumtype?: number;
   usernumber?: number;

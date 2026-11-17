@@ -141,7 +141,7 @@ test("an unmessageable member comes back named on the error", async () => {
 
 test("DMs and groups share one list, newest activity first", () => {
   const dm = (id: string, at?: number) => ({
-    user: { id, username: id, avatar: "" },
+    user: { id, username: id, avatar_url: "" },
     lastMessage: at
       ? {
           id: `m${id}`,

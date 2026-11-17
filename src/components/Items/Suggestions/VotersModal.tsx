@@ -107,7 +107,7 @@ export function VotersModal({
                           <div className="relative h-10 w-10 shrink-0">
                             <UserAvatar
                               userId={v.user.id}
-                              avatarHash={null}
+                              avatarUrl={null}
                               username={
                                 v.user.roblox_username ?? v.user.username ?? ""
                               }

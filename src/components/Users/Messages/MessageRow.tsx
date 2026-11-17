@@ -244,7 +244,7 @@ const GROUP_GAP_MS = 5 * 60_000;
 const placeholderUser = (id: string): MessageUser => ({
   id,
   username: `User #${id.slice(-6)}`,
-  avatar: "",
+  avatar_url: "",
 });
 
 export function MessageRow({
@@ -783,12 +783,11 @@ export function MessageRow({
                         <UserAvatar
                           userId={parentSender.id}
                           bgClassName="bg-tertiary-bg"
-                          avatarHash={parentSender.avatar}
+                          avatarUrl={parentSender.avatar_url}
                           username={parentSender.username}
-                          custom_avatar={parentSender.custom_avatar}
                           size={4}
                           showBadge={false}
-                          settings={parentSender.settings_v2}
+                          settings={parentSender.settings}
                           premiumType={parentSender.premiumtype}
                           className="h-4 w-4"
                         />
@@ -831,12 +830,11 @@ export function MessageRow({
                       <UserAvatar
                         userId={sender.id}
                         bgClassName="bg-tertiary-bg"
-                        avatarHash={sender.avatar}
+                        avatarUrl={sender.avatar_url}
                         username={sender.username}
-                        custom_avatar={sender.custom_avatar}
                         size={9}
                         showBadge={false}
-                        settings={sender.settings_v2}
+                        settings={sender.settings}
                         premiumType={sender.premiumtype}
                       />
                     </Link>
@@ -924,12 +922,11 @@ export function MessageRow({
                             <UserAvatar
                               userId={sender.id}
                               bgClassName="bg-tertiary-bg"
-                              avatarHash={sender.avatar}
+                              avatarUrl={sender.avatar_url}
                               username={sender.username}
-                              custom_avatar={sender.custom_avatar}
                               size={10}
                               showBadge={false}
-                              settings={sender.settings_v2}
+                              settings={sender.settings}
                               premiumType={sender.premiumtype}
                             />
                             <div className="min-w-0">

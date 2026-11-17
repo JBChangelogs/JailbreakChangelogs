@@ -26,7 +26,7 @@ import Link from "next/link";
 import NextError from "next/error";
 import { notFound, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { UserAvatar, getAvatarUrl } from "@/utils/ui/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -74,10 +74,11 @@ const toColorInt = (hex?: string | null) =>
   hex ? parseInt(hex.slice(1), 16) : null;
 
 function withPack(user: User, pack: ThemePack): User {
-  const settings = { ...user.settings_v2 } as UserSettingsV2;
+  const settings = { ...user.settings } as UserSettingsV2;
   const next: User = { ...user };
   if (pack.banner) {
     next.custom_banner = pack.banner;
+    next.banner_url = pack.banner;
     settings.custom_banner = true;
   }
   if (pack.background) {
@@ -92,14 +93,15 @@ function withPack(user: User, pack: ThemePack): User {
   if (pack.colored_profile_cards != null)
     settings.colored_profile_cards = pack.colored_profile_cards;
   if (pack.underglow) next.underglow = toColorInt(pack.underglow);
-  next.settings_v2 = settings;
+  next.settings = settings;
   return next;
 }
 
 interface User {
   id: string;
   username: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   global_name: string;
   usernumber: number;
   accent_color: string;
@@ -112,7 +114,7 @@ interface User {
   custom_banner?: string;
   /** Profile background image URL (16:9, may be an animated GIF), or null. */
   custom_background?: string | null;
-  settings_v2?: UserSettingsV2;
+  settings?: UserSettingsV2;
   presence?: {
     status: "Online" | "Offline";
     last_updated: number;
@@ -176,7 +178,7 @@ export default function UserProfileClient({
     queryKey: ["shared-theme-creator", packTheme?.user_id],
     queryFn: () =>
       fetchUserById(packTheme!.user_id, PUBLIC_API_URL) as Promise<
-        PopoverUser & { settings_v2?: UserSettingsV2 }
+        PopoverUser & { settings?: UserSettingsV2 }
       >,
     enabled: !!packTheme,
     staleTime: 5 * 60_000,
@@ -247,23 +249,23 @@ export default function UserProfileClient({
   ) => {
     updateUser((previousUser) => ({
       ...previousUser,
-      avatar: displayEnabled ? newAvatarUrl : previousUser.avatar,
+      avatar_url: displayEnabled ? newAvatarUrl : previousUser.avatar_url,
       custom_avatar: newAvatarUrl,
-      settings_v2: previousUser.settings_v2
+      settings: previousUser.settings
         ? {
-            ...previousUser.settings_v2,
+            ...previousUser.settings,
             custom_avatar: displayEnabled,
           }
-        : previousUser.settings_v2,
+        : previousUser.settings,
     }));
 
     if (currentUser) {
       const updatedCurrentUser = {
         ...currentUser,
-        avatar: displayEnabled ? newAvatarUrl : currentUser.avatar,
+        avatar_url: displayEnabled ? newAvatarUrl : currentUser.avatar_url,
         custom_avatar: newAvatarUrl,
-        settings_v2: {
-          ...currentUser.settings_v2,
+        settings: {
+          ...currentUser.settings,
           custom_avatar: displayEnabled,
         } as UserSettingsV2,
       };
@@ -280,23 +282,23 @@ export default function UserProfileClient({
   ) => {
     updateUser((previousUser) => ({
       ...previousUser,
-      banner: displayEnabled ? newBannerUrl : previousUser.banner,
+      banner_url: displayEnabled ? newBannerUrl : previousUser.banner_url,
       custom_banner: newBannerUrl,
-      settings_v2: previousUser.settings_v2
+      settings: previousUser.settings
         ? {
-            ...previousUser.settings_v2,
+            ...previousUser.settings,
             custom_banner: displayEnabled,
           }
-        : previousUser.settings_v2,
+        : previousUser.settings,
     }));
 
     if (currentUser) {
       const updatedCurrentUser = {
         ...currentUser,
-        banner: displayEnabled ? newBannerUrl : currentUser.banner,
+        banner_url: displayEnabled ? newBannerUrl : currentUser.banner_url,
         custom_banner: newBannerUrl,
-        settings_v2: {
-          ...currentUser.settings_v2,
+        settings: {
+          ...currentUser.settings,
           custom_banner: displayEnabled,
         } as UserSettingsV2,
       };
@@ -613,20 +615,14 @@ export default function UserProfileClient({
 
   const isOwnProfile = currentUserId === user.id;
   const canEditMedia = isOwnProfile && !previewing;
-  const avatarUrl = getAvatarUrl({
-    userId: user.id,
-    avatarHash: user.avatar,
-    custom_avatar: user.custom_avatar,
-    settings: user.settings_v2,
-    premiumType: user.premiumtype,
-  });
+  const avatarUrl = user.avatar_url;
   // Accent colors only recolor profile cards when the owner opts in.
   const accent = userCardAccent(user);
   const underglow = accentColorToHex(user.underglow);
 
   // Tier 2, like custom banners, so it hides after a downgrade.
   const hasVisibleBackground =
-    user.settings_v2?.custom_background === true &&
+    user.settings?.custom_background === true &&
     (previewing || (user.premiumtype ?? 0) >= 2) &&
     !!user.custom_background;
 
@@ -688,11 +684,10 @@ export default function UserProfileClient({
                   >
                     <UserAvatar
                       userId={packTheme.user_id}
-                      avatarHash={packCreator?.avatar ?? null}
+                      avatarUrl={packCreator?.avatar_url ?? null}
                       username={packCreator?.username ?? ""}
-                      custom_avatar={packCreator?.custom_avatar ?? undefined}
                       premiumType={packCreator?.premiumtype}
-                      settings={packCreator?.settings_v2}
+                      settings={packCreator?.settings}
                       size={5}
                       showBadge={false}
                     />
@@ -732,15 +727,7 @@ export default function UserProfileClient({
             <Banner
               userId={user.id}
               username={user.username}
-              banner={user.banner}
-              customBanner={user.custom_banner}
-              settings={user.settings_v2}
-              // A preview shows the pack's banner whatever the tier.
-              premiumType={
-                previewing
-                  ? Math.max(user.premiumtype ?? 0, 2)
-                  : user.premiumtype
-              }
+              bannerUrl={user.banner_url}
               expandable={!canEditMedia}
             />
             {canEditMedia && (
@@ -764,12 +751,11 @@ export default function UserProfileClient({
                 >
                   <UserAvatar
                     userId={user.id}
-                    avatarHash={user.avatar}
+                    avatarUrl={user.avatar_url}
                     username={user.username}
                     size={38}
-                    custom_avatar={user.custom_avatar}
                     isOnline={
-                      user.settings_v2?.hide_presence === true
+                      user.settings?.hide_presence === true
                         ? false
                         : user.presence?.status === "Online"
                     }
@@ -779,7 +765,7 @@ export default function UserProfileClient({
                       user.premiumtype === 3 && "[&>div]:rounded-2xl!",
                     )}
                     presenceBadgeClassName="z-40 size-6! md:size-8!"
-                    settings={user.settings_v2}
+                    settings={user.settings}
                     premiumType={user.premiumtype}
                   />
                   {!canEditMedia && avatarUrl && (
@@ -831,7 +817,7 @@ export default function UserProfileClient({
                       />
                     </div>
                     <div className="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-1 md:mt-2">
-                      {user.settings_v2?.hide_presence === true &&
+                      {user.settings?.hide_presence === true &&
                       currentUserId !== user.id ? (
                         <p className="text-secondary-text text-sm">
                           Last seen: Hidden

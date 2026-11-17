@@ -119,8 +119,7 @@ interface GroupChatViewProps {
 
 /** Online unless they're offline or hide their presence. */
 const isOnline = (user: MessageUser) =>
-  user.presence?.status === "Online" &&
-  user.settings_v2?.hide_presence !== true;
+  user.presence?.status === "Online" && user.settings?.hide_presence !== true;
 
 /**
  * The group's members beside the chat, like the app's: in join order, with
@@ -201,12 +200,11 @@ function GroupMembersPanel({
                     <UserAvatar
                       userId={user.id}
                       bgClassName="bg-tertiary-bg"
-                      avatarHash={user.avatar}
+                      avatarUrl={user.avatar_url}
                       username={user.username}
-                      custom_avatar={user.custom_avatar}
                       size={8}
                       showBadge={false}
-                      settings={user.settings_v2}
+                      settings={user.settings}
                       premiumType={user.premiumtype}
                     />
                     <PresenceDot online={isOnline(user)} typing={typing} />
@@ -736,7 +734,7 @@ export function GroupChatView({
       usersById.get(id) ?? {
         id,
         username: `User #${id.slice(-6)}`,
-        avatar: "",
+        avatar_url: "",
       },
   );
 

@@ -61,13 +61,13 @@ export const toAccentStyle = (style: unknown): AccentStyle =>
  * the solid style.
  */
 export function userCardAccent(user: {
-  settings_v2?: { colored_profile_cards?: boolean } | null;
+  settings?: { colored_profile_cards?: boolean } | null;
   accent_color?: number | string | null;
   custom_accent_color?: number | string | null;
   accent_gradient?: number | string | null;
   accent_style?: string | null;
 }): Accent | null {
-  if (user.settings_v2?.colored_profile_cards !== true) return null;
+  if (user.settings?.colored_profile_cards !== true) return null;
   const color =
     accentColorToHex(user.custom_accent_color) ??
     accentColorToHex(user.accent_color);

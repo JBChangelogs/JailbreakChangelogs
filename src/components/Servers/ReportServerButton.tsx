@@ -114,9 +114,8 @@ export default function ReportServerButton({
               <div className="shrink-0">
                 <UserAvatar
                   userId={server.user.id}
-                  avatarHash={server.user.avatar}
+                  avatarUrl={server.user.avatar_url}
                   username={server.user.username}
-                  custom_avatar={server.user.custom_avatar ?? undefined}
                   size={7}
                   showBadge={false}
                   settings={server.user.settings}

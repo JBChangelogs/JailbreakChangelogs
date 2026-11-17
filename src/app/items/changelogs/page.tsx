@@ -46,7 +46,8 @@ interface EntryUser {
   id: string;
   username?: string;
   global_name?: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   premiumtype?: number;
   settings?: {
@@ -414,7 +415,7 @@ export default function ValuesChangelogPage() {
                                       >
                                         <UserAvatar
                                           userId={u.id}
-                                          avatarHash={null}
+                                          avatarUrl={null}
                                           username={
                                             u.roblox_username ??
                                             u.username ??

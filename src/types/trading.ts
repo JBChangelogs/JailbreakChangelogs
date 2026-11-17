@@ -45,7 +45,9 @@ export interface TradeAd {
     id: string;
     username: string;
     global_name?: string;
-    avatar?: string;
+    avatar_url?: string;
+    banner_url?: string | null;
+    flags?: import("@/types/auth").UserFlag[];
     roblox_id?: string;
     roblox_username?: string;
     roblox_display_name?: string;
@@ -54,7 +56,7 @@ export interface TradeAd {
     custom_avatar?: string;
     usernumber?: number;
     premiumtype?: number;
-    settings_v2?: {
+    settings?: {
       custom_avatar: boolean;
     };
   };

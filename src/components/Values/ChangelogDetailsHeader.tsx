@@ -8,11 +8,12 @@ import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 interface UserData {
   id: string;
   username: string;
-  avatar: string | null;
+  avatar_url: string | null;
+  banner_url?: string | null;
   global_name: string;
   accent_color: string;
   custom_avatar?: string;
-  settings_v2?: {
+  settings?: {
     custom_avatar: boolean;
   };
   premiumtype?: number;
@@ -96,7 +97,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
                 <span key={userId} className="flex items-center gap-1">
                   <UserAvatar
                     userId={userId}
-                    avatarHash={null}
+                    avatarUrl={null}
                     username={contributorData.name}
                     forceAvatarUrl={contributorData.avatarUrl ?? undefined}
                     premiumType={contributorData.premiumtype ?? 0}

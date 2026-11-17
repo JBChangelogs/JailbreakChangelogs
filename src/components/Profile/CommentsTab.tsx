@@ -24,7 +24,8 @@ interface CommentReaction {
   users?: {
     id: string;
     username: string;
-    avatar?: string | null;
+    avatar_url?: string | null;
+    banner_url?: string | null;
     custom_avatar?: string | null;
     premiumtype?: number;
     settings?: { custom_avatar?: boolean } | null;
@@ -262,7 +263,7 @@ export default function CommentsTab({
     }): Promise<Record<string, ProfileCommentUser>> => {
       const params = new URLSearchParams({
         ids: profileOwnerIds.join(","),
-        fields: "id,username,avatar,custom_avatar,premiumtype,settings_v2",
+        fields: "id,username,avatar_url,banner_url,premiumtype,settings,flags",
       });
       const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,

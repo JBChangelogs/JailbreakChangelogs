@@ -342,11 +342,8 @@ function CommentsLayout() {
             userData[ruid]?.roblox_avatar
           )
             return userData[ruid].roblox_avatar;
-          return userData[ruid]?.avatar ?? null;
+          return userData[ruid]?.avatar_url ?? null;
         })()}
-        commentCustomAvatar={
-          userData[reportingComment?.user_id || ""]?.custom_avatar ?? null
-        }
         commentDate={reportingComment?.date || ""}
         commentPremiumType={
           userData[reportingComment?.user_id || ""]?.premiumtype

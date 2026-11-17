@@ -82,7 +82,7 @@ test("identity bar appears only above the site header and cleans up its observer
   );
   const props = {
     identityRef: { current: heading },
-    user: { id: "123", username: "test", avatar: "" },
+    user: { id: "123", username: "test", avatar_url: "" },
   };
   expect(exports.default(props).props.children).toBe(false);
   const cleanup = effect!();

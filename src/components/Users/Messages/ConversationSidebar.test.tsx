@@ -15,15 +15,15 @@ function nodes(value: unknown): Node[] {
 
 test("group icons use normal member avatars and their fallbacks in the shared sidebar/header component", () => {
   const users: MessageUser[] = [
-    { id: "me", username: "Me", avatar: "my-avatar" },
-    { id: "none", username: "No picture", avatar: "None" },
-    { id: "picture", username: "Picture", avatar: "hash" },
+    { id: "me", username: "Me", avatar_url: "my-avatar" },
+    { id: "none", username: "No picture", avatar_url: "None" },
+    { id: "picture", username: "Picture", avatar_url: "hash" },
     {
       id: "custom",
       username: "Custom",
-      avatar: "",
+      avatar_url: "https://example.test/custom.png",
       custom_avatar: "https://example.test/custom.png",
-      settings_v2: { custom_avatar: true },
+      settings: { custom_avatar: true },
       premiumtype: 3,
     },
   ];
@@ -84,17 +84,17 @@ test("group icons use normal member avatars and their fallbacks in the shared si
     "custom",
   ]);
   expect(queries.every((key) => key[0] === "message-users-batch")).toBe(true);
-  expect(avatars[0].props.avatarHash).toBe("my-avatar");
-  expect(avatars[1].props.avatarHash).toBe("None");
-  expect(avatars[2].props.avatarHash).toBe("hash");
+  expect(avatars[0].props.avatarUrl).toBe("my-avatar");
+  expect(avatars[1].props.avatarUrl).toBe("None");
+  expect(avatars[2].props.avatarUrl).toBe("hash");
   expect(avatars[3].props).toMatchObject({
-    custom_avatar: users[3].custom_avatar,
+    avatarUrl: users[3].avatar_url,
     settings: { custom_avatar: true },
     premiumType: 3,
   });
   expect(
     render(["loading"]).find((node) => node.type === "UserAvatar")!.props
-      .avatarHash,
+      .avatarUrl,
   ).toBe("");
   expect(avatars.every((node) => node.props.showBadge === false)).toBe(true);
   expect(

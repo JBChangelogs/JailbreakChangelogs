@@ -421,10 +421,9 @@ export default async function Home() {
                       ) : (
                         <UserAvatar
                           userId={testimonial.userId}
-                          avatarHash={testimonial.avatarHash}
+                          avatarUrl={testimonial.avatarUrl}
                           username={testimonial.name}
                           size={10}
-                          cdnSize={128}
                           showBadge={false}
                         />
                       )}

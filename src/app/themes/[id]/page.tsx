@@ -125,11 +125,10 @@ export default async function ThemeDetailsPage({ params }: Props) {
                 {creator && (
                   <UserAvatar
                     userId={theme.user_id}
-                    avatarHash={creator.avatar ?? null}
+                    avatarUrl={creator.avatar_url ?? null}
                     username={creator.username}
-                    custom_avatar={creator.custom_avatar}
                     premiumType={creator.premiumtype}
-                    settings={creator.settings_v2}
+                    settings={creator.settings}
                     size={6}
                     showBadge={false}
                   />
@@ -164,10 +163,10 @@ export default async function ThemeDetailsPage({ params }: Props) {
                   id: theme.user_id,
                   username: creator.username,
                   global_name: creator.global_name,
-                  avatar: creator.avatar,
+                  avatar_url: creator.avatar_url,
                   custom_avatar: creator.custom_avatar,
                   premiumtype: creator.premiumtype,
-                  settings: creator.settings_v2,
+                  settings: creator.settings,
                 }
               }
             />

@@ -123,12 +123,11 @@ export function ComposerBar({
               {typingUsers.length === 1 && (
                 <UserAvatar
                   userId={typingUsers[0].id}
-                  avatarHash={typingUsers[0].avatar}
+                  avatarUrl={typingUsers[0].avatar_url}
                   username={typingUsers[0].username}
-                  custom_avatar={typingUsers[0].custom_avatar}
                   size={4}
                   showBadge={false}
-                  settings={typingUsers[0].settings_v2}
+                  settings={typingUsers[0].settings}
                   premiumType={typingUsers[0].premiumtype}
                 />
               )}

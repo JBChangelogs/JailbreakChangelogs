@@ -79,12 +79,10 @@ export default function ProfileCommentsPreview() {
                     <UserAvatar
                       userId={id}
                       username={user?.username ?? ""}
-                      avatarHash={user?.avatar ?? null}
-                      custom_avatar={user?.custom_avatar}
+                      avatarUrl={user?.avatar_url ?? null}
                       settings={user?.settings}
                       premiumType={user?.premiumtype}
                       size={8}
-                      cdnSize={64}
                       showBadge={false}
                     />
                   </span>

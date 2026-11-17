@@ -190,7 +190,7 @@ export function GroupAvatar({
     fallbackUsers?.find((user) => user.id === id) ?? {
       id,
       username: id,
-      avatar: "",
+      avatar_url: "",
     };
   const memberAvatar = (id: string, px: number) => {
     const user = userFor(id);
@@ -198,12 +198,11 @@ export function GroupAvatar({
       <UserAvatar
         userId={user.id}
         bgClassName="bg-tertiary-bg"
-        avatarHash={user.avatar}
+        avatarUrl={user.avatar_url}
         username={user.username}
-        custom_avatar={user.custom_avatar}
         size={px / 4}
         showBadge={false}
-        settings={user.settings_v2}
+        settings={user.settings}
         premiumType={user.premiumtype}
         className="border-0!"
       />
@@ -418,12 +417,11 @@ function UserSearch({
               >
                 <UserAvatar
                   userId={user.id}
-                  avatarHash={user.avatar}
+                  avatarUrl={user.avatar_url}
                   username={user.username}
-                  custom_avatar={user.custom_avatar}
                   size={8}
                   showBadge={false}
-                  settings={user.settings_v2}
+                  settings={user.settings}
                   premiumType={user.premiumtype}
                 />
                 <span className="text-primary-text min-w-0 flex-1 truncate text-sm font-medium">
@@ -559,7 +557,7 @@ export function ConversationSidebar({
                     typers?.find((user) => user.id === id) ?? {
                       id,
                       username: "Someone",
-                      avatar: "",
+                      avatar_url: "",
                     },
                 );
               const select = () => selectGroup(group.id);
@@ -666,18 +664,17 @@ export function ConversationSidebar({
                   <UserAvatar
                     userId={user.id}
                     bgClassName="bg-tertiary-bg"
-                    avatarHash={user.avatar}
+                    avatarUrl={user.avatar_url}
                     username={user.username}
-                    custom_avatar={user.custom_avatar}
                     size={8}
                     showBadge={false}
-                    settings={user.settings_v2}
+                    settings={user.settings}
                     premiumType={user.premiumtype}
                   />
                   <PresenceDot
                     online={
                       user.presence?.status === "Online" &&
-                      user.settings_v2?.hide_presence !== true
+                      user.settings?.hide_presence !== true
                     }
                     typing={typingUserIds.has(user.id)}
                   />

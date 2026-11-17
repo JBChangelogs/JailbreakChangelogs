@@ -70,12 +70,11 @@ export function ChatHeaderPanel({
             <UserAvatar
               userId={selectedUser.id}
               bgClassName="bg-quaternary-bg"
-              avatarHash={selectedUser.avatar}
+              avatarUrl={selectedUser.avatar_url}
               username={selectedUser.username}
-              custom_avatar={selectedUser.custom_avatar}
               size={8}
               showBadge={false}
-              settings={selectedUser.settings_v2}
+              settings={selectedUser.settings}
               premiumType={selectedUser.premiumtype}
             />
             {!shouldHidePresence && (

@@ -54,7 +54,7 @@ test("profile counts, follow status, and modals share complete lists without dup
   }
   const userId = "123";
   const socialUser = {
-    avatar: "",
+    avatar_url: "",
     global_name: "",
     usernumber: 1,
     accent_color: "",

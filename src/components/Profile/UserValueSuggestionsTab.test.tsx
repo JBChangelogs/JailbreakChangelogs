@@ -194,7 +194,7 @@ test("profile and changelog voters follow refreshed data while preserving open m
                         ).map((vote) => ({
                           id: vote.user.id,
                           name: vote.user.username,
-                          avatar: "",
+                          avatar_url: "",
                           vote_type: "upvote",
                           timestamp: vote.created_at,
                         })),

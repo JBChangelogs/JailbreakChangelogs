@@ -79,7 +79,7 @@ test("gift previews describe sending from the viewer's perspective", () => {
     content: "Jalen sent you a Supporter 1 gift!",
     metadata: { type: "gift_sent", level: 1 },
   };
-  const sender = { id: "jalen", username: "Jalen", avatar: "" };
+  const sender = { id: "jalen", username: "Jalen", avatar_url: "" };
   expect(formatSystemMessageContent(message, "jalen", sender)).toBe(
     "Sent a Supporter 1 gift!",
   );

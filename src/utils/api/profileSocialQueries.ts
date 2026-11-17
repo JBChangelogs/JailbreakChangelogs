@@ -7,12 +7,14 @@ import { fetchWithRetry } from "./fetchWithRetry";
 export interface ProfileSocialUser {
   id: string;
   username: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
+  flags?: import("@/types/auth").UserFlag[];
   global_name: string;
   usernumber: number;
   accent_color: string;
   custom_avatar?: string;
-  settings_v2?: UserSettingsV2;
+  settings?: UserSettingsV2;
   premiumtype?: number;
 }
 

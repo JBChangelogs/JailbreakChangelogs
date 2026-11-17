@@ -53,10 +53,10 @@ test("user results link to profiles and fall back from missing display names", a
       global_name: "None",
       roblox_username: "BrickBuilder",
       roblox_id: "789",
-      avatar: "avatar-hash",
+      avatar_url: "avatar-hash",
       premiumtype: 3,
       custom_avatar: "https://assets.jailbreakchangelogs.com/avatar.webp",
-      settings_v2: { custom_avatar: true },
+      settings: { custom_avatar: true },
     },
     {
       id: "456",

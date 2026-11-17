@@ -61,7 +61,7 @@ test("login validates directly and stores a browser session only after success",
       name: "test-user",
       username: "Test User",
       supporter: 0,
-      avatar: "",
+      avatar_url: "",
       settings: undefined,
       presence: { status: "Offline", last_updated: 0 },
     };

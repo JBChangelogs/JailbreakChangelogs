@@ -5,7 +5,8 @@ export interface MeResponse {
   name: string;
   username: string;
   supporter: number;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   /** Full CDN URL, unlike the hash other endpoints return. */
   banner?: string | null;
   roblox?: {
@@ -15,7 +16,7 @@ export interface MeResponse {
     roblox_avatar?: string | null;
     roblox_join_date?: number | null;
   } | null;
-  settings: UserData["settings_v2"];
+  settings?: UserData["settings"];
   presence: UserData["presence"];
   flags?: UserData["flags"];
 }
@@ -25,7 +26,8 @@ export function normalizeMeResponse(raw: MeResponse): UserData {
     id: raw.id,
     username: raw.name,
     global_name: raw.username,
-    avatar: raw.avatar,
+    avatar_url: raw.avatar_url,
+    banner_url: raw.banner_url ?? null,
     banner: raw.banner ?? null,
     premiumtype: raw.supporter,
     premiumduration: 0,
@@ -34,7 +36,7 @@ export function normalizeMeResponse(raw: MeResponse): UserData {
     roblox_display_name: raw.roblox?.roblox_display_name ?? "",
     roblox_avatar: raw.roblox?.roblox_avatar ?? "",
     roblox_join_date: raw.roblox?.roblox_join_date ?? 0,
-    settings_v2: raw.settings,
+    settings: raw.settings,
     presence: raw.presence,
     flags: raw.flags,
   } as UserData;

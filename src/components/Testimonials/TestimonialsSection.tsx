@@ -76,10 +76,9 @@ export default function TestimonialsSection({
             <div className="mt-5 flex items-center gap-3">
               <UserAvatar
                 userId={testimonial.userId}
-                avatarHash={testimonial.avatarHash}
+                avatarUrl={testimonial.avatarUrl}
                 username={testimonial.name}
                 size={10}
-                cdnSize={128}
                 showBadge={false}
               />
               <div className="min-w-0">

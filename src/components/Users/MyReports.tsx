@@ -196,7 +196,8 @@ interface ReportUser {
   id: string;
   username: string;
   global_name: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   custom_avatar?: string;
   usernumber: number;
 }
@@ -1129,12 +1130,11 @@ export default function MyReports() {
                             >
                               <UserAvatar
                                 userId={reportedUser.id}
-                                avatarHash={reportedUser.avatar}
+                                avatarUrl={reportedUser.avatar_url}
                                 username={reportedUser.username}
-                                custom_avatar={reportedUser.custom_avatar}
                                 settings={{
                                   custom_avatar:
-                                    reportedUser.settings_v2?.custom_avatar,
+                                    reportedUser.settings?.custom_avatar,
                                 }}
                                 premiumType={reportedUser.premiumtype}
                                 size={7}

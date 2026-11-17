@@ -26,7 +26,7 @@ interface ProfileUser {
   id: string;
   username: string;
   global_name: string;
-  settings_v2?: UserSettingsV2;
+  settings?: UserSettingsV2;
 }
 
 export function FollowList({ userId, kind }: { userId: string; kind: Kind }) {
@@ -47,7 +47,7 @@ export function FollowList({ userId, kind }: { userId: string; kind: Kind }) {
   const profile = userQuery.data;
   const hidden = (k: Kind) =>
     !isOwnProfile &&
-    profile?.settings_v2?.[
+    profile?.settings?.[
       k === "followers" ? "hide_followers" : "hide_following"
     ] === true;
 

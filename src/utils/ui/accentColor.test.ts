@@ -34,14 +34,14 @@ test("picks the more readable text color for an accent", () => {
 
 test("reads a user's card accent, defaulting missing fields", () => {
   const on = { colored_profile_cards: true };
-  expect(userCardAccent({ settings_v2: on, accent_color: 255 })).toEqual({
+  expect(userCardAccent({ settings: on, accent_color: 255 })).toEqual({
     color: "#0000ff",
     gradient: null,
     style: "solid",
   });
   expect(
     userCardAccent({
-      settings_v2: on,
+      settings: on,
       accent_color: 255,
       custom_accent_color: "#ff0000",
       accent_gradient: 0x00ff00,
@@ -49,14 +49,14 @@ test("reads a user's card accent, defaulting missing fields", () => {
     }),
   ).toEqual({ color: "#ff0000", gradient: "#00ff00", style: "glass" });
   expect(
-    userCardAccent({ settings_v2: on, accent_color: 255, accent_style: "x" })
+    userCardAccent({ settings: on, accent_color: 255, accent_style: "x" })
       ?.style,
   ).toBe("solid");
   expect(userCardAccent({ accent_color: 255 })).toBeNull();
-  expect(userCardAccent({ settings_v2: on, accent_color: null })).toBeNull();
+  expect(userCardAccent({ settings: on, accent_color: null })).toBeNull();
   expect(
     userCardAccent({
-      settings_v2: on,
+      settings: on,
       accent_color: "0",
       accent_gradient: 0,
     }),

@@ -52,16 +52,11 @@ export function AccentColorSetting({
   const { modalState, closeModal, checkAccentColorAccess } =
     useSupporterModal();
   const canEdit = () => checkAccentColorAccess(premiumType);
-  // The style previews show the user's own banner, avatar and name. /v2/users/me
-  // has no custom banner, so read the public profile (shared with the preview).
+  // Underglow comes from the public profile.
   const { data: profile } = useQuery({
     queryKey: appearanceProfileKey(userData.id),
     queryFn: () =>
       fetchUserById(userData.id, PUBLIC_API_URL) as Promise<{
-        avatar?: string | null;
-        banner?: string | null;
-        custom_avatar?: string | null;
-        custom_banner?: string | null;
         underglow?: number | string | null;
       }>,
     staleTime: 60_000,
@@ -69,11 +64,7 @@ export function AccentColorSetting({
   const underglow = accentColorToHex(profile?.underglow);
   const banner = getProfileBanner({
     userId: userData.id,
-    banner: profile?.banner ?? userData.banner,
-    customBanner: profile?.custom_banner ?? userData.custom_banner,
-    settings: userData.settings_v2,
-    premiumType,
-    size: 600,
+    bannerUrl: userData.banner_url,
   });
   const name =
     userData.global_name && userData.global_name !== "None"
@@ -160,14 +151,10 @@ export function AccentColorSetting({
                 <span className="bg-secondary-bg border-border-card relative flex w-full min-w-0 items-center gap-1.5 rounded-md border p-1.5">
                   <UserAvatar
                     userId={userData.id}
-                    avatarHash={profile?.avatar ?? userData.avatar}
+                    avatarUrl={userData.avatar_url}
                     username={userData.username}
                     size={5}
-                    custom_avatar={
-                      (profile?.custom_avatar ?? userData.custom_avatar) ||
-                      undefined
-                    }
-                    settings={userData.settings_v2}
+                    settings={userData.settings}
                     premiumType={premiumType}
                     showBadge={false}
                   />

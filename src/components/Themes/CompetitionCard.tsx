@@ -99,9 +99,8 @@ function TopThemes({ id }: { id: number }) {
                     {theme.user?.id && (
                       <UserAvatar
                         userId={theme.user.id}
-                        avatarHash={theme.user.avatar ?? null}
+                        avatarUrl={theme.user.avatar_url ?? null}
                         username={theme.user.username}
-                        custom_avatar={theme.user.custom_avatar}
                         premiumType={theme.user.premiumtype}
                         settings={theme.user.settings}
                         size={6}

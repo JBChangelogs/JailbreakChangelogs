@@ -47,12 +47,31 @@ test("route user failures preserve backend messages, batch failures do not becom
     {
       exports,
       fetch: async (url: string) => {
+        const request = new URL(url);
+        if (request.pathname === "/v2/users/them") {
+          const fields = request.searchParams.get("fields")!.split(",");
+          for (const field of [
+            "avatar_url",
+            "banner_url",
+            "settings",
+            "presence",
+          ])
+            expect(fields).toContain(field);
+          for (const field of [
+            "avatar",
+            "banner",
+            "custom_avatar",
+            "custom_banner",
+            "settings_v2",
+          ])
+            expect(fields).not.toContain(field);
+        }
         if (url.includes("/users/batch"))
           return batchAvailable
             ? new Response(
                 JSON.stringify([
-                  { id: "them", username: "Them", avatar: "" },
-                  { id: "123", username: "New friend", avatar: "" },
+                  { id: "them", username: "Them", avatar_url: "" },
+                  { id: "123", username: "New friend", avatar_url: "" },
                 ]),
               )
             : new Response(

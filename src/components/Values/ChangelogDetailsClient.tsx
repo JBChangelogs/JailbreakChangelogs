@@ -106,7 +106,8 @@ interface SuggestionData {
     voters?: Array<{
       id: string | number;
       name: string;
-      avatar: string;
+      avatar_url: string;
+      banner_url?: string | null;
       avatar_hash?: string;
       vote_number: number;
       vote_type: string;
@@ -140,7 +141,8 @@ interface ChangeData {
 type VoteRecord = {
   id: string | number;
   name: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   avatar_hash?: string;
   premiumtype?: number;
   vote_number: number;
@@ -165,11 +167,12 @@ interface ChangelogGroup {
 interface UserData {
   id: string;
   username: string;
-  avatar: string | null;
+  avatar_url: string | null;
+  banner_url?: string | null;
   global_name: string;
   accent_color: string;
   custom_avatar?: string;
-  settings_v2?: {
+  settings?: {
     custom_avatar: boolean;
   };
 }
@@ -751,7 +754,7 @@ export default function ChangelogDetailsClient({
                         <div className="flex min-w-0 items-center gap-3">
                           <UserAvatar
                             userId={String(change.suggestion.user_id)}
-                            avatarHash={null}
+                            avatarUrl={null}
                             username={change.suggestion.suggestor_name}
                             forceAvatarUrl={
                               change.suggestion.metadata?.avatar ?? undefined
@@ -1343,9 +1346,9 @@ export default function ChangelogDetailsClient({
                           >
                             <UserAvatar
                               userId={String(voter.id)}
-                              avatarHash={null}
+                              avatarUrl={null}
                               username={voter.name}
-                              forceAvatarUrl={voter.avatar || undefined}
+                              forceAvatarUrl={voter.avatar_url || undefined}
                               premiumType={voter.premiumtype ?? 0}
                               size={10}
                               showBadge={false}

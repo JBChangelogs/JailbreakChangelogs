@@ -48,7 +48,7 @@ test("header block button requires confirmation, supports unblock and preserves 
     },
   );
   const props: ComponentProps<typeof ChatHeaderPanel> = {
-    selectedUser: { id: "them", username: "Recipient", avatar: "" },
+    selectedUser: { id: "them", username: "Recipient", avatar_url: "" },
     currentUserId: "me",
     isTargetOnline: false,
     shouldHidePresence: false,

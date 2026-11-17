@@ -96,7 +96,7 @@ export default function SupportersSection({
       <div className="flex flex-col items-center gap-4">
         <UserAvatar
           userId={supporter.id}
-          avatarHash={supporter.avatar || null}
+          avatarUrl={supporter.avatar_url || null}
           username={supporter.username}
           size={64}
           showBadge={false}

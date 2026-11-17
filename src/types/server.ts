@@ -4,7 +4,8 @@ interface ServerUser {
   id: string;
   username: string;
   global_name: string;
-  avatar: string | null;
+  avatar_url: string | null;
+  banner_url?: string | null;
   accent_color: string | null;
   locale: string | null;
   created_at: string | number | null;

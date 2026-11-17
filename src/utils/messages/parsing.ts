@@ -205,10 +205,10 @@ export function toMessageUser(raw: unknown): MessageUser | null {
   const data = raw as Record<string, unknown>;
   const id = data.id;
   const username = data.username;
-  const avatar = data.avatar;
-  const rawSettingsV2 =
-    data.settings_v2 && typeof data.settings_v2 === "object"
-      ? (data.settings_v2 as Partial<UserSettingsV2>)
+  const avatar = data.avatar_url;
+  const rawSettings =
+    data.settings && typeof data.settings === "object"
+      ? (data.settings as Partial<UserSettingsV2>)
       : null;
 
   if (
@@ -219,12 +219,13 @@ export function toMessageUser(raw: unknown): MessageUser | null {
     return null;
   }
 
-  const settings_v2: MessageUser["settings_v2"] = rawSettingsV2 ?? undefined;
+  const settings: MessageUser["settings"] = rawSettings ?? undefined;
 
   return {
     id: asId(id),
     username,
-    avatar,
+    avatar_url: avatar,
+    banner_url: typeof data.banner_url === "string" ? data.banner_url : null,
     banner:
       typeof data.banner === "string" || data.banner === null
         ? (data.banner as string | null)
@@ -250,7 +251,7 @@ export function toMessageUser(raw: unknown): MessageUser | null {
         ? (data.presence as MessageUser["presence"])
         : undefined,
     last_seen: typeof data.last_seen === "number" ? data.last_seen : null,
-    settings_v2,
+    settings,
     flags: Array.isArray(data.flags) ? (data.flags as UserFlag[]) : undefined,
     primary_guild:
       data.primary_guild && typeof data.primary_guild === "object"

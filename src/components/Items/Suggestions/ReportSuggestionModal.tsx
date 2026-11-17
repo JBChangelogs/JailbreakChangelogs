@@ -137,7 +137,7 @@ export function ReportSuggestionModal({
               <div className="flex items-center gap-2">
                 <UserAvatar
                   userId={suggestion.user.id}
-                  avatarHash={null}
+                  avatarUrl={null}
                   username={
                     suggestion.user.roblox_username ??
                     suggestion.user.username ??

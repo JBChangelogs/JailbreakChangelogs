@@ -18,14 +18,15 @@ import { Button } from "@/components/ui/button";
 interface User {
   id: string;
   username: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   global_name: string;
   usernumber: number;
   accent_color: string;
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
-  settings_v2?: UserSettingsV2;
+  settings?: UserSettingsV2;
   presence?: {
     status: "Online" | "Offline";
     last_updated: number;
@@ -235,7 +236,7 @@ export default function ProfileOverview({
             key={isOverview ? "favorites-preview" : "favorites-full"}
             userId={user.id}
             currentUserId={currentUserId}
-            settings={user.settings_v2}
+            settings={user.settings}
             preview={isOverview}
             onViewAll={() => openSection("favorites")}
           />
@@ -255,7 +256,7 @@ export default function ProfileOverview({
             key={isOverview ? "comments-preview" : "comments-full"}
             userId={user.id}
             currentUserId={currentUserId}
-            settings={user.settings_v2}
+            settings={user.settings}
             preview={isOverview}
             onViewAll={() => openSection("comments")}
           />
@@ -289,7 +290,7 @@ export default function ProfileOverview({
               changelogId={user.id}
               changelogTitle={`${user.username}'s profile`}
               type="user"
-              allowProfileComments={user.settings_v2?.allow_profile_comments}
+              allowProfileComments={user.settings?.allow_profile_comments}
               previewContainer={isOverview ? commentsPreviewContainer : null}
             />
           </section>

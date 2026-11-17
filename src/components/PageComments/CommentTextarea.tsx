@@ -364,12 +364,11 @@ export const CommentTextarea = forwardRef<
                 <UserAvatar
                   userId={user.id}
                   bgClassName="bg-tertiary-bg"
-                  avatarHash={user.avatar}
+                  avatarUrl={user.avatar_url}
                   username={user.username}
-                  custom_avatar={user.custom_avatar}
                   size={6}
                   showBadge={false}
-                  settings={user.settings_v2}
+                  settings={user.settings}
                   premiumType={user.premiumtype}
                 />
                 <span className="text-primary-text truncate">

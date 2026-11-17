@@ -51,7 +51,7 @@ test("message senders reuse profile, member and conversation caches", async () =
     id: "123",
     username: "sencha",
     global_name: "Sencha",
-    avatar: "",
+    avatar_url: "",
   };
   const sender = loadSender(async () => {
     throw new Error("Unexpected fetch");

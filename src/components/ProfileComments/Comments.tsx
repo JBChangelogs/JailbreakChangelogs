@@ -37,7 +37,12 @@ import type { SharedTheme } from "@/utils/api/userThemes";
 
 export type ProfileCommentUser = Pick<
   UserData,
-  "id" | "username" | "avatar" | "custom_avatar" | "premiumtype" | "settings_v2"
+  | "id"
+  | "username"
+  | "avatar_url"
+  | "custom_avatar"
+  | "premiumtype"
+  | "settings"
 >;
 import { getCategoryColor } from "@/utils/items/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
@@ -49,7 +54,8 @@ import { TwemojiText } from "@/components/ui/TwemojiText";
 interface ReactionUser {
   id: string;
   username: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   premiumtype?: number;
   settings?: { custom_avatar?: boolean } | null;
@@ -181,11 +187,9 @@ function ProfileReactionsDialog({
                       <div className="shrink-0">
                         <UserAvatar
                           userId={u.id}
-                          avatarHash={u.avatar ?? null}
+                          avatarUrl={u.avatar_url ?? null}
                           username={u.username}
                           size={9}
-                          cdnSize={128}
-                          custom_avatar={u.custom_avatar ?? undefined}
                           showBadge={false}
                           settings={u.settings ?? undefined}
                           premiumType={u.premiumtype}
@@ -343,9 +347,8 @@ export default function Comment({
           <UserAvatar
             userId={profileOwner.id}
             username={profileOwner.username}
-            avatarHash={profileOwner.avatar ?? null}
-            custom_avatar={profileOwner.custom_avatar}
-            settings={profileOwner.settings_v2}
+            avatarUrl={profileOwner.avatar_url ?? null}
+            settings={profileOwner.settings}
             premiumType={profileOwner.premiumtype}
             size={12}
             showBadge={false}

@@ -133,13 +133,12 @@ export default function ContributorsClient({
             >
               <UserAvatar
                 userId={user.id}
-                avatarHash={user.avatar || null}
+                avatarUrl={user.avatar_url || null}
                 username={user.username}
                 size={32}
                 showBadge={false}
                 className="border-0"
-                custom_avatar={user.custom_avatar}
-                settings={user.settings_v2}
+                settings={user.settings}
                 premiumType={user.premiumtype}
               />
             </div>

@@ -478,7 +478,8 @@ export default function MessagesInbox() {
       id: asId(currentUser.id),
       username: currentUser.username,
       global_name: currentUser.global_name,
-      avatar: currentUser.avatar,
+      avatar_url: currentUser.avatar_url,
+      banner_url: currentUser.banner_url,
       banner: currentUser.banner,
       custom_banner: currentUser.custom_banner ?? null,
       accent_color: currentUser.accent_color ?? null,
@@ -573,7 +574,7 @@ export default function MessagesInbox() {
   );
 
   const shouldHidePresence =
-    selectedUser?.settings_v2?.hide_presence === true &&
+    selectedUser?.settings?.hide_presence === true &&
     currentUser?.id !== selectedUser?.id;
   const isTargetOnline =
     !!selectedUser &&
@@ -1307,12 +1308,11 @@ export default function MessagesInbox() {
                 <div className="shrink-0">
                   <UserAvatar
                     userId={selectedUser.id}
-                    avatarHash={selectedUser.avatar}
+                    avatarUrl={selectedUser.avatar_url}
                     username={selectedUser.username}
-                    custom_avatar={selectedUser.custom_avatar}
                     size={7}
                     showBadge={false}
-                    settings={selectedUser.settings_v2}
+                    settings={selectedUser.settings}
                     premiumType={selectedUser.premiumtype}
                   />
                 </div>

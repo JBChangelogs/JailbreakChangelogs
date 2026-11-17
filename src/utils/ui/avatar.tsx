@@ -8,11 +8,9 @@ import { cn } from "@/lib/utils";
 
 interface UserAvatarProps {
   userId: string;
-  avatarHash: string | null;
+  avatarUrl?: string | null;
   username: string;
   size?: number;
-  cdnSize?: number;
-  custom_avatar?: string;
   forceAvatarUrl?: string;
   isOnline?: boolean;
   showBadge?: boolean;
@@ -72,35 +70,6 @@ export const SilhouetteAvatar = () => (
   </svg>
 );
 
-export function getAvatarUrl({
-  userId,
-  avatarHash,
-  custom_avatar,
-  settings,
-  premiumType,
-}: {
-  userId: string;
-  avatarHash?: string | null;
-  custom_avatar?: string | null;
-  settings?: { custom_avatar?: boolean };
-  premiumType?: number;
-}): string | null {
-  if (
-    settings?.custom_avatar === true &&
-    (premiumType ?? 0) >= 2 &&
-    custom_avatar &&
-    custom_avatar !== "N/A"
-  ) {
-    return custom_avatar;
-  }
-  if (avatarHash && avatarHash !== "None") {
-    return /^https?:\/\//i.test(avatarHash)
-      ? avatarHash
-      : `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=4096`;
-  }
-  return null;
-}
-
 const AvatarWrapper = ({
   children,
   isOnline,
@@ -155,11 +124,9 @@ const AvatarWrapper = ({
 
 const UserAvatarImpl = ({
   userId,
-  avatarHash,
+  avatarUrl,
   username,
   size = 12,
-  cdnSize,
-  custom_avatar,
   forceAvatarUrl,
   isOnline,
   showBadge = true,
@@ -170,55 +137,19 @@ const UserAvatarImpl = ({
   bgClassName = "bg-primary-bg",
   presenceBadgeClassName,
 }: UserAvatarProps) => {
-  const [imageError, setImageError] = useState(false);
-  const [customAvatarError, setCustomAvatarError] = useState(false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
   const finalShape = premiumType === 3 ? "square" : shape;
 
-  const discordCdnSize = (() => {
-    const value = cdnSize ?? 4096;
-    const allowed = new Set([16, 32, 64, 128, 256, 512, 1024, 2048, 4096]);
-    return allowed.has(value) ? value : 4096;
-  })();
-
-  const getAvatarSource = () => {
-    if (forceAvatarUrl && !imageError) {
-      return {
-        src: forceAvatarUrl,
-        alt: username ? `${username}'s profile picture` : "User avatar",
-        onError: () => setImageError(true),
-      };
-    }
-
-    if (
-      settings?.custom_avatar === true &&
-      premiumType &&
-      premiumType >= 2 &&
-      custom_avatar &&
-      custom_avatar !== "N/A" &&
-      !customAvatarError
-    ) {
-      return {
-        src: custom_avatar,
-        alt: username ? `${username}'s profile picture` : "User avatar",
-        onError: () => setCustomAvatarError(true),
-      };
-    }
-
-    if (!imageError && avatarHash && avatarHash !== "None") {
-      return {
-        src: /^https?:\/\//i.test(avatarHash)
-          ? avatarHash
-          : `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`,
-        alt: username ? `${username}'s profile picture` : "User avatar",
-        onError: () => setImageError(true),
-      };
-    }
-
-    return null;
-  };
-
-  const avatarSource = getAvatarSource();
+  const src = forceAvatarUrl || avatarUrl;
+  const avatarSource =
+    src && src !== failedSrc
+      ? {
+          src,
+          alt: username ? `${username}'s profile picture` : "User avatar",
+          onError: () => setFailedSrc(src),
+        }
+      : null;
 
   // If showBadge is true, we pass className to wrapper.
   // If showBadge is false, we pass className to inner div.
@@ -307,19 +238,16 @@ export const UserAvatar = memo(
   UserAvatarImpl,
   (prev, next) =>
     prev.userId === next.userId &&
-    prev.avatarHash === next.avatarHash &&
+    prev.avatarUrl === next.avatarUrl &&
     prev.forceAvatarUrl === next.forceAvatarUrl &&
     prev.username === next.username &&
     prev.size === next.size &&
-    prev.custom_avatar === next.custom_avatar &&
     prev.isOnline === next.isOnline &&
     prev.showBadge === next.showBadge &&
     prev.shape === next.shape &&
     prev.premiumType === next.premiumType &&
     prev.className === next.className &&
     prev.presenceBadgeClassName === next.presenceBadgeClassName &&
-    (prev.settings?.custom_avatar ?? null) ===
-      (next.settings?.custom_avatar ?? null) &&
     (prev.settings?.hide_presence ?? null) ===
       (next.settings?.hide_presence ?? null),
 );

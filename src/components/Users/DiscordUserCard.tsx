@@ -21,7 +21,8 @@ interface DiscordUserCardProps {
   user: {
     id: string;
     username: string;
-    avatar: string;
+    avatar_url: string;
+    banner_url?: string | null;
     banner?: string | null;
     custom_banner?: string | null;
     global_name: string;
@@ -31,7 +32,7 @@ interface DiscordUserCardProps {
     roblox_username?: string | null;
     roblox_display_name?: string | null;
     custom_avatar?: string;
-    settings_v2?: UserSettingsV2;
+    settings?: UserSettingsV2;
     premiumtype?: number;
     presence?: UserPresence;
     primary_guild?: {
@@ -51,18 +52,14 @@ export default function DiscordUserCard({
   disableBadgeTooltips = false,
   badgeLimit,
 }: DiscordUserCardProps) {
-  const presence = user.settings_v2?.hide_presence ? undefined : user.presence;
+  const presence = user.settings?.hide_presence ? undefined : user.presence;
   const joined = Number(user.created_at);
-  const [bannerFailed, setBannerFailed] = useState(false);
+  const [failedBannerUrl, setFailedBannerUrl] = useState<string | null>(null);
   const { primary, fallback } = getProfileBanner({
     userId: user.id,
-    banner: user.banner,
-    customBanner: user.custom_banner,
-    settings: user.settings_v2,
-    premiumType: user.premiumtype,
-    size: 1024,
+    bannerUrl: user.banner_url,
   });
-  const bannerSrc = primary && !bannerFailed ? primary : fallback;
+  const bannerSrc = primary && primary !== failedBannerUrl ? primary : fallback;
 
   return (
     <div className="flex h-full flex-col">
@@ -76,7 +73,9 @@ export default function DiscordUserCard({
           sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
           draggable={false}
           onError={
-            bannerSrc === primary ? () => setBannerFailed(true) : undefined
+            bannerSrc === primary
+              ? () => setFailedBannerUrl(primary)
+              : undefined
           }
           className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
         />
@@ -90,15 +89,13 @@ export default function DiscordUserCard({
           >
             <UserAvatar
               userId={user.id}
-              avatarHash={user.avatar}
+              avatarUrl={user.avatar_url}
               username={user.username}
               size={16}
-              cdnSize={512}
-              custom_avatar={user.custom_avatar}
               isOnline={presence?.status === "Online"}
               showBadge={true}
               presenceBadgeClassName="border-secondary-bg"
-              settings={user.settings_v2}
+              settings={user.settings}
               premiumType={user.premiumtype}
             />
           </div>

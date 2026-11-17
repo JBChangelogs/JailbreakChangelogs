@@ -113,9 +113,9 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
   const owner = {
     id: "123456789012345678",
     username: "Profile owner name",
-    avatar: "hash",
+    avatar_url: "hash",
     custom_avatar: "custom.webp",
-    settings_v2: { custom_avatar: true },
+    settings: { custom_avatar: true },
   };
   const profileCard = nodes(
     exports.default({
@@ -134,8 +134,7 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
   expect(avatar?.props).toMatchObject({
     userId: owner.id,
     username: owner.username,
-    avatarHash: "hash",
-    custom_avatar: "custom.webp",
+    avatarUrl: "hash",
     settings: { custom_avatar: true },
   });
   const normal = nodes(exports.default(props));

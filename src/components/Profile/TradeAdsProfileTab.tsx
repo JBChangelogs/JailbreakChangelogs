@@ -106,6 +106,10 @@ export default function TradeAdsProfileTab({
   }
 
   interface V2TradeUser {
+    avatar_url?: string;
+    banner_url?: string | null;
+    flags?: import("@/types/auth").UserFlag[];
+    settings?: import("@/types/auth").UserSettings;
     id?: string;
     roblox_id?: string;
     roblox_username?: string;
@@ -190,7 +194,10 @@ export default function TradeAdsProfileTab({
             id: trade.user.id || "",
             username: trade.user.username || "Unknown",
             global_name: trade.user.global_name,
-            avatar: undefined,
+            avatar_url: trade.user.avatar_url,
+            banner_url: trade.user.banner_url,
+            flags: trade.user.flags,
+            settings: trade.user.settings,
             roblox_id: trade.user.roblox_id,
             roblox_username: trade.user.roblox_username,
             roblox_display_name: trade.user.roblox_display_name,

@@ -76,9 +76,8 @@ export default function ReportThemeButton({
           <span className="shrink-0">Created by</span>
           <UserAvatar
             userId={author.id}
-            avatarHash={author.avatar ?? null}
+            avatarUrl={author.avatar_url ?? null}
             username={author.username}
-            custom_avatar={author.custom_avatar}
             premiumType={author.premiumtype}
             settings={author.settings}
             size={6}

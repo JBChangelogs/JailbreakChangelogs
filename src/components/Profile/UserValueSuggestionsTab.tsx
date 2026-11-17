@@ -60,7 +60,8 @@ interface SuggestionUser {
   id: string;
   username?: string;
   global_name?: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   premiumtype?: number;
   usernumber?: number;
@@ -970,9 +971,8 @@ export default function UserValueSuggestionsTab({
                           >
                             <UserAvatar
                               userId={v.user.id}
-                              avatarHash={v.user.avatar ?? null}
+                              avatarUrl={v.user.avatar_url ?? null}
                               username={v.user.username ?? ""}
-                              custom_avatar={v.user.custom_avatar ?? undefined}
                               premiumType={v.user.premiumtype ?? 0}
                               settings={
                                 v.user.settings

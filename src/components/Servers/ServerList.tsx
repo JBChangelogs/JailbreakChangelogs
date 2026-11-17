@@ -675,10 +675,9 @@ const ServerList: React.FC = () => {
                   <div className="flex min-w-0 items-center gap-2">
                     <UserAvatar
                       userId={server.user.id}
-                      avatarHash={server.user.avatar}
+                      avatarUrl={server.user.avatar_url}
                       username={server.user.username}
                       size={9}
-                      custom_avatar={server.user.custom_avatar ?? undefined}
                       showBadge={false}
                       settings={server.user.settings}
                       premiumType={server.user.premiumtype}

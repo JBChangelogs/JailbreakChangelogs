@@ -761,7 +761,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         ? {
             id: user.id,
             username: user.username,
-            avatar: user.avatar ?? null,
+            avatar_url: user.avatar_url ?? null,
             roblox_avatar: (user as UserData).roblox_avatar ?? null,
             roblox_display_name: (user as UserData).roblox_display_name,
             roblox_username: (user as UserData).roblox_username,

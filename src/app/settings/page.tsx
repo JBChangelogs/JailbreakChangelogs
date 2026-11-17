@@ -227,14 +227,15 @@ export default function SettingsPage() {
     error: purchaseGiftLevelsError,
   } = usePurchaseGiftModal();
 
-  const handleBannerUpdate = (newBannerUrl: string) => {
+  const handleBannerUpdate = (
+    newBannerUrl: string,
+    displayEnabled: boolean,
+  ) => {
     if (userData) {
       const updatedUser: UserData = {
         ...userData,
         custom_banner: newBannerUrl,
-        banner: userData.settings_v2?.custom_banner
-          ? newBannerUrl
-          : userData.banner,
+        banner_url: displayEnabled ? newBannerUrl : userData.banner_url,
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -243,14 +244,15 @@ export default function SettingsPage() {
     }
   };
 
-  const handleAvatarUpdate = (newAvatarUrl: string) => {
+  const handleAvatarUpdate = (
+    newAvatarUrl: string,
+    displayEnabled: boolean,
+  ) => {
     if (userData) {
       const updatedUser: UserData = {
         ...userData,
         custom_avatar: newAvatarUrl,
-        avatar: userData.settings_v2?.custom_avatar
-          ? newAvatarUrl
-          : userData.avatar,
+        avatar_url: displayEnabled ? newAvatarUrl : userData.avatar_url,
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -583,12 +585,12 @@ export default function SettingsPage() {
                               )?.value === true
                             }
                             onAvatarUploaded={(url, enabled) => {
-                              handleAvatarUpdate(url);
+                              handleAvatarUpdate(url, enabled);
                               if (enabled)
                                 setSettingValue("custom_avatar", true);
                             }}
                             onBannerUploaded={(url, enabled) => {
-                              handleBannerUpdate(url);
+                              handleBannerUpdate(url, enabled);
                               if (enabled)
                                 setSettingValue("custom_banner", true);
                             }}
@@ -596,8 +598,7 @@ export default function SettingsPage() {
                             onToggle={handleSettingChange}
                             togglesDisabled={isPreviewUploading}
                             accent={
-                              userData.settings_v2?.colored_profile_cards ===
-                              true
+                              userData.settings?.colored_profile_cards === true
                                 ? accentColor.accent
                                 : null
                             }

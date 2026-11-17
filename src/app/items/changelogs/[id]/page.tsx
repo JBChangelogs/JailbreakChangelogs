@@ -16,7 +16,8 @@ interface VoteUser {
   id: string;
   username?: string;
   global_name?: string;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   roblox_id?: string;
   roblox_username?: string;
@@ -106,7 +107,7 @@ function transformToChangelogGroup(data: ValueChangelogDetail) {
             ...entry.votes.upvotes.map((v, i) => ({
               id: v.user.id,
               name: userDisplayName(v.user),
-              avatar: v.user.roblox_avatar ?? "",
+              avatar_url: v.user.roblox_avatar ?? "",
               avatar_hash: undefined,
               premiumtype: v.user.premiumtype ?? 0,
               vote_number: i + 1,
@@ -116,7 +117,7 @@ function transformToChangelogGroup(data: ValueChangelogDetail) {
             ...entry.votes.downvotes.map((v, i) => ({
               id: v.user.id,
               name: userDisplayName(v.user),
-              avatar: v.user.roblox_avatar ?? "",
+              avatar_url: v.user.roblox_avatar ?? "",
               avatar_hash: undefined,
               premiumtype: v.user.premiumtype ?? 0,
               vote_number: i + 1,

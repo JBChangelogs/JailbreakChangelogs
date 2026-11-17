@@ -94,18 +94,14 @@ export default function JoinedUsers({
               <span className="shrink-0">
                 <UserAvatar
                   userId={String(user.user_id)}
-                  avatarHash={
-                    userDetails?.[String(user.user_id)]?.avatar ?? null
+                  avatarUrl={
+                    userDetails?.[String(user.user_id)]?.avatar_url ?? null
                   }
                   username={identityFor(user).username}
                   forceAvatarUrl={identityFor(user).avatarUrl}
                   premiumType={userDetails?.[String(user.user_id)]?.premiumtype}
-                  custom_avatar={
-                    userDetails?.[String(user.user_id)]?.custom_avatar
-                  }
                   settings={userDetails?.[String(user.user_id)]?.settings}
                   size={isBounty ? 7 : 6}
-                  cdnSize={64}
                   showBadge={false}
                   bgClassName={isBounty ? "bg-quaternary-bg" : "bg-tertiary-bg"}
                 />
@@ -164,20 +160,16 @@ export default function JoinedUsers({
                 >
                   <UserAvatar
                     userId={String(user.user_id)}
-                    avatarHash={
-                      userDetails?.[String(user.user_id)]?.avatar ?? null
+                    avatarUrl={
+                      userDetails?.[String(user.user_id)]?.avatar_url ?? null
                     }
                     username={identityFor(user).username}
                     forceAvatarUrl={identityFor(user).avatarUrl}
                     premiumType={
                       userDetails?.[String(user.user_id)]?.premiumtype
                     }
-                    custom_avatar={
-                      userDetails?.[String(user.user_id)]?.custom_avatar
-                    }
                     settings={userDetails?.[String(user.user_id)]?.settings}
                     size={7}
-                    cdnSize={64}
                     showBadge={false}
                     bgClassName={
                       isBounty ? "bg-quaternary-bg" : "bg-secondary-bg"

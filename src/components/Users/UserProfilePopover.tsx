@@ -46,13 +46,13 @@ export interface PopoverUser {
   id?: string | number;
   username?: string;
   global_name?: string | null;
-  avatar?: string | null;
+  avatar_url?: string | null;
+  banner_url?: string | null;
   custom_avatar?: string | null;
   premiumtype?: number;
   usernumber?: number | null;
   flags?: UserFlag[];
   presence?: { status?: string } | null;
-  settings_v2?: LooseSettings | null;
   settings?: LooseSettings | null;
 }
 
@@ -191,11 +191,7 @@ function PopoverBanner({
 }) {
   const { primary, fallback } = getProfileBanner({
     userId: user.id,
-    banner: hidePersonal ? null : user.banner,
-    customBanner: hidePersonal ? null : user.custom_banner,
-    settings: (user.settings_v2 ?? user.settings ?? undefined) as never,
-    premiumType: user.premiumtype,
-    size: 600,
+    bannerUrl: hidePersonal ? null : user.banner_url,
   });
   const [failed, setFailed] = useState(false);
   const src = primary && !failed ? primary : fallback;
@@ -257,7 +253,7 @@ export function UserProfilePopover({
         presence: user.presence ?? full.data.profile.presence,
       }
     : { ...user, id: userId };
-  const settings = profile.settings_v2 ?? profile.settings ?? undefined;
+  const settings = profile.settings ?? undefined;
   const isOwn = currentUser?.id === userId;
   // Presence and their own banner wait for the full profile; the page's user
   // may carry both.
@@ -268,7 +264,7 @@ export function UserProfilePopover({
   // card, and the card coloured with their accent.
   const accent = userCardAccent({
     ...profile,
-    settings_v2: {
+    settings: {
       colored_profile_cards: settings?.colored_profile_cards === true,
     },
   });
@@ -335,7 +331,7 @@ export function UserProfilePopover({
         )}
         <div className={cn("relative", accent && "bg-secondary-bg")}>
           <PopoverBanner
-            key={`${profile.id}:${profile.custom_banner ?? profile.banner}:${hidePersonal}`}
+            key={`${profile.id}:${profile.banner_url}:${hidePersonal}`}
             user={profile}
             hidePersonal={hidePersonal}
           />
@@ -350,9 +346,8 @@ export function UserProfilePopover({
             >
               <UserAvatar
                 userId={profile.id}
-                avatarHash={profile.avatar ?? null}
+                avatarUrl={profile.avatar_url ?? null}
                 username={username}
-                custom_avatar={profile.custom_avatar ?? undefined}
                 settings={{
                   custom_avatar: settings?.custom_avatar === true,
                   hide_presence: Boolean(settings?.hide_presence),

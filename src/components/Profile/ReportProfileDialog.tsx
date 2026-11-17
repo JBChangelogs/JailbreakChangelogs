@@ -11,9 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { UserAvatar, getAvatarUrl } from "@/utils/ui/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
-import { getProfileBanner } from "@/components/Profile/Banner";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
@@ -37,12 +36,13 @@ interface ReportableUser {
   id: string;
   username: string;
   global_name: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
   custom_background?: string | null;
-  settings_v2?: UserSettingsV2;
+  settings?: UserSettingsV2;
   premiumtype?: number;
 }
 
@@ -65,20 +65,8 @@ export function ReportProfileDialog({
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const pageSettled = usePageSettled();
-  const { primary: bannerSrc } = getProfileBanner({
-    userId: user.id,
-    banner: user.banner,
-    customBanner: user.custom_banner,
-    settings: user.settings_v2,
-    premiumType: user.premiumtype,
-  });
-  const avatarUrl = getAvatarUrl({
-    userId: user.id,
-    avatarHash: user.avatar,
-    custom_avatar: user.custom_avatar,
-    settings: user.settings_v2,
-    premiumType: user.premiumtype,
-  });
+  const bannerSrc = user.banner_url;
+  const avatarUrl = user.avatar_url;
   // The lightbox renders outside the dialog, so keep its clicks and Escape
   // from also closing the dialog.
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -104,12 +92,11 @@ export function ReportProfileDialog({
   const avatar = (size: number) => (
     <UserAvatar
       userId={user.id}
-      avatarHash={user.avatar}
+      avatarUrl={user.avatar_url}
       username={user.username}
-      custom_avatar={user.custom_avatar}
       size={size}
       showBadge={false}
-      settings={user.settings_v2}
+      settings={user.settings}
       premiumType={user.premiumtype}
     />
   );

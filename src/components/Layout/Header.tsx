@@ -222,11 +222,11 @@ const MobileDrawer = memo(function MobileDrawer({
           >
             <UserAvatar
               userId={userData.id}
-              avatarHash={userData.avatar}
+              avatarUrl={userData.avatar_url}
               username={userData.username}
               size={10}
               showBadge={false}
-              settings={userData.settings_v2}
+              settings={userData.settings}
               premiumType={userData.premiumtype}
             />
             <div className="min-w-0 flex-1">

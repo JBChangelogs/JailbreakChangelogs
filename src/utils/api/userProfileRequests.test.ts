@@ -92,7 +92,7 @@ test("client profile requests use the public base and preserve access errors", a
   }
 });
 
-test("user list and search send cookies and preserve cancellation", async () => {
+test("user list and search request only card fields while preserving resolved media and settings", async () => {
   const exports = {} as typeof import("./api");
   runInNewContext(
     transpileModule(
@@ -110,12 +110,69 @@ test("user list and search send cookies and preserve cancellation", async () => 
     },
   );
   const signal = new AbortController().signal;
-  const fetchMock = spyOn(globalThis, "fetch")
-    .mockResolvedValueOnce(Response.json({ users: [] }))
-    .mockResolvedValueOnce(Response.json({ users: [] }));
-  await exports.fetchPaginatedUsers(1, 30, signal);
-  await exports.searchUsers("test-user", 30, signal);
-  for (const [, options] of fetchMock.mock.calls) {
+  const user = {
+    id: "123",
+    username: "test-user",
+    avatar_url: "https://uploads.jailbreakchangelogs.com/avatar.webp",
+    banner_url: "https://cdn.discordapp.com/banners/123/a_banner.gif",
+    settings: {
+      custom_avatar: true,
+      custom_banner: false,
+      hide_presence: true,
+    },
+  };
+  const fetchMock = spyOn(globalThis, "fetch").mockImplementation(
+    Object.assign(
+      async (input: Parameters<typeof fetch>[0]) => {
+        const url = new URL(String(input));
+        const fields = url.searchParams.get("fields")?.split(",");
+        const fullUser = {
+          ...user,
+          description: "Unused profile data",
+          custom_avatar: "unused.webp",
+        };
+        const returnedUser = Object.fromEntries(
+          Object.entries(fullUser).filter(
+            ([key]) => !fields || fields.includes(key),
+          ),
+        );
+        return Response.json(
+          url.pathname.endsWith("/search")
+            ? [returnedUser]
+            : { items: [returnedUser] },
+        );
+      },
+      { preconnect: originalFetch.preconnect },
+    ),
+  );
+  expect((await exports.fetchPaginatedUsers(1, 30, signal)).items).toEqual([
+    user,
+  ]);
+  expect(await exports.searchUsers("test-user", 30, signal)).toEqual([user]);
+  for (const [input, options] of fetchMock.mock.calls) {
+    const fields = new URL(String(input)).searchParams
+      .get("fields")!
+      .split(",");
+    expect(fields).toEqual([
+      "id",
+      "username",
+      "global_name",
+      "avatar_url",
+      "banner_url",
+      "accent_color",
+      "accent_gradient",
+      "accent_style",
+      "usernumber",
+      "premiumtype",
+      "created_at",
+      "settings",
+      "presence",
+      "roblox_id",
+      "roblox_username",
+      "roblox_display_name",
+      "flags",
+      "primary_guild",
+    ]);
     expect(options?.credentials).toBe("include");
     expect(options?.signal).toBe(signal);
   }

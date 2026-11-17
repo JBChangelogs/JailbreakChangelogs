@@ -41,7 +41,7 @@ test("profile comments reuse one timeline request for over ten distinct changelo
     calls.push({ url: String(url), options });
     if (String(url).includes("/v2/users/batch")) {
       return new Response(
-        '[{"id":123456789012345678,"username":"Owner one","avatar":"hash"},{"id":987654321098765432,"username":"Owner two","avatar":null}]',
+        '[{"id":123456789012345678,"username":"Owner one","avatar_url":"hash"},{"id":987654321098765432,"username":"Owner two","avatar_url":null}]',
       );
     }
     if (String(url).includes("/comments?page=")) {
@@ -155,7 +155,7 @@ test("profile comments reuse one timeline request for over ten distinct changelo
     const params = new URL(batchCalls[0]!.url).searchParams;
     expect(params.get("ids")).toBe("123456789012345678,987654321098765432");
     expect(params.get("fields")).toBe(
-      "id,username,avatar,custom_avatar,premiumtype,settings_v2",
+      "id,username,avatar_url,banner_url,premiumtype,settings,flags",
     );
     expect(batchCalls[0]!.options.credentials).toBe("include");
   } finally {

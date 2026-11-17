@@ -4,7 +4,8 @@ export type MessageUser = {
   id: string;
   username: string;
   global_name?: string;
-  avatar: string;
+  avatar_url: string;
+  banner_url?: string | null;
   banner?: string | null;
   custom_banner?: string | null;
   accent_color?: string | null;
@@ -23,7 +24,7 @@ export type MessageUser = {
     last_updated: number;
   };
   last_seen?: number | null;
-  settings_v2?: Partial<UserSettingsV2>;
+  settings?: Partial<UserSettingsV2>;
 };
 
 /** Emoji → the ids of the users who reacted with it. */

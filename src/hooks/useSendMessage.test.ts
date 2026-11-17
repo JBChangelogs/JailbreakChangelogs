@@ -97,7 +97,7 @@ test.each([false, true])(
     );
     const options = {
       selectedUserId: "recipient",
-      selectedUser: { id: "recipient", username: "Recipient", avatar: "" },
+      selectedUser: { id: "recipient", username: "Recipient", avatar_url: "" },
       currentUser: { id: "me" },
       isSending: false,
       replyingToMessage: parent,
@@ -193,7 +193,7 @@ test("gift redemption creates a distinct sender embed per gift without posting a
   );
   const { handleSendGift } = exports.useSendMessage({
     selectedUserId: "recipient",
-    selectedUser: { id: "recipient", username: "Recipient", avatar: "" },
+    selectedUser: { id: "recipient", username: "Recipient", avatar_url: "" },
     currentUser: { id: "jalen", username: "Jalen" },
     isSending: false,
     selectedUserIdRef: { current: "recipient" },

@@ -87,7 +87,9 @@ export interface MarketplaceTheme extends CustomTheme {
           Pick<
             UserData,
             | "global_name"
-            | "avatar"
+            | "avatar_url"
+            | "banner_url"
+            | "flags"
             | "custom_avatar"
             | "settings"
             | "premiumtype"

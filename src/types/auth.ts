@@ -1,4 +1,4 @@
-/** Settings embedded in comment user data and returned as settings_v2 from /users/get */
+/** Settings embedded in API user objects */
 export interface UserSettings {
   show_recent_comments: boolean;
   allow_profile_comments?: boolean;
@@ -58,7 +58,7 @@ export interface SupporterHistoryEntry {
   created_at: number | null;
 }
 
-/** Settings returned as settings_v2 from /users/get — same shape as UserSettings */
+/** Legacy type alias for user settings */
 export type UserSettingsV2 = UserSettings;
 
 export interface UserPresence {
@@ -78,7 +78,8 @@ interface UserPrimaryGuild {
 interface User {
   id: string;
   username: string;
-  avatar: string; // Discord avatar hash or "None"
+  avatar_url: string;
+  banner_url: string | null; // Ready-to-use image URL resolved by the API
   banner: string | null; // Discord banner hash, "None", or null
   accent_color: string; // Color code, "None", or null
   custom_accent_color?: string | null;
@@ -118,7 +119,6 @@ export interface UserData extends User {
 
   // Nested objects
   settings: UserSettings;
-  settings_v2?: UserSettingsV2;
   presence: UserPresence;
   custom_banner: CustomBanner | null;
   token: string;

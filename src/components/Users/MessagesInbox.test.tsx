@@ -51,7 +51,7 @@ test("inbox preserves pagination, realtime changes, sibling conversations and gu
   client.setQueryData(threadKey, initial);
   client.setQueryData(siblingKey, sibling);
   const summary: ConversationSummary = {
-    user: { id: "them", username: "Them", avatar: "" },
+    user: { id: "them", username: "Them", avatar_url: "" },
   };
   client.setQueryData<ConversationListData>(conversationKey, {
     items: [summary],

@@ -823,12 +823,10 @@ export default function GlobalSearch({ onClose }: { onClose: () => void }) {
                             {result.user ? (
                               <UserAvatar
                                 userId={result.user.id}
-                                avatarHash={result.user.avatar}
+                                avatarUrl={result.user.avatar_url}
                                 username={result.user.username}
                                 size={9}
-                                cdnSize={64}
-                                custom_avatar={result.user.custom_avatar}
-                                settings={result.user.settings_v2}
+                                settings={result.user.settings}
                                 premiumType={result.user.premiumtype}
                                 showBadge={false}
                                 className="shrink-0"

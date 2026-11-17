@@ -179,7 +179,7 @@ test("theme discussions use the shared comments component and the theme share co
 
 test("theme details show the creator avatar when their profile is available", async () => {
   const markup = await page({
-    creator: { username: "Jalen", avatar: "hash" },
+    creator: { username: "Jalen", avatar_url: "hash" },
   }).render();
   expect(markup).toContain('data-avatar-user="123"');
   expect(markup).toContain("Jalen");

@@ -8,8 +8,8 @@ import {
 import { toggleReaction } from "./reactions";
 import type { MessageUser } from "./types";
 
-const bob = { id: "123", username: "bob", avatar: "" } as MessageUser;
-const bobby = { id: "456", username: "bobby", avatar: "" } as MessageUser;
+const bob = { id: "123", username: "bob", avatar_url: "" } as MessageUser;
+const bobby = { id: "456", username: "bobby", avatar_url: "" } as MessageUser;
 
 test("mentions round-trip between @username and <@id>", () => {
   expect(mentionsToIds("hi @Bob, mail email@bob or @bobby", [bob])).toBe(

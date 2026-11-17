@@ -972,7 +972,7 @@ export function SuggestionForm({
                 >
                   <UserAvatar
                     userId={user.id}
-                    avatarHash={null}
+                    avatarUrl={null}
                     username={user.roblox_username ?? user.username ?? ""}
                     forceAvatarUrl={user.roblox_avatar ?? undefined}
                     premiumType={user.premiumtype ?? 0}

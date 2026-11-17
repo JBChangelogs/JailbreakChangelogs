@@ -459,12 +459,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                   >
                     <UserAvatar
                       userId={comment.user_id}
-                      avatarHash={userData[comment.user_id]?.avatar}
+                      avatarUrl={userData[comment.user_id]?.avatar_url}
                       username={displayName}
                       forceAvatarUrl={robloxAvatarUrl}
                       size={10}
-                      cdnSize={512}
-                      custom_avatar={userData[comment.user_id]?.custom_avatar}
                       showBadge={false}
                       settings={userData[comment.user_id]?.settings}
                       premiumType={userData[comment.user_id]?.premiumtype}
@@ -1100,9 +1098,9 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 />
                                 <UserAvatar
                                   userId={replyToTarget.user_id}
-                                  avatarHash={
-                                    userData[replyToTarget.user_id]?.avatar ??
-                                    null
+                                  avatarUrl={
+                                    userData[replyToTarget.user_id]
+                                      ?.avatar_url ?? null
                                   }
                                   username={replyToTargetName}
                                   forceAvatarUrl={
@@ -1111,10 +1109,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                           ?.roblox_avatar
                                       : undefined
                                   }
-                                  custom_avatar={
-                                    userData[replyToTarget.user_id]
-                                      ?.custom_avatar
-                                  }
                                   settings={
                                     userData[replyToTarget.user_id]?.settings
                                   }
@@ -1122,7 +1116,6 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                     userData[replyToTarget.user_id]?.premiumtype
                                   }
                                   size={4}
-                                  cdnSize={64}
                                   showBadge={false}
                                   bgClassName="bg-tertiary-bg"
                                 />
@@ -1146,12 +1139,10 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                             >
                               <UserAvatar
                                 userId={reply.user_id}
-                                avatarHash={replyUser?.avatar ?? null}
+                                avatarUrl={replyUser?.avatar_url ?? null}
                                 username={replyDisplayName}
                                 forceAvatarUrl={replyRobloxAvatarUrl}
                                 size={8}
-                                cdnSize={256}
-                                custom_avatar={replyUser?.custom_avatar}
                                 showBadge={false}
                                 settings={replyUser?.settings}
                                 premiumType={replyUser?.premiumtype}

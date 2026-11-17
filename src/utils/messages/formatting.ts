@@ -134,7 +134,7 @@ export function hasAvatarSettingsData(
   user: MessageUser | null | undefined,
 ): boolean {
   if (!user) return false;
-  return Boolean(user.settings_v2);
+  return Boolean(user.settings);
 }
 
 export function formatMessageText(value: string): string {

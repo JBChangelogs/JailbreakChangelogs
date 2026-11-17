@@ -52,12 +52,10 @@ export function SuggesterLeaderboard({
                       </span>
                       <UserAvatar
                         userId={entry.user.id}
-                        avatarHash={entry.user.avatar ?? null}
+                        avatarUrl={entry.user.avatar_url ?? null}
                         username={displayName}
                         forceAvatarUrl={entry.user.roblox_avatar}
                         size={8}
-                        cdnSize={64}
-                        custom_avatar={entry.user.custom_avatar ?? undefined}
                         showBadge={false}
                         premiumType={entry.user.premiumtype}
                         bgClassName="bg-quaternary-bg"
@@ -143,14 +141,10 @@ export function SuggesterLeaderboard({
 
                             <UserAvatar
                               userId={entry.user.id!}
-                              avatarHash={entry.user.avatar ?? null}
+                              avatarUrl={entry.user.avatar_url ?? null}
                               username={displayName}
                               forceAvatarUrl={entry.user.roblox_avatar}
                               size={10}
-                              cdnSize={128}
-                              custom_avatar={
-                                entry.user.custom_avatar ?? undefined
-                              }
                               showBadge={false}
                               premiumType={entry.user.premiumtype}
                               bgClassName="bg-quaternary-bg"

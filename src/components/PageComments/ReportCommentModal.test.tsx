@@ -23,7 +23,7 @@ test("report previews always show the comment author", () => {
     userData: {
       target: {
         username: "Target",
-        avatar: "discord-avatar",
+        avatar_url: "discord-avatar",
         custom_avatar: "custom-avatar",
         roblox_avatar: "roblox-avatar",
         settings: { ...settings } as Partial<typeof settings> | undefined,

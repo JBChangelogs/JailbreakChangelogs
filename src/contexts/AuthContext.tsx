@@ -243,8 +243,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           safeSetJSON("user", user);
           setSiteBan(null);
           safeLocalStorage.setItem("userid", user.id);
-          if (user.avatar) {
-            safeLocalStorage.setItem("avatar", user.avatar);
+          if (user.avatar_url) {
+            safeLocalStorage.setItem("avatar", user.avatar_url);
           }
           setAuthState({
             isAuthenticated: true,
