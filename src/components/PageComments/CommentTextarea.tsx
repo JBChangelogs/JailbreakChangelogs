@@ -283,7 +283,10 @@ export const CommentTextarea = forwardRef<
         setActiveIndex((i) => (i - 1 + suggestionCount) % suggestionCount);
         return;
       }
-      if (e.key === "Tab" || (e.key === "Enter" && !e.shiftKey)) {
+      if (
+        e.key === "Tab" ||
+        (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing)
+      ) {
         e.preventDefault();
         applySuggestionAtIndex(activeIndex);
         return;

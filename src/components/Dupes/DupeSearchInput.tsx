@@ -243,7 +243,7 @@ export default function DupeSearchInput({
       setHighlightedIndex(
         (prev) => (prev - 1 + suggestions.length) % suggestions.length,
       );
-    } else if (e.key === "Enter") {
+    } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
         e.preventDefault();
         goToOwner(suggestions[highlightedIndex]);

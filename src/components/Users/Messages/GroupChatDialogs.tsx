@@ -371,7 +371,9 @@ export function RenameGroupDialog({
         autoFocus
         value={name}
         onChange={(event) => setName(event.target.value)}
-        onKeyDown={(event) => event.key === "Enter" && void save()}
+        onKeyDown={(event) =>
+          event.key === "Enter" && !event.nativeEvent.isComposing && void save()
+        }
         maxLength={GROUP_NAME_MAX}
         placeholder="Group name"
         aria-label="Group name"

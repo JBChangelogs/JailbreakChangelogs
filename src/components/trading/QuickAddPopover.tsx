@@ -199,7 +199,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                 const next = Math.max(highlightedIndex - 1, 0);
                 setHighlightedIndex(next);
                 virtualizer.scrollToIndex(next);
-              } else if (e.key === "Enter") {
+              } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 const picked = results[highlightedIndex];
                 if (picked) handlePick(picked);

@@ -182,7 +182,7 @@ export default function ValuesSearchControls({
       setIsSuggestionsOpen(false);
       return;
     }
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       e.preventDefault();
       if (showSuggestions && highlightedIndex >= 0) {
         goToItem(suggestions[highlightedIndex]);
