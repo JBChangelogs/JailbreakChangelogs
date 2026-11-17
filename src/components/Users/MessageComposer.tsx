@@ -45,7 +45,8 @@ export interface MessageComposerProps {
   maxChars: number;
   isSending: boolean;
   disabled?: boolean;
-  actions?: React.ReactNode;
+  /** Gets the image chooser, or undefined while images can't be added. */
+  actions?: (chooseImages: (() => void) | undefined) => React.ReactNode;
   onSend: (
     message: string,
     metadata?: OutgoingMessageMetadata,
@@ -358,7 +359,11 @@ export function MessageComposer({
         </div>
       )}
       <div className="flex min-w-0 items-center gap-2">
-        {actions}
+        {actions?.(
+          disabled || isSending || uploads.length >= MAX_MESSAGE_IMAGES
+            ? undefined
+            : () => inputRef.current?.click(),
+        )}
         <ChatToolbarTextarea
           onPaste={(event) => {
             const files = Array.from(event.clipboardData.files);
@@ -393,17 +398,6 @@ export function MessageComposer({
                   -{overLimit}
                 </span>
               ) : null}
-              <ChatToolbarButton
-                type="button"
-                aria-label="Add images"
-                onClick={() => inputRef.current?.click()}
-                disabled={
-                  disabled || isSending || uploads.length >= MAX_MESSAGE_IMAGES
-                }
-                className="hover:bg-tertiary-bg! size-11! p-0! lg:size-9!"
-              >
-                <Icon icon="heroicons:photo" className="size-5" />
-              </ChatToolbarButton>
               <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
                 <Tooltip delayDuration={500}>
                   <TooltipTrigger asChild>
@@ -462,7 +456,7 @@ export function MessageComposer({
           }
           // The app's text box: 16px on a 24px line with 8px padding, so one
           // line fills the 40px box and sits centred beside the "+".
-          className={`text-primary-text placeholder-secondary-text py-2 pl-3 text-base leading-6 md:text-base ${overLimit > 0 ? "pr-48 lg:pr-44" : "pr-36 lg:pr-32"}`}
+          className={`text-primary-text placeholder-secondary-text py-2 pl-3 text-base leading-6 md:text-base ${overLimit > 0 ? "pr-36" : "pr-24 lg:pr-20"}`}
         />
       </div>
     </div>

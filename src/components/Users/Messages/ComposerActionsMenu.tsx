@@ -21,6 +21,8 @@ interface ComposerActionsMenuProps {
   userId: string;
   recipientLabel: string;
   disabled: boolean;
+  /** Undefined while images can't be added. */
+  onUploadImages?: () => void;
   /** Leave out (group chats) to hide gifts. */
   onSendGift?: (gift: SupporterGift) => Promise<void>;
   onSend: (
@@ -33,6 +35,7 @@ export function ComposerActionsMenu({
   userId,
   recipientLabel,
   disabled,
+  onUploadImages,
   onSend,
   onSendGift,
 }: ComposerActionsMenuProps) {
@@ -147,6 +150,18 @@ export function ComposerActionsMenu({
         )}
         {view === "menu" && (
           <>
+            <button
+              type="button"
+              className={itemClass}
+              disabled={!onUploadImages}
+              onClick={() => {
+                setOpen(false);
+                onUploadImages?.();
+              }}
+            >
+              <Icon icon="heroicons:photo" className="h-4 w-4" />
+              Upload Images
+            </button>
             <button
               type="button"
               className={itemClass}

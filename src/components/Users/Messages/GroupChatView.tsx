@@ -985,12 +985,13 @@ export function GroupChatView({
             placeholder={`Message ${group?.name ?? "the group"}...`}
             isSending={isSending}
             disabled={!!messageBan}
-            actions={
+            actions={(chooseImages) =>
               currentUserId ? (
                 <ComposerActionsMenu
                   userId={currentUserId}
                   recipientLabel={group?.name ?? "the group"}
                   disabled={isSending || !!messageBan}
+                  onUploadImages={chooseImages}
                   onSend={(content, metadata) => void send(content, metadata)}
                 />
               ) : null

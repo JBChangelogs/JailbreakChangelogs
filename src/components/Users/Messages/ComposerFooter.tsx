@@ -1,10 +1,13 @@
 "use client";
 
-import type { Dispatch, ReactNode, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { Icon } from "@/components/ui/IconWrapper";
-import { MessageComposer } from "@/components/Users/MessageComposer";
+import {
+  MessageComposer,
+  type MessageComposerProps,
+} from "@/components/Users/MessageComposer";
 import { ComposerActionsMenu } from "./ComposerActionsMenu";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -53,7 +56,7 @@ interface ComposerBarProps {
   isSending: boolean;
   disabled: boolean;
   /** The "+" menu: invites, servers, gifts. */
-  actions?: ReactNode;
+  actions?: MessageComposerProps["actions"];
   onSend: (
     message: string,
     metadata?: OutgoingMessageMetadata,
@@ -245,13 +248,14 @@ export function ComposerFooter({
       placeholder={messagePlaceholder}
       isSending={isSending}
       disabled={blocked}
-      actions={
+      actions={(chooseImages) =>
         currentUser && selectedUserId ? (
           <ComposerActionsMenu
             key={`${currentUser.id}:${selectedUserId}`}
             userId={asId(currentUser.id)}
             recipientLabel={getDisplayName(selectedUser)}
             disabled={isSending || blocked}
+            onUploadImages={chooseImages}
             onSend={onSend}
             onSendGift={onSendGift}
           />

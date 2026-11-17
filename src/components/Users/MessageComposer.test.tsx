@@ -297,7 +297,11 @@ test("full-screen image drag overlay survives nested targets and clears on leave
 
 test("attachments sit above the input and actions, with filenames and expiry in a tooltip", async () => {
   const h = harness();
-  h.props.actions = "Actions";
+  let chooseImages: (() => void) | undefined;
+  h.props.actions = (choose) => {
+    chooseImages = choose;
+    return "Actions";
+  };
   h.render().find((node) => node.type === "input")!.props.onChange!({
     target: { files: [file()], value: "" },
   });
@@ -325,6 +329,7 @@ test("attachments sit above the input and actions, with filenames and expiry in 
     ),
   ).toBe(false);
   expect(inputRow.props.children).toContain("Actions");
+  expect(chooseImages).toBeFunction();
   expect(tree.find((node) => node.type === "ImageLightbox")?.props.src).toBe(
     url,
   );
