@@ -91,6 +91,15 @@ export function MessageComposer({
     uploadsRef.current = uploadsRef.current.filter((item) => item.id !== id);
     syncUploads();
   };
+  const cursorPosRef = React.useRef<number | null>(null);
+  const focusComposerAfterEmojiRef = React.useRef(false);
+  const focusComposer = React.useCallback(() => {
+    const textarea = inputRef.current?.parentElement?.querySelector("textarea");
+    if (!textarea) return;
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    cursorPosRef.current = textarea.value.length;
+  }, []);
   const addImages = (files: File[]) => {
     if (disabled || isSending) return;
     if (uploadsRef.current.length + files.length > MAX_MESSAGE_IMAGES) {
@@ -129,6 +138,7 @@ export function MessageComposer({
           );
         });
     }
+    focusComposer();
   };
   const [dragState, setDragState] = React.useState<
     "images" | "unsupported" | null
@@ -198,15 +208,6 @@ export function MessageComposer({
   const uploading = uploads.some((item) => !item.url);
   const [draft, setDraft] = React.useState("");
   const [emojiOpen, setEmojiOpen] = React.useState(false);
-  const cursorPosRef = React.useRef<number | null>(null);
-  const focusComposerAfterEmojiRef = React.useRef(false);
-  const focusComposer = React.useCallback(() => {
-    const textarea = inputRef.current?.parentElement?.querySelector("textarea");
-    if (!textarea) return;
-    textarea.focus();
-    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-    cursorPosRef.current = textarea.value.length;
-  }, []);
   const emojiStringMap = useEmojiStringMap();
   const isMobile = useMediaQuery("(max-width: 1023px)");
 
