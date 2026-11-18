@@ -156,13 +156,13 @@ function JumpToCommentForm({
     setIsCommentFormExpanded,
     setLoginModal,
   } = useCommentsContext();
-  const [formInView, setFormInView] = useState(true);
+  const [formPassed, setFormPassed] = useState(false);
 
   useEffect(() => {
     const form = document.getElementById("new-comment-form");
     const header = headerRef.current;
     if (!form || !header) return;
-    // Out of view once it's under the top bar or the stuck header.
+    // Only offer a jump back once the form has passed behind the header.
     const update = () => {
       const topBar =
         parseFloat(
@@ -170,7 +170,7 @@ function JumpToCommentForm({
         ) || 0;
       const covered = Math.max(topBar, header.getBoundingClientRect().bottom);
       const rect = form.getBoundingClientRect();
-      setFormInView(rect.bottom > covered && rect.top < window.innerHeight);
+      setFormPassed(rect.bottom <= covered);
     };
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
@@ -186,7 +186,7 @@ function JumpToCommentForm({
   // 0fr/1fr grid track so the width can animate.
   return (
     <div
-      className={`grid shrink-0 transition-[grid-template-columns,opacity,visibility] duration-300 ${formInView ? "invisible grid-cols-[0fr] opacity-0" : "grid-cols-[1fr]"}`}
+      className={`grid shrink-0 transition-[grid-template-columns,opacity,visibility] duration-300 ${formPassed ? "grid-cols-[1fr]" : "invisible grid-cols-[0fr] opacity-0"}`}
     >
       <div className="min-w-0 overflow-hidden">
         <button

@@ -151,6 +151,90 @@ test("sticky headers scroll with the final comments and resume when more comment
   expect(events.size).toBe(0);
 });
 
+test("comment shortcut only appears after scrolling past the form", () => {
+  let formTop = 1100;
+  let formBottom = 1250;
+  let headerBottom = 1100;
+  let formPassed = false;
+  let effect!: () => () => void;
+  const events = new Map<string, () => void>();
+  const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
+  const exports = {} as { CommentHeader: (props: object) => Node };
+  runInNewContext(
+    transpileModule(
+      readFileSync(new URL("./CommentHeader.tsx", import.meta.url), "utf8"),
+      {
+        compilerOptions: { module: ModuleKind.CommonJS, jsx: JsxEmit.ReactJSX },
+      },
+    ).outputText,
+    {
+      exports,
+      document: {
+        getElementById: () => ({
+          getBoundingClientRect: () => ({ top: formTop, bottom: formBottom }),
+        }),
+        documentElement: { style: { getPropertyValue: () => "64px" } },
+      },
+      window: {
+        innerHeight: 800,
+        addEventListener: (name: string, callback: () => void) =>
+          events.set(name, callback),
+        removeEventListener: (name: string) => events.delete(name),
+      },
+      require: (name: string) => {
+        if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+        if (name === "react")
+          return {
+            useRef: () => ({
+              current: {
+                getBoundingClientRect: () => ({ bottom: headerBottom }),
+              },
+            }),
+            useEffect: (callback: typeof effect) => {
+              effect = callback;
+            },
+            useState: () => [
+              formPassed,
+              (value: boolean) => {
+                formPassed = value;
+              },
+            ],
+          };
+        if (name.endsWith("CommentsContext"))
+          return { useCommentsContext: () => ({}) };
+        return {};
+      },
+    },
+  );
+  const shortcut = nodes(exports.CommentHeader({})).find(
+    (node) => typeof node.type === "function" && "headerRef" in node.props,
+  )!;
+  const render = () =>
+    (shortcut.type as (props: object) => Node)(shortcut.props);
+  render();
+  const cleanup = effect();
+  const isHidden = () => render().props.className!.includes("invisible");
+  expect(isHidden()).toBe(true); // Form starts below the viewport.
+  headerBottom = 180;
+  formTop = 200;
+  formBottom = 350;
+  events.get("scroll")!();
+  expect(isHidden()).toBe(true); // Form is visible.
+  formTop = 100;
+  formBottom = 250;
+  events.get("scroll")!();
+  expect(isHidden()).toBe(true); // Form is partly covered.
+  formBottom = 180;
+  events.get("scroll")!();
+  expect(isHidden()).toBe(false); // Form has passed behind the header.
+  formTop = 200;
+  formBottom = 350;
+  events.get("scroll")!();
+  expect(isHidden()).toBe(true); // Scrolling back restores the form.
+  cleanup();
+  expect(events.size).toBe(0);
+});
+
 function renderComments(state: object) {
   const jsx = (type: unknown, props: Node["props"]) => ({ type, props });
   const exports = {} as { default: (props: object) => Node };
