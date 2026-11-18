@@ -51,7 +51,9 @@ export default function SeasonDetailsClient({
     if (!currentSeasonState) return;
     const rewardId = window.location.hash.slice(1);
     if (rewardId.startsWith("reward-"))
-      document.getElementById(rewardId)?.scrollIntoView({ block: "start" });
+      document
+        .getElementById(rewardId)
+        ?.scrollIntoView({ behavior: "instant", block: "start" });
   }, [currentSeasonState]);
   const seasonsQuery = useSeasonsList();
   const seasonList = seasonsQuery.data;

@@ -806,6 +806,12 @@ body:has([data-sheet-side="right"][data-state="open"])
     scrollbar-color: var(--color-border-primary) transparent;
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   ::selection {
     background: color-mix(in srgb, var(--color-highlight) 25%, transparent);
   }

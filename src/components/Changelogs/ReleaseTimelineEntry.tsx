@@ -32,7 +32,10 @@ export function ReleaseTimelineEntry({
 
   useEffect(() => {
     if (open && window.location.hash === releaseHash) {
-      articleRef.current?.scrollIntoView({ block: "start" });
+      articleRef.current?.scrollIntoView({
+        behavior: "instant",
+        block: "start",
+      });
     }
   }, [open, releaseHash]);
 
