@@ -140,3 +140,10 @@ export function hasAvatarSettingsData(
 export function formatMessageText(value: string): string {
   return sanitizeText(decodeHtmlEntities(value));
 }
+
+const EMOJI_ONLY =
+  /^(?:\p{Extended_Pictographic}|\p{Emoji_Modifier}|\p{Regional_Indicator}|\u200d|\ufe0f|\s)+$/u;
+
+export const isJumboEmoji = (text: string) =>
+  EMOJI_ONLY.test(text) &&
+  [...new Intl.Segmenter().segment(text.replace(/\s/g, ""))].length <= 27;

@@ -66,6 +66,7 @@ import {
   formatSystemMessageContent,
   getDayKey,
   getDisplayName,
+  isJumboEmoji,
 } from "@/utils/messages/formatting";
 import { getMessageDomId } from "@/utils/messages/sorting";
 import { MessageImages } from "./MessageImages";
@@ -958,6 +959,11 @@ export function MessageRow({
                         data-message-content
                         className={cn(
                           "text-base wrap-break-word whitespace-pre-wrap",
+                          !embedMetadata &&
+                            isJumboEmoji(
+                              formatMessageText(message.content ?? ""),
+                            ) &&
+                            "text-[2.75rem] leading-tight @md/chat:text-[2.75rem]",
                           message.status === "pending"
                             ? "text-primary-text/50"
                             : message.status === "failed"
