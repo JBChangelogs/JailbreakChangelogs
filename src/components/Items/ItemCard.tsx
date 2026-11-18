@@ -386,8 +386,8 @@ function ItemCard({
                   />
                   <div className="pointer-events-none absolute right-2 bottom-2 left-2">
                     <div className="text-right text-[10px] leading-none font-semibold text-white">
-                      <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                        {isBlueBirdRaised ? "LOWERED MODE" : "RAISED MODE"}
+                      <span className="uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                        {isBlueBirdRaised ? "Lowered mode" : "Raised mode"}
                       </span>
                     </div>
                   </div>

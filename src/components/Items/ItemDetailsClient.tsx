@@ -287,8 +287,8 @@ const ItemMediaColumn = React.memo(function ItemMediaColumn({
             />
             <div className="pointer-events-none absolute right-4 bottom-4 left-4">
               <div className="text-right text-xs font-semibold tracking-wide text-white">
-                <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                  {isBlueBirdRaised ? "LOWERED MODE" : "RAISED MODE"}
+                <span className="uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                  {isBlueBirdRaised ? "Lowered mode" : "Raised mode"}
                 </span>
               </div>
             </div>
