@@ -3,7 +3,13 @@
 import { EmojiPicker } from "@/components/ui/EmojiPicker";
 
 import type React from "react";
-import { Fragment, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { Dispatch, SetStateAction } from "react";
 import Link from "next/link";
 import Twemoji from "react-twemoji";
@@ -254,6 +260,29 @@ function MessageText({
 const TOOLBAR_BUTTON =
   "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed";
 
+let shiftHeld = false;
+const subscribeShift = (notify: () => void) => {
+  const update = (event: KeyboardEvent | FocusEvent) => {
+    // Every row's listener must notify; React skips unchanged snapshots.
+    shiftHeld = "shiftKey" in event && event.shiftKey;
+    notify();
+  };
+  window.addEventListener("keydown", update);
+  window.addEventListener("keyup", update);
+  window.addEventListener("blur", update);
+  return () => {
+    window.removeEventListener("keydown", update);
+    window.removeEventListener("keyup", update);
+    window.removeEventListener("blur", update);
+  };
+};
+const useShiftHeld = () =>
+  useSyncExternalStore(
+    subscribeShift,
+    () => shiftHeld,
+    () => false,
+  );
+
 /** Messages this close together from one sender share a header, like the app. */
 const GROUP_GAP_MS = 5 * 60_000;
 
@@ -301,6 +330,7 @@ export function MessageRow({
     return user ? getDisplayName(user) : undefined;
   };
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
+  const shiftHeld = useShiftHeld();
   const topEmojis = useFrequentEmojis(Object.values(emojiStringMap), 4);
   // In a group, a sender is any member; in a DM, the other person.
   const userFor = (id: string): MessageUser | null =>
@@ -1068,6 +1098,67 @@ export function MessageRow({
                       </PopoverContent>
                     </Popover>
                   </>
+                )}
+                {isOwnMessage &&
+                  message.status !== "failed" &&
+                  embedMetadata?.type !== "gift_sent" && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label="Edit"
+                          className={TOOLBAR_BUTTON}
+                          disabled={busy}
+                          onClick={() => setEditingMessageId(message.id)}
+                        >
+                          <Icon
+                            icon="heroicons-outline:pencil"
+                            className="size-4"
+                          />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Edit</TooltipContent>
+                    </Tooltip>
+                  )}
+                {!isOwnMessage && message.status !== "failed" && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Reply"
+                        className={TOOLBAR_BUTTON}
+                        disabled={busy}
+                        onClick={() => setReplyingToMessage(message)}
+                      >
+                        <Icon
+                          icon="heroicons-outline:reply"
+                          className="size-4"
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Reply</TooltipContent>
+                  </Tooltip>
+                )}
+                {shiftHeld && canDelete && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Delete message"
+                        className={cn(TOOLBAR_BUTTON, "text-button-danger")}
+                        disabled={busy}
+                        onClick={() =>
+                          void handleDeleteMessage(message.id, true)
+                        }
+                      >
+                        <Icon
+                          icon="heroicons-outline:trash"
+                          className="size-4"
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Delete</TooltipContent>
+                  </Tooltip>
                 )}
                 {messageMenu}
               </div>

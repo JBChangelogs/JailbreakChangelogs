@@ -59,6 +59,7 @@ function harness(mobile: boolean) {
         ];
       },
       useEffect: (effect: () => () => void) => cleanups.push(effect()),
+      useSyncExternalStore: (_subscribe: unknown, get: () => unknown) => get(),
     },
     "@/components/ui/bottom-panel": {
       BottomPanelHeader: "BottomPanelHeader",
@@ -411,7 +412,10 @@ test("desktop actions open from the app's single menu button; sending disables i
     tree
       .filter((node) => node.type === "TooltipContent")
       .map((node) => node.props.children),
-  ).toEqual(["More message actions"]);
+  ).toEqual(["Edit", "More message actions"]);
+  tree.find((node) => node.props["aria-label"] === "Edit")!.props.onClick!();
+  expect(h.edits).toEqual(["message"]);
+  h.edits.length = 0;
   const items = tree.filter((node) => node.type === "DropdownMenuItem");
   items[0].props.onClick!();
   items[1].props.onClick!();
