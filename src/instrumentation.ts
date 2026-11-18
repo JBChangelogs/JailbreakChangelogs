@@ -31,6 +31,18 @@ export const onRequestError: Instrumentation.onRequestError = (
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    // Default timeout for server fetches. Without it a slow upstream holds the
+    // render (and its memory) for undici's 300s header timeout, which piled up
+    // into an OOM during the 2026-11-18 bot flood. Callers' own signals win.
+    const nativeFetch = globalThis.fetch;
+    globalThis.fetch = ((input, init) =>
+      init?.signal || input instanceof Request
+        ? nativeFetch(input, init)
+        : nativeFetch(input, {
+            ...init,
+            signal: AbortSignal.timeout(15_000),
+          })) as typeof fetch;
+
     if (
       process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
       process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT

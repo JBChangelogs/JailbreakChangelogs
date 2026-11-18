@@ -173,3 +173,34 @@ test("request errors log searchable details without headers or query strings", (
     expect(record).not.toHaveProperty("digest");
   }
 });
+
+test("server fetches get a default timeout unless the caller passes a signal", async () => {
+  const seen: (RequestInit | undefined)[] = [];
+  const sandbox = {
+    exports: {} as { register: () => Promise<void> },
+    AbortSignal,
+    Request,
+    process: { env: { NEXT_RUNTIME: "nodejs" } },
+    fetch: async (_input: unknown, init?: RequestInit) => {
+      seen.push(init);
+      return new Response("ok");
+    },
+    require: (name: string) => {
+      if (name === "railway") return { flags: { init: async () => {} } };
+      throw new Error(`Unexpected import: ${name}`);
+    },
+  } as Record<string, unknown> & {
+    exports: { register: () => Promise<void> };
+    fetch: (input: string, init?: RequestInit) => Promise<Response>;
+  };
+  runInNewContext(source, sandbox);
+  await sandbox.exports.register();
+
+  await sandbox.fetch("https://example.test", { method: "POST" });
+  expect(seen[0]?.signal).toBeInstanceOf(AbortSignal);
+  expect(seen[0]?.method).toBe("POST");
+
+  const own = new AbortController().signal;
+  await sandbox.fetch("https://example.test", { signal: own });
+  expect(seen[1]?.signal).toBe(own);
+});
