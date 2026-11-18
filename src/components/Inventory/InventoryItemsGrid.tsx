@@ -7,6 +7,8 @@ import InventoryItemCard from "./InventoryItemCard";
 import InventoryItemsSkeleton from "./InventoryItemsSkeleton";
 import { Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
+import NitroGridAd from "@/components/Ads/NitroGridAd";
+import { useRailAdSize } from "@/hooks/useRailAdSize";
 
 import React from "react";
 
@@ -46,6 +48,7 @@ export default function InventoryItemsGrid({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
+  const noRailAds = useRailAdSize() === "none";
   const itemQuery = useCatalogValues();
   const catalogValuesById = useMemo(
     () => new Map(itemQuery.data?.map((item) => [item.id, item])),
@@ -93,6 +96,12 @@ export default function InventoryItemsGrid({
 
   return (
     <>
+      {noRailAds && (
+        <div key={currentPage} className="mb-4 hidden justify-center md:flex">
+          <NitroGridAd adId="np-inventory-feed" desktop />
+        </div>
+      )}
+
       {totalPages > 1 && (
         <div className="mb-4 flex justify-center">
           <Pagination
@@ -138,6 +147,11 @@ export default function InventoryItemsGrid({
                 userId={userId}
                 isDupedItem={isDupedItem}
               />
+              {index + 1 === 6 && displayedItems.length > 6 && (
+                <div className="col-span-full flex justify-center py-4 md:hidden">
+                  <NitroGridAd adId="np-inventory-grid" />
+                </div>
+              )}
             </React.Fragment>
           );
         })}

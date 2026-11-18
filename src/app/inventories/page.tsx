@@ -1,5 +1,3 @@
-import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
-
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { fetchUserScansLeaderboard, UserScan } from "@/utils/api/api";
@@ -18,6 +16,7 @@ import InventoryFAQ from "@/components/Inventory/InventoryFAQ";
 import { NetworthCapHistoryChart } from "@/components/Inventory/LazyCharts";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 export const dynamic = "force-dynamic";
 
@@ -49,18 +48,25 @@ export default async function InventoriesPage() {
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-2 flex items-center gap-3">
-          <h1 className="page-heading">Inventory Checker</h1>
-        </div>
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="flex-1">
+            <div className="mb-2 flex items-center gap-3">
+              <h1 className="page-heading">Inventory Checker</h1>
+            </div>
 
-        <p className="text-secondary-text mb-3">
-          Enter a username or Roblox ID to check their Jailbreak inventory.
-        </p>
-        <div className="mb-6">
-          <RelatedInventoryPages current="inventories" />
-        </div>
+            <p className="text-secondary-text mb-3">
+              Enter a username or Roblox ID to check their Jailbreak inventory.
+            </p>
+            <div>
+              <RelatedInventoryPages current="inventories" />
+            </div>
+          </div>
 
-        <NitroRailFallbackAd adId="np-inventories-rail-fallback" />
+          <NitroInlineVideoPlayer
+            slotId="inventories-header-video"
+            className="w-full self-center lg:w-96 lg:shrink-0"
+          />
+        </div>
 
         <PremiumAwareLayout>
           <InventoryCheckerClient key="inventories-root" />

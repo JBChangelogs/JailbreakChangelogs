@@ -48,6 +48,8 @@ export default function NitroVideoPlayer() {
 
     const hasDedicatedVideoNcPlayer =
       pathname === "/values" ||
+      pathname === "/inventories" ||
+      pathname.startsWith("/inventories/") ||
       pathname === "/robberies" ||
       pathname === "/values/calculator" ||
       pathname === "/trading" ||

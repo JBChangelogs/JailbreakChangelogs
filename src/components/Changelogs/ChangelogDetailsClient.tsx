@@ -312,17 +312,7 @@ export default function ChangelogDetailsClient({
                 onChangelogSelect={handleChangelogSelect}
               />
             </div>
-          </div>
-          {/* Nitro: video-nc unit should sit above the fold */}
-          <NitroInlineVideoPlayer
-            slotId="np-changelogs-video"
-            className="lg:mx-0 lg:w-96 lg:shrink-0"
-          />
-        </section>
-
-        <ChangelogContent
-          heading={
-            <>
+            <div className="mt-6">
               <h1 className="page-heading">
                 <span className="text-secondary-text flex items-center gap-2 text-sm font-semibold tracking-wide uppercase">
                   Changelog #{changelog.id}
@@ -353,8 +343,16 @@ export default function ChangelogDetailsClient({
                   </Link>
                 </Button>
               </div>
-            </>
-          }
+            </div>
+          </div>
+          {/* Nitro: video-nc unit should sit above the fold */}
+          <NitroInlineVideoPlayer
+            slotId="np-changelogs-video"
+            className="lg:mx-0 lg:w-96 lg:shrink-0"
+          />
+        </section>
+
+        <ChangelogContent
           title={changelog.title}
           sections={changelog.sections}
           imageUrl={changelog.image_url}

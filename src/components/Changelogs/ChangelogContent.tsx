@@ -38,7 +38,6 @@ const ChangelogQuickNav = dynamic(() => import("./ChangelogQuickNav"), {
 });
 
 interface ChangelogContentProps {
-  heading: React.ReactNode;
   title: string;
   sections: string;
   imageUrl: string;
@@ -50,7 +49,6 @@ interface ChangelogContentProps {
 }
 
 const ChangelogContent: React.FC<ChangelogContentProps> = ({
-  heading,
   title,
   sections,
   imageUrl,
@@ -92,10 +90,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
           ref={stickyColumnRef}
           className={`sm:col-span-12 xl:col-span-8 ${STICKY_COLUMN_CLASS}`}
         >
-          <div className="bg-primary-bg top-(--header-height) z-10 mb-8 xl:sticky xl:py-4">
-            {heading}
-          </div>
-
           {/* AI Summary */}
           {isFeatureEnabled("AI_SUMMARY") && (
             <ChangelogSummary changelogId={changelogId} content={sections} />
