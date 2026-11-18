@@ -1,5 +1,3 @@
-import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
-
 import OGFinderDataStreamer from "@/components/OG/OGFinderDataStreamer";
 import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
 import OGFinderClient from "@/components/OG/OGFinderClient";
@@ -52,9 +50,7 @@ export default async function OGFinderUserPage({
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <OGFinderDescription />
-
-        <NitroRailFallbackAd adId="np-og-detail-rail-fallback" />
+        <OGFinderDescription videoSlotId="og-detail-header-video" />
 
         <PremiumAwareLayout>
           <Suspense

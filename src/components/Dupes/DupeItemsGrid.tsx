@@ -6,6 +6,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import { useCatalogValues, type CatalogValues } from "@/hooks/usePartialItems";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
+import NitroGridAd from "@/components/Ads/NitroGridAd";
+import { useRailAdSize } from "@/hooks/useRailAdSize";
 
 import React from "react";
 
@@ -36,6 +38,7 @@ export default function DupeItemsGrid({
 }: DupeItemsGridProps) {
   const [page, setPage] = useState(1);
   const itemsPerPage = 16;
+  const noRailAds = useRailAdSize() === "none";
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const currentPage = Math.min(page, Math.max(1, totalPages));
@@ -90,6 +93,12 @@ export default function DupeItemsGrid({
 
   return (
     <>
+      {noRailAds && (
+        <div key={currentPage} className="mb-4 hidden justify-center md:flex">
+          <NitroGridAd adId="np-dupe-feed" desktop />
+        </div>
+      )}
+
       {totalPages > 1 && (
         <div className="mb-4 flex justify-center">
           <Pagination
@@ -101,7 +110,7 @@ export default function DupeItemsGrid({
       )}
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-        {displayedItems.map((item) => {
+        {displayedItems.map((item, index) => {
           const itemData = pageItems.find((data) => data.id === item.item_id);
           if (!itemData) return null;
 
@@ -124,6 +133,11 @@ export default function DupeItemsGrid({
                 isDuplicate={isDuplicate}
                 robloxId={robloxId}
               />
+              {index + 1 === 6 && displayedItems.length > 6 && (
+                <div className="col-span-full flex justify-center py-4 md:hidden">
+                  <NitroGridAd adId="np-dupe-grid" />
+                </div>
+              )}
             </React.Fragment>
           );
         })}

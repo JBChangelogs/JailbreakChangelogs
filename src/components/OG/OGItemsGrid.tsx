@@ -6,6 +6,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import { useCatalogValues, type CatalogValues } from "@/hooks/usePartialItems";
 import OGItemCard from "./OGItemCard";
 import { Item } from "@/types";
+import NitroGridAd from "@/components/Ads/NitroGridAd";
+import { useRailAdSize } from "@/hooks/useRailAdSize";
 
 import React from "react";
 
@@ -54,6 +56,7 @@ export default function OGItemsGrid({
 }: OGItemsGridProps) {
   const [page, setPage] = useState(1);
   const itemsPerPage = 16;
+  const noRailAds = useRailAdSize() === "none";
 
   // Catalog metadata is keyed by catalog item ID, separate from the physical copy ID.
   const itemsMap = useMemo(() => {
@@ -121,6 +124,12 @@ export default function OGItemsGrid({
 
   return (
     <>
+      {noRailAds && (
+        <div key={currentPage} className="mb-4 hidden justify-center md:flex">
+          <NitroGridAd adId="np-og-feed" desktop />
+        </div>
+      )}
+
       {totalPages > 1 && (
         <div className="mb-4 flex justify-center">
           <Pagination
@@ -154,6 +163,11 @@ export default function OGItemsGrid({
                 duplicateCount={duplicateCount}
                 duplicateOrder={duplicateOrder}
               />
+              {index + 1 === 6 && displayedItems.length > 6 && (
+                <div className="col-span-full flex justify-center py-4 md:hidden">
+                  <NitroGridAd adId="np-og-grid" />
+                </div>
+              )}
             </React.Fragment>
           );
         })}

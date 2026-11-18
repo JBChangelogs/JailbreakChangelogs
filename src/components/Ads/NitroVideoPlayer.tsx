@@ -50,6 +50,11 @@ export default function NitroVideoPlayer() {
       pathname === "/values" ||
       pathname === "/inventories" ||
       pathname.startsWith("/inventories/") ||
+      pathname === "/og" ||
+      pathname.startsWith("/og/") ||
+      pathname === "/dupes" ||
+      (pathname.startsWith("/dupes/") &&
+        !pathname.startsWith("/dupes/compare")) ||
       pathname === "/robberies" ||
       pathname === "/values/calculator" ||
       pathname === "/trading" ||

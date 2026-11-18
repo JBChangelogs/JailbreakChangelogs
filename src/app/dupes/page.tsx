@@ -1,5 +1,3 @@
-import NitroRailFallbackAd from "@/components/Ads/NitroRailFallbackAd";
-
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import MostDuplicatedItemsServer from "@/components/Dupes/MostDuplicatedItemsServer";
@@ -13,6 +11,7 @@ import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 
 export const dynamic = "force-dynamic";
@@ -46,19 +45,26 @@ export default async function DupeFinderPage() {
 
         <ExperimentalFeatureBanner className="mb-6" />
 
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
-          <h1 className="page-heading">Dupe Finder</h1>
-        </div>
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="flex-1">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
+              <h1 className="page-heading">Dupe Finder</h1>
+            </div>
 
-        <p className="text-secondary-text mb-3">
-          Enter a username or Roblox ID to check whether a Jailbreak item is
-          duped.
-        </p>
-        <div className="mb-6">
-          <RelatedInventoryPages current="dupes" />
-        </div>
+            <p className="text-secondary-text mb-3">
+              Enter a username or Roblox ID to check whether a Jailbreak item is
+              duped.
+            </p>
+            <div>
+              <RelatedInventoryPages current="dupes" />
+            </div>
+          </div>
 
-        <NitroRailFallbackAd adId="np-rail-left-dupes-fallback" />
+          <NitroInlineVideoPlayer
+            slotId="dupes-header-video"
+            className="w-full self-center lg:w-96 lg:shrink-0"
+          />
+        </div>
 
         <PremiumAwareLayout>
           <DupeFinderClient />
