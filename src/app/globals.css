@@ -806,6 +806,10 @@ body:has([data-sheet-side="right"][data-state="open"])
     scrollbar-color: var(--color-border-primary) transparent;
   }
 
+  ::selection {
+    background: color-mix(in srgb, var(--color-highlight) 25%, transparent);
+  }
+
   p {
     text-wrap: pretty;
   }
