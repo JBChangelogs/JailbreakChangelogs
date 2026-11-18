@@ -172,7 +172,7 @@ export default function SeasonDetailsClient({
       <div className="container mx-auto mb-8 px-4 sm:px-6">
         <Breadcrumb />
 
-        <section className="border-border-card mb-8 flex flex-col gap-6 border-b pb-6 lg:flex-row lg:items-center">
+        <section className="border-border-card mb-8 flex flex-col gap-6 border-b pb-6 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <h1 className="page-heading">
