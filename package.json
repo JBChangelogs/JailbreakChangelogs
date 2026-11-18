@@ -131,7 +131,7 @@
     ]
   },
   "browserslist": "> 1%",
-  "version": "0.69.0",
+  "version": "0.70.0",
   "engines": {
     "node": "24.x"
   }
