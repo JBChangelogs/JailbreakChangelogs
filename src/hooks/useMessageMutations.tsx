@@ -185,6 +185,7 @@ export function useMessageMutations({
       });
 
       const updatedMessage: Message = {
+        ...originalMessage,
         id: asId(parsedBody.message?.id ?? messageId),
         parentId: originalMessage?.parentId,
         senderId:
@@ -198,8 +199,6 @@ export function useMessageMutations({
         updatedAt: parsedBody.message?.updated_at
           ? normalizeTimestamp(parsedBody.message.updated_at)
           : Date.now(),
-        // Editing keeps the message's reactions.
-        reactions: originalMessage?.reactions,
       };
 
       setMessages((prev) =>

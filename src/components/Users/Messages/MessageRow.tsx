@@ -906,15 +906,21 @@ export function MessageRow({
                   </ChatEventTitle>
                 ) : null}
                 {editingMessageId === message.id ? (
-                  <MessageEditor
-                    key={message.id}
-                    message={message}
-                    emojiStringMap={emojiStringMap}
-                    isSending={isSending}
-                    onSave={handleEditMessage}
-                    onCancel={() => setEditingMessageId(null)}
-                    mentionUsers={people ? [...people.values()] : undefined}
-                  />
+                  <>
+                    <MessageEditor
+                      key={message.id}
+                      message={message}
+                      emojiStringMap={emojiStringMap}
+                      isSending={isSending}
+                      onSave={handleEditMessage}
+                      onCancel={() => setEditingMessageId(null)}
+                      mentionUsers={people ? [...people.values()] : undefined}
+                    />
+                    <MessageImages
+                      metadata={message.metadata}
+                      header={lightboxHeader}
+                    />
+                  </>
                 ) : (
                   <div className="flex w-full items-start gap-2">
                     <div className="min-w-0 flex-1">

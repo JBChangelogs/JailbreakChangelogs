@@ -353,7 +353,6 @@ export function useMessagesRealtime({
           (m) => m.id === messageId,
           (m) => ({
             ...m,
-            parentId,
             content,
             updatedAt: editedAt,
           }),
@@ -366,7 +365,6 @@ export function useMessagesRealtime({
                   ...conversation,
                   lastMessage: {
                     ...conversation.lastMessage,
-                    parentId,
                     content,
                     updatedAt: editedAt,
                   },
@@ -377,9 +375,7 @@ export function useMessagesRealtime({
         if (selectedUserIdRef.current === counterpartId) {
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === messageId
-                ? { ...m, parentId, content, updatedAt: editedAt }
-                : m,
+              m.id === messageId ? { ...m, content, updatedAt: editedAt } : m,
             ),
           );
         }
