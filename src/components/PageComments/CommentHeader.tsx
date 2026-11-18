@@ -74,10 +74,12 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
     <>
       <div
         ref={headerRef}
-        className={`${containerBgClass} @container sticky top-(--header-height) z-10 -mx-2 -mt-2 -mb-4 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:mb-0 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
+        className={`${containerBgClass} @container sticky top-(--header-height) z-10 -mx-2 -mt-2 -mb-4 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:mb-0 sm:px-3`}
       >
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2">
-          <h2 className="text-primary-text col-span-2 min-w-0 text-lg font-bold tracking-tight sm:text-xl @xl:col-span-1">
+          <h2
+            className={`text-primary-text col-span-2 min-w-0 text-lg font-bold tracking-tight sm:text-xl @xl:col-span-1 ${pinnedTitle ? "xl:col-span-1" : ""}`}
+          >
             <span>
               {/* No "0" while loading, or it rolls up to the real count. */}
               {isRefreshingComments ? (
@@ -89,10 +91,12 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
                 <NumberFlow translate="no" value={totalComments} />
               )}{" "}
               {totalComments === 1 && !isRefreshingComments
-                ? "Comment for"
-                : "Comments for"}
+                ? "Comment"
+                : "Comments"}
             </span>{" "}
-            <span>
+            {/* The page title is already pinned beside it on xl. */}
+            <span className={pinnedTitle ? "xl:hidden" : undefined}>
+              for{" "}
               {type === "changelog" ? (
                 `Changelog ${changelogId}: ${changelogTitle}`
               ) : type === "season" ? (
@@ -113,24 +117,24 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
               )}
             </span>
           </h2>
-          <p className="text-secondary-text flex items-start gap-1 text-xs max-sm:col-span-2 @xl:order-2 @xl:col-span-2">
+          <p
+            className={`text-secondary-text flex items-start gap-1 text-xs max-sm:col-span-2 @xl:order-2 @xl:col-span-2 ${pinnedTitle ? "xl:order-2 xl:col-span-2" : ""}`}
+          >
             <Icon
               icon="heroicons:information-circle"
               className="mt-0.5 h-3.5 w-3.5 shrink-0"
             />
             <span>Comments are user-submitted and unverified.</span>
           </p>
-          <div className="flex justify-end gap-2 max-sm:col-span-2 @xl:order-1">
+          <div
+            className={`flex justify-end max-sm:col-span-2 @xl:order-1 ${pinnedTitle ? "xl:order-1" : ""}`}
+          >
             <JumpToCommentForm headerRef={headerRef} />
             <CommentSort />
           </div>
         </div>
-        {/* Rides along under the stuck title. Where the title isn't sticky,
-          ChangelogComments shows the fixed pill instead. */}
         {pill && (
-          <div
-            className={`absolute top-full left-1/2 mt-3 -translate-x-1/2 ${pinnedTitle ? "xl:hidden" : ""}`}
-          >
+          <div className="absolute top-full left-1/2 mt-3 -translate-x-1/2">
             {pill}
           </div>
         )}
@@ -148,7 +152,6 @@ function JumpToCommentForm({
     profileCommentsDisabled,
     isLoggedIn,
     isBlocked,
-    pinnedTitle,
     isCommentFormExpanded,
     setIsCommentFormExpanded,
     setLoginModal,
@@ -180,35 +183,41 @@ function JumpToCommentForm({
 
   if (profileCommentsDisabled || isBlocked) return null;
 
-  // Hide, don't unmount: the reflow moves the form and loops the toggle.
+  // 0fr/1fr grid track so the width can animate.
   return (
-    <button
-      type="button"
-      onClick={() => {
-        if (!isLoggedIn) {
-          setLoginModal({ open: true });
-          return;
-        }
-        document
-          .getElementById("comments-top")
-          ?.scrollIntoView({ behavior: "smooth" });
-        if (isCommentFormExpanded) {
-          document
-            .getElementById("new-comment-textarea")
-            ?.focus({ preventScroll: true });
-        } else {
-          setIsCommentFormExpanded(true);
-        }
-      }}
-      className={`${formInView ? "invisible" : ""} ${pinnedTitle ? "xl:hidden" : ""} border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors duration-300 focus:ring-1 focus:outline-none`}
+    <div
+      className={`grid shrink-0 transition-[grid-template-columns,opacity,visibility] duration-300 ${formInView ? "invisible grid-cols-[0fr] opacity-0" : "grid-cols-[1fr]"}`}
     >
-      <Icon
-        icon="heroicons:pencil-square"
-        className="h-4 w-4 shrink-0"
-        inline={true}
-      />
-      <span>Comment</span>
-    </button>
+      <div className="min-w-0 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => {
+            if (!isLoggedIn) {
+              setLoginModal({ open: true });
+              return;
+            }
+            document
+              .getElementById("comments-top")
+              ?.scrollIntoView({ behavior: "smooth" });
+            if (isCommentFormExpanded) {
+              document
+                .getElementById("new-comment-textarea")
+                ?.focus({ preventScroll: true });
+            } else {
+              setIsCommentFormExpanded(true);
+            }
+          }}
+          className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus mr-2 flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs whitespace-nowrap transition-colors duration-300 focus:ring-1 focus:outline-none"
+        >
+          <Icon
+            icon="heroicons:pencil-square"
+            className="h-4 w-4 shrink-0"
+            inline={true}
+          />
+          <span>Comment</span>
+        </button>
+      </div>
+    </div>
   );
 }
 

@@ -13,7 +13,7 @@ import { CommentItem } from "./CommentItem";
 import { Icon } from "../ui/IconWrapper";
 import { CommentSkeletonList } from "./CommentSkeleton";
 import { Button } from "@/components/ui/button";
-import { UpdatePill, UpdatePillButton } from "@/components/ui/UpdatePill";
+import { UpdatePillButton } from "@/components/ui/UpdatePill";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import ReportCommentModal from "./ReportCommentModal";
@@ -39,7 +39,6 @@ export default function ChangelogComments(
 function CommentsLayout() {
   const {
     containerBgClass,
-    pinnedTitle,
     rateLimitUntil,
     rateLimitLabel,
     reactionRateLimitUntil,
@@ -77,7 +76,6 @@ function CommentsLayout() {
   const pageKey = `${type}:${changelogId}`;
   const [autoLoadFor, setAutoLoadFor] = useState<string | null>(null);
   const autoLoad = autoLoadFor === pageKey;
-  const commentsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const target = loadMoreRef.current;
@@ -137,7 +135,6 @@ function CommentsLayout() {
   return (
     <div className="space-y-2 sm:space-y-3">
       <div
-        ref={commentsRef}
         className={`border-border-card ${containerBgClass} rounded-lg border p-2 sm:p-3`}
       >
         {/* Not the title: it's sticky, so it never scrolls out of view */}
@@ -299,14 +296,6 @@ function CommentsLayout() {
           )}
         </div>
       </div>
-
-      {pillLabel && pinnedTitle && (
-        <div className="hidden xl:block">
-          <UpdatePill centerOn={commentsRef} onClick={scrollToTop}>
-            {pillLabel}
-          </UpdatePill>
-        </div>
-      )}
 
       {/* Report Comment Modal */}
       <ReportCommentModal
