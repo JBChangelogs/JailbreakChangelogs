@@ -74,9 +74,9 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
     <>
       <div
         ref={headerRef}
-        className={`${containerBgClass} sticky top-(--header-height) z-10 -mx-2 -mt-2 -mb-4 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:mb-0 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
+        className={`${containerBgClass} @container sticky top-(--header-height) z-10 -mx-2 -mt-2 -mb-4 rounded-t-lg px-2 py-2 sm:-mx-3 sm:-mt-3 sm:mb-0 sm:px-3 ${pinnedTitle ? "xl:static" : ""}`}
       >
-        <div className="grid items-center gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4">
+        <div className="grid items-center gap-2 @xl:grid-cols-[minmax(0,1fr)_auto] @xl:gap-x-4">
           <h2 className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl">
             <span>
               {/* No "0" while loading, or it rolls up to the real count. */}
@@ -113,14 +113,14 @@ export function CommentHeader({ pill }: { pill?: ReactNode }) {
               )}
             </span>
           </h2>
-          <p className="text-secondary-text flex items-start gap-1 text-xs sm:order-2 sm:col-span-2">
+          <p className="text-secondary-text flex items-start gap-1 text-xs @xl:order-2 @xl:col-span-2">
             <Icon
               icon="heroicons:information-circle"
               className="mt-0.5 h-3.5 w-3.5 shrink-0"
             />
             <span>Comments are user-submitted and unverified.</span>
           </p>
-          <div className="flex justify-end gap-2 sm:order-1">
+          <div className="flex justify-end gap-2 @xl:order-1">
             <JumpToCommentForm headerRef={headerRef} />
             <CommentSort />
           </div>
@@ -158,18 +158,28 @@ function JumpToCommentForm({
     const form = document.getElementById("new-comment-form");
     const header = headerRef.current;
     if (!form || !header) return;
-    const inset =
-      header.offsetHeight + (parseFloat(getComputedStyle(header).top) || 0);
-    const observer = new IntersectionObserver(
-      ([entry]) => setFormInView(entry.isIntersecting),
-      { rootMargin: `-${inset}px 0px 0px 0px` },
-    );
-    observer.observe(form);
-    return () => observer.disconnect();
+    // Out of view once it's under the top bar or the stuck header.
+    const update = () => {
+      const topBar =
+        parseFloat(
+          document.documentElement.style.getPropertyValue("--header-height"),
+        ) || 0;
+      const covered = Math.max(topBar, header.getBoundingClientRect().bottom);
+      const rect = form.getBoundingClientRect();
+      setFormInView(rect.bottom > covered && rect.top < window.innerHeight);
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, [headerRef]);
 
-  if (profileCommentsDisabled || isBlocked || formInView) return null;
+  if (profileCommentsDisabled || isBlocked) return null;
 
+  // Hide, don't unmount: the reflow moves the form and loops the toggle.
   return (
     <button
       type="button"
@@ -189,7 +199,7 @@ function JumpToCommentForm({
           setIsCommentFormExpanded(true);
         }
       }}
-      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all duration-300 focus:ring-1 focus:outline-none"
+      className={`${formInView ? "invisible" : ""} border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors duration-300 focus:ring-1 focus:outline-none`}
     >
       <Icon
         icon="heroicons:pencil-square"
