@@ -3,13 +3,7 @@
 import { EmojiPicker } from "@/components/ui/EmojiPicker";
 
 import type React from "react";
-import {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import Link from "next/link";
 import Twemoji from "react-twemoji";
@@ -261,28 +255,20 @@ function MessageText({
 const TOOLBAR_BUTTON =
   "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-not-allowed";
 
-let shiftHeld = false;
-const subscribeShift = (notify: () => void) => {
-  const update = (event: KeyboardEvent | FocusEvent) => {
-    // Every row's listener must notify; React skips unchanged snapshots.
-    shiftHeld = "shiftKey" in event && event.shiftKey;
-    notify();
-  };
+// Toggles a root attribute so CSS reveals quick delete without re-rendering rows.
+let shiftListening = false;
+const listenForShift = () => {
+  if (shiftListening || typeof window === "undefined") return;
+  shiftListening = true;
+  const update = (event: KeyboardEvent | FocusEvent) =>
+    document.documentElement.toggleAttribute(
+      "data-shift",
+      "shiftKey" in event && event.shiftKey,
+    );
   window.addEventListener("keydown", update);
   window.addEventListener("keyup", update);
   window.addEventListener("blur", update);
-  return () => {
-    window.removeEventListener("keydown", update);
-    window.removeEventListener("keyup", update);
-    window.removeEventListener("blur", update);
-  };
 };
-const useShiftHeld = () =>
-  useSyncExternalStore(
-    subscribeShift,
-    () => shiftHeld,
-    () => false,
-  );
 
 /** Messages this close together from one sender share a header, like the app. */
 const GROUP_GAP_MS = 5 * 60_000;
@@ -331,7 +317,7 @@ export function MessageRow({
     return user ? getDisplayName(user) : undefined;
   };
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false);
-  const shiftHeld = useShiftHeld();
+  useEffect(listenForShift, []);
   const topEmojis = useFrequentEmojis(Object.values(emojiStringMap), 4);
   // In a group, a sender is any member; in a DM, the other person.
   const userFor = (id: string): MessageUser | null =>
@@ -1145,13 +1131,16 @@ export function MessageRow({
                     <TooltipContent side="top">Reply</TooltipContent>
                   </Tooltip>
                 )}
-                {shiftHeld && canDelete && (
+                {canDelete && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         type="button"
                         aria-label="Delete message"
-                        className={cn(TOOLBAR_BUTTON, "text-button-danger")}
+                        className={cn(
+                          TOOLBAR_BUTTON,
+                          "text-button-danger hover:text-button-danger hidden [:root[data-shift]_&]:flex",
+                        )}
                         disabled={busy}
                         onClick={() =>
                           void handleDeleteMessage(message.id, true)

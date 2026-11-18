@@ -59,7 +59,6 @@ function harness(mobile: boolean) {
         ];
       },
       useEffect: (effect: () => () => void) => cleanups.push(effect()),
-      useSyncExternalStore: (_subscribe: unknown, get: () => unknown) => get(),
     },
     "@/components/ui/bottom-panel": {
       BottomPanelHeader: "BottomPanelHeader",
@@ -157,7 +156,7 @@ function harness(mobile: boolean) {
       for (const callback of timers.values()) callback();
       timers.clear();
     },
-    unmount: () => cleanups.forEach((cleanup) => cleanup()),
+    unmount: () => cleanups.forEach((cleanup) => cleanup?.()),
   };
 }
 
@@ -412,7 +411,11 @@ test("desktop actions open from the app's single menu button; sending disables i
     tree
       .filter((node) => node.type === "TooltipContent")
       .map((node) => node.props.children),
-  ).toEqual(["Edit", "More message actions"]);
+  ).toEqual(["Edit", "Delete", "More message actions"]);
+  expect(
+    tree.find((node) => node.props["aria-label"] === "Delete message")!.props
+      .className,
+  ).toContain("[:root[data-shift]_&]:flex");
   tree.find((node) => node.props["aria-label"] === "Edit")!.props.onClick!();
   expect(h.edits).toEqual(["message"]);
   h.edits.length = 0;

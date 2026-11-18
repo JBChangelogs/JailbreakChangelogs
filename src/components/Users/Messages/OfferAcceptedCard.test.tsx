@@ -278,7 +278,6 @@ test("accepted trade cards use the message content column and one row timestamp"
             useRef: (current: unknown) => ({ current }),
             useState: (initial: unknown) => [initial, () => {}],
             useEffect: () => {},
-            useSyncExternalStore: () => false,
           };
         if (name === "@/components/ui/bottom-panel")
           return { useBottomPanel: () => ({ isMobile: false }) };
