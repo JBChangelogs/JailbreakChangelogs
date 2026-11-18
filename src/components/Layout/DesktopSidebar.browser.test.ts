@@ -467,7 +467,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
               builder.onResolve(
                 {
                   filter:
-                    /^(next\/(link|navigation)|@\/components\/ui\/IconWrapper|@\/contexts\/TwemojiContext)$/,
+                    /^(next\/(link|navigation)|@\/components\/ui\/IconWrapper)$/,
                 },
                 ({ path }) => ({
                   path,
@@ -481,8 +481,7 @@ test.skipIf(process.env.RUN_SIDEBAR_BROWSER_TESTS !== "1")(
                   contents: `import React from '${root}/node_modules/react/index.js';
                 export default function Link({prefetch, ...props}) { return <a {...props} />; }
                 export const usePathname = () => '/';
-                export const Icon = () => <svg />;
-                export const useTwemoji = () => ({twemojiEnabled: false});`,
+                export const Icon = () => <svg />;`,
                 }),
               );
             },

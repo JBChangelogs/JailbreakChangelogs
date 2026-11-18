@@ -113,8 +113,6 @@ test("comment authors stay visible and copied comment links preserve the target 
           return { useCommentsContext: () => context };
         if (name === "./CommentTimestamp")
           return { default: "CommentTimestamp" };
-        if (name === "@/contexts/TwemojiContext")
-          return { useTwemoji: () => ({ twemojiEnabled: false }) };
         if (name === "./commentUtils")
           return {
             isCommentEditable: () => false,

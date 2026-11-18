@@ -79,9 +79,6 @@ function harness() {
     "@/contexts/AuthContext": {
       useAuthContext: () => ({ user: { premiumtype: 0 } }),
     },
-    "@/contexts/TwemojiContext": {
-      useTwemoji: () => ({ twemojiEnabled: false }),
-    },
     "@/hooks/useEmojiStringMap": { useEmojiStringMap: () => ({}) },
     "@/hooks/useFrequentEmojis": { recordEmojiUse: () => {} },
     "@/hooks/useMediaQuery": { useMediaQuery: () => false },

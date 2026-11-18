@@ -389,6 +389,7 @@ export const CommentTextarea = forwardRef<
         <div
           ref={mirrorRef}
           aria-hidden
+          data-field-mirror
           className={cn(
             className,
             "text-primary-text pointer-events-none absolute inset-0 h-full max-h-none min-h-0 overflow-hidden wrap-break-word whitespace-pre-wrap",

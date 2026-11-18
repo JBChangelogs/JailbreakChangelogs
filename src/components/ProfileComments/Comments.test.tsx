@@ -42,8 +42,6 @@ test("activity cards distinguish replies, link to the exact comment, and keep me
             IMAGE_PATHS: { PLACEHOLDER: "/placeholder.webp" },
           };
         if (name === "@/services/logger") return { createLogger: () => ({}) };
-        if (name === "@/contexts/TwemojiContext")
-          return { useTwemoji: () => ({ twemojiEnabled: false }) };
         if (name === "@/utils/helpers/timestamp")
           return {
             formatRelativeDate: () => "1 day ago",

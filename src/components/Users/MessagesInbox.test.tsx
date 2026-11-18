@@ -150,8 +150,6 @@ test("inbox preserves pagination, realtime changes, sibling conversations and gu
               bans: {},
             }),
           };
-        if (name === "@/contexts/TwemojiContext")
-          return { useTwemoji: () => ({ twemojiEnabled: false }) };
         if (name === "@/hooks/useEmojiStringMap")
           return { useEmojiStringMap: () => ({}) };
         if (name === "@/hooks/useLockBodyScroll")

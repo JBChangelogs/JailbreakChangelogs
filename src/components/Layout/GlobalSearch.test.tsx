@@ -77,13 +77,6 @@ function setupSearch() {
           };
         if (name === "@/contexts/AuthContext")
           return { useAuthContext: () => ({ user: null }) };
-        if (name === "@/contexts/TwemojiContext")
-          return {
-            useTwemoji: () => ({
-              twemojiEnabled: true,
-              setTwemojiEnabled: () => {},
-            }),
-          };
         if (name === "@/contexts/ThemeContext")
           return {
             useTheme: () => ({ theme: "dark", setTheme: () => {} }),
