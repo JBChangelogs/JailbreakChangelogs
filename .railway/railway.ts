@@ -44,12 +44,13 @@ function frontend() {
       builder: "RAILPACK",
       buildCommand: "bun run build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
     },
-    start: "HOSTNAME=:: node .next/standalone/server.js",
+    start: "HOSTNAME=:: node --max-old-space-size=8192 .next/standalone/server.js",
     healthcheck: "/api/healthcheck",
     healthcheckTimeout: 30,
     tracing: { enabled: true, autoInstrumentation: false },
     deploy: {
       drainingSeconds: 20,
+      restartPolicyType: "ALWAYS",
       overlapSeconds: 0,
       limitOverride: {
         containers: { cpu: 16, memoryBytes: 16_000_000_000 },
