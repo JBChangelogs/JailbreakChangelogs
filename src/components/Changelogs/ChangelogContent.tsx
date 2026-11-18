@@ -161,7 +161,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
             <ImageLightbox
               src={`https://assets.jailbreakchangelogs.com${imageUrl}`}
               alt={title}
-              showUrl
               className={`w-full ${imageAspectRatio}`}
             >
               <Image

@@ -8,14 +8,12 @@ import { ImageLightbox } from "@/components/ui/ImageLightbox";
 interface ChangelogMediaEmbedProps {
   type: "image" | "video" | "audio";
   url: string;
-  showUrl?: boolean;
   wrapperClassName?: string;
 }
 
 const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
   type,
   url,
-  showUrl = true,
   wrapperClassName,
 }) => {
   switch (type) {
@@ -24,7 +22,6 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
         <ImageLightbox
           src={url}
           alt="Embedded image"
-          showUrl={showUrl}
           className={wrapperClassName ?? "my-4 w-full max-w-2xl"}
         >
           <Image

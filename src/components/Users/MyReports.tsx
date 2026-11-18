@@ -69,7 +69,6 @@ function SpoilerImage({
         src={src}
         alt={alt}
         compact={rounded}
-        showUrl
         stopPropagation
         previewRadius={rounded ? "rounded-full" : "rounded-lg"}
         className={

@@ -48,7 +48,6 @@ interface ImageLightboxProps {
   className?: string;
   previewRadius?: string;
   compact?: boolean;
-  showUrl?: boolean;
   triggerAsChild?: boolean;
   stopPropagation?: boolean;
   noReferrer?: boolean;
@@ -65,7 +64,6 @@ export const ImageLightbox = ({
   className,
   previewRadius = "rounded-lg",
   compact = false,
-  showUrl = false,
   triggerAsChild = false,
   stopPropagation = false,
   noReferrer = false,
@@ -701,17 +699,6 @@ export const ImageLightbox = ({
                       </button>
                     ))}
                   </div>
-                )}
-                {showUrl && (
-                  <a
-                    href={activeImage.src}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(event) => event.stopPropagation()}
-                    className="w-full px-6 text-center font-mono text-xs break-all text-white/50 hover:text-white/80 hover:underline"
-                  >
-                    {activeImage.src}
-                  </a>
                 )}
               </div>
             )}
