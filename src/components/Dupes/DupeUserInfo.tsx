@@ -9,6 +9,7 @@ import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { DefaultAvatar } from "@/utils/ui/avatar";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 
 import {
   Tooltip,
@@ -42,16 +43,16 @@ export default function DupeUserInfo({
   const [avatarError, setAvatarError] = useState(false);
 
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg rounded-lg border p-4 sm:p-6">
       <h2 className="text-primary-text mb-4 text-xl font-semibold">
         User Information
       </h2>
 
       {/* Roblox User Profile with Ad */}
-      <div className="lg:border-border-card lg:bg-tertiary-bg mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:rounded-lg lg:border lg:p-4">
+      <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 last:mb-0 lg:flex-row lg:items-center lg:justify-between">
         {/* User Info Section */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="border-border-card bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="border-border-card bg-quaternary-bg relative h-12 w-12 shrink-0 overflow-hidden rounded-full border sm:h-16 sm:w-16">
             {!avatarError ? (
               <Image
                 placeholder={IMAGE_PLACEHOLDER}
@@ -68,10 +69,10 @@ export default function DupeUserInfo({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-primary-text text-lg font-bold wrap-break-word">
-              <span className="inline-flex items-center gap-2">
+              <span>
                 <span>{getUserDisplay(robloxId)}</span>
                 {getHasVerifiedBadge(robloxId) && (
-                  <VerifiedBadgeIcon className="h-4 w-4" />
+                  <VerifiedBadgeIcon className="ml-2 align-[-0.2em]" />
                 )}
               </span>
             </h3>
@@ -117,25 +118,22 @@ export default function DupeUserInfo({
 
               {/* Website Profile */}
               {userConnectionData && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={`/users/${userConnectionData.id}`}
-                      prefetch={false}
-                      className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                    >
-                      <Image
-                        src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
-                        alt="JBCL Logo"
-                        width={16}
-                        height={16}
-                        className="h-3.5 w-3.5 shrink-0"
-                      />
-                      <span>Website</span>
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">JBCL profile</TooltipContent>
-                </Tooltip>
+                <UserProfilePopover user={userConnectionData} side="bottom">
+                  <Link
+                    href={`/users/${userConnectionData.id}`}
+                    prefetch={false}
+                    className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                  >
+                    <Image
+                      src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
+                      alt="JBCL Logo"
+                      width={16}
+                      height={16}
+                      className="h-3.5 w-3.5 shrink-0"
+                    />
+                    <span>Website</span>
+                  </Link>
+                </UserProfilePopover>
               )}
             </div>
           </div>
@@ -144,7 +142,7 @@ export default function DupeUserInfo({
 
       {/* Stats */}
       {!hideStats && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-4">
           <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 text-sm">
               Dupe Items Found

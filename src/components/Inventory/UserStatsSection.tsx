@@ -401,7 +401,7 @@ export default function UserStatsSection({
 
       {/* Total Values */}
       <div
-        className={`mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 ${(currentData.duplicates?.length ?? 0) > 0 ? "lg:grid-cols-3" : ""}`}
+        className={`mt-4 grid grid-cols-1 gap-4 min-[440px]:grid-cols-2 ${hasDupedValue || (currentData.duplicates?.length ?? 0) > 0 ? "lg:grid-cols-3" : ""}`}
       >
         {/* Inventory Value */}
         <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
@@ -516,7 +516,7 @@ export default function UserStatsSection({
           (currentData &&
             currentData.duplicates &&
             currentData.duplicates.length > 0)) && (
-          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center min-[440px]:col-span-2 lg:col-span-1">
             <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
               <span>
                 {activeFilteredStats

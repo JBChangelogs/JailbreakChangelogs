@@ -9,6 +9,7 @@ import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { DefaultAvatar } from "@/utils/ui/avatar";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 
 import {
   Tooltip,
@@ -40,81 +41,81 @@ export default function OGUserInfo({
   const [avatarError, setAvatarError] = useState(false);
 
   return (
-    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg rounded-lg border p-4 sm:p-6">
       <h2 className="text-primary-text mb-4 text-xl font-semibold">
         User Information
       </h2>
 
       {/* Roblox User Profile */}
-      <div className="lg:border-border-card lg:bg-tertiary-bg mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:rounded-lg lg:border lg:p-4">
-        <div className="border-border-card bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
-          {!avatarError ? (
-            <Image
-              placeholder={IMAGE_PLACEHOLDER}
-              src={getUserAvatar(robloxId)}
-              alt="Roblox Avatar"
-              fill
-              className="object-cover"
-              unoptimized
-              onError={() => setAvatarError(true)}
-            />
-          ) : (
-            <DefaultAvatar />
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-primary-text text-lg font-bold wrap-break-word">
-            <span className="inline-flex items-center gap-2">
-              <span>{getUserDisplay(robloxId)}</span>
-              {getHasVerifiedBadge(robloxId) && (
-                <VerifiedBadgeIcon className="h-4 w-4" />
-              )}
-            </span>
-          </h3>
-          <p className="text-primary-text text-sm wrap-break-word opacity-75">
-            @{getUsername(robloxId)}
-          </p>
+      <div className="border-border-card bg-tertiary-bg flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="border-border-card bg-quaternary-bg relative h-12 w-12 shrink-0 overflow-hidden rounded-full border sm:h-16 sm:w-16">
+            {!avatarError ? (
+              <Image
+                placeholder={IMAGE_PLACEHOLDER}
+                src={getUserAvatar(robloxId)}
+                alt="Roblox Avatar"
+                fill
+                className="object-cover"
+                unoptimized
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <DefaultAvatar />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-primary-text text-lg font-bold wrap-break-word">
+              <span>
+                <span>{getUserDisplay(robloxId)}</span>
+                {getHasVerifiedBadge(robloxId) && (
+                  <VerifiedBadgeIcon className="ml-2 align-[-0.2em]" />
+                )}
+              </span>
+            </h3>
+            <p className="text-primary-text text-sm wrap-break-word opacity-75">
+              @{getUsername(robloxId)}
+            </p>
 
-          {/* Connection Icons */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {/* Discord Profile */}
-            {userConnectionData && (
+            {/* Connection Icons */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {/* Discord Profile */}
+              {userConnectionData && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={`https://discord.com/users/${userConnectionData.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                    >
+                      <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
+                      <span>Discord</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Discord profile</TooltipContent>
+                </Tooltip>
+              )}
+
+              {/* Roblox Profile */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
-                    href={`https://discord.com/users/${userConnectionData.id}`}
+                    href={`https://www.roblox.com/users/${robloxId}/profile`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                    className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
-                    <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
-                    <span>Discord</span>
+                    <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
+                    <span>Roblox</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Discord profile</TooltipContent>
+                <TooltipContent side="bottom">Roblox profile</TooltipContent>
               </Tooltip>
-            )}
 
-            {/* Roblox Profile */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href={`https://www.roblox.com/users/${robloxId}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                >
-                  <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
-                  <span>Roblox</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Roblox profile</TooltipContent>
-            </Tooltip>
-
-            {/* Website Profile */}
-            {userConnectionData && (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              {/* Website Profile */}
+              {userConnectionData && (
+                <UserProfilePopover user={userConnectionData} side="bottom">
                   <Link
                     href={`/users/${userConnectionData.id}`}
                     prefetch={false}
@@ -129,21 +130,17 @@ export default function OGUserInfo({
                     />
                     <span>Website</span>
                   </Link>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">JBCL profile</TooltipContent>
-              </Tooltip>
-            )}
+                </UserProfilePopover>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons & Stats */}
-        <div className="mt-4 flex flex-col items-center gap-4 sm:mt-0 sm:ml-auto sm:flex-col sm:items-end">
-          {/* Original Items Found */}
-          <div className="text-center sm:text-right">
-            <div className="text-secondary-text text-sm">{itemsLabel}</div>
-            <div className="text-primary-text text-2xl font-bold">
-              {(originalItemsCount || 0).toLocaleString("en-US")}
-            </div>
+        {/* Original Items Found */}
+        <div className="shrink-0 sm:text-right">
+          <div className="text-secondary-text text-sm">{itemsLabel}</div>
+          <div className="text-primary-text text-2xl font-bold">
+            {(originalItemsCount || 0).toLocaleString("en-US")}
           </div>
         </div>
       </div>

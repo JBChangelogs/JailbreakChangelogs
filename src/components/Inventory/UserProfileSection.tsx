@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Spinner } from "../ui/Spinner";
+import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 
 interface UserProfileSectionProps {
   userId: string;
@@ -92,11 +93,11 @@ export default function UserProfileSection({
   };
 
   return (
-    <div className="md:border-border-card md:bg-tertiary-bg mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:rounded-lg md:border md:p-4">
+    <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-start lg:justify-between">
       {/* Avatar and User Info */}
       <div className="flex min-w-0 items-center gap-4">
         {/* Avatar */}
-        <div className="bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+        <div className="bg-quaternary-bg relative h-12 w-12 shrink-0 overflow-hidden rounded-full sm:h-16 sm:w-16">
           {!avatarError ? (
             <Image
               placeholder={IMAGE_PLACEHOLDER}
@@ -115,10 +116,10 @@ export default function UserProfileSection({
         {/* User Info */}
         <div className="min-w-0 flex-1">
           <h3 className="text-primary-text text-lg font-bold wrap-break-word">
-            <span className="inline-flex items-center gap-2">
+            <span>
               {getUserDisplay(userId)}
               {getHasVerifiedBadge(userId) && (
-                <VerifiedBadgeIcon className="h-4 w-4" />
+                <VerifiedBadgeIcon className="ml-2 align-[-0.2em]" />
               )}
             </span>
           </h3>
@@ -166,25 +167,22 @@ export default function UserProfileSection({
 
             {/* Website Profile */}
             {userConnectionData && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={`/users/${userConnectionData.id}`}
-                    prefetch={false}
-                    className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
-                  >
-                    <Image
-                      src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
-                      alt="JBCL Logo"
-                      width={16}
-                      height={16}
-                      className="h-3.5 w-3.5 shrink-0"
-                    />
-                    Website
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">JBCL profile</TooltipContent>
-              </Tooltip>
+              <UserProfilePopover user={userConnectionData} side="bottom">
+                <Link
+                  href={`/users/${userConnectionData.id}`}
+                  prefetch={false}
+                  className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                >
+                  <Image
+                    src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
+                    alt="JBCL Logo"
+                    width={16}
+                    height={16}
+                    className="h-3.5 w-3.5 shrink-0"
+                  />
+                  Website
+                </Link>
+              </UserProfilePopover>
             )}
           </div>
         </div>
@@ -192,9 +190,9 @@ export default function UserProfileSection({
 
       {/* Scan Button or Login Prompt */}
       {isOwnInventory ? (
-        <div className="space-y-3 md:w-80 md:shrink-0">
+        <div className="space-y-3 lg:w-80 lg:shrink-0">
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3 lg:flex-row lg:gap-3 xl:justify-end">
+          <div className="flex flex-col gap-3 lg:flex-row lg:justify-end lg:gap-3">
             <Button
               onClick={handleScanClick}
               disabled={
@@ -363,7 +361,7 @@ export default function UserProfileSection({
         </div>
       ) : (
         /* Show login prompt for potential profile owner */
-        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 md:max-w-sm md:shrink-0 md:border-0 md:bg-transparent md:p-0">
+        <div className="lg:max-w-sm lg:shrink-0">
           <div className="flex items-start gap-3">
             <div className="shrink-0">
               <svg
