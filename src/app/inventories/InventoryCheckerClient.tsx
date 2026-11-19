@@ -434,8 +434,8 @@ export default function InventoryCheckerClient({
     enabled: false,
     queryFn: async ({ signal }) => {
       const response = await fetch(
-        `/api/inventories/queue/position?id=${encodeURIComponent(robloxId ?? "")}`,
-        { cache: "no-store", signal },
+        `${INVENTORY_API_URL}/queue/position/${encodeURIComponent(robloxId ?? "")}`,
+        { cache: "no-store", credentials: "include", signal },
       );
       const data = await response.json().catch(() => ({}));
       if (!response.ok && response.status !== 404)

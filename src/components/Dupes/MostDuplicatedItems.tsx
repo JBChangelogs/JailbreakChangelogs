@@ -3,17 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
-import { DuplicatedItem } from "@/utils/api/api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchMostDuplicatedItems } from "@/utils/api/api";
+import MostDuplicatedItemsSkeleton from "./MostDuplicatedItemsSkeleton";
 import { getItemImagePath, handleImageError } from "@/utils/ui/images";
 
-interface MostDuplicatedItemsProps {
-  items: DuplicatedItem[];
-}
-
-export default function MostDuplicatedItems({
-  items,
-}: MostDuplicatedItemsProps) {
+export default function MostDuplicatedItems() {
   "use no memo";
+  const { data: items, isPending } = useQuery({
+    queryKey: ["most-duplicated-items"],
+    queryFn: fetchMostDuplicatedItems,
+    refetchOnWindowFocus: false,
+  });
+  if (isPending) return <MostDuplicatedItemsSkeleton />;
 
   const topItems = items && items.length > 0 ? items.slice(0, 26) : [];
 

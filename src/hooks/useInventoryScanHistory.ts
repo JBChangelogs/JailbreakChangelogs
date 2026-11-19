@@ -1,6 +1,7 @@
 "use client";
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import { INVENTORY_API_URL } from "@/utils/api/api";
 
 export function inventoryScanHistoryOptions(userId: string) {
   return queryOptions({
@@ -9,9 +10,10 @@ export function inventoryScanHistoryOptions(userId: string) {
       signal,
     }): Promise<Array<{ scan_id: string; created_at: number }>> => {
       const response = await fetch(
-        `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
-        { signal },
+        `${INVENTORY_API_URL}/user/history?id=${encodeURIComponent(userId)}&limit=1000`,
+        { credentials: "include", signal },
       );
+      if (response.status === 404) return [];
       if (!response.ok) throw new Error("Failed to fetch scan history");
       const data = await response.json();
       return Array.isArray(data) ? data : [];

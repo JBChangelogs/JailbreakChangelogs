@@ -1,6 +1,18 @@
 import { expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { DuplicatedItem } from "@/utils/api/api";
 import MostDuplicatedItems from "./MostDuplicatedItems";
+
+function render(items: DuplicatedItem[]) {
+  const client = new QueryClient();
+  client.setQueryData(["most-duplicated-items"], items);
+  return renderToStaticMarkup(
+    <QueryClientProvider client={client}>
+      <MostDuplicatedItems />
+    </QueryClientProvider>,
+  );
+}
 
 test("leaderboard keeps 26 item links and scales counts against the largest", () => {
   const items = Array.from({ length: 28 }, (_, index) => ({
@@ -8,7 +20,7 @@ test("leaderboard keeps 26 item links and scales counts against the largest", ()
     type: "Vehicle",
     count: index === 0 ? 1000 : 500,
   }));
-  const html = renderToStaticMarkup(<MostDuplicatedItems items={items} />);
+  const html = render(items);
   expect(html.match(/<li\b/g)).toHaveLength(26);
   expect(html).toContain('href="/item/Vehicle/Item%200"');
   expect(html).not.toContain("Item 26");
@@ -21,12 +33,8 @@ test("leaderboard keeps 26 item links and scales counts against the largest", ()
 });
 
 test("empty and zero-count leaderboards render without invalid bar widths", () => {
-  expect(renderToStaticMarkup(<MostDuplicatedItems items={[]} />)).toBe("");
-  const html = renderToStaticMarkup(
-    <MostDuplicatedItems
-      items={[{ name: "Torpedo", type: "Vehicle", count: 0 }]}
-    />,
-  );
+  expect(render([])).toBe("");
+  const html = render([{ name: "Torpedo", type: "Vehicle", count: 0 }]);
   expect(html).toContain("width:0%");
   expect(html).not.toContain("NaN");
 });

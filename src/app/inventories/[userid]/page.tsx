@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import InventoryDataLoader from "../InventoryDataLoader";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -11,8 +10,6 @@ import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = { robots: { index: false, follow: true } };
 
 interface InventoryCheckerPageProps {
   params: Promise<{

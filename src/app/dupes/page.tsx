@@ -1,7 +1,6 @@
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
-import MostDuplicatedItemsServer from "@/components/Dupes/MostDuplicatedItemsServer";
-import MostDuplicatedItemsSkeleton from "@/components/Dupes/MostDuplicatedItemsSkeleton";
+import MostDuplicatedItems from "@/components/Dupes/MostDuplicatedItems";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
@@ -73,9 +72,7 @@ export default async function DupeFinderPage() {
             <StatsPolling />
           </Suspense>
 
-          <Suspense fallback={<MostDuplicatedItemsSkeleton />}>
-            <MostDuplicatedItemsServer />
-          </Suspense>
+          <MostDuplicatedItems />
 
           <ConnectedBotsPolling />
 

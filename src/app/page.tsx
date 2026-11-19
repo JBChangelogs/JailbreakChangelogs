@@ -2,17 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getRandomBackgroundImage } from "@/utils/helpers/backgroundImages";
-import {
-  fetchHomepageImpactStats,
-  fetchHomepageStats,
-  fetchNetworthCap,
-} from "@/utils/api/api";
+import { fetchHomepageStats } from "@/utils/api/api";
 import { Icon } from "../components/ui/IconWrapper";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import PlayJailbreakButton from "@/components/Home/PlayJailbreakButton";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 import CountUpNumber from "@/components/Home/CountUpNumber";
+import InventoryHeroStat, {
+  type InventoryHeroStatKey,
+} from "@/components/Home/InventoryHeroStat";
 import { Button } from "@/components/ui/button";
 import AppHeroButton from "@/app/app/AppHeroButton";
 import { getHomepageTestimonials } from "@/components/Testimonials/homepageTestimonials";
@@ -166,19 +165,17 @@ const platformRowClass =
 type HeroStatCard = {
   label: string;
   icon: string;
-  value: number;
+  value?: number;
+  inventoryStat?: InventoryHeroStatKey;
   badge?: string;
 };
 
 export default async function Home() {
   const initialImage = getRandomBackgroundImage();
-  const [impactStats, homepageStats, networthCap, testimonials] =
-    await Promise.all([
-      fetchHomepageImpactStats(),
-      fetchHomepageStats(),
-      fetchNetworthCap(),
-      getHomepageTestimonials(),
-    ]);
+  const [homepageStats, testimonials] = await Promise.all([
+    fetchHomepageStats(),
+    getHomepageTestimonials(),
+  ]);
 
   const heroStats: HeroStatCard[] = [
     {
@@ -189,19 +186,19 @@ export default async function Home() {
     {
       label: "Items Tracked",
       icon: "mdi:shape",
-      value: impactStats?.items_tracked ?? 0,
+      inventoryStat: "items_tracked",
       badge: "All time",
     },
     {
       label: "Inventories Scanned",
       icon: "mdi:account-search",
-      value: impactStats?.users_scanned ?? 0,
+      inventoryStat: "users_scanned",
       badge: "All time",
     },
     {
       label: "Total Networth",
       icon: "mdi:cash-multiple",
-      value: networthCap?.total_networth ?? 0,
+      inventoryStat: "total_networth",
       badge: "Last 24 hours",
     },
   ];
@@ -354,9 +351,13 @@ export default async function Home() {
                       </div>
                       <p
                         className="text-primary-text text-2xl leading-none font-bold md:text-3xl"
-                        title={stat.value.toLocaleString("en-US")}
+                        title={stat.value?.toLocaleString("en-US")}
                       >
-                        <CountUpNumber value={stat.value} compact />
+                        {stat.inventoryStat ? (
+                          <InventoryHeroStat stat={stat.inventoryStat} />
+                        ) : (
+                          <CountUpNumber value={stat.value ?? 0} compact />
+                        )}
                       </p>
                       {stat.badge ? (
                         <p className="text-secondary-text mt-1.5 text-[10px] font-medium tracking-wide uppercase">

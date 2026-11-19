@@ -33,6 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/Spinner";
 import { createLogger } from "@/services/logger";
 import {
+  INVENTORY_API_URL,
   fetchEmailLinkedStatus,
   fetchEmailNotificationStatus,
   fetchPartialItems,
@@ -106,8 +107,8 @@ export default function OGNotificationSheet({
     queryKey: ["og-notifications", user?.roblox_id],
     queryFn: async ({ signal }): Promise<string[]> => {
       const response = await fetch(
-        `/api/og/notify?user_id=${user?.roblox_id}`,
-        { cache: "no-store", signal },
+        `${INVENTORY_API_URL}/og/notify?user_id=${user?.roblox_id}`,
+        { cache: "no-store", credentials: "include", signal },
       );
       const data = await response.json().catch(() => null);
       if (!response.ok) {
@@ -208,8 +209,8 @@ export default function OGNotificationSheet({
     try {
       const method = isCurrentlyNotified ? "DELETE" : "POST";
       const response = await fetch(
-        `/api/og/notify?user_id=${user.roblox_id}&item_id=${item.id}`,
-        { method },
+        `${INVENTORY_API_URL}/og/notify?user_id=${user.roblox_id}&item_id=${item.id}`,
+        { method, credentials: "include" },
       );
 
       if (response.status === 429) {

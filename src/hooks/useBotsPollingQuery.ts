@@ -1,29 +1,17 @@
 "use client";
 
-import { createLogger } from "@/services/logger";
 import { useQuery } from "@tanstack/react-query";
-import { pollBotsData } from "@/app/api/bots/actions";
-
-const log = createLogger("API");
+import { fetchConnectedBots, fetchQueueInfo } from "@/utils/api/api";
 
 export function useBotsPollingQuery(intervalMs: number = 30000) {
   return useQuery({
     queryKey: ["bots-polling"],
     queryFn: async () => {
-      const timestamp = new Date().toISOString();
-      const result = await pollBotsData();
-
-      if (result.success && result.data) {
-        // const totalBotsCount = result.data.botsData?.recent_heartbeats?.length || 0;
-
-        return result.data;
-      } else {
-        log.error(
-          `[POLLING] Failed to fetch data at ${timestamp}`,
-          result.error,
-        );
-        throw new Error(result.error || "Failed to fetch bots data");
-      }
+      const [botsData, queueInfo] = await Promise.all([
+        fetchConnectedBots({ includePrivate: true }),
+        fetchQueueInfo({ includePrivate: true }),
+      ]);
+      return { botsData, queueInfo };
     },
     refetchInterval: intervalMs,
     refetchIntervalInBackground: true,
