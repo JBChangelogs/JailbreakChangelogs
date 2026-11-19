@@ -62,7 +62,6 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
         signal,
         headers: {
           ...headers,
-          "User-Agent": "JailbreakChangelogs-Messages/1.0",
           "Content-Type": "application/json",
         },
         body: payloadJson,

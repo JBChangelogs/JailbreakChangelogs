@@ -98,7 +98,7 @@ export default function TradeActivityChart({
     queryFn: async ({ signal }): Promise<TradeActivity> => {
       const { url, headers } = buildApiFetchRequest(
         INVENTORY_API_URL,
-        `/trades/user/${encodeURIComponent(userId)}/activity?days=365`,
+        `/v2/users/${encodeURIComponent(userId)}/trades/activity?days=365`,
       );
       const response = await fetch(url, {
         headers,

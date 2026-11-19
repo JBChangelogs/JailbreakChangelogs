@@ -91,7 +91,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       }
 
       const response = await fetch(
-        `${INVENTORY_API_URL}/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+        `${INVENTORY_API_URL}/v2/items/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}/hoarders`,
         {
           headers: {
             "X-Source": INVENTORY_API_SOURCE_HEADER || "",

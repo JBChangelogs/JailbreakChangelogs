@@ -184,10 +184,7 @@ export default function CommentsTab({
       const response = await fetch(url, {
         credentials: "include",
         signal,
-        headers: {
-          ...headers,
-          "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-        },
+        headers,
       });
       if (response.status === 404) {
         return { comments: [], totalPages: 1, totalComments: 0 };

@@ -59,7 +59,6 @@ test("shared seasons query preserves cache, cancellation and rate-limit handling
   expect(request?.credentials).toBe("include");
   expect(request?.headers).toEqual({
     "X-Test": "shared",
-    "User-Agent": "JailbreakChangelogs-Seasons/1.0",
   });
   response = new Response(null, {
     status: 429,

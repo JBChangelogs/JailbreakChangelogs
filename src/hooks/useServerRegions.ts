@@ -33,7 +33,7 @@ export function useServerRegions() {
               }): Promise<Record<string, ServerRegionData | null>> => {
                 const idsParam = batch.map(encodeURIComponent).join(",");
                 const response = await fetch(
-                  `${INVENTORY_API_URL}/servers/regions?ids=${idsParam}`,
+                  `${INVENTORY_API_URL}/v2/servers/regions?ids=${idsParam}`,
                   { signal },
                 );
                 if (!response.ok) {

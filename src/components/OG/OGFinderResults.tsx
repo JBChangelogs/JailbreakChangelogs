@@ -4,9 +4,6 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { trackWebEvent } from "@/utils/analytics/web";
-import { toast } from "sonner";
-import { MaxStreamsError } from "@/utils/api/api";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -85,7 +82,6 @@ export default function OGFinderResults({
   }, [robloxId, initialData, error, resultCount]);
 
   const router = useRouter();
-  const { getId: getRobloxId } = useUsernameToId();
 
   // State management
   const [searchId, setSearchId] = useState(
@@ -96,7 +92,6 @@ export default function OGFinderResults({
     setSearchId(originalSearchTerm || robloxId || "");
   }, [originalSearchTerm, robloxId]);
   const [isLoading, setIsLoading] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
@@ -167,7 +162,7 @@ export default function OGFinderResults({
   };
 
   const getUserAvatar = (userId: string) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${userId}/avatar-headshot`;
   };
 
   const getHasVerifiedBadge = (userId: string) => {
@@ -176,7 +171,7 @@ export default function OGFinderResults({
   };
 
   // Handle search
-  const handleSearch = async (searchValue: string) => {
+  const handleSearch = (searchValue: string) => {
     const input = searchValue.trim();
     if (!input) return;
 
@@ -185,41 +180,8 @@ export default function OGFinderResults({
     });
     trackEvent("OG Search", { searchTerm: input });
 
-    setSearchError(null);
-
-    const isUsername = !/^\d+$/.test(input);
-    if (!isUsername) {
-      setIsLoading(true);
-      router.push(`/og/${input}`);
-      return;
-    }
-
     setIsLoading(true);
-    try {
-      const resolvedId = await getRobloxId(input);
-      if (resolvedId) {
-        router.push(`/og/${input}`);
-      } else {
-        trackWebEvent("og_search_failed", { code: "user_not_found" });
-        setIsLoading(false);
-        const truncated =
-          input.length > 50 ? `${input.substring(0, 47)}...` : input;
-        const msg = `Username "${truncated}" not found. Please check the spelling and try again.`;
-        toast.error(msg);
-        setSearchError(msg);
-      }
-    } catch (err) {
-      trackWebEvent("og_search_failed", {
-        code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
-      });
-      setIsLoading(false);
-      const msg =
-        err instanceof MaxStreamsError
-          ? "Unable to search by username at this time. Please use the Roblox ID instead."
-          : "Server error while looking up username. Please try searching by Roblox ID instead.";
-      toast.error(msg);
-      setSearchError(msg);
-    }
+    router.push(`/og/${encodeURIComponent(input)}`);
   };
 
   // Filter and sort logic
@@ -416,15 +378,6 @@ export default function OGFinderResults({
             isLoading={isLoading}
             externalIsLoading={false}
           />
-          {searchError && (
-            <div className="text-primary-text border-button-danger/30 bg-button-danger/10 mt-2 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
-              <Icon
-                icon="heroicons:exclamation-circle"
-                className="h-4 w-4 shrink-0"
-              />
-              {searchError}
-            </div>
-          )}
         </div>
         <Button
           onClick={() => {

@@ -27,40 +27,30 @@ export function useBatchUserData(
   options: UseBatchUserDataOptions = {},
 ): UseBatchUserDataResult {
   const { enabled = true } = options;
-  const ids = Array.from(new Set(userIds)).sort();
+  const ids = Array.from(
+    new Set(userIds.filter((id) => /^\d+$/.test(id))),
+  ).sort();
   const total = ids.length > 0 ? 1 : 0;
   const userQuery = useQuery({
     queryKey: ["batch-user-data", ids],
     queryFn: async ({ signal }): Promise<Record<string, RobloxUser>> => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2`,
+          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/batch`,
           {
+            // POST keeps large owner batches out of URL limits.
             method: "POST",
+            body: JSON.stringify({ ids: ids.map(Number) }),
             headers: {
               "Content-Type": "application/json",
-              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
               "X-Source":
                 process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
             },
-            body: JSON.stringify({ userIds: ids.map(Number) }),
             signal,
           },
         );
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = (await response.json()) as
-          | Record<string, RobloxUser>
-          | { data: unknown };
-
-        if (data && "data" in data && Array.isArray(data.data)) {
-          const userData: Record<string, RobloxUser> = {};
-          data.data.forEach((item: unknown) => {
-            if (item && typeof item === "object") {
-              Object.assign(userData, item);
-            }
-          });
-          return withUsernameFallbacks(userData);
-        }
+        const data = (await response.json()) as Record<string, RobloxUser>;
         return data && typeof data === "object"
           ? withUsernameFallbacks(data as Record<string, RobloxUser>)
           : EMPTY_USERS;

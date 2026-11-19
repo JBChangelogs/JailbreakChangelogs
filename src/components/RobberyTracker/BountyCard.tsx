@@ -11,7 +11,7 @@ import RobberyPlayersModal from "./RobberyPlayersModal";
 import { formatServerTime } from "./utils";
 
 function getAvatarUrl(userId: number): string {
-  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${userId}/avatar-headshot`;
 }
 
 interface BountyCardProps {

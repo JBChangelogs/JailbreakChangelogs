@@ -34,7 +34,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
   const { userid } = await params;
 
   // Allow both usernames and numeric IDs
-  // Let DupeFinderDataStreamer handle the username resolution
+  // The inventory API accepts usernames directly
   const isNumeric = /^\d+$/.test(userid);
   const robloxId = parseInt(userid);
 

@@ -179,7 +179,7 @@ export default function AirdropCard({
   };
 
   const players = airdrop.server?.players || [];
-  const mapImageUrl = `${INVENTORY_API_URL}/map/airdrop?x=${airdrop.x}&z=${airdrop.z}`;
+  const mapImageUrl = `${INVENTORY_API_URL}/v2/maps/airdrop?x=${airdrop.x}&z=${airdrop.z}`;
 
   return (
     <div

@@ -462,7 +462,7 @@ export default function ConnectedBotsPolling() {
 
 function LastUpdatedAvatar({ userId }: { userId: string }) {
   const [avatarError, setAvatarError] = useState(false);
-  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${userId}/avatar-headshot`;
   return avatarError ? (
     <DefaultAvatar name={userId} />
   ) : (
@@ -495,7 +495,7 @@ function BotStatusCard({
     `bot-${bot.id}-heartbeat`,
   );
   const fullDate = formatCustomDate(bot.last_heartbeat);
-  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${bot.id}/avatar-headshot`;
+  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${bot.id}/avatar-headshot`;
 
   let methodText = "";
   if (bot.method === 1) methodText = "Trade World";

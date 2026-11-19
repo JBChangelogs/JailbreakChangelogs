@@ -114,7 +114,7 @@ export default function MostScannedLeaderboardClient({
 
   // Generate avatar URL directly
   const getUserAvatar = (userId: string) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${userId}/avatar-headshot`;
   };
 
   // Filter leaderboard based on debounced search term

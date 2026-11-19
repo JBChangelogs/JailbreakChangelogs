@@ -31,7 +31,7 @@ export async function fetchCopyTree(
     throw new Error("Inventory API URL is not configured");
   }
   const response = await fetch(
-    `${INVENTORY_API_URL}/item/duplicates/tree?id=${encodeURIComponent(id)}`,
+    `${INVENTORY_API_URL}/v2/item-instances/${encodeURIComponent(id)}/copy-tree`,
     {
       headers: { "X-Source": INVENTORY_API_SOURCE_HEADER || "" },
       cache: "no-store",

@@ -77,7 +77,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
       }
 
       const response = await fetch(
-        `${INVENTORY_API_URL}/item/duplicates?id=${itemId}&limit=5000`,
+        `${INVENTORY_API_URL}/v2/item-instances/${encodeURIComponent(itemId)}/duplicates?limit=5000`,
         {
           headers: {
             "X-Source": INVENTORY_API_SOURCE_HEADER || "",

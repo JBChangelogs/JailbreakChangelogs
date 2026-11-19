@@ -20,10 +20,7 @@ export function changelogTimelineQueryOptions() {
       const response = await fetch(url, {
         credentials: "include",
         signal,
-        headers: {
-          ...headers,
-          "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-        },
+        headers,
       });
       if (response.status === 429) {
         const raw = response.headers.get("retry-after");

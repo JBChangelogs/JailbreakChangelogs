@@ -1,9 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchOGSearchData } from "@/utils/api/api";
-import { UserDataService } from "@/services/userDataService";
-import { useResolvedRobloxId } from "@/hooks/useResolvedRobloxId";
+import { fetchOGSearchData, fetchRobloxUserProfile } from "@/utils/api/api";
 import { fetchUserConnection } from "@/app/inventories/userConnection";
 import OGFinderResults, { type OGSearchData } from "./OGFinderResults";
 import OGFinderClient from "./OGFinderClient";
@@ -33,32 +31,29 @@ export default function OGFinderDataStreamer({
 }: {
   robloxId: string;
 }) {
-  const {
-    id,
-    error: usernameError,
-    isUsername,
-  } = useResolvedRobloxId(robloxId);
+  const isUsername = !/^\d+$/.test(robloxId);
   const originalSearchTerm = isUsername ? robloxId : undefined;
+  const usersQuery = useQuery({
+    queryKey: ["roblox-profile", robloxId],
+    queryFn: () => fetchRobloxUserProfile(robloxId),
+    ...ONCE,
+  });
+  const id =
+    usersQuery.data?.id?.toString() ?? (!isUsername ? robloxId : undefined);
+  const robloxUsers = usersQuery.data && id ? { [id]: usersQuery.data } : {};
 
   const searchQuery = useQuery({
-    queryKey: ["og-search", id],
-    queryFn: () => fetchOGSearchData(id!),
-    enabled: Boolean(id),
+    queryKey: ["og-search", robloxId],
+    queryFn: () => fetchOGSearchData(robloxId),
     ...ONCE,
   });
   const result = searchQuery.data;
   const hasResults = Boolean(result) && !(result && "error" in result);
-  const usersQuery = useQuery({
-    queryKey: ["og-search-owner", id],
-    queryFn: () =>
-      UserDataService.fetchUserData([id!], { maxUsers: 1, context: "OG" }),
-    enabled: hasResults,
-    ...ONCE,
-  });
+
   const connectionQuery = useQuery({
     queryKey: ["og-search-connection", id],
     queryFn: () => fetchUserConnection(id!),
-    enabled: hasResults,
+    enabled: hasResults && Boolean(id),
     ...ONCE,
   });
 
@@ -68,20 +63,11 @@ export default function OGFinderDataStreamer({
     userConnectionData: null,
     items: [],
   };
-  if (usernameError) {
-    return (
-      <OGFinderResults
-        robloxId={robloxId}
-        error={usernameError}
-        originalSearchTerm={robloxId}
-        {...errorProps}
-      />
-    );
-  }
 
   if (
     !searchQuery.isFetched ||
-    (hasResults && (usersQuery.isPending || connectionQuery.isPending))
+    (hasResults &&
+      (usersQuery.isPending || (Boolean(id) && connectionQuery.isPending)))
   ) {
     return <OGFinderClient isLoading={true} robloxId={robloxId} />;
   }
@@ -89,7 +75,7 @@ export default function OGFinderDataStreamer({
   if (!hasResults) {
     return (
       <OGFinderResults
-        robloxId={id!}
+        robloxId={id ?? robloxId}
         error={
           (result && "error" in result && result.message) ||
           "Failed to fetch OG search data. Please try again."
@@ -102,9 +88,12 @@ export default function OGFinderDataStreamer({
 
   return (
     <OGFinderResults
-      initialData={withoutOwnTireSticker(id!, result as OGSearchData)}
-      robloxId={id!}
-      robloxUsers={usersQuery.data?.robloxUsers ?? {}}
+      initialData={withoutOwnTireSticker(
+        id ?? robloxId,
+        result as OGSearchData,
+      )}
+      robloxId={id ?? robloxId}
+      robloxUsers={robloxUsers}
       userConnectionData={connectionQuery.data ?? null}
       items={[]}
       originalSearchTerm={originalSearchTerm}

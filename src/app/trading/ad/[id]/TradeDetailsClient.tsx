@@ -694,9 +694,7 @@ export default function TradeDetailsClient({
     queryFn: async ({ signal }) => {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!baseUrl) throw new Error("Trade API is not configured");
-      const headers: Record<string, string> = {
-        "User-Agent": "JailbreakChangelogs-Trading/2.0",
-      };
+      const headers: Record<string, string> = {};
       if (typeof document !== "undefined") {
         const tokenCookie = document.cookie
           ?.split(";")

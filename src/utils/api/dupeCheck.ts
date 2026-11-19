@@ -20,12 +20,15 @@ export async function checkDupe(
   }
   const baseUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
   if (!baseUrl) throw new Error("Dupe checking is unavailable.");
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/dupes/check`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: originalOwner, item_id: itemId }),
-    signal,
-  });
+  const response = await fetch(
+    `${baseUrl.replace(/\/$/, "")}/v2/duplicates/checks`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: originalOwner, item_id: itemId }),
+      signal,
+    },
+  );
   const data = await response.json().catch(() => null);
   // A clean answer, not a failure: no duplicated copy exists to score.
   if (response.status === 404 && data?.error === "no_dupes_found") return null;

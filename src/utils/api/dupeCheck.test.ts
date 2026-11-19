@@ -31,7 +31,7 @@ test("checks the original owner and catalog ID using the dashboard endpoint", as
   const controller = new AbortController();
   expect(await checkDupe("235642012", 49, controller.signal)).toEqual(result);
   expect(request?.options?.signal).toBe(controller.signal);
-  expect(request?.url).toBe("https://inventory.example/dupes/check");
+  expect(request?.url).toBe("https://inventory.example/v2/duplicates/checks");
   expect(request?.options?.method).toBe("POST");
   expect(JSON.parse(request?.options?.body as string)).toEqual({
     user_id: "235642012",

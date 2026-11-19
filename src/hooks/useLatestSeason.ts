@@ -23,10 +23,7 @@ export function useLatestSeason(enabled = true) {
       const response = await fetch(url, {
         signal,
         credentials: "include",
-        headers: {
-          ...headers,
-          "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-        },
+        headers,
       });
 
       if (response.status === 429) {

@@ -415,8 +415,7 @@ test("date selection uses UTC snapshots, ignores stale requests, and restores la
     .props.defaultMonth!;
   expect(calendarMonth.getFullYear()).toBe(2026);
   expect(calendarMonth.getMonth()).toBe(9);
-  expect(requests[0].url.pathname).toBe("/user/inventory/history");
-  expect(requests[0].url.searchParams.get("id")).toBe("123");
+  expect(requests[0].url.pathname).toBe("/v2/users/123/inventory/history");
   expect(requests[0].url.searchParams.get("date")).toBe("2026-10-14");
   expect(requests[0].init.headers).toEqual({
     Authorization: "dev-token",
@@ -505,8 +504,9 @@ test("owner lookup uses the exact copy and lists duplicated owners with all thre
   expect(requests).toHaveLength(2);
   expect(content(view)).toContain("Finding current owner");
   expect(content(view)).not.toContain("View current owner");
-  expect(requests[1].url.pathname).toBe("/item/owner");
-  expect(requests[1].url.searchParams.get("id")).toBe(item.item_id);
+  expect(requests[1].url.pathname).toBe(
+    `/v2/item-instances/${encodeURIComponent(item.item_id)}/owner`,
+  );
   expect(requests[1].url.searchParams.get("branch_id")).toBe("0");
   await respond(1, {
     duplicated_since: true,

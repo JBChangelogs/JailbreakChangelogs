@@ -81,7 +81,7 @@ const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
   if (!baseUrl) return null;
   const trimmed = (robloxId ?? "").toString().trim();
   if (!trimmed) return null;
-  return `${baseUrl}/proxy/users/${encodeURIComponent(trimmed)}/avatar-headshot`;
+  return `${baseUrl}/v2/users/${encodeURIComponent(trimmed)}/avatar-headshot`;
 };
 
 const normalizeInventoryItemId = (value: unknown): string | null => {

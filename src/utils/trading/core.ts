@@ -180,10 +180,7 @@ export const fetchTradeOffers = async (
     method: "GET",
     cache: "no-store",
     credentials: "include",
-    headers: {
-      ...offersHeaders,
-      "User-Agent": "JailbreakChangelogs-Trading/2.0",
-    },
+    headers: offersHeaders,
   });
 
   if (!response.ok) {

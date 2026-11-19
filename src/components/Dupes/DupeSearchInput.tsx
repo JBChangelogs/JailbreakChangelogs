@@ -9,9 +9,7 @@ import { trackEvent } from "@/utils/analytics/rybbit";
 import { trackWebEvent } from "@/utils/analytics/web";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import { toast } from "sonner";
-import { MaxStreamsError, searchDupeOwners } from "@/utils/api/api";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
+import { searchDupeOwners } from "@/utils/api/api";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import type { DupeOwnerSearchResult } from "@/types";
 
@@ -42,9 +40,7 @@ export default function DupeSearchInput({
     setSearchId(initialValue);
   }, [initialValue]);
   const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const router = useRouter();
-  const { getId: getRobloxId } = useUsernameToId();
 
   const [suggestions, setSuggestions] = useState<DupeOwnerSearchResult[]>([]);
   const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
@@ -148,7 +144,7 @@ export default function DupeSearchInput({
     router.push(`/dupes/${owner.id}`);
   };
 
-  const performSearch = async (input: string) => {
+  const performSearch = (input: string) => {
     if (!input) return;
 
     trackWebEvent("dupe_search", {
@@ -156,51 +152,9 @@ export default function DupeSearchInput({
     });
     setIsSuggestionsOpen(false);
     trackEvent("Dupe Search", { searchTerm: input });
-    setSearchError(null);
-
-    const isUsername = !/^\d+$/.test(input);
-    if (!isUsername) {
-      setIsSearching(true);
-      router.push(`/dupes/${input}`);
-      return;
-    }
 
     setIsSearching(true);
-    try {
-      const resolvedId = await getRobloxId(input);
-      if (resolvedId) {
-        router.push(`/dupes/${input}`);
-      } else {
-        trackWebEvent("search", {
-          surface: "dupefinder",
-          query_len: input.trim().length,
-          results: 0,
-        });
-        trackWebEvent("dupe_search_failed", { code: "user_not_found" });
-        setIsSearching(false);
-        const truncated =
-          input.length > 50 ? `${input.substring(0, 47)}...` : input;
-        const msg = `Username "${truncated}" not found. Please check the spelling and try again.`;
-        toast.error(msg);
-        setSearchError(msg);
-      }
-    } catch (err) {
-      trackWebEvent("search", {
-        surface: "dupefinder",
-        query_len: input.trim().length,
-        results: 0,
-      });
-      trackWebEvent("dupe_search_failed", {
-        code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
-      });
-      setIsSearching(false);
-      const msg =
-        err instanceof MaxStreamsError
-          ? "Unable to search by username at this time. Please use the Roblox ID instead."
-          : "Server error while looking up username. Please try searching by Roblox ID instead.";
-      toast.error(msg);
-      setSearchError(msg);
-    }
+    router.push(`/dupes/${encodeURIComponent(input)}`);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -392,7 +346,7 @@ export default function DupeSearchInput({
                         {!avatarErrors.has(owner.id) ? (
                           <Image
                             placeholder={IMAGE_PLACEHOLDER}
-                            src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${owner.id}/avatar-headshot`}
+                            src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${owner.id}/avatar-headshot`}
                             alt=""
                             fill
                             unoptimized
@@ -427,15 +381,6 @@ export default function DupeSearchInput({
           )}
         </div>
       </form>
-      {searchError && (
-        <div className="text-primary-text border-button-danger/30 bg-button-danger/10 mt-2 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
-          <Icon
-            icon="heroicons:exclamation-circle"
-            className="h-4 w-4 shrink-0"
-          />
-          {searchError}
-        </div>
-      )}
     </div>
   );
 }

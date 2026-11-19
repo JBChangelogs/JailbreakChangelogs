@@ -37,7 +37,7 @@ export default function SeasonLeaderboardClient({
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const getUserAvatar = (userId: number) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${userId}/avatar-headshot`;
   };
 
   const filteredLeaderboard = (() => {

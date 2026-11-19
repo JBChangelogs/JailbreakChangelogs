@@ -107,7 +107,7 @@ export default function OGNotificationSheet({
     queryKey: ["og-notifications", user?.roblox_id],
     queryFn: async ({ signal }): Promise<string[]> => {
       const response = await fetch(
-        `${INVENTORY_API_URL}/og/notify?user_id=${user?.roblox_id}`,
+        `${INVENTORY_API_URL}/v2/users/${encodeURIComponent(user?.roblox_id ?? "")}/og-notifications`,
         { cache: "no-store", credentials: "include", signal },
       );
       const data = await response.json().catch(() => null);
@@ -208,9 +208,19 @@ export default function OGNotificationSheet({
 
     try {
       const method = isCurrentlyNotified ? "DELETE" : "POST";
+      const path = `${INVENTORY_API_URL}/v2/users/${encodeURIComponent(user.roblox_id)}/og-notifications`;
       const response = await fetch(
-        `${INVENTORY_API_URL}/og/notify?user_id=${user.roblox_id}&item_id=${item.id}`,
-        { method, credentials: "include" },
+        isCurrentlyNotified ? `${path}/${item.id}` : path,
+        {
+          method,
+          credentials: "include",
+          ...(isCurrentlyNotified
+            ? {}
+            : {
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ item_id: itemIdStr }),
+              }),
+        },
       );
 
       if (response.status === 429) {
@@ -403,7 +413,7 @@ export default function OGNotificationSheet({
                   {!avatarError ? (
                     <Image
                       placeholder={IMAGE_PLACEHOLDER}
-                      src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
+                      src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${user.roblox_id}/avatar-headshot`}
                       alt="Your Avatar"
                       fill
                       className="rounded-full object-cover"

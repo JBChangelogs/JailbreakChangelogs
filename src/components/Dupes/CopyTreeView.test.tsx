@@ -327,12 +327,8 @@ test("shows display names above @usernames, avatars, and Roblox profile links", 
   );
   expect(markup).toContain('alt="Trade Display"');
   expect(markup).toContain('alt="Holder Display"');
-  expect(markup).toContain(
-    encodeURIComponent("/proxy/users/123/avatar-headshot"),
-  );
-  expect(markup).toContain(
-    encodeURIComponent("/proxy/users/456/avatar-headshot"),
-  );
+  expect(markup).toContain(encodeURIComponent("/v2/users/123/avatar-headshot"));
+  expect(markup).toContain(encodeURIComponent("/v2/users/456/avatar-headshot"));
   expect(markup).toContain('href="https://www.roblox.com/users/123/profile"');
   expect(markup).toContain('href="https://www.roblox.com/users/456/profile"');
   expect(markup).toContain('target="_blank" rel="noopener noreferrer"');

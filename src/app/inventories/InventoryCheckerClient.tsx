@@ -767,7 +767,7 @@ export default function InventoryCheckerClient({
             <>
               <UserEmptyStateCard
                 robloxId={robloxId}
-                avatarSrc={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
+                avatarSrc={`${INVENTORY_API_URL}/v2/users/${robloxId}/avatar-headshot`}
                 displayName={
                   mergedRobloxUsers[robloxId]?.displayName ||
                   originalSearchTerm ||

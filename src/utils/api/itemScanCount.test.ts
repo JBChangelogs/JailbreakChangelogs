@@ -10,7 +10,7 @@ test("item scan counts preserve zero and handle missing, invalid, and failed res
       import { fetchItemScanCount } from "./src/utils/api/api.ts";
       let response;
       globalThis.fetch = async (url) => {
-        assert.equal(url, "https://inventory.example/items/49/scans/count");
+        assert.equal(url, "https://inventory.example/v2/items/49/scans/count");
         return response;
       };
       response = Response.json({ copy_count: 1234, duped_copy_count: 25 });

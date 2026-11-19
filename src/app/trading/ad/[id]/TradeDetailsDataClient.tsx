@@ -169,10 +169,7 @@ export default function TradeDetailsDataClient({
         signal,
         cache: "no-store",
         credentials: "include",
-        headers: {
-          ...devTokenHeaders,
-          "User-Agent": "JailbreakChangelogs-Trading/2.0",
-        },
+        headers: devTokenHeaders,
       });
 
       if (response.status === 404) {

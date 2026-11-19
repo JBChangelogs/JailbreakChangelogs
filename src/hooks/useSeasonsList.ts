@@ -22,10 +22,7 @@ export function useSeasonsList() {
       const response = await fetch(url, {
         credentials: "include",
         signal,
-        headers: {
-          ...headers,
-          "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-        },
+        headers,
       });
       if (response.status === 429) {
         const raw = response.headers.get("retry-after");

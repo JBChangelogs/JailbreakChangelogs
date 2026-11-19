@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
+  inventoryUserPath,
 } from "@/utils/api/api";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 
@@ -34,7 +35,7 @@ async function fetchUserInventory(
   signal: AbortSignal,
 ): Promise<unknown> {
   if (!INVENTORY_API_URL) throw new Error("Inventory API is unavailable");
-  const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
+  const url = `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(robloxId)}/inventory?nocache=false`;
   let response: Response | null = null;
 
   for (let attempt = 0; attempt < 2; attempt++) {

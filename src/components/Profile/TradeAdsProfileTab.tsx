@@ -223,10 +223,7 @@ export default function TradeAdsProfileTab({
         cache: "no-store",
         credentials: "include",
         signal,
-        headers: {
-          ...headers,
-          "User-Agent": "JailbreakChangelogs-Profile/1.0",
-        },
+        headers,
       });
       const data: unknown = await response.json().catch(() => null);
 

@@ -10,7 +10,7 @@ export function inventoryScanHistoryOptions(userId: string) {
       signal,
     }): Promise<Array<{ scan_id: string; created_at: number }>> => {
       const response = await fetch(
-        `${INVENTORY_API_URL}/user/history?id=${encodeURIComponent(userId)}&limit=1000`,
+        `${INVENTORY_API_URL}/v2/users/${encodeURIComponent(userId)}/scans?limit=1000`,
         { credentials: "include", signal },
       );
       if (response.status === 404) return [];

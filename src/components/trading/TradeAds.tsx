@@ -651,10 +651,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
         cache: "no-store",
         credentials: "include",
         signal,
-        headers: {
-          ...recentTradesHeaders,
-          "User-Agent": "JailbreakChangelogs-Trading/2.0",
-        },
+        headers: recentTradesHeaders,
       });
 
       if (response.status === 429) {

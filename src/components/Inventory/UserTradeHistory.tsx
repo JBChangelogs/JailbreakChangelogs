@@ -207,7 +207,7 @@ function TradeAvatar({ userId, name }: { userId: string; name: string }) {
       ) : (
         <Image
           placeholder={IMAGE_PLACEHOLDER}
-          src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
+          src={`${INVENTORY_API_URL}/v2/users/${encodeURIComponent(userId)}/avatar-headshot`}
           alt={`${name}'s Roblox avatar`}
           fill
           sizes="40px"
@@ -441,7 +441,7 @@ export default function UserTradeHistory({
       try {
         const { url, headers } = buildApiFetchRequest(
           INVENTORY_API_URL,
-          `/trades/user/${encodeURIComponent(userId)}?${params}`,
+          `/v2/users/${encodeURIComponent(userId)}/trades?${params}`,
         );
         const response = await fetch(url, {
           headers,
@@ -498,7 +498,7 @@ export default function UserTradeHistory({
       try {
         const { url, headers } = buildApiFetchRequest(
           INVENTORY_API_URL,
-          `/trades/user/${encodeURIComponent(userId)}/day?date=${encodeURIComponent(selectedDay ?? "")}&nocache=false`,
+          `/v2/users/${encodeURIComponent(userId)}/trades?date=${encodeURIComponent(selectedDay ?? "")}&nocache=false`,
         );
         const response = await fetch(url, {
           headers,
@@ -553,7 +553,7 @@ export default function UserTradeHistory({
         try {
           const { url, headers } = buildApiFetchRequest(
             INVENTORY_API_URL,
-            `/trades/${encodeURIComponent(trade.trade_id)}?nocache=false`,
+            `/v2/trades/${encodeURIComponent(trade.trade_id)}?nocache=false`,
           );
           const response = await fetch(url, {
             headers,

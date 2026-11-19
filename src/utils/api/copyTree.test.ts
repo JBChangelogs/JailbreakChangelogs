@@ -35,7 +35,7 @@ test("requests the game ID with source and cancellation, and separates missing h
   const signal = new AbortController().signal;
   expect(await exports.fetchCopyTree("game/id & copy", signal)).toEqual(tree);
   expect(requests[0]).toEqual({
-    url: "https://inventory.example/item/duplicates/tree?id=game%2Fid%20%26%20copy",
+    url: "https://inventory.example/v2/item-instances/game%2Fid%20%26%20copy/copy-tree",
     options: {
       headers: { "X-Source": "test-source" },
       cache: "no-store",

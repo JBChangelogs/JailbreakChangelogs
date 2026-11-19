@@ -75,11 +75,10 @@ function CurrentOwner({ item }: { item: HistoricalInventoryItem }) {
     if (!attempt) return;
     const controller = new AbortController();
     const params = new URLSearchParams({
-      id: item.item_id,
       branch_id: item.branch_id,
     });
     void fetchHistoryData<ItemOwnerData>(
-      `/item/owner?${params}`,
+      `/v2/item-instances/${encodeURIComponent(item.item_id)}/owner?${params}`,
       controller.signal,
     )
       .then((result) => {
@@ -239,9 +238,9 @@ export default function InventoryHistory({
   useEffect(() => {
     if (!date) return;
     const controller = new AbortController();
-    const params = new URLSearchParams({ id: userId, date });
+    const params = new URLSearchParams({ date });
     void fetchHistoryData<InventoryHistoryData>(
-      `/user/inventory/history?${params}`,
+      `/v2/users/${encodeURIComponent(userId)}/inventory/history?${params}`,
       controller.signal,
     )
       .then((data) => {

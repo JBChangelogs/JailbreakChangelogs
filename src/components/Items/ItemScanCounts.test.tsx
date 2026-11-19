@@ -30,7 +30,7 @@ test("only the duped count requires experiment access and unavailable counts sta
     TooltipTrigger: ({ children }: { children: ReactElement }) => children,
     TooltipContent: ({ children }: { children: ReactElement }) =>
       jsxRuntime.jsx("aside", { children }),
-    getUserAvatar: (id: string) => `/proxy/users/${id}/avatar-headshot`,
+    getUserAvatar: (id: string) => `/v2/users/${id}/avatar-headshot`,
     UserAvatar: ({
       forceAvatarUrl,
       username,
@@ -109,7 +109,7 @@ test("only the duped count requires experiment access and unavailable counts sta
           expect(markup).toContain(
             `href="https://www.roblox.com/users/${id}/profile"`,
           );
-          expect(markup).toContain(`src="/proxy/users/${id}/avatar-headshot"`);
+          expect(markup).toContain(`src="/v2/users/${id}/avatar-headshot"`);
           const link = markup.match(
             new RegExp(
               `<a[^>]*href="https://www.roblox.com/users/${id}/profile"[^>]*>(.*?)</a>`,

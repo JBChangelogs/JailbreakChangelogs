@@ -284,10 +284,9 @@ export const searchDupeOwners = async (
   signal?: AbortSignal,
 ): Promise<DupeOwnerSearchResult[]> => {
   const response = await fetch(
-    `${INVENTORY_API_URL}/dupes/search/owners?query=${encodeURIComponent(query)}&limit=${limit}`,
+    `${INVENTORY_API_URL}/v2/duplicates/owners/search?query=${encodeURIComponent(query)}&limit=${limit}`,
     {
       headers: {
-        "User-Agent": "JailbreakChangelogs-DupeSearch/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -311,10 +310,9 @@ export const searchDupeItemsByOwner = async (
   signal?: AbortSignal,
 ): Promise<DupeItemSearchResult[]> => {
   const response = await fetch(
-    `${INVENTORY_API_URL}/dupes/search/items?owner_id=${encodeURIComponent(ownerId)}&prefix=${encodeURIComponent(prefix)}&limit=${limit}`,
+    `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(ownerId)}/duplicates/search?prefix=${encodeURIComponent(prefix)}&limit=${limit}`,
     {
       headers: {
-        "User-Agent": "JailbreakChangelogs-DupeSearch/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -497,10 +495,7 @@ export async function fetchUserByRobloxId(
       `${BASE_API_URL}/v2/users/by-roblox-id/${robloxId}`,
       {
         credentials: "include",
-        headers: {
-          "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-          ...verificationHeaders,
-        },
+        headers: verificationHeaders,
       },
     );
     const data = await response.json();
@@ -983,19 +978,20 @@ export async function fetchChangelog(
 
 export async function fetchDupeFinderData(userId: string) {
   try {
-    const url = `${INVENTORY_API_URL}/users/dupes?id=${userId}`;
+    const url = `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(userId)}/duplicates`;
     const response = await fetch(url, {
       credentials: "include",
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
     if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      const usernameError = inventoryUsernameError(userId, body);
+      if (usernameError) return { error: usernameError.message };
       if (response.status === 404) {
         return { error: "No recorded dupes found for this user." };
       }
-      const body = await response.json().catch(() => ({}));
       log.error("fetchDupeFinderData failed", {
         status: response.status,
         body,
@@ -1012,10 +1008,9 @@ export async function fetchDupeFinderData(userId: string) {
 
 export async function fetchDuplicatesCount() {
   try {
-    const url = `${INVENTORY_API_URL}/items/duplicates/count`;
+    const url = `${INVENTORY_API_URL}/v2/items/duplicates/count`;
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -1042,10 +1037,9 @@ export async function fetchDuplicatesCount() {
 
 export async function fetchTotalRobberiesLogged(): Promise<number> {
   try {
-    const url = `${INVENTORY_API_URL}/tracker/stats/total?nocache=false`;
+    const url = `${INVENTORY_API_URL}/v2/tracker/stats/total?nocache=false`;
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -1083,10 +1077,9 @@ export async function fetchRobberyServerRegionStats(): Promise<RobberyServerRegi
     if (!INVENTORY_API_URL) {
       throw new Error("Missing INVENTORY_API_URL");
     }
-    const url = `${INVENTORY_API_URL}/servers/regions/common`;
+    const url = `${INVENTORY_API_URL}/v2/servers/regions/common`;
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -1124,10 +1117,9 @@ export async function fetchMostDuplicatedItems(): Promise<DuplicatedItem[]> {
     if (!INVENTORY_API_URL) {
       throw new Error("Missing INVENTORY_API_URL");
     }
-    const url = `${INVENTORY_API_URL}/items/duplicates`;
+    const url = `${INVENTORY_API_URL}/v2/items/duplicates`;
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -1272,7 +1264,7 @@ export async function fetchItemScanCount(itemId: number): Promise<{
 
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/items/${itemId}/scans/count`,
+      `${INVENTORY_API_URL}/v2/items/${itemId}/scans/count`,
       {
         headers: { "X-Source": INVENTORY_API_SOURCE_HEADER },
       },
@@ -1480,24 +1472,35 @@ export function flattenComments(
   return { comments, userMap };
 }
 
-export type InventoryUser = { id: string } | { username: string };
+export const inventoryUserPath = (user: string) =>
+  encodeURIComponent(
+    /^\d+$/.test(user) || user.startsWith("@") ? user : `@${user}`,
+  );
 
-const inventoryUserParam = (user: InventoryUser, idKey = "id") =>
-  "id" in user
-    ? `${idKey}=${encodeURIComponent(user.id)}`
-    : `username=${encodeURIComponent(user.username)}`;
+function inventoryUsernameError(
+  user: string,
+  body: { detail?: { error?: string; message?: string } } | null,
+) {
+  const code = body?.detail?.error;
+  if (code !== "username_not_found" && code !== "username_lookup_failed")
+    return null;
+  const name = user.length > 50 ? `${user.substring(0, 47)}...` : user;
+  return {
+    error: code,
+    message:
+      code === "username_not_found"
+        ? `Username "${name}" not found. Please check the spelling and try again.`
+        : `Server error while searching for "${name}". Please try searching by Roblox ID instead, or try again later.`,
+  };
+}
 
-const usernameLabel = (username: string) =>
-  username.length > 50 ? `${username.substring(0, 47)}...` : username;
-
-export async function fetchInventoryData(user: InventoryUser) {
+export async function fetchInventoryData(user: string) {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/user?${inventoryUserParam(user)}`,
+      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}`,
       {
         credentials: "include",
         headers: {
-          "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
@@ -1506,26 +1509,14 @@ export async function fetchInventoryData(user: InventoryUser) {
     if (!response.ok) {
       const body = (await response.json().catch(() => null)) as {
         detail?: { error?: string };
+        user_id?: string;
       } | null;
-      if ("username" in user && body?.detail?.error === "username_not_found") {
-        return {
-          error: "username_not_found",
-          message: `Username "${usernameLabel(user.username)}" not found. Please check the spelling and try again.`,
-        };
-      }
-      if (
-        "username" in user &&
-        body?.detail?.error === "username_lookup_failed"
-      ) {
-        return {
-          error: "username_lookup_failed",
-          message: `Server error while searching for "${usernameLabel(user.username)}". Please try searching by Roblox ID instead, or try again later.`,
-        };
-      }
+      const usernameError = inventoryUsernameError(user, body);
+      if (usernameError) return usernameError;
 
       if (response.status !== 404 && response.status !== 500) {
         log.error(
-          `fetchInventoryData: API returned ${response.status} for ${inventoryUserParam(user)}`,
+          `fetchInventoryData: API returned ${response.status} for ${inventoryUserPath(user)}`,
         );
       }
 
@@ -1533,6 +1524,7 @@ export async function fetchInventoryData(user: InventoryUser) {
         return {
           error: "not_found",
           message: "Inventory not found for this user.",
+          user_id: body?.user_id,
         };
       }
 
@@ -1586,28 +1578,28 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
   try {
     // Validate input
     if (!userIds || userIds.length === 0) {
-      return { data: [] };
+      return {};
     }
 
-    // Filter out any invalid IDs and convert to numbers
-    const validUserIds = userIds
-      .filter((id) => id && typeof id === "string" && /^\d+$/.test(id))
-      .map((id) => parseInt(id, 10));
+    // Filter out invalid IDs before calling the batch endpoint
+    const validUserIds = userIds.filter(
+      (id) => id && typeof id === "string" && /^\d+$/.test(id),
+    );
 
     if (validUserIds.length === 0) {
       log.warn("fetchRobloxUsersBatch: No valid userIds found after filtering");
-      return { data: [] };
+      return {};
     }
 
     try {
-      const response = await fetch(`${INVENTORY_API_URL}/proxy/users/v2`, {
+      const response = await fetch(`${INVENTORY_API_URL}/v2/users/batch`, {
+        // POST keeps large owner batches out of URL limits.
         method: "POST",
+        body: JSON.stringify({ ids: validUserIds.map(Number) }),
         headers: {
-          "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
           "Content-Type": "application/json",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
-        body: JSON.stringify({ userIds: validUserIds }),
       });
 
       if (!response.ok) {
@@ -1616,7 +1608,7 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
           url: response.url,
           ids: validUserIds.length,
         });
-        return { data: [] };
+        return {};
       }
 
       const data = await response.json();
@@ -1646,9 +1638,9 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
     }
 
     // Filter out any invalid IDs
-    const validUserIds = userIds
-      .filter((id) => id && typeof id === "string" && /^\d+$/.test(id))
-      .map((id) => parseInt(id, 10));
+    const validUserIds = userIds.filter(
+      (id) => id && typeof id === "string" && /^\d+$/.test(id),
+    );
 
     if (validUserIds.length === 0) {
       log.warn(
@@ -1658,14 +1650,14 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
     }
 
     try {
-      const response = await fetch(`${INVENTORY_API_URL}/proxy/users/v2`, {
+      const response = await fetch(`${INVENTORY_API_URL}/v2/users/batch`, {
+        // POST keeps large owner batches out of URL limits.
         method: "POST",
+        body: JSON.stringify({ ids: validUserIds.map(Number) }),
         headers: {
-          "User-Agent": "JailbreakChangelogs-Leaderboard/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
           "Content-Type": "application/json",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
-        body: JSON.stringify({ userIds: validUserIds }),
       });
 
       if (!response.ok) {
@@ -1729,9 +1721,8 @@ export interface NetworthLeaderboardEntry {
 
 export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/items/count`, {
+    const response = await fetch(`${INVENTORY_API_URL}/v2/items/count`, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -1759,9 +1750,8 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
 
 export async function fetchTradeCountStats(): Promise<TradeCountStats | null> {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/trades/count`, {
+    const response = await fetch(`${INVENTORY_API_URL}/v2/trades/count`, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
       cache: "no-store",
@@ -1788,9 +1778,8 @@ export async function fetchTradeCountStats(): Promise<TradeCountStats | null> {
 
 export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/users/scans`, {
+    const response = await fetch(`${INVENTORY_API_URL}/v2/leaderboards/scans`, {
       headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
@@ -1828,15 +1817,14 @@ export interface UserNetworthData {
 }
 
 export async function fetchUserNetworth(
-  user: InventoryUser,
+  user: string,
 ): Promise<UserNetworthData[]> {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/user/networth?${inventoryUserParam(user)}`,
+      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}/networth/history`,
       {
         credentials: "include",
         headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
@@ -1865,15 +1853,14 @@ export interface MoneyHistory {
 }
 
 export async function fetchUserMoneyHistory(
-  user: InventoryUser,
+  user: string,
 ): Promise<MoneyHistory[]> {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/money/history?${inventoryUserParam(user, "user_id")}`,
+      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}/money/history`,
       {
         credentials: "include",
         headers: {
-          "User-Agent": "JailbreakChangelogs-MoneyHistory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
@@ -1965,7 +1952,6 @@ export async function fetchConnectedBots({
 
       const response = await fetch(`${INVENTORY_API_URL}/bots/connected`, {
         headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
         signal: AbortSignal.timeout(10000),
@@ -2050,7 +2036,6 @@ export async function fetchQueueInfo({
 
       const response = await fetch(`${INVENTORY_API_URL}/queue/info`, {
         headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
         signal: AbortSignal.timeout(10000),
@@ -2103,102 +2088,22 @@ export async function fetchQueueInfo({
   return null;
 }
 
-// Custom error class for max streams error
-export class MaxStreamsError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "MaxStreamsError";
-  }
-}
-
-export async function fetchRobloxUserByUsername(username: string) {
+export async function fetchRobloxUserProfile(
+  user: string,
+): Promise<RobloxUser | null> {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/proxy/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-      body: JSON.stringify({
-        usernames: [username],
-        excludeBannedUsers: false,
-      }),
-    });
-
-    if (!response.ok) {
-      // Try to read the response body to check for specific error messages
-      let errorMessage = `Failed to fetch user: ${response.status}`;
-      let responseText = "";
-
-      try {
-        responseText = await response.text();
-        // Try to parse as JSON if possible
-        try {
-          const errorData = JSON.parse(responseText);
-          if (errorData.error || errorData.message) {
-            errorMessage = errorData.error || errorData.message;
-          } else if (typeof errorData === "string") {
-            errorMessage = errorData;
-          }
-        } catch {
-          // If not JSON, use the text directly
-          // If not JSON, use the text directly but avoid logging HTML
-          if (responseText) {
-            if (responseText.trim().startsWith("<")) {
-              errorMessage =
-                "Received HTML response (likely proxy/gateway error page)";
-            } else {
-              errorMessage = responseText;
-            }
-          }
-        }
-      } catch (parseError) {
-        // If we can't read the response, use the status-based error
-        log.error(
-          "fetchRobloxUserByUsername: Failed to parse error response",
-          parseError,
-        );
-      }
-
-      log.error(
-        `fetchRobloxUserByUsername: Failed with status ${response.status} ${response.statusText}`,
-        errorMessage,
-      );
-
-      // Check for the specific "Max outbound streams" error
-      // The error can appear in various formats:
-      // - "Request error: Max outbound streams is 100, 100 open"
-      // - "Max outbound streams is 100, 100 open"
-      // - "Max outbound streams"
-      const maxStreamsPattern = /max\s+outbound\s+streams/i;
-      if (
-        response.status === 500 &&
-        (maxStreamsPattern.test(errorMessage) ||
-          maxStreamsPattern.test(responseText))
-      ) {
-        throw new MaxStreamsError(
-          "Max outbound streams is 100, 100 open. Please use Roblox ID instead of username for now.",
-        );
-      }
-
-      throw new Error(errorMessage);
-    }
-
-    const data = await response.json();
-
-    if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-      return withUsernameFallback(data.data[0]);
-    } else {
-      return null;
-    }
-  } catch (err) {
-    log.error(
-      "fetchRobloxUserByUsername: Error fetching user by username",
-      err,
+    const response = await fetch(
+      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}/profile`,
+      { headers: { "X-Source": INVENTORY_API_SOURCE_HEADER } },
     );
-    // Re-throw the error so it can be properly handled upstream
-    throw err;
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!data || typeof data.id !== "number" || typeof data.name !== "string")
+      return null;
+    return withUsernameFallback({ ...data, username: data.name });
+  } catch (error) {
+    log.error("Failed to fetch Roblox profile", error);
+    return null;
   }
 }
 
@@ -2250,11 +2155,10 @@ export async function fetchOGSearchData(
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const response = await fetch(
-        `${INVENTORY_API_URL}/search?username=${robloxId}`,
+        `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(robloxId)}/original-items`,
         {
           credentials: "include",
           headers: {
-            "User-Agent": "JailbreakChangelogs-OGFinder/1.0",
             "X-Source": INVENTORY_API_SOURCE_HEADER,
           },
           signal: controller.signal,
@@ -2264,7 +2168,9 @@ export async function fetchOGSearchData(
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
+        const body = await response.json().catch(() => null);
+        const usernameError = inventoryUsernameError(robloxId, body);
+        if (usernameError) return usernameError;
         log.error(
           `fetchOGSearchData: API returned ${response.status} for ID: ${robloxId} (attempt ${attempt + 1})`,
           { status: response.status, body },
@@ -2671,10 +2577,9 @@ export async function fetchNetworthCapHistory(): Promise<
 > {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/networth/cap/history?limit=30`,
+      `${INVENTORY_API_URL}/v2/networth-cap/history?limit=30`,
       {
         headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       },
@@ -2693,10 +2598,9 @@ export async function fetchNetworthCapHistory(): Promise<
 
 export async function fetchNetworthCap(): Promise<NetworthCapStats | null> {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/networth/cap`, {
+    const response = await fetch(`${INVENTORY_API_URL}/v2/networth-cap`, {
       next: { revalidate: 10800 }, // Revalidate every 3 hours
       headers: {
-        "User-Agent": "JailbreakChangelogs-HomepageStats/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
@@ -2719,17 +2623,15 @@ export async function fetchNetworthCap(): Promise<NetworthCapStats | null> {
 export async function fetchHomepageImpactStats(): Promise<HomepageImpactStats | null> {
   try {
     const [countResponse, duplicatesResponse] = await Promise.all([
-      fetch(`${INVENTORY_API_URL}/items/count`, {
+      fetch(`${INVENTORY_API_URL}/v2/items/count`, {
         next: { revalidate: 10800 }, // Revalidate every 3 hours
         headers: {
-          "User-Agent": "JailbreakChangelogs-HomepageImpactStats/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       }),
-      fetch(`${INVENTORY_API_URL}/items/duplicates/count`, {
+      fetch(`${INVENTORY_API_URL}/v2/items/duplicates/count`, {
         next: { revalidate: 10800 }, // Revalidate every 3 hours
         headers: {
-          "User-Agent": "JailbreakChangelogs-HomepageImpactStats/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
         },
       }),

@@ -5,9 +5,8 @@ import {
   fetchInventoryData,
   fetchUserNetworth,
   fetchUserMoneyHistory,
+  fetchRobloxUserProfile,
 } from "@/utils/api/api";
-import { UserDataService } from "@/services/userDataService";
-import { useResolvedRobloxId } from "@/hooks/useResolvedRobloxId";
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import { fetchUserConnection } from "./userConnection";
 import type { InventoryData } from "./types";
@@ -29,11 +28,10 @@ export default function InventoryDataLoader({
   const inventoryQuery = useQuery({
     queryKey: ["inventory", input],
     queryFn: async () => {
-      const user = isUsername ? { username: input } : { id: input };
       const [result, networth, moneyHistory] = await Promise.all([
-        fetchInventoryData(user),
-        fetchUserNetworth(user),
-        fetchUserMoneyHistory(user),
+        fetchInventoryData(input),
+        fetchUserNetworth(input),
+        fetchUserMoneyHistory(input),
       ]);
       return { result, networth, moneyHistory };
     },
@@ -41,7 +39,7 @@ export default function InventoryDataLoader({
   });
   const result = inventoryQuery.data?.result as
     | InventoryData
-    | { error: string; message?: string }
+    | { error: string; message?: string; user_id?: string }
     | undefined;
   const errorCode = result && "error" in result ? result.error : undefined;
   const errorMessage =
@@ -55,11 +53,10 @@ export default function InventoryDataLoader({
     errorMessage?.includes("Inventory not found for this user."),
   );
 
-  const lookup = useResolvedRobloxId(input, isNotFound);
-  const resolvedId = hasInventory
-    ? String((result as InventoryData).user_id)
-    : isNotFound
-      ? lookup.id
+  const resolvedId = result?.user_id
+    ? String(result.user_id)
+    : isNotFound && !isUsername
+      ? input
       : undefined;
 
   const connectionQuery = useQuery({
@@ -70,11 +67,7 @@ export default function InventoryDataLoader({
   });
   const usersQuery = useQuery({
     queryKey: ["inventory-owner", resolvedId],
-    queryFn: () =>
-      UserDataService.fetchUserData([resolvedId!], {
-        maxUsers: 1,
-        context: "INVENTORY",
-      }),
+    queryFn: () => fetchRobloxUserProfile(resolvedId!),
     enabled: hasInventory && Boolean(resolvedId),
     ...ONCE,
   });
@@ -88,19 +81,9 @@ export default function InventoryDataLoader({
       />
     );
   }
-  if (isNotFound && lookup.error) {
-    return (
-      <InventoryCheckerClient
-        robloxId={input}
-        originalSearchTerm={originalSearchTerm}
-        error={lookup.error}
-      />
-    );
-  }
 
   const isLoading =
     (!inventoryQuery.data && !inventoryQuery.isError) ||
-    (isNotFound && lookup.isPending) ||
     (hasInventory && (usersQuery.isPending || connectionQuery.isPending));
   if (isLoading) {
     return (
@@ -128,7 +111,9 @@ export default function InventoryDataLoader({
       initialData={result as InventoryData}
       robloxId={resolvedId}
       originalSearchTerm={originalSearchTerm}
-      robloxUsers={usersQuery.data?.robloxUsers}
+      robloxUsers={
+        usersQuery.data && resolvedId ? { [resolvedId]: usersQuery.data } : {}
+      }
       userConnectionData={connectionQuery.data ?? null}
       initialNetworthData={inventoryQuery.data!.networth}
       initialMoneyHistoryData={inventoryQuery.data!.moneyHistory}

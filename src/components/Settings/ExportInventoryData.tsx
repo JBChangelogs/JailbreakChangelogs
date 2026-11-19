@@ -21,7 +21,7 @@ export const ExportInventoryData = ({ robloxId }: { robloxId?: string }) => {
       if (!INVENTORY_API_URL) throw new Error("Inventory API is unavailable.");
 
       const response = await fetch(
-        `${INVENTORY_API_URL}/user/export?token=${encodeURIComponent(token)}`,
+        `${INVENTORY_API_URL}/v2/me/exports?token=${encodeURIComponent(token)}`,
         { method: "POST" },
       );
 

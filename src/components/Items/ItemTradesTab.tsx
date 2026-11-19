@@ -43,7 +43,7 @@ function TradeAvatarImage({ userId }: { userId: string }) {
       ) : (
         <Image
           placeholder={IMAGE_PLACEHOLDER}
-          src={`${INVENTORY_API_URL}/proxy/users/${encodeURIComponent(userId)}/avatar-headshot`}
+          src={`${INVENTORY_API_URL}/v2/users/${encodeURIComponent(userId)}/avatar-headshot`}
           alt={`User ${userId} avatar`}
           width={40}
           height={40}
@@ -154,7 +154,7 @@ export default function ItemTradesTab({
       if (!INVENTORY_API_URL) throw new Error("Inventory API is unavailable");
 
       const response = await fetch(
-        `${INVENTORY_API_URL}/trades/item/${itemId}?limit=50`,
+        `${INVENTORY_API_URL}/v2/items/${itemId}/trades?limit=50`,
         {
           headers: { "X-Source": INVENTORY_API_SOURCE_HEADER ?? "" },
           cache: "no-store",

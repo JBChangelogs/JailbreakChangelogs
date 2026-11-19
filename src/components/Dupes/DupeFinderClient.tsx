@@ -85,7 +85,7 @@ export default function DupeFinderClient({
     return user?.name || userId;
   };
   const getUserAvatar = (userId: string) =>
-    `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+    `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/v2/users/${userId}/avatar-headshot`;
 
   // Derive loading state from props instead of managing in effects
   const isLoading = externalIsLoading && !initialData && !error;

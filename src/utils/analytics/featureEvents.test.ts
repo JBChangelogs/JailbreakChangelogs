@@ -63,12 +63,9 @@ function setupScope(overrides: Record<string, unknown> = {}) {
     },
     log: { error: () => {} },
     router: { push: (path: string) => navigation.push(path) },
-    MaxStreamsError: class extends Error {},
     setIsLoading: () => {},
     setIsSearching: () => {},
     setIsSuggestionsOpen: () => {},
-    setSearchError: () => {},
-    getRobloxId: async () => "123",
     setSubmitting: () => {},
     setRateLimitUntil: () => {},
     ...overrides,
@@ -102,30 +99,15 @@ test("search submissions record input type without sending the query", async () 
   }
 });
 
-test("search lookup failures report stable codes", async () => {
-  for (const [file, handler, feature] of [
+test("username searches navigate directly without a preliminary lookup", async () => {
+  for (const [file, handler, route] of [
     ["components/OG/OGFinderResults.tsx", "handleSearch", "og"],
-    ["components/Dupes/DupeSearchInput.tsx", "performSearch", "dupe"],
+    ["components/Dupes/DupeSearchInput.tsx", "performSearch", "dupes"],
   ]) {
-    for (const code of ["user_not_found", "lookup_failed", "lookup_busy"]) {
-      const app = setupScope();
-      app.scope.getRobloxId = async () => {
-        if (code === "user_not_found") return "";
-        if (code === "lookup_busy")
-          throw new app.scope.MaxStreamsError("private error");
-        throw new Error("private error");
-      };
-      const callback = loadCallback(file, handler, {
-        ...app.scope,
-        searchId: "PrivateUsername",
-      });
-      await callback("PrivateUsername");
-      expect(app.events.at(-1)).toEqual({
-        name: `${feature}_search_failed`,
-        props: { code },
-      });
-      expect(app.navigation).toHaveLength(0);
-    }
+    const app = setupScope();
+    await loadCallback(file, handler, app.scope)("@PrivateUsername");
+    expect(app.navigation).toEqual([`/${route}/%40PrivateUsername`]);
+    expect(app.events).toHaveLength(1);
   }
 });
 

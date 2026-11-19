@@ -33,7 +33,7 @@ export const DeleteInventoryData = ({
       if (!INVENTORY_API_URL) throw new Error("Inventory API is unavailable.");
 
       const response = await fetch(
-        `${INVENTORY_API_URL}/user/data?token=${encodeURIComponent(token)}`,
+        `${INVENTORY_API_URL}/v2/me/data?token=${encodeURIComponent(token)}`,
         { method: "DELETE" },
       );
       const result = await readInventoryJobResponse(
