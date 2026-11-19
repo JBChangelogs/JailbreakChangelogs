@@ -1,9 +1,5 @@
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { fetchUserScansLeaderboard, UserScan } from "@/utils/api/api";
-import { createLogger } from "@/services/logger";
-
-const log = createLogger("INVENTORY");
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ConnectedBotsPolling from "@/components/ui/ConnectedBotsPolling";
@@ -79,9 +75,9 @@ export default async function InventoriesPage() {
 
           <ConnectedBotsPolling />
 
-          <Suspense fallback={<LeaderboardSkeleton />}>
-            <LeaderboardSection />
-          </Suspense>
+          <MostScannedLeaderboardClient
+            loadingFallback={<LeaderboardSkeleton />}
+          />
 
           <InventoryFAQ />
         </PremiumAwareLayout>
@@ -117,18 +113,4 @@ function LeaderboardSkeleton() {
       </div>
     </div>
   );
-}
-
-// Component for leaderboard section
-async function LeaderboardSection() {
-  let leaderboard: UserScan[] = [];
-
-  try {
-    leaderboard = await fetchUserScansLeaderboard();
-  } catch (error) {
-    log.error("[SERVER] Error in LeaderboardSection", error);
-    leaderboard = [];
-  }
-
-  return <MostScannedLeaderboardClient initialLeaderboard={leaderboard} />;
 }

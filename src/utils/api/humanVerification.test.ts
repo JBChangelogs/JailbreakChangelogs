@@ -30,7 +30,10 @@ function setup(responseUrl = "https://api.example.com/v2/users/me") {
       window,
       require: (name: string) => {
         if (name === "@/utils/api/api")
-          return { PUBLIC_API_URL: "https://api.example.com" };
+          return {
+            PUBLIC_API_URL: "https://api.example.com",
+            INVENTORY_API_URL: "https://inventory.example.com",
+          };
         if (name === "@/utils/api/apiDevToken") return {};
         if (name === "@/utils/api/siteBanInterceptor")
           return { observeSiteBanResponse };
@@ -81,7 +84,7 @@ test("API strings, URLs, Requests and relative paths retain ban observation", as
     expect(context.observeSiteBanResponse).toHaveBeenCalledWith(
       context.response,
     );
-    expect(context.listener).toHaveBeenCalledWith("reference");
+    expect(context.listener).toHaveBeenCalledWith("reference", undefined);
   }
 });
 
@@ -90,4 +93,37 @@ test("API redirects to another origin do not trigger ban observers", async () =>
   await context.window.fetch("https://api.example.com/redirect");
   expect(context.observeSiteBanResponse).not.toHaveBeenCalled();
   expect(context.listener).not.toHaveBeenCalled();
+});
+
+test("inventory API requests send cookies and a captcha 403 opens verification", async () => {
+  const challenge = {
+    detail: {
+      error: "challenge_required",
+      reason: "subnet_enumeration",
+      message: "Please complete human verification to continue.",
+    },
+  };
+  const cases = [
+    { status: 403, body: challenge, notify: true },
+    { status: 403, body: { detail: { error: "forbidden" } }, notify: false },
+    { status: 200, body: challenge, notify: false },
+  ];
+  for (const { status, body, notify } of cases) {
+    const context = setup();
+    const response = new Response(JSON.stringify(body), { status });
+    context.originalFetch.mockReturnValue(Promise.resolve(response));
+    const input = "https://inventory.example.com/user?id=1";
+    expect(await context.window.fetch(input, { method: "GET" })).toBe(response);
+    expect(context.originalFetch.mock.calls[0][1]).toEqual({
+      credentials: "include",
+      method: "GET",
+    });
+    expect(context.observeSiteBanResponse).not.toHaveBeenCalled();
+    if (notify)
+      expect(context.listener).toHaveBeenCalledWith(
+        null,
+        "Please complete human verification to continue.",
+      );
+    else expect(context.listener).not.toHaveBeenCalled();
+  }
 });

@@ -1,48 +1,41 @@
-import {
-  fetchDupeFinderData,
-  fetchRobloxUserByUsername,
-  fetchRobloxUsersBatch,
-  MaxStreamsError,
-} from "@/utils/api/api";
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { fetchDupeFinderData } from "@/utils/api/api";
+import { UserDataService } from "@/services/userDataService";
+import { useResolvedRobloxId } from "@/hooks/useResolvedRobloxId";
 import DupeFinderClient from "./DupeFinderClient";
-import { createLogger } from "@/services/logger";
 
-const log = createLogger("INVENTORY");
+const ONCE = { staleTime: Infinity, refetchOnWindowFocus: false } as const;
 
-interface DupeFinderDataStreamerProps {
+export default function DupeFinderDataStreamer({
+  robloxId,
+}: {
   robloxId: string;
-}
+}) {
+  const {
+    id,
+    error: usernameError,
+    isUsername,
+  } = useResolvedRobloxId(robloxId);
+  const originalSearchTerm = isUsername ? robloxId : undefined;
 
-// Component that fetches dupe finder data
-async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
-  // Check if the input is a username (not a number) or a Roblox ID
-  const isUsername = !/^\d+$/.test(robloxId);
+  const dupesQuery = useQuery({
+    queryKey: ["dupe-finder", id],
+    queryFn: () => fetchDupeFinderData(id!),
+    enabled: Boolean(id),
+    ...ONCE,
+  });
+  const result = dupesQuery.data;
+  const hasDupes = Array.isArray(result);
+  const usersQuery = useQuery({
+    queryKey: ["dupe-finder-owner", id],
+    queryFn: () =>
+      UserDataService.fetchUserData([id!], { maxUsers: 1, context: "DUPES" }),
+    enabled: hasDupes,
+    ...ONCE,
+  });
 
-  let actualRobloxId = robloxId;
-  let usernameError: string | null = null;
-
-  // If it's a username, try to get the Roblox ID first
-  if (isUsername) {
-    try {
-      const userData = await fetchRobloxUserByUsername(robloxId);
-      if (userData && userData.id) {
-        actualRobloxId = userData.id.toString();
-      } else {
-        usernameError = `Username "${robloxId}" not found. Please check the spelling and try again.`;
-      }
-    } catch (error) {
-      log.error("Error fetching user by username:", error);
-
-      // Check for max streams error - this is a temporary server issue
-      if (error instanceof MaxStreamsError) {
-        usernameError = `Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.`;
-      } else {
-        usernameError = `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`;
-      }
-    }
-  }
-
-  // Return error component if username lookup failed
   if (usernameError) {
     return (
       <DupeFinderClient
@@ -55,97 +48,42 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     );
   }
 
-  const result = await fetchDupeFinderData(actualRobloxId);
-
-  // Check if the result contains an error
-  if (result && "error" in result) {
-    // Distinguish between different error types
-    if (result.error === "No recorded dupes found for this user.") {
-      // User exists but has no dupes - show success message with user info
-      return (
-        <DupeFinderClient
-          robloxId={actualRobloxId}
-          error={result.error}
-          isUserFound={true}
-          items={[]}
-          originalSearchTerm={isUsername ? robloxId : undefined}
-        />
-      );
-    } else {
-      // Other errors (user doesn't exist, API issues, etc.)
-      return (
-        <DupeFinderClient
-          robloxId={actualRobloxId}
-          error={result.error}
-          isUserFound={false}
-          items={[]}
-          originalSearchTerm={isUsername ? robloxId : undefined}
-        />
-      );
-    }
+  if (!dupesQuery.isFetched || (hasDupes && usersQuery.isPending)) {
+    return <DupeFinderClient isLoading={true} originalSearchTerm={robloxId} />;
   }
 
-  // Check if no data was returned (shouldn't happen with proper API)
-  if (!result || !Array.isArray(result)) {
+  if (result && "error" in result) {
     return (
       <DupeFinderClient
-        robloxId={actualRobloxId}
-        error="No dupe data found for this user."
-        isUserFound={true}
+        robloxId={id}
+        error={result.error}
+        isUserFound={result.error === "No recorded dupes found for this user."}
         items={[]}
-        originalSearchTerm={isUsername ? robloxId : undefined}
+        originalSearchTerm={originalSearchTerm}
       />
     );
   }
 
-  const mainUserData = await fetchRobloxUsersBatch([actualRobloxId]).catch(
-    (error) => {
-      log.error("Failed to fetch main user data:", error);
-      return {};
-    },
-  );
-
-  // Build the user data objects with just the main user
-  const robloxUsers: Record<string, import("@/types").RobloxUser> = {};
-
-  // Add main user data
-  if (mainUserData && typeof mainUserData === "object") {
-    Object.values(mainUserData).forEach((userData) => {
-      const user = userData as {
-        id: number;
-        name: string;
-        displayName: string;
-        username: string;
-        hasVerifiedBadge: boolean;
-      };
-      if (user && user.id) {
-        robloxUsers[user.id.toString()] = {
-          id: user.id,
-          name: user.name,
-          displayName: user.displayName,
-          username: user.username,
-          hasVerifiedBadge: user.hasVerifiedBadge,
-        };
-      }
-    });
+  if (!hasDupes) {
+    return (
+      <DupeFinderClient
+        robloxId={id}
+        error="No dupe data found for this user."
+        isUserFound={true}
+        items={[]}
+        originalSearchTerm={originalSearchTerm}
+      />
+    );
   }
-
-  // Avatars are now handled client-side with direct URLs
 
   return (
     <DupeFinderClient
-      robloxId={actualRobloxId}
+      robloxId={id}
       initialData={result}
       isUserFound={true}
-      robloxUsers={robloxUsers}
+      robloxUsers={usersQuery.data?.robloxUsers ?? {}}
       items={[]}
-      originalSearchTerm={isUsername ? robloxId : undefined}
+      originalSearchTerm={originalSearchTerm}
     />
   );
-}
-
-export default function DupeFinderDataStreamer({
-  robloxId,
-}: DupeFinderDataStreamerProps) {
-  return <DupeFinderDataFetcher robloxId={robloxId} />;
 }

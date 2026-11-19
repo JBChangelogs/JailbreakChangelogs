@@ -44,7 +44,7 @@ interface OGItem {
   history?: string | Array<{ UserId: number; TradeTime: number }>;
 }
 
-interface OGSearchData {
+export interface OGSearchData {
   results: OGItem[];
   count: number;
   search_id: string;

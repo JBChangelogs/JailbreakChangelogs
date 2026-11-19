@@ -3,9 +3,8 @@
 import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { parseAsString, useQueryStates } from "nuqs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -95,13 +94,15 @@ const ChangelogComments = dynamic(
   },
 );
 
+const EMPTY_NETWORTH: UserNetworthData[] = [];
+const EMPTY_MONEY_HISTORY: MoneyHistory[] = [];
+
 interface InventoryCheckerClientProps {
   initialData?: InventoryData;
   robloxId?: string;
   originalSearchTerm?: string;
   robloxUsers?: Record<string, RobloxUser>;
   userConnectionData?: UserConnectionData | null;
-  initialDupeData?: unknown;
   currentSeason?: Season | null;
   error?: string;
   isLoading?: boolean;
@@ -125,8 +126,8 @@ export default function InventoryCheckerClient({
   initialComments = [],
   initialCommentUserMap = {},
   items = [],
-  initialNetworthData = [],
-  initialMoneyHistoryData = [],
+  initialNetworthData = EMPTY_NETWORTH,
+  initialMoneyHistoryData = EMPTY_MONEY_HISTORY,
 }: InventoryCheckerClientProps) {
   const [searchId, setSearchId] = useState(
     originalSearchTerm || robloxId || "",
@@ -138,8 +139,8 @@ export default function InventoryCheckerClient({
   const lastShownErrorRef = useRef<string | null>(null);
   const lastShownSuccessRef = useRef<string | null>(null);
 
-  const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
-  const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
+  const networthData = initialNetworthData;
+  const moneyHistoryData = initialMoneyHistoryData;
   const [{ tab: tabParam }, setTabParams] = useQueryStates(
     {
       tab: parseAsString.withDefault(""),
@@ -241,17 +242,20 @@ export default function InventoryCheckerClient({
   }, [originalSearchTerm, robloxId]);
 
   // Backend notifies once a scan is saved; reload in place if we're looking at that inventory.
-  const router = useRouter();
+  const queryClient = useQueryClient();
   useEffect(() => {
     if (!isOwnInventory || !robloxId) return;
     const onNotification = (e: Event) => {
       const { path } = (e as CustomEvent<{ path?: string }>).detail;
-      if (path === `/inventories/${robloxId}`) router.refresh();
+      if (path === `/inventories/${robloxId}`)
+        void queryClient.invalidateQueries({
+          queryKey: ["inventory"],
+        });
     };
     window.addEventListener("realtimeNotification", onNotification);
     return () =>
       window.removeEventListener("realtimeNotification", onNotification);
-  }, [isOwnInventory, robloxId, router]);
+  }, [isOwnInventory, robloxId, queryClient]);
 
   // Extract all user IDs from inventory data for batch fetching
   const allUserIds = useMemo(() => {

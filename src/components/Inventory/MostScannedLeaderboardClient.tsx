@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
@@ -8,7 +8,10 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useQuery } from "@tanstack/react-query";
-import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
+import {
+  fetchRobloxUsersBatchLeaderboard,
+  fetchUserScansLeaderboard,
+} from "@/utils/api/api";
 import { Icon } from "@/components/ui/IconWrapper";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
@@ -41,14 +44,22 @@ function LeaderboardAvatar({
   );
 }
 
+const EMPTY_LEADERBOARD: UserScan[] = [];
+
 interface MostScannedLeaderboardClientProps {
-  initialLeaderboard: UserScan[];
+  loadingFallback: ReactNode;
 }
 
 export default function MostScannedLeaderboardClient({
-  initialLeaderboard,
+  loadingFallback,
 }: MostScannedLeaderboardClientProps) {
   "use memo";
+  const { data: initialLeaderboard = EMPTY_LEADERBOARD, isPending } = useQuery({
+    queryKey: ["mostScannedLeaderboard"],
+    queryFn: fetchUserScansLeaderboard,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -74,9 +85,9 @@ export default function MostScannedLeaderboardClient({
       let allUserData: Record<string, unknown> = {};
 
       for (const batch of batches) {
-        const result = await fetchLeaderboardUserData(batch);
-        if (result.userData && typeof result.userData === "object") {
-          allUserData = { ...allUserData, ...result.userData };
+        const userData = await fetchRobloxUsersBatchLeaderboard(batch);
+        if (userData && typeof userData === "object") {
+          allUserData = { ...allUserData, ...userData };
         }
       }
 
@@ -145,6 +156,8 @@ export default function MostScannedLeaderboardClient({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [columnCount, virtualizer]);
+
+  if (isPending) return loadingFallback;
 
   if (!initialLeaderboard || initialLeaderboard.length === 0) {
     return (

@@ -106,7 +106,6 @@ test("search lookup failures report stable codes", async () => {
   for (const [file, handler, feature] of [
     ["components/OG/OGFinderResults.tsx", "handleSearch", "og"],
     ["components/Dupes/DupeSearchInput.tsx", "performSearch", "dupe"],
-    ["components/Inventory/SearchForm.tsx", "handleSubmit", "inventory"],
   ]) {
     for (const code of ["user_not_found", "lookup_failed", "lookup_busy"]) {
       const app = setupScope();
@@ -120,9 +119,7 @@ test("search lookup failures report stable codes", async () => {
         ...app.scope,
         searchId: "PrivateUsername",
       });
-      await callback(
-        feature === "inventory" ? { preventDefault() {} } : "PrivateUsername",
-      );
+      await callback("PrivateUsername");
       expect(app.events.at(-1)).toEqual({
         name: `${feature}_search_failed`,
         props: { code },

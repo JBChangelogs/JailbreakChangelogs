@@ -1,213 +1,113 @@
-import {
-  fetchOGSearchData,
-  fetchRobloxUserByUsername,
-  fetchRobloxUsersBatch,
-  fetchUserByRobloxId,
-  MaxStreamsError,
-} from "@/utils/api/api";
-import { RobloxUser } from "@/types";
-import OGFinderResults from "./OGFinderResults";
-import { createLogger } from "@/services/logger";
+"use client";
 
-const log = createLogger("OG");
+import { useQuery } from "@tanstack/react-query";
+import { fetchOGSearchData } from "@/utils/api/api";
+import { UserDataService } from "@/services/userDataService";
+import { useResolvedRobloxId } from "@/hooks/useResolvedRobloxId";
+import { fetchUserConnection } from "@/app/inventories/userConnection";
+import OGFinderResults, { type OGSearchData } from "./OGFinderResults";
+import OGFinderClient from "./OGFinderClient";
 
-interface OGSearchData {
-  results: Array<{
-    tradePopularMetric: number;
-    level: number | null;
-    timesTraded: number;
-    id: string;
-    categoryTitle: string;
-    info: Array<{
-      title: string;
-      value: string;
-    }>;
-    uniqueCirculation: number;
-    season: number | null;
-    title: string;
-    isOriginalOwner: boolean;
-    user_id: string;
-    logged_at: number;
-    history:
-      | string
-      | Array<{
-          UserId: number;
-          TradeTime: number;
-        }>;
-  }>;
-  count: number;
-}
+const ONCE = { staleTime: Infinity, refetchOnWindowFocus: false } as const;
 
-interface OGFinderDataStreamerProps {
-  robloxId: string;
-  verificationHeaders?: Record<string, string>;
-}
+// Hide these users' own infinite tire stickers from their OG results.
+const tireStickerFilteredUsers: Record<string, string> = {
+  "371668828": "NoobFreak",
+  "159606072": "HelloItsVG",
+};
 
-// Component that fetches OG search data
-async function OGFinderDataFetcher({
-  robloxId,
-  verificationHeaders,
-}: OGFinderDataStreamerProps) {
-  // Check if the input is a username (not a number) or a Roblox ID
-  const isUsername = !/^\d+$/.test(robloxId);
-
-  let actualRobloxId = robloxId;
-
-  // If it's a username, try to get the Roblox ID first
-  if (isUsername) {
-    let fetchError: string | null = null;
-    try {
-      const userData = await fetchRobloxUserByUsername(robloxId);
-      if (userData && userData.id) {
-        actualRobloxId = userData.id.toString();
-      } else {
-        fetchError = `Username "${robloxId}" not found. Please check the spelling and try again.`;
-      }
-    } catch (error) {
-      log.error("Error fetching user by username:", error);
-
-      // Check for max streams error - this is a temporary server issue
-      if (error instanceof MaxStreamsError) {
-        fetchError = `Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.`;
-      } else {
-        fetchError = `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`;
-      }
-    }
-
-    if (fetchError) {
-      return (
-        <OGFinderResults
-          robloxId={robloxId}
-          error={fetchError}
-          initialData={null}
-          robloxUsers={{}}
-          userConnectionData={null}
-          items={[]}
-          originalSearchTerm={robloxId}
-        />
-      );
-    }
-  }
-
-  const result = await fetchOGSearchData(actualRobloxId);
-
-  // Check if the result contains an error
-  if (result && "error" in result) {
-    return (
-      <OGFinderResults
-        robloxId={actualRobloxId}
-        error={result.message}
-        initialData={null}
-        robloxUsers={{}}
-        userConnectionData={null}
-        items={[]}
-        originalSearchTerm={isUsername ? robloxId : undefined}
-      />
-    );
-  }
-
-  // Check if no data was returned
-  if (!result) {
-    return (
-      <OGFinderResults
-        robloxId={actualRobloxId}
-        error="Failed to fetch OG search data. Please try again."
-        initialData={null}
-        robloxUsers={{}}
-        userConnectionData={null}
-        items={[]}
-        originalSearchTerm={isUsername ? robloxId : undefined}
-      />
-    );
-  }
-
-  // Filter out infinite tire stickers for specific user IDs
-  const tireStickerFilteredUsers: Record<string, string> = {
-    "371668828": "NoobFreak", // NoobFreak (371668828) filters out NoobFreak's tire sticker
-    "159606072": "HelloItsVG", // HelloItsVG (159606072) filters out HelloItsVG's tire sticker
-  };
-
-  if (
-    actualRobloxId in tireStickerFilteredUsers &&
-    result.results &&
-    Array.isArray(result.results)
-  ) {
-    const tireStickerName = tireStickerFilteredUsers[actualRobloxId];
-    let categoryTitle = "";
-
-    result.results = result.results.filter(
-      (item: OGSearchData["results"][0]) => {
-        const shouldFilter =
-          item.categoryTitle === "Tire Sticker" &&
-          item.title === tireStickerName;
-        if (shouldFilter) {
-          if (!categoryTitle) categoryTitle = item.categoryTitle;
-        }
-        return !shouldFilter;
-      },
-    );
-    result.count = result.results.length;
-  }
-
-  // Fetch main user data and connection data.
-  // Avatars are now handled client-side with direct URLs
-  // Item owners will be fetched client-side in batches
-  const [mainUserData, userConnectionData] = await Promise.all([
-    fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
-      log.error("Failed to fetch main user data:", error);
-      return {};
-    }),
-    fetchUserByRobloxId(actualRobloxId, verificationHeaders).catch((error) => {
-      log.error("Failed to fetch user connection data:", error);
-      return null;
-    }),
-  ]);
-
-  // Build the user data objects with just the main user
-  const robloxUsers: Record<string, RobloxUser> = {};
-
-  // Add main user data
-  if (mainUserData && typeof mainUserData === "object") {
-    Object.values(mainUserData).forEach((userData) => {
-      const user = userData as {
-        id: number;
-        name: string;
-        displayName: string;
-        username: string;
-        hasVerifiedBadge: boolean;
-      };
-      if (user && user.id) {
-        robloxUsers[user.id.toString()] = {
-          id: user.id,
-          name: user.name,
-          displayName: user.displayName,
-          username: user.username,
-          hasVerifiedBadge: user.hasVerifiedBadge,
-        };
-      }
-    });
-  }
-
-  return (
-    <OGFinderResults
-      initialData={result}
-      robloxId={actualRobloxId}
-      robloxUsers={robloxUsers}
-      userConnectionData={userConnectionData}
-      items={[]}
-      originalSearchTerm={isUsername ? robloxId : undefined}
-    />
+function withoutOwnTireSticker(
+  robloxId: string,
+  data: OGSearchData,
+): OGSearchData {
+  const name = tireStickerFilteredUsers[robloxId];
+  if (!name || !Array.isArray(data.results)) return data;
+  const results = data.results.filter(
+    (item) => !(item.categoryTitle === "Tire Sticker" && item.title === name),
   );
+  return { ...data, results, count: results.length };
 }
 
 export default function OGFinderDataStreamer({
   robloxId,
-  verificationHeaders,
-}: OGFinderDataStreamerProps) {
+}: {
+  robloxId: string;
+}) {
+  const {
+    id,
+    error: usernameError,
+    isUsername,
+  } = useResolvedRobloxId(robloxId);
+  const originalSearchTerm = isUsername ? robloxId : undefined;
+
+  const searchQuery = useQuery({
+    queryKey: ["og-search", id],
+    queryFn: () => fetchOGSearchData(id!),
+    enabled: Boolean(id),
+    ...ONCE,
+  });
+  const result = searchQuery.data;
+  const hasResults = Boolean(result) && !(result && "error" in result);
+  const usersQuery = useQuery({
+    queryKey: ["og-search-owner", id],
+    queryFn: () =>
+      UserDataService.fetchUserData([id!], { maxUsers: 1, context: "OG" }),
+    enabled: hasResults,
+    ...ONCE,
+  });
+  const connectionQuery = useQuery({
+    queryKey: ["og-search-connection", id],
+    queryFn: () => fetchUserConnection(id!),
+    enabled: hasResults,
+    ...ONCE,
+  });
+
+  const errorProps = {
+    initialData: null,
+    robloxUsers: {},
+    userConnectionData: null,
+    items: [],
+  };
+  if (usernameError) {
+    return (
+      <OGFinderResults
+        robloxId={robloxId}
+        error={usernameError}
+        originalSearchTerm={robloxId}
+        {...errorProps}
+      />
+    );
+  }
+
+  if (
+    !searchQuery.isFetched ||
+    (hasResults && (usersQuery.isPending || connectionQuery.isPending))
+  ) {
+    return <OGFinderClient isLoading={true} robloxId={robloxId} />;
+  }
+
+  if (!hasResults) {
+    return (
+      <OGFinderResults
+        robloxId={id!}
+        error={
+          (result && "error" in result && result.message) ||
+          "Failed to fetch OG search data. Please try again."
+        }
+        originalSearchTerm={originalSearchTerm}
+        {...errorProps}
+      />
+    );
+  }
+
   return (
-    <OGFinderDataFetcher
-      robloxId={robloxId}
-      verificationHeaders={verificationHeaders}
+    <OGFinderResults
+      initialData={withoutOwnTireSticker(id!, result as OGSearchData)}
+      robloxId={id!}
+      robloxUsers={usersQuery.data?.robloxUsers ?? {}}
+      userConnectionData={connectionQuery.data ?? null}
+      items={[]}
+      originalSearchTerm={originalSearchTerm}
     />
   );
 }

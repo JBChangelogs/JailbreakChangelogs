@@ -1,8 +1,9 @@
-import { PUBLIC_API_URL } from "@/utils/api/api";
+import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { observeSiteBanResponse } from "@/utils/api/siteBanInterceptor";
 
 const BAN_REFERENCE_HEADER = "Ban-Reference";
+const CHALLENGE_REQUIRED = "challenge_required";
 
 export interface BanReferenceDetails {
   reference: string;
@@ -12,7 +13,7 @@ export interface BanReferenceDetails {
   created_at: number | null;
 }
 
-type BanReferenceListener = (banRef: string) => void;
+type BanReferenceListener = (banRef: string | null, message?: string) => void;
 
 let banReferenceListener: BanReferenceListener | null = null;
 let isInterceptorInstalled = false;
@@ -27,19 +28,53 @@ export function subscribeBanReference(listener: BanReferenceListener) {
   };
 }
 
-function notifyBanReference(banRef: string) {
-  banReferenceListener?.(banRef);
+function notifyBanReference(banRef: string | null, message?: string) {
+  banReferenceListener?.(banRef, message);
 }
 
-function isPublicApiUrl(url: string | URL): boolean {
-  if (!PUBLIC_API_URL || !url) return false;
+function isApiUrl(apiUrl: string | undefined, url: string | URL): boolean {
+  if (!apiUrl || !url) return false;
 
   try {
-    const apiOrigin = new URL(PUBLIC_API_URL, window.location.href).origin;
+    const apiOrigin = new URL(apiUrl, window.location.href).origin;
     return new URL(url, window.location.href).origin === apiOrigin;
   } catch {
     return false;
   }
+}
+
+const isPublicApiUrl = (url: string | URL) => isApiUrl(PUBLIC_API_URL, url);
+const isInventoryApiUrl = (url: string | URL) =>
+  isApiUrl(INVENTORY_API_URL, url);
+
+function fetchInventoryApi(
+  originalFetch: typeof window.fetch,
+  input: RequestInfo | URL,
+  init?: RequestInit,
+) {
+  const withCookies =
+    input instanceof Request
+      ? init
+      : { credentials: "include" as const, ...init };
+  return originalFetch
+    .call(window, input, withCookies)
+    .then(async (response) => {
+      if (response.status !== 403) return response;
+      const banRef = response.headers.get(BAN_REFERENCE_HEADER);
+      const body = (await response
+        .clone()
+        .json()
+        .catch(() => null)) as {
+        detail?: { error?: unknown; message?: unknown };
+      } | null;
+      const message = body?.detail?.message;
+      if (banRef || body?.detail?.error === CHALLENGE_REQUIRED)
+        notifyBanReference(
+          banRef,
+          typeof message === "string" ? message : undefined,
+        );
+      return response;
+    });
 }
 
 export function installBanReferenceInterceptor(): () => void {
@@ -50,6 +85,8 @@ export function installBanReferenceInterceptor(): () => void {
   const originalFetch = window.fetch;
   const interceptedFetch = ((input: RequestInfo | URL, init?: RequestInit) => {
     const url = input instanceof Request ? input.url : input;
+    if (isInventoryApiUrl(url))
+      return fetchInventoryApi(originalFetch, input, init);
     if (!isPublicApiUrl(url)) {
       return originalFetch.call(window, input, init);
     }

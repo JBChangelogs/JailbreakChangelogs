@@ -1,8 +1,4 @@
-import {
-  fetchRobloxUsersBatch,
-  fetchUserByRobloxId,
-  fetchDupeFinderData,
-} from "@/utils/api/api";
+import { fetchRobloxUsersBatch, fetchUserByRobloxId } from "@/utils/api/api";
 import { RobloxUser } from "@/types";
 import {
   RobloxUsersResponse,
@@ -34,13 +30,11 @@ interface OGSearchData {
 export interface UserDataResult {
   robloxUsers: Record<string, RobloxUser>;
   userConnectionData?: UserConnectionData | null;
-  dupeData?: DupeFinderResponse;
 }
 
 export interface UserDataOptions {
   maxUsers?: number;
   includeUserConnection?: boolean;
-  includeDupeData?: boolean;
   context?: string; // For logging context (e.g., 'INVENTORY', 'DUPE_FINDER', 'OG_FINDER')
 }
 
@@ -86,7 +80,6 @@ export class UserDataService {
     const {
       maxUsers = this.DEFAULT_MAX_USERS,
       includeUserConnection = false,
-      includeDupeData = false,
       context = "UNKNOWN",
     } = options;
 
@@ -117,33 +110,21 @@ export class UserDataService {
       );
     }
 
-    if (includeDupeData && finalUserIds.length > 0) {
-      fetchPromises.push(
-        fetchDupeFinderData(finalUserIds[0]).catch((error) => {
-          log.error(`[${context}] Failed to fetch dupe data`, error);
-          return { error: "Failed to fetch dupe data" };
-        }),
-      );
-    }
-
     // Execute all fetches in parallel with graceful error handling
     const results = await Promise.allSettled(fetchPromises);
 
     // Extract successful results, providing defaults for failed ones
-    const [allUserData, userConnectionData, dupeData] = results.map(
-      (result, index) => {
-        if (result.status === "fulfilled") {
-          return result.value;
-        } else {
-          log.warn(`UserDataService: Promise ${index} failed`, result.reason);
-          // Return appropriate defaults based on the promise index
-          if (index === 0) return null; // user data
-          if (index === 1) return null; // user connection data
-          if (index === 2) return { error: "Failed to fetch dupe data" }; // dupe data
-          return null;
-        }
-      },
-    );
+    const [allUserData, userConnectionData] = results.map((result, index) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      } else {
+        log.warn(`UserDataService: Promise ${index} failed`, result.reason);
+        // Return appropriate defaults based on the promise index
+        if (index === 0) return null; // user data
+        if (index === 1) return null; // user connection data
+        return null;
+      }
+    });
 
     // Process user data
     const robloxUsers = this.processUserData(allUserData);
@@ -153,7 +134,6 @@ export class UserDataService {
       userConnectionData: includeUserConnection
         ? this.processUserConnectionData(userConnectionData)
         : undefined,
-      dupeData: includeDupeData ? this.processDupeData(dupeData) : undefined,
     };
   }
 
@@ -212,19 +192,6 @@ export class UserDataService {
     }
 
     return null;
-  }
-
-  /**
-   * Processes raw dupe finder data into the standardized DupeFinderResponse format
-   */
-  private static processDupeData(
-    dupeData: unknown,
-  ): DupeFinderResponse | undefined {
-    if (!dupeData || !Array.isArray(dupeData)) {
-      return undefined;
-    }
-
-    return dupeData as DupeFinderResponse;
   }
 
   /**

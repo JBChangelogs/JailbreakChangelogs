@@ -10,8 +10,12 @@ type Element = {
 
 function render(wide: boolean, search = "", length = 5) {
   const exports = {} as {
-    default: (props: { initialLeaderboard: unknown[] }) => Element;
+    default: (props: { loadingFallback: unknown }) => Element;
   };
+  const leaderboard = Array.from({ length }, (_, index) => ({
+    user_id: String(index + 1),
+    upsert_count: 1000 - index,
+  }));
   const jsx = (type: unknown, props: Element["props"]) => ({ type, props });
   runInNewContext(
     transpileModule(
@@ -40,13 +44,16 @@ function render(wide: boolean, search = "", length = 5) {
           return { useDebounce: (value: string) => value };
         if (name === "@tanstack/react-query")
           return {
-            useQuery: () => ({
-              data: {
-                userData: {
-                  "2": { name: "SecondPlayer", displayName: "Second" },
-                },
-              },
-            }),
+            useQuery: ({ queryKey }: { queryKey: unknown[] }) =>
+              queryKey[0] === "mostScannedLeaderboard"
+                ? { data: leaderboard, isPending: false }
+                : {
+                    data: {
+                      userData: {
+                        "2": { name: "SecondPlayer", displayName: "Second" },
+                      },
+                    },
+                  },
           };
         if (name === "@tanstack/react-virtual")
           return {
@@ -65,12 +72,7 @@ function render(wide: boolean, search = "", length = 5) {
       },
     },
   );
-  return exports.default({
-    initialLeaderboard: Array.from({ length }, (_, index) => ({
-      user_id: String(index + 1),
-      upsert_count: 1000 - index,
-    })),
-  });
+  return exports.default({ loadingFallback: null });
 }
 
 function nodes(value: unknown): Element[] {

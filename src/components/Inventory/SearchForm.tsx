@@ -5,9 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import { toast } from "sonner";
-import { MaxStreamsError } from "@/utils/api/api";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { trackWebEvent } from "@/utils/analytics/web";
 
@@ -23,16 +20,10 @@ export default function SearchForm({
   externalIsLoading,
 }: SearchFormProps) {
   const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { getId: getRobloxId } = useUsernameToId();
 
   const isLoading = isSearching || externalIsLoading;
-
-  useEffect(() => {
-    setSearchError(null);
-  }, [searchId]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -53,7 +44,7 @@ export default function SearchForm({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
@@ -62,39 +53,9 @@ export default function SearchForm({
       input_type: /^\d+$/.test(input) ? "id" : "username",
     });
     trackEvent("Inventory Search", { searchTerm: input });
-    setSearchError(null);
     setIsSearching(true);
 
-    if (/^\d+$/.test(input)) {
-      router.push(`/inventories/${input}`);
-      return;
-    }
-
-    try {
-      const resolvedId = await getRobloxId(input);
-      if (resolvedId) {
-        router.push(`/inventories/${input}`);
-      } else {
-        trackWebEvent("inventory_search_failed", { code: "user_not_found" });
-        setIsSearching(false);
-        const truncated =
-          input.length > 50 ? `${input.substring(0, 47)}...` : input;
-        const msg = `Username "${truncated}" not found. Please check the spelling and try again.`;
-        toast.error(msg);
-        setSearchError(msg);
-      }
-    } catch (err) {
-      trackWebEvent("inventory_search_failed", {
-        code: err instanceof MaxStreamsError ? "lookup_busy" : "lookup_failed",
-      });
-      setIsSearching(false);
-      const msg =
-        err instanceof MaxStreamsError
-          ? "Unable to search by username at this time. Please use the Roblox ID instead."
-          : "Server error while looking up username. Please try searching by Roblox ID instead.";
-      toast.error(msg);
-      setSearchError(msg);
-    }
+    router.push(`/inventories/${encodeURIComponent(input)}`);
   };
 
   return (
@@ -156,15 +117,6 @@ export default function SearchForm({
           </div>
         </div>
       </form>
-      {searchError && (
-        <div className="text-primary-text border-button-danger/30 bg-button-danger/10 -mt-4 flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm">
-          <Icon
-            icon="heroicons:exclamation-circle"
-            className="h-4 w-4 shrink-0"
-          />
-          {searchError}
-        </div>
-      )}
     </>
   );
 }

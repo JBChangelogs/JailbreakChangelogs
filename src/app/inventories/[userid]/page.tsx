@@ -1,7 +1,6 @@
-import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import InventoryCheckerClient from "../InventoryCheckerClient";
-import InventoryDataStreamer from "../InventoryDataStreamer";
+import InventoryDataLoader from "../InventoryDataLoader";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { checkInventoryMaintenanceMode } from "@/utils/api/maintenance";
@@ -12,6 +11,8 @@ import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import RelatedInventoryPages from "@/components/Inventory/RelatedInventoryPages";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { robots: { index: false, follow: true } };
 
 interface InventoryCheckerPageProps {
   params: Promise<{
@@ -77,18 +78,7 @@ export default async function InventoryCheckerPage({
         </div>
 
         <PremiumAwareLayout>
-          <Suspense
-            key={`inventory-detail-${userid}`}
-            fallback={
-              <InventoryCheckerClient
-                key={`inventory-detail-fallback-${userid}`}
-                robloxId={userid}
-                isLoading={true}
-              />
-            }
-          >
-            <InventoryDataStreamer robloxId={userid} />
-          </Suspense>
+          <InventoryDataLoader key={userid} robloxId={userid} />
         </PremiumAwareLayout>
       </div>
     </>

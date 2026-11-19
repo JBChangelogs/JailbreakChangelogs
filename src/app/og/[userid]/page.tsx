@@ -1,9 +1,6 @@
 import OGFinderDataStreamer from "@/components/OG/OGFinderDataStreamer";
-import { getServerVerificationHeaders } from "@/utils/api/routeAuth";
-import OGFinderClient from "@/components/OG/OGFinderClient";
 import OGFinderDescription from "@/components/OG/OGFinderDescription";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
@@ -53,14 +50,7 @@ export default async function OGFinderUserPage({
         <OGFinderDescription videoSlotId="og-detail-header-video" />
 
         <PremiumAwareLayout>
-          <Suspense
-            fallback={<OGFinderClient isLoading={true} robloxId={userid} />}
-          >
-            <OGFinderDataStreamer
-              robloxId={userid}
-              verificationHeaders={await getServerVerificationHeaders()}
-            />
-          </Suspense>
+          <OGFinderDataStreamer robloxId={userid} />
         </PremiumAwareLayout>
       </div>
     </>

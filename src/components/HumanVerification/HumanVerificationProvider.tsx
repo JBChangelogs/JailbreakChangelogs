@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import HumanVerificationModal from "@/components/HumanVerification/HumanVerificationModal";
 import {
   fetchBanReferenceDetails,
@@ -8,6 +9,7 @@ import {
   subscribeBanReference,
 } from "@/utils/api/humanVerification";
 
+const CAPTCHA_REASON = "Please confirm you're human to keep browsing.";
 const FALLBACK_REASON =
   "Your recent requests were temporarily blocked because they appeared automated.";
 
@@ -26,20 +28,24 @@ const INITIAL_STATE: HumanVerificationState = {
 };
 
 export default function HumanVerificationProvider() {
+  const queryClient = useQueryClient();
   const [state, setState] = useState(INITIAL_STATE);
+  const isActive = useRef(false);
   const activeBanRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = subscribeBanReference((banRef) => {
-      if (activeBanRef.current) return;
+    const unsubscribe = subscribeBanReference((banRef, message) => {
+      if (isActive.current) return;
 
+      isActive.current = true;
       activeBanRef.current = banRef;
       setState({
         isOpen: true,
         banRef,
-        reasonMessage: FALLBACK_REASON,
-        isLoadingReason: true,
+        reasonMessage: banRef ? FALLBACK_REASON : (message ?? CAPTCHA_REASON),
+        isLoadingReason: Boolean(banRef),
       });
+      if (!banRef) return;
 
       void fetchBanReferenceDetails(banRef)
         .then((details) => {
@@ -68,11 +74,13 @@ export default function HumanVerificationProvider() {
   }, []);
 
   const handleVerified = () => {
+    isActive.current = false;
     activeBanRef.current = null;
     setState(INITIAL_STATE);
+    void queryClient.invalidateQueries();
   };
 
-  return state.isOpen && state.banRef ? (
+  return state.isOpen ? (
     <HumanVerificationModal
       isOpen={state.isOpen}
       reasonMessage={state.reasonMessage}

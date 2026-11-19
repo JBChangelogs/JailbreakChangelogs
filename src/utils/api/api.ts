@@ -985,6 +985,7 @@ export async function fetchDupeFinderData(userId: string) {
   try {
     const url = `${INVENTORY_API_URL}/users/dupes?id=${userId}`;
     const response = await fetch(url, {
+      credentials: "include",
       headers: {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
@@ -1479,19 +1480,52 @@ export function flattenComments(
   return { comments, userMap };
 }
 
-export async function fetchInventoryData(robloxId: string) {
+export type InventoryUser = { id: string } | { username: string };
+
+const inventoryUserParam = (user: InventoryUser, idKey = "id") =>
+  "id" in user
+    ? `${idKey}=${encodeURIComponent(user.id)}`
+    : `username=${encodeURIComponent(user.username)}`;
+
+const usernameLabel = (username: string) =>
+  username.length > 50 ? `${username.substring(0, 47)}...` : username;
+
+export async function fetchInventoryData(user: InventoryUser) {
   try {
-    const response = await fetch(`${INVENTORY_API_URL}/user?id=${robloxId}`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
+    const response = await fetch(
+      `${INVENTORY_API_URL}/user?${inventoryUserParam(user)}`,
+      {
+        credentials: "include",
+        headers: {
+          "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
+      const body = (await response.json().catch(() => null)) as {
+        detail?: { error?: string };
+      } | null;
+      if ("username" in user && body?.detail?.error === "username_not_found") {
+        return {
+          error: "username_not_found",
+          message: `Username "${usernameLabel(user.username)}" not found. Please check the spelling and try again.`,
+        };
+      }
+      if (
+        "username" in user &&
+        body?.detail?.error === "username_lookup_failed"
+      ) {
+        return {
+          error: "username_lookup_failed",
+          message: `Server error while searching for "${usernameLabel(user.username)}". Please try searching by Roblox ID instead, or try again later.`,
+        };
+      }
+
       if (response.status !== 404 && response.status !== 500) {
         log.error(
-          `fetchInventoryData: API returned ${response.status} for ID: ${robloxId}`,
+          `fetchInventoryData: API returned ${response.status} for ${inventoryUserParam(user)}`,
         );
       }
 
@@ -1794,12 +1828,13 @@ export interface UserNetworthData {
 }
 
 export async function fetchUserNetworth(
-  robloxId: string,
+  user: InventoryUser,
 ): Promise<UserNetworthData[]> {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/user/networth?id=${robloxId}`,
+      `${INVENTORY_API_URL}/user/networth?${inventoryUserParam(user)}`,
       {
+        credentials: "include",
         headers: {
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
@@ -1830,12 +1865,13 @@ export interface MoneyHistory {
 }
 
 export async function fetchUserMoneyHistory(
-  userId: string,
+  user: InventoryUser,
 ): Promise<MoneyHistory[]> {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/money/history?user_id=${userId}`,
+      `${INVENTORY_API_URL}/money/history?${inventoryUserParam(user, "user_id")}`,
       {
+        credentials: "include",
         headers: {
           "User-Agent": "JailbreakChangelogs-MoneyHistory/1.0",
           "X-Source": INVENTORY_API_SOURCE_HEADER,
@@ -2216,6 +2252,7 @@ export async function fetchOGSearchData(
       const response = await fetch(
         `${INVENTORY_API_URL}/search?username=${robloxId}`,
         {
+          credentials: "include",
           headers: {
             "User-Agent": "JailbreakChangelogs-OGFinder/1.0",
             "X-Source": INVENTORY_API_SOURCE_HEADER,

@@ -1,7 +1,5 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import DupeFinderDataStreamer from "@/components/Dupes/DupeFinderDataStreamer";
-import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
@@ -88,13 +86,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         </div>
 
         <PremiumAwareLayout>
-          <Suspense
-            fallback={
-              <DupeFinderClient isLoading={true} originalSearchTerm={userid} />
-            }
-          >
-            <DupeFinderDataStreamer robloxId={userid} />
-          </Suspense>
+          <DupeFinderDataStreamer robloxId={userid} />
 
           <DupeFinderFAQ />
         </PremiumAwareLayout>
