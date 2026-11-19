@@ -86,7 +86,6 @@ export default function AirdropCard({
     lastJoined.location === airdrop.location &&
     lastJoined.color === airdrop.color,
   );
-  const showLastJoinedState = isLastJoined && !isJoining;
   const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
     isLastJoined ? lastJoined?.joinedAt : null,
     `airdrop-last-joined-${jobId || "unknown"}-${airdrop.location}-${airdrop.color}`,
@@ -185,7 +184,7 @@ export default function AirdropCard({
     <div
       className={cn(
         "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
-        showLastJoinedState && "bg-tertiary-bg",
+        isLastJoined && "bg-tertiary-bg",
       )}
     >
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
@@ -249,7 +248,7 @@ export default function AirdropCard({
 
           {/* Actions */}
           <div className="mt-2">
-            {showLastJoinedState && lastJoinedRelative && (
+            {isLastJoined && lastJoinedRelative && (
               <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
                 <span className="truncate">
                   Last joined {lastJoinedRelative}

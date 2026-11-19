@@ -187,7 +187,7 @@ export default function ServerBountyGroup({
             )}
           </div>
 
-          {isLastJoined && !isJoining && lastJoinedRelative && (
+          {isLastJoined && lastJoinedRelative && (
             <div className="border-status-success/30 bg-status-success/10 text-primary-text inline-flex max-w-full items-center self-start rounded-lg border px-2 py-1 text-xs font-semibold lg:self-end">
               Last joined {lastJoinedRelative}
             </div>

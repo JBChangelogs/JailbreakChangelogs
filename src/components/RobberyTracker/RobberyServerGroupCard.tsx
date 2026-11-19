@@ -75,7 +75,6 @@ function RobberyServerGroupCard({
   const { lastJoined, setLastJoined } =
     useRobberyTrackerLastJoinedServer(serverId);
   const isLastJoined = Boolean(serverId && lastJoined?.jobId === serverId);
-  const showLastJoinedState = isLastJoined && !isJoining;
 
   const latestTimestamp = useMemo(
     () =>
@@ -390,7 +389,7 @@ function RobberyServerGroupCard({
           )}
 
           <div className="mt-2">
-            {showLastJoinedState && lastJoined && (
+            {isLastJoined && lastJoined && (
               <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
                 <span className="truncate">
                   Last joined{" "}

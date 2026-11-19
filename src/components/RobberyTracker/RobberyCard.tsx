@@ -72,7 +72,6 @@ function RobberyCard({
   const timerId = `robbery-${robbery.marker_name}-${jobId}-${robbery.timestamp}`;
 
   const isLastJoined = Boolean(jobId && lastJoined?.jobId === jobId);
-  const showLastJoinedState = isLastJoined && !isJoining;
 
   // Check if this is a train with high progress
   const isTrainNearClose =
@@ -329,7 +328,7 @@ function RobberyCard({
           {/* Actions */}
           {jobId && (
             <div className="mt-2">
-              {showLastJoinedState && lastJoined && (
+              {isLastJoined && lastJoined && (
                 <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
                   <span className="truncate">
                     Last joined{" "}
