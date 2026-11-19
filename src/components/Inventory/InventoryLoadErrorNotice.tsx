@@ -38,6 +38,9 @@ export function InventoryLoadErrorNotice({
               Use Values List
             </Button>
           </div>
+          {message && (
+            <p className="text-secondary-text mt-2 text-sm">{message}</p>
+          )}
         </>
       ) : (
         <p className="text-secondary-text text-sm">

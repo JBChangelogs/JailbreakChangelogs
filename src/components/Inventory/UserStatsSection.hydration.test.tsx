@@ -13,6 +13,13 @@ test("inventory stats initially match across timezones and number locales", () =
     default: typeof import("./UserStatsSection").default;
   };
   const stub = () => null;
+  let queueResult: {
+    data?: { status: number; data: { position: number; delay: number } };
+    isFetching: boolean;
+    isFetched: boolean;
+    isError?: boolean;
+  } = { isFetching: true, isFetched: false };
+  let queueEnabled: boolean | undefined;
   const numberLocale = { value: "en-US" };
   let botName: string | undefined = "Scanner Bot";
   runInNewContext(
@@ -47,8 +54,15 @@ test("inventory stats initially match across timezones and number locales", () =
             }),
           };
         if (id.endsWith("timestamp")) return { formatMessageDate };
+        if (id.endsWith("api/api"))
+          return { INVENTORY_API_URL: "https://inventory.example" };
         if (id === "@tanstack/react-query")
-          return { useQuery: () => ({ data: undefined }) };
+          return {
+            useQuery: (options: { enabled: boolean }) => {
+              queueEnabled = options.enabled;
+              return queueResult;
+            },
+          };
         if (id.endsWith("useInventoryScanHistory"))
           return { useInventoryScanHistory: () => ({ data: undefined }) };
         if (id.endsWith("AuthContext"))
@@ -116,6 +130,31 @@ test("inventory stats initially match across timezones and number locales", () =
       React.createElement(exports.default, props),
     );
     expect(browserInitial).toBe(server);
+    expect(queueEnabled).toBe(true);
+    expect(server).toContain("Loading...");
+    expect(server).not.toContain("Not checked yet");
+    queueResult = {
+      isFetching: false,
+      isFetched: true,
+      data: { status: 200, data: { position: 0, delay: 1.8 } },
+    };
+    const queued = renderToStaticMarkup(
+      React.createElement(exports.default, props),
+    );
+    expect(queued).toContain("#0");
+    expect(queued).toContain("(~1.8 s)");
+    queueResult = {
+      isFetching: false,
+      isFetched: true,
+      data: { status: 404, data: { position: 0, delay: 0 } },
+    };
+    expect(
+      renderToStaticMarkup(React.createElement(exports.default, props)),
+    ).toContain("Not in scan queue");
+    queueResult = { isFetching: false, isFetched: true, isError: true };
+    expect(
+      renderToStaticMarkup(React.createElement(exports.default, props)),
+    ).not.toContain("Not checked yet");
     expect(server).toContain("1,234");
     expect(server).toContain("Last scanned by:");
     expect(server).toContain("https://www.roblox.com/users/456/profile");

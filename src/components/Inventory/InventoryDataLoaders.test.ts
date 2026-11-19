@@ -92,9 +92,11 @@ test("an unscanned inventory uses the API's user ID without another username loo
   const app = load("../../app/inventories/InventoryDataLoader.tsx", {
     inventory: {
       result: {
-        error: "not_found",
-        message: "Inventory not found for this user.",
+        error: "inventory_not_found",
+        message: "Inventory not found. In queue: position 0 (~1.8 s)",
         user_id: "123",
+        queue_position: 0,
+        queue_delay: 1.8,
       },
       networth: [],
       moneyHistory: [],
@@ -103,11 +105,33 @@ test("an unscanned inventory uses the API's user ID without another username loo
   const view = app.render({ robloxId: "v3kmw" });
   expect(view.props.robloxId).toBe("123");
   expect(view.props.originalSearchTerm).toBe("v3kmw");
-  expect(view.props.error).toBe("Inventory not found for this user.");
+  expect(view.props.errorCode).toBe("inventory_not_found");
+  expect(view.props.initialQueue).toEqual({ position: 0, delay: 1.8 });
+  expect(view.props.error).toBe(
+    "Inventory not found. In queue: position 0 (~1.8 s)",
+  );
   await app.queries[0].queryFn();
   expect(app.calls).toEqual([
     { name: "fetchInventoryData", input: "v3kmw" },
     { name: "fetchUserNetworth", input: "v3kmw" },
     { name: "fetchUserMoneyHistory", input: "v3kmw" },
   ]);
+});
+
+test("an unqueued missing inventory passes explicit null queue data", () => {
+  const app = load("../../app/inventories/InventoryDataLoader.tsx", {
+    inventory: {
+      result: {
+        error: "inventory_not_found",
+        message: "Inventory not found.",
+        user_id: "123",
+        queue_position: null,
+        queue_delay: null,
+      },
+    },
+  });
+  expect(app.render({ robloxId: "123" }).props.initialQueue).toEqual({
+    position: null,
+    delay: null,
+  });
 });

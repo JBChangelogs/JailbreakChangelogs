@@ -105,6 +105,8 @@ interface InventoryCheckerClientProps {
   userConnectionData?: UserConnectionData | null;
   currentSeason?: Season | null;
   error?: string;
+  errorCode?: string;
+  initialQueue?: { position: number | null; delay: number | null };
   isLoading?: boolean;
 
   initialComments?: CommentData[];
@@ -122,6 +124,8 @@ export default function InventoryCheckerClient({
   userConnectionData,
   currentSeason = null,
   error,
+  errorCode,
+  initialQueue,
   isLoading: externalIsLoading,
   initialComments = [],
   initialCommentUserMap = {},
@@ -196,9 +200,7 @@ export default function InventoryCheckerClient({
       : null;
   const shouldBypassTurnstile =
     Boolean(user?.flags?.some((f) => f.flag === "is_owner")) || false;
-  const isInventoryNotFoundError = Boolean(
-    error?.includes("Inventory not found for this user."),
-  );
+  const isInventoryNotFoundError = errorCode === "inventory_not_found";
   const reportedResult = useRef<string | null>(null);
   const resultCount = initialData?.data.length ?? 0;
   useEffect(() => {
@@ -451,7 +453,7 @@ export default function InventoryCheckerClient({
     if (queueQuery.error)
       log.error("Error fetching queue position:", queueQuery.error);
   }, [queueQuery.error]);
-  const queueData = queueQuery.data?.data;
+  const queueData = queueQuery.data?.data ?? initialQueue;
   const queuePosition =
     !queueQuery.isError &&
     queueQuery.data?.status !== 404 &&
@@ -464,7 +466,7 @@ export default function InventoryCheckerClient({
   const isLoadingQueuePosition = queueQuery.isFetching;
   const queueStatusMessage = queueQuery.isError
     ? "Failed to fetch queue position"
-    : queueQuery.data && !queuePosition
+    : (queueQuery.data || initialQueue) && !queuePosition
       ? queueData?.in_queue === false ||
         /not found in queue/i.test(queueData?.error || "")
         ? "Not in scan queue"
@@ -477,7 +479,7 @@ export default function InventoryCheckerClient({
 
   useEffect(() => {
     const shouldFetchOnLoad =
-      Boolean(robloxId) && Boolean(error) && !initialData;
+      Boolean(robloxId) && Boolean(error) && !initialData && !initialQueue;
     if (!shouldFetchOnLoad) {
       hasAutoFetchedQueueRef.current = false;
       return;
@@ -489,7 +491,7 @@ export default function InventoryCheckerClient({
 
     hasAutoFetchedQueueRef.current = true;
     fetchQueuePosition();
-  }, [robloxId, error, initialData, fetchQueuePosition]);
+  }, [robloxId, error, initialData, initialQueue, fetchQueuePosition]);
 
   // Handle scan status updates
   useEffect(() => {
@@ -781,9 +783,12 @@ export default function InventoryCheckerClient({
                 icon="material-symbols:inventory-2-rounded"
                 title="No inventory found yet"
                 description={
-                  isOwnInventory
-                    ? "Your inventory hasn’t been scanned yet. Join a trade server for an automatic scan. Manual scans require Supporter III."
-                    : "This user hasn’t been scanned by our bots yet. Inventories are updated automatically after a bot successfully scans their trade server."
+                  <>
+                    {isOwnInventory
+                      ? "Your inventory hasn’t been scanned yet. Join a trade server for an automatic scan. Manual scans require Supporter III."
+                      : "This user hasn’t been scanned by our bots yet. Inventories are updated automatically after a bot successfully scans their trade server."}
+                    <span className="mt-1 block">{error}</span>
+                  </>
                 }
                 tool="inventory"
                 profileLinks={

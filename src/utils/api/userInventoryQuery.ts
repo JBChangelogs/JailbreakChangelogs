@@ -5,11 +5,16 @@ import {
   inventoryUserPath,
 } from "@/utils/api/api";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+import {
+  inventoryNotFoundMessage,
+  type InventoryNotFoundResponse,
+} from "./inventoryNotFound";
 
 export class InventoryRequestError extends Error {
   constructor(
     message: string,
     public readonly status: number,
+    public readonly code?: string,
   ) {
     super(message);
     this.name = "InventoryRequestError";
@@ -17,7 +22,8 @@ export class InventoryRequestError extends Error {
 }
 
 export const isInventoryNotFound = (error: unknown): boolean =>
-  error instanceof InventoryRequestError && error.status === 404;
+  error instanceof InventoryRequestError &&
+  error.code === "inventory_not_found";
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -74,6 +80,20 @@ async function fetchUserInventory(
   if (!response) throw new Error("Failed to load inventory (no response)");
   const data: unknown = await response.json();
   if (!response.ok) {
+    const code =
+      data &&
+      typeof data === "object" &&
+      "error" in data &&
+      typeof data.error === "string"
+        ? data.error
+        : undefined;
+    if (code === "inventory_not_found") {
+      throw new InventoryRequestError(
+        inventoryNotFoundMessage(data as InventoryNotFoundResponse),
+        response.status,
+        code,
+      );
+    }
     const message =
       data &&
       typeof data === "object" &&
@@ -81,7 +101,7 @@ async function fetchUserInventory(
       typeof data.message === "string"
         ? data.message
         : `Failed to load inventory (${response.status})`;
-    throw new InventoryRequestError(message, response.status);
+    throw new InventoryRequestError(message, response.status, code);
   }
   return data;
 }

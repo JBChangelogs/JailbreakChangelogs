@@ -39,7 +39,13 @@ export default function InventoryDataLoader({
   });
   const result = inventoryQuery.data?.result as
     | InventoryData
-    | { error: string; message?: string; user_id?: string }
+    | {
+        error: string;
+        message?: string;
+        user_id?: string;
+        queue_position?: number | null;
+        queue_delay?: number | null;
+      }
     | undefined;
   const errorCode = result && "error" in result ? result.error : undefined;
   const errorMessage =
@@ -49,9 +55,7 @@ export default function InventoryDataLoader({
         ? "Failed to fetch inventory data. Please try again."
         : undefined;
   const hasInventory = Boolean(result) && !errorMessage;
-  const isNotFound = Boolean(
-    errorMessage?.includes("Inventory not found for this user."),
-  );
+  const isNotFound = errorCode === "inventory_not_found";
 
   const resolvedId = result?.user_id
     ? String(result.user_id)
@@ -102,6 +106,18 @@ export default function InventoryDataLoader({
         originalSearchTerm={originalSearchTerm}
         error={errorMessage}
         userConnectionData={connectionQuery.data ?? null}
+        errorCode={errorCode}
+        initialQueue={
+          isNotFound &&
+          result &&
+          "error" in result &&
+          result.queue_position !== undefined
+            ? {
+                position: result.queue_position,
+                delay: result.queue_delay ?? null,
+              }
+            : undefined
+        }
       />
     );
   }

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { INVENTORY_API_URL } from "@/utils/api/api";
 import {
-  InventoryRequestError,
+  isInventoryNotFound,
   userInventoryQueryOptions,
 } from "@/utils/api/userInventoryQuery";
 import Image from "next/image";
@@ -181,9 +181,7 @@ export default function ProfileInventoryTab({
     : !INVENTORY_API_URL
       ? "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing)."
       : (inventoryQuery.error?.message ?? null);
-  const isNotFound =
-    inventoryQuery.error instanceof InventoryRequestError &&
-    inventoryQuery.error.status === 404;
+  const isNotFound = isInventoryNotFound(inventoryQuery.error);
 
   const ownerIds = useMemo(
     () =>
@@ -386,7 +384,7 @@ export default function ProfileInventoryTab({
           }
           message={
             isNotFound
-              ? "This user's inventory could not be found."
+              ? (error ?? "This user's inventory could not be found.")
               : (error ?? "Something went wrong while loading the inventory.")
           }
           onRetry={

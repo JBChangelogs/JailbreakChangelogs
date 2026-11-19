@@ -193,7 +193,7 @@ export default function UserStatsSection({
   };
   const queueQuery = useQuery({
     queryKey: ["inventory-queue-position", userId],
-    enabled: false,
+    enabled: Boolean(INVENTORY_API_URL && userId),
     queryFn: async ({ signal }) => {
       const response = await fetch(
         `${INVENTORY_API_URL}/queue/position/${encodeURIComponent(userId)}`,
@@ -801,6 +801,7 @@ export default function UserStatsSection({
                       ) : queuePosition ? (
                         <span className="text-xs">
                           #{queuePosition.position.toLocaleString("en-US")}
+                          {` (~${queuePosition.delay} s)`}
                         </span>
                       ) : (
                         <span className="text-secondary-text text-xs">

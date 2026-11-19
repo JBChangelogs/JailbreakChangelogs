@@ -13,8 +13,11 @@ test("inventory v2 callers pass usernames directly and preserve errors and batch
         fetchRobloxUserProfile, fetchRobloxUsersBatch,
         fetchRobloxUsersBatchLeaderboard,
       } from "./src/utils/api/api.ts";
+      import { createElement } from "react";
+      import { renderToStaticMarkup } from "react-dom/server";
+      import { InventoryLoadErrorNotice } from "./src/components/Inventory/InventoryLoadErrorNotice.tsx";
       import { QueryClient } from "@tanstack/react-query";
-      import { userInventoryQueryOptions } from "./src/utils/api/userInventoryQuery.ts";
+      import { userInventoryQueryOptions, isInventoryNotFound } from "./src/utils/api/userInventoryQuery.ts";
 
       const calls = [];
       let body = [];
@@ -48,9 +51,29 @@ test("inventory v2 callers pass usernames directly and preserve errors and batch
         assert.equal((await fetchInventoryData("missing")).error, "username_not_found");
         assert.equal((await fetchOGSearchData("missing")).error, "username_not_found");
         assert.match((await fetchDupeFinderData("missing")).error, /Username.*not found/);
-        body = { error: "inventory_not_found", user_id: "123", queue_position: 1 };
-        assert.deepEqual(await fetchInventoryData("v3kmw"), {
-          error: "not_found", message: "Inventory not found for this user.", user_id: "123",
+        for (const [position, delay, expected] of [
+          [0, 0, "Inventory not found. In queue: position 0 (~0 s)"],
+          [4, 1.8, "Inventory not found. In queue: position 4 (~1.8 s)"],
+          [null, null, "Inventory not found."],
+        ]) {
+          body = { error: "inventory_not_found", message: "Inventory not found.", user_id: "123", queue_position: position, queue_delay: delay };
+          assert.deepEqual(await fetchInventoryData("v3kmw"), { ...body, message: expected });
+          const html = renderToStaticMarkup(createElement(InventoryLoadErrorNotice, {
+            notFound: true, message: expected, onUseValuesList: () => {},
+          }));
+          assert.ok(html.includes(expected));
+          assert.equal(html.includes("In queue:"), position !== null);
+          await assert.rejects(client.fetchQuery(userInventoryQueryOptions("123")), error => {
+            assert.equal(isInventoryNotFound(error), true);
+            assert.equal(error.message, expected);
+            return true;
+          });
+        }
+        body = { error: "user_not_found", message: "User not found." };
+        assert.equal((await fetchInventoryData("123")).error, "fetch_error");
+        await assert.rejects(client.fetchQuery(userInventoryQueryOptions("123")), error => {
+          assert.equal(isInventoryNotFound(error), false);
+          return true;
         });
         assert.equal((await fetchDupeFinderData("123")).error, "No recorded dupes found for this user.");
         status = 502;

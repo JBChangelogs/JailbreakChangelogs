@@ -1,3 +1,8 @@
+import {
+  inventoryNotFoundMessage,
+  type InventoryNotFoundResponse,
+} from "./inventoryNotFound";
+
 export interface Changelog {
   id: number;
   title: string;
@@ -1507,10 +1512,12 @@ export async function fetchInventoryData(user: string) {
     );
 
     if (!response.ok) {
-      const body = (await response.json().catch(() => null)) as {
-        detail?: { error?: string };
-        user_id?: string;
-      } | null;
+      const body = (await response.json().catch(() => null)) as
+        | ({
+            detail?: { error?: string };
+            user_id?: string;
+          } & Partial<InventoryNotFoundResponse>)
+        | null;
       const usernameError = inventoryUsernameError(user, body);
       if (usernameError) return usernameError;
 
@@ -1520,11 +1527,10 @@ export async function fetchInventoryData(user: string) {
         );
       }
 
-      if (response.status === 404) {
+      if (body?.error === "inventory_not_found") {
         return {
-          error: "not_found",
-          message: "Inventory not found for this user.",
-          user_id: body?.user_id,
+          ...body,
+          message: inventoryNotFoundMessage(body as InventoryNotFoundResponse),
         };
       }
 
