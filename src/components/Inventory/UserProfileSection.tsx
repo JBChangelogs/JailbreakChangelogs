@@ -92,9 +92,9 @@ export default function UserProfileSection({
   };
 
   return (
-    <div className="xl:border-border-card xl:bg-tertiary-bg mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between xl:rounded-lg xl:border xl:p-4">
+    <div className="md:border-border-card md:bg-tertiary-bg mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:rounded-lg md:border md:p-4">
       {/* Avatar and User Info */}
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 items-center gap-4">
         {/* Avatar */}
         <div className="bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
           {!avatarError ? (
@@ -192,7 +192,7 @@ export default function UserProfileSection({
 
       {/* Scan Button or Login Prompt */}
       {isOwnInventory ? (
-        <div className="mt-4 space-y-3 xl:mt-0 xl:w-80 xl:shrink-0">
+        <div className="space-y-3 md:w-80 md:shrink-0">
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 lg:flex-row lg:gap-3 xl:justify-end">
             <Button
@@ -363,63 +363,61 @@ export default function UserProfileSection({
         </div>
       ) : (
         /* Show login prompt for potential profile owner */
-        <div className="mt-4 flex flex-col gap-3 xl:mt-0 xl:shrink-0">
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-            <div className="flex items-start gap-3">
-              <div className="shrink-0">
-                <svg
-                  className="text-link mt-0.5 h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="text-primary-text mb-1 text-sm font-medium">
-                  Want on-demand scans?
-                </h4>
-                <p className="text-secondary-text mb-3 text-sm">
-                  {!ENABLE_WS_SCAN
-                    ? "Inventory scanning is temporarily disabled. Please check back later."
-                    : !isAuthenticated
-                      ? "Login and connect your Roblox account to request instant inventory scans anytime."
-                      : user?.roblox_id
-                        ? "You can request instant inventory scans anytime from your own inventory page."
-                        : "Connect your Roblox account to request instant inventory scans anytime."}
-                </p>
-                <div className="flex gap-2">
-                  {!ENABLE_WS_SCAN ? (
-                    <span className="text-secondary-text inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium">
-                      Scanning Temporarily Disabled
-                    </span>
-                  ) : !isAuthenticated ? (
-                    <Button asChild size="sm">
-                      <Link href="/faq">Learn More</Link>
-                    </Button>
-                  ) : user?.roblox_id ? (
-                    <Button asChild size="sm">
-                      <Link href={`/inventories/${user.roblox_id}`}>
-                        View My Inventory
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={() => {
-                        setLoginModal({ open: true, tab: "roblox" });
-                      }}
-                      size="sm"
-                    >
-                      Connect Roblox Account
-                    </Button>
-                  )}
-                </div>
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 md:max-w-sm md:shrink-0 md:border-0 md:bg-transparent md:p-0">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0">
+              <svg
+                className="text-link mt-0.5 h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h4 className="text-primary-text mb-1 text-sm font-medium">
+                Want on-demand scans?
+              </h4>
+              <p className="text-secondary-text mb-3 text-sm">
+                {!ENABLE_WS_SCAN
+                  ? "Inventory scanning is temporarily disabled. Please check back later."
+                  : !isAuthenticated
+                    ? "Login and connect your Roblox account to request instant inventory scans anytime."
+                    : user?.roblox_id
+                      ? "You can request instant inventory scans anytime from your own inventory page."
+                      : "Connect your Roblox account to request instant inventory scans anytime."}
+              </p>
+              <div className="flex gap-2">
+                {!ENABLE_WS_SCAN ? (
+                  <span className="text-secondary-text inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium">
+                    Scanning Temporarily Disabled
+                  </span>
+                ) : !isAuthenticated ? (
+                  <Button asChild size="sm">
+                    <Link href="/faq">Learn More</Link>
+                  </Button>
+                ) : user?.roblox_id ? (
+                  <Button asChild size="sm">
+                    <Link href={`/inventories/${user.roblox_id}`}>
+                      View My Inventory
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      setLoginModal({ open: true, tab: "roblox" });
+                    }}
+                    size="sm"
+                  >
+                    Connect Roblox Account
+                  </Button>
+                )}
               </div>
             </div>
           </div>
