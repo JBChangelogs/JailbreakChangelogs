@@ -113,6 +113,7 @@ export default function DupeComparisonLoader({
       <DupeComparisonNotFound
         key={id}
         id={id}
+        title="Simplified comparison not found"
         reportItem={reportItem}
         originalOwner={originalOwner}
         onExploreTree={() => selectView("copy-tree", "check")}
@@ -151,7 +152,19 @@ export default function DupeComparisonLoader({
           {renderSimplified()}
         </TabsContent>
         <TabsContent value="copy-tree" className="mt-6">
-          <CopyTreeView id={id} />
+          <CopyTreeView
+            id={id}
+            empty={(refetch) => (
+              <DupeComparisonNotFound
+                key={id}
+                id={id}
+                title="Dupe tree comparison not found"
+                reportItem={reportItem}
+                originalOwner={originalOwner}
+                onExploreTree={refetch}
+              />
+            )}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { Button } from "@/components/ui/button";
@@ -294,7 +295,13 @@ export function CopyTree({
   );
 }
 
-export default function CopyTreeView({ id }: { id: string }) {
+export default function CopyTreeView({
+  id,
+  empty,
+}: {
+  id: string;
+  empty: (refetch: () => void) => ReactNode;
+}) {
   const query = useQuery({
     queryKey: ["duplicate-copy-tree", id],
     queryFn: ({ signal }) => fetchCopyTree(id, signal),
@@ -327,11 +334,7 @@ export default function CopyTreeView({ id }: { id: string }) {
     );
   }
   if (!query.data) {
-    return (
-      <p className="text-secondary-text text-sm">
-        No dupe tree history has been recorded for this item yet.
-      </p>
-    );
+    return empty(() => void query.refetch());
   }
   return <CopyTree tree={query.data} users={robloxUsers} />;
 }

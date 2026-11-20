@@ -420,7 +420,7 @@ test("both history views use the same loading panel and spinner", () => {
   );
   const tree = renderToStaticMarkup(
     <QueryClientProvider client={client}>
-      <CopyTreeView id="pending-item" />
+      <CopyTreeView id="pending-item" empty={() => null} />
     </QueryClientProvider>,
   );
   expect(simplified).toContain("Loading simplified history...");
