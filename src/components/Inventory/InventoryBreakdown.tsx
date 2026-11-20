@@ -27,11 +27,7 @@ export default function InventoryBreakdown({
   inventoryData,
   isActive = true,
 }: InventoryBreakdownProps) {
-  // Once the tab becomes active, keep charts rendered permanently to avoid
-  // re-mounting them on every tab switch (isActive changes are ignored by memo).
-  const hasBeenActiveRef = useRef(isActive);
-  if (isActive) hasBeenActiveRef.current = true;
-  const renderCharts = hasBeenActiveRef.current;
+  const renderCharts = isActive;
   const partialItemsQuery = usePartialItems(isActive);
 
   const stats = useInventoryBreakdownStats(
@@ -131,7 +127,7 @@ export default function InventoryBreakdown({
               unobtainableItemsAll={stats.unobtainableItemsAll}
               collectionChartConfig={stats.collectionChartConfig}
               collectionChartData={stats.collectionChartData}
-              renderCharts={renderCharts}
+              renderCharts={renderCharts && progressTab === "collection"}
               unverifiableSectionRef={unverifiableSectionRef}
               onViewUnverifiable={scrollToUnverifiableSection}
             />
@@ -149,7 +145,7 @@ export default function InventoryBreakdown({
               unverifiableCount={stats.unverifiableCount}
               ogChartConfig={stats.ogChartConfig}
               ogChartData={stats.ogChartData}
-              renderCharts={renderCharts}
+              renderCharts={renderCharts && progressTab === "og-owned"}
               onViewUnverifiable={scrollToUnverifiableSection}
             />
           </TabsContent>

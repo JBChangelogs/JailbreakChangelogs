@@ -93,10 +93,11 @@ test("ownership tabs switch panels and View list reveals collection before scrol
       },
     },
   );
-  const render = () =>
+  const render = (isActive = true) =>
     exports.default({
       networthData: [],
       username: "Example",
+      isActive,
       itemsData: [],
       inventoryData: {
         user_id: "123",
@@ -118,6 +119,11 @@ test("ownership tabs switch panels and View list reveals collection before scrol
   let tree = render();
   const panels = () =>
     elements(tree).filter((element) => element.props.forceMount);
+  const chartVisibility = () =>
+    elements(tree)
+      .filter((element) => "renderCharts" in element.props)
+      .map((element) => element.props.renderCharts);
+  expect(chartVisibility()).toEqual([true, false, true]);
   expect(progressTab).toBe("collection");
   expect(
     panels().map((panel) => [panel.props.value, panel.props.hidden]),
@@ -136,6 +142,11 @@ test("ownership tabs switch panels and View list reveals collection before scrol
   (tabs.props.onValueChange as (value: string) => void)("og-owned");
   tree = render();
   expect(panels().map((panel) => panel.props.hidden)).toEqual([true, false]);
+  expect(chartVisibility()).toEqual([false, true, true]);
+  tree = render(false);
+  expect(chartVisibility()).toEqual([false, false, false]);
+  tree = render();
+  expect(chartVisibility()).toEqual([false, true, true]);
   const actions = elements(tree).filter(
     (element) => typeof element.props.onViewUnverifiable === "function",
   );

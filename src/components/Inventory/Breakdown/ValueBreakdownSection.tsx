@@ -99,7 +99,7 @@ export default function ValueBreakdownSection({
                   return (
                     <div
                       key={category}
-                      className="border-border-card/60 flex items-center justify-between gap-3 border-b py-3 text-base"
+                      className="border-border-card/60 flex items-center justify-between gap-3 border-t py-3 text-base first:border-t-0 md:[&:nth-child(2)]:border-t-0"
                     >
                       <div className="flex items-center gap-2">
                         {categoryIcon ? (

@@ -80,12 +80,7 @@ const MemoInventoryItems = React.memo(InventoryItems);
 const MemoDuplicatesTab = React.memo(DuplicatesTab);
 const MemoDupedItemsTab = React.memo(DupedItemsTab);
 const MemoInventoryHistoryChart = React.memo(InventoryHistoryChart);
-const MemoInventoryBreakdown = React.memo(InventoryBreakdown, (prev, next) => {
-  const keys = (Object.keys(next) as Array<keyof typeof next>).filter(
-    (k) => k !== "isActive",
-  );
-  return keys.every((k) => Object.is(prev[k], next[k]));
-});
+const MemoInventoryBreakdown = React.memo(InventoryBreakdown);
 
 const ChangelogComments = dynamic(
   () => import("@/components/PageComments/ChangelogComments"),
