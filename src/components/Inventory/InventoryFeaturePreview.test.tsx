@@ -92,17 +92,21 @@ test("preview uses breakdown collection rules and never shows loading data as ze
   expect(html).toContain("1 unverifiable item assumed owned");
   expect(html).toContain("View items");
   expect(html).toContain('value="3" max="4"');
-  expect(html).toContain("Explore breakdown");
-  expect(html).toContain("View features");
+  expect(html).toContain("View breakdown");
+  expect(html).toMatch(/<h2><button[^>]*aria-expanded="false"/);
   expect(html).toContain('aria-expanded="false"');
   expect(html).toMatch(/aria-controls="([^"]+)"/);
-  expect(html).toContain("hidden sm:block");
+  expect(html).toContain('hidden=""');
+  expect(html).not.toContain("hidden sm:block");
+  expect(html).toContain("Collection: 75.00%");
+  expect(html).toContain("See past trades");
+  expect(html).toContain("Track networth");
   expect(html).toContain("Explore Example User’s inventory");
-  expect(html).toContain("1 item flagged as duplicated.");
-  expect(html).toContain("Networth across 1 recorded snapshot.");
+  expect(html).not.toContain("See more than the item list");
+  expect(html).not.toContain("Explore value charts, collection progress");
   const ownInventory = render([snapshot], tabs, true);
   expect(ownInventory).toContain("Explore your inventory");
-  expect(ownInventory).toContain("Your networth across 1 recorded snapshot.");
+
   for (const title of [
     "Trade History",
     "Multiple Copies",
@@ -123,8 +127,8 @@ test("preview uses breakdown collection rules and never shows loading data as ze
   expect(withoutBreakdown).toContain("Comments");
   expect(withoutBreakdown).not.toContain("Multiple Copies");
   expect(withoutBreakdown).not.toContain("Duplicate Items");
-  expect(withoutBreakdown).not.toContain("Explore breakdown");
-  expect(withoutBreakdown).toContain("Track networth and cash over time.");
+  expect(withoutBreakdown).not.toContain("View breakdown");
+
   expect(
     render([], {
       trades: null,

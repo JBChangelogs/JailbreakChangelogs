@@ -47,43 +47,36 @@ export default function InventoryFeaturePreview({
   );
   const categories = stats.categoryChartData.filter((entry) => entry.value > 0);
   const progress = stats.overallProgress;
-  const dupedCount = inventoryData.duplicates?.length ?? 0;
 
   const features = [
     {
       tab: tabs.trades,
       title: "Trade History",
-      description: "Explore past trades and counterparties.",
+      description: "See past trades",
       icon: "lucide:history",
     },
     {
       tab: tabs.copies,
       title: "Multiple Copies",
-      description: "Find repeated items and compare copy counts.",
+      description: "Find repeated items",
       icon: "lucide:copy",
     },
     {
       tab: tabs.dupes,
       title: "Duplicate Items",
-      description:
-        dupedCount > 0
-          ? `${formatInventoryCount(dupedCount)} ${dupedCount === 1 ? "item" : "items"} flagged as duplicated.`
-          : "Inspect items flagged as duplicated.",
+      description: "Check flagged dupes",
       icon: "lucide:shield-alert",
     },
     {
       tab: tabs.graphs,
       title: "Graphs",
-      description:
-        networthData.length > 0
-          ? `${isOwnInventory ? "Your networth" : "Networth"} across ${formatInventoryCount(networthData.length)} recorded ${networthData.length === 1 ? "snapshot" : "snapshots"}.`
-          : "Track networth and cash over time.",
+      description: "Track networth",
       icon: "lucide:chart-no-axes-combined",
     },
     {
       tab: tabs.comments,
       title: "Comments",
-      description: "Ask questions and discuss this inventory.",
+      description: "Join the discussion",
       icon: "lucide:message-square",
     },
   ];
@@ -93,44 +86,54 @@ export default function InventoryFeaturePreview({
     return null;
 
   return (
-    <section aria-label="Explore inventory features" className="mt-6">
-      <div className="border-border-card bg-secondary-bg flex items-center justify-between gap-3 rounded-lg border p-3 sm:block sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
-        <div className="min-w-0">
-          <h2 className="text-primary-text truncate text-sm font-semibold sm:text-base">
-            {isOwnInventory
-              ? "Explore your inventory"
-              : ownerName
-                ? `Explore ${ownerName}’s inventory`
-                : "Explore this inventory"}
-          </h2>
-          <p className="text-secondary-text mt-1 hidden text-sm sm:block">
-            See more than the item list. Choose what you want to explore.
-          </p>
-        </div>
-        <Button
+    <section aria-label="Explore inventory features" className="mt-4">
+      <h2>
+        <button
           type="button"
-          size="sm"
-          variant="secondary"
-          className="sm:hidden"
+          className="border-border-card bg-secondary-bg hover:bg-tertiary-bg focus-visible:ring-border-focus flex w-full cursor-pointer items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
           aria-expanded={featuresExpanded}
           aria-controls={featuresId}
           onClick={() => setFeaturesExpanded((expanded) => !expanded)}
         >
-          <span>{featuresExpanded ? "Hide features" : "View features"}</span>
+          <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="text-primary-text text-sm font-semibold">
+              {isOwnInventory
+                ? "Explore your inventory"
+                : ownerName
+                  ? `Explore ${ownerName}’s inventory`
+                  : "Explore this inventory"}
+            </span>
+            {tabs.breakdown !== null && (
+              <span className="text-secondary-text text-xs">
+                {catalog.data && progress.total > 0 ? (
+                  <>
+                    Collection: {formatPercentage(progress.percentage)}%{" · "}
+                    {formatInventoryCount(progress.missingCount)}{" "}
+                    {progress.missingCount === 1 ? "item" : "items"} missing
+                  </>
+                ) : catalog.isPending ? (
+                  "Loading collection progress…"
+                ) : (
+                  "Explore collection progress and missing items"
+                )}
+              </span>
+            )}
+          </span>
           <Icon
             icon="lucide:chevron-down"
             aria-hidden="true"
-            className={featuresExpanded ? "rotate-180" : ""}
+            className={`text-secondary-text size-4 shrink-0 ${featuresExpanded ? "rotate-180" : ""}`}
           />
-        </Button>
-      </div>
+        </button>
+      </h2>
       <div
         id={featuresId}
-        className={`mt-3 space-y-3 ${featuresExpanded ? "" : "hidden sm:block"}`}
+        hidden={!featuresExpanded}
+        className="mt-2 space-y-2"
       >
         {showBreakdown && (
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-4 sm:p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-primary-text flex items-center gap-2 font-semibold">
                   <Icon
@@ -140,9 +143,6 @@ export default function InventoryFeaturePreview({
                   />
                   Inventory Breakdown
                 </h3>
-                <p className="text-secondary-text mt-1 text-sm">
-                  Explore value charts, collection progress, and missing items.
-                </p>
               </div>
               <Button
                 type="button"
@@ -151,11 +151,11 @@ export default function InventoryFeaturePreview({
                   if (tabs.breakdown !== null) onExplore(event, tabs.breakdown);
                 }}
               >
-                Explore breakdown{" "}
+                View breakdown{" "}
                 <Icon icon="lucide:arrow-right" aria-hidden="true" />
               </Button>
             </div>
-            <div className="border-border-card mt-4 grid gap-5 border-t pt-4 sm:grid-cols-2">
+            <div className="border-border-card mt-3 grid gap-3 border-t pt-3 sm:grid-cols-2">
               <div>
                 <h4 className="text-primary-text mb-2 text-[13px] font-medium">
                   Clean inventory value by category
@@ -248,7 +248,7 @@ export default function InventoryFeaturePreview({
             </div>
           </div>
         )}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {features.map((feature) =>
             feature.tab === null ? null : (
               <button
@@ -258,7 +258,7 @@ export default function InventoryFeaturePreview({
                 onClick={(event) => {
                   if (feature.tab !== null) onExplore(event, feature.tab);
                 }}
-                className="group border-border-card bg-secondary-bg hover:bg-tertiary-bg focus-visible:ring-border-focus flex cursor-pointer flex-col items-start justify-start rounded-lg border p-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                className="group border-border-card bg-secondary-bg hover:bg-tertiary-bg focus-visible:ring-border-focus flex cursor-pointer flex-col items-start rounded-lg border p-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="text-primary-text flex w-full items-center gap-2 text-sm font-semibold">
                   <Icon
@@ -273,7 +273,7 @@ export default function InventoryFeaturePreview({
                     className="text-secondary-text ml-auto size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
                   />
                 </span>
-                <span className="text-secondary-text mt-1.5 block text-sm leading-relaxed">
+                <span className="text-secondary-text mt-1 text-sm">
                   {feature.description}
                 </span>
               </button>
