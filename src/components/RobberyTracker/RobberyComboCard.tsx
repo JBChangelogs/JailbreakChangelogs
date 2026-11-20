@@ -127,6 +127,7 @@ function RobberyComboCard({
         <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 @[24rem]:h-16 @[24rem]:w-24">
           {comboImageUrl ? (
             <Image
+              draggable={false}
               placeholder={IMAGE_PLACEHOLDER}
               src={comboImageUrl}
               alt={comboLabel}

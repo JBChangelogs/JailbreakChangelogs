@@ -215,6 +215,7 @@ function RobberyCard({
         {/* Thumbnail */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 @[24rem]:aspect-auto @[24rem]:h-16 @[24rem]:w-24">
           <Image
+            draggable={false}
             placeholder={IMAGE_PLACEHOLDER}
             src={imageUrl}
             alt={displayName}

@@ -287,6 +287,7 @@ export default function RecentJoins({
                     <span className="border-border-card bg-quaternary-bg flex aspect-video w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border sm:w-24">
                       {imageName ? (
                         <Image
+                          draggable={false}
                           placeholder={IMAGE_PLACEHOLDER}
                           src={`https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`}
                           alt=""

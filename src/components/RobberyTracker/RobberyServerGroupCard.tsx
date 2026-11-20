@@ -185,6 +185,7 @@ function RobberyServerGroupCard({
           ) : prioritizedImages.length === 1 ? (
             <div className="relative h-full w-full">
               <Image
+                draggable={false}
                 placeholder={IMAGE_PLACEHOLDER}
                 src={prioritizedImages[0].imageUrl}
                 alt={prioritizedImages[0].alt}
@@ -200,6 +201,7 @@ function RobberyServerGroupCard({
                   className="bg-tertiary-bg relative h-full w-full overflow-hidden"
                 >
                   <Image
+                    draggable={false}
                     placeholder={IMAGE_PLACEHOLDER}
                     src={img.imageUrl}
                     alt={img.alt}
@@ -213,6 +215,7 @@ function RobberyServerGroupCard({
             <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-1">
               <div className="bg-tertiary-bg relative col-span-1 row-span-2 overflow-hidden">
                 <Image
+                  draggable={false}
                   placeholder={IMAGE_PLACEHOLDER}
                   src={prioritizedImages[0].imageUrl}
                   alt={prioritizedImages[0].alt}
@@ -222,6 +225,7 @@ function RobberyServerGroupCard({
               </div>
               <div className="bg-tertiary-bg relative overflow-hidden">
                 <Image
+                  draggable={false}
                   placeholder={IMAGE_PLACEHOLDER}
                   src={prioritizedImages[1].imageUrl}
                   alt={prioritizedImages[1].alt}
@@ -231,6 +235,7 @@ function RobberyServerGroupCard({
               </div>
               <div className="bg-tertiary-bg relative overflow-hidden">
                 <Image
+                  draggable={false}
                   placeholder={IMAGE_PLACEHOLDER}
                   src={prioritizedImages[2].imageUrl}
                   alt={prioritizedImages[2].alt}
@@ -247,6 +252,7 @@ function RobberyServerGroupCard({
                   className="bg-tertiary-bg relative h-full w-full overflow-hidden"
                 >
                   <Image
+                    draggable={false}
                     placeholder={IMAGE_PLACEHOLDER}
                     src={img.imageUrl}
                     alt={img.alt}

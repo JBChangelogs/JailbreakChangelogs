@@ -191,6 +191,7 @@ export default function AirdropCard({
         {/* Thumbnail */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-16 sm:w-24">
           <Image
+            draggable={false}
             src={imageUrl}
             alt={`${airdrop.color} Airdrop at ${airdrop.location}`}
             fill
