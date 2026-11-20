@@ -252,7 +252,7 @@ const SearchableInventoryListSection = memo(
       >
         {collapsible ? (
           <details className="group">
-            <summary className="hover:bg-secondary-bg focus-visible:ring-border-focus -m-3 cursor-pointer list-none rounded-lg p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+            <summary className="focus-visible:ring-border-focus -m-3 cursor-pointer list-none rounded-lg p-3 focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
               <span className="flex items-start justify-between gap-3">
                 {heading}
                 <span className="text-link inline-flex shrink-0 items-center gap-2 text-base font-medium whitespace-nowrap">

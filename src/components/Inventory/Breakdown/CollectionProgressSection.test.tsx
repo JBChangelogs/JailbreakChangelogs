@@ -7,6 +7,7 @@ test("both Hyperchrome choices explain completion and appear before the missing-
   const render = (
     countLowerLevels: boolean,
     creditedHyperchromeLevels = countLowerLevels ? 1 : 0,
+    onlyLegacy = false,
   ) =>
     renderToStaticMarkup(
       <CollectionProgressSection
@@ -14,10 +15,10 @@ test("both Hyperchrome choices explain completion and appear before the missing-
         creditedHyperchromeLevels={creditedHyperchromeLevels}
         onCountLowerLevelsChange={() => {}}
         overallProgress={{
-          total: 5,
-          owned: countLowerLevels ? 4 : 3,
-          missingCount: countLowerLevels ? 1 : 2,
-          percentage: countLowerLevels ? 80 : 60,
+          total: onlyLegacy ? 0 : 5,
+          owned: onlyLegacy ? 0 : countLowerLevels ? 4 : 3,
+          missingCount: onlyLegacy ? 0 : countLowerLevels ? 1 : 2,
+          percentage: onlyLegacy ? 0 : countLowerLevels ? 80 : 60,
         }}
         typeProgress={[
           {
@@ -36,6 +37,10 @@ test("both Hyperchrome choices explain completion and appear before the missing-
         ]}
         unverifiableItemsAll={[
           { id: 587, name: "HyperShift", type: "HyperChrome" },
+        ]}
+        unobtainableItemsAll={[
+          { id: 176, name: "MCL36", type: "Vehicle" },
+          { id: 945, name: "Live 2026", type: "Rim" },
         ]}
         collectionChartConfig={{
           value: { label: "Completion", color: "blue" },
@@ -83,6 +88,17 @@ test("both Hyperchrome choices explain completion and appear before the missing-
     );
     expect(disclosure).toContain("Show items");
     expect(disclosure).toContain("Hide items");
+    const legacyDisclosure = markup.match(
+      /<details\b[^>]*>[\s\S]*?<\/details>/g,
+    )![1];
+    expect(legacyDisclosure).not.toMatch(/<details\b[^>]*\bopen\b/);
+    expect(legacyDisclosure).toContain("Unobtainable / Legacy Items (2)");
+    expect(legacyDisclosure).toContain("MCL36");
+    expect(legacyDisclosure).toContain("Live 2026");
+    expect(legacyDisclosure).toContain("even if owned");
+    expect(markup).toContain(
+      "2 unobtainable / legacy items excluded from completion.",
+    );
     expect(markup).toContain('role="status"');
     const text = markup.split(/<[^>]*>/).join("");
     expect(text).toContain(
@@ -96,6 +112,11 @@ test("both Hyperchrome choices explain completion and appear before the missing-
         : "Only Hyperchrome levels currently in your inventory count toward completion.",
     );
   }
+  const onlyLegacy = render(true, 0, true);
+  expect(onlyLegacy).toContain("No items found.");
+  expect(onlyLegacy).toContain("Unobtainable / Legacy Items (2)");
+  expect(onlyLegacy).toContain("Live 2026");
+  expect(onlyLegacy).not.toContain("Trackable Missing Items");
   expect(render(true, 0)).toContain(
     "No additional lower Hyperchrome levels to count for this inventory.",
   );

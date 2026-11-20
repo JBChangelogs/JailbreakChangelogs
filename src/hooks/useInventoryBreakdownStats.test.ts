@@ -5,8 +5,7 @@ import { ModuleKind, transpileModule } from "typescript";
 import * as constants from "@/components/Inventory/Breakdown/constants";
 import type { useInventoryBreakdownStats } from "./useInventoryBreakdownStats";
 
-test("Hyperchrome modes update completion and missing levels without changing inventory, value or OG ownership", () => {
-  let countLowerLevels = true;
+function loadStats(getCountLowerLevels: () => boolean) {
   const exports = {} as {
     useInventoryBreakdownStats: typeof useInventoryBreakdownStats;
   };
@@ -28,7 +27,7 @@ test("Hyperchrome modes update completion and missing levels without changing in
         if (name === "@/hooks/useHyperchromeCollectionMode")
           return {
             useHyperchromeCollectionMode: () => ({
-              countLowerLevels,
+              countLowerLevels: getCountLowerLevels(),
               setCountLowerLevels: () => {},
             }),
           };
@@ -40,6 +39,12 @@ test("Hyperchrome modes update completion and missing levels without changing in
       },
     },
   );
+  return exports.useInventoryBreakdownStats;
+}
+
+test("Hyperchrome modes update completion and missing levels without changing inventory, value or OG ownership", () => {
+  let countLowerLevels = true;
+  const calculateStats = loadStats(() => countLowerLevels);
   const colors = [
     "Blue",
     "Diamond",
@@ -87,8 +92,7 @@ test("Hyperchrome modes update completion and missing levels without changing in
     },
   ] as Args[0];
   const before = JSON.stringify(inventory);
-  const stats = () =>
-    exports.useInventoryBreakdownStats(snapshot, [], inventory, catalog);
+  const stats = () => calculateStats(snapshot, [], inventory, catalog);
   const backendSnapshot = [
     {
       snapshot_time: 1791927781,
@@ -111,7 +115,7 @@ test("Hyperchrome modes update completion and missing levels without changing in
       },
     ],
   };
-  const spinner = exports.useInventoryBreakdownStats(
+  const spinner = calculateStats(
     backendSnapshot,
     [],
     spinnerInventory,
@@ -120,7 +124,7 @@ test("Hyperchrome modes update completion and missing levels without changing in
   expect(spinner.duplicatesValue).toBe(12000000);
   expect(spinner.duplicateCategoryValues.Rim).toBe(12000000);
   expect(spinner.duplicatesChartData[0].amount).toBe(12000000);
-  const mixed = exports.useInventoryBreakdownStats(
+  const mixed = calculateStats(
     [
       {
         ...backendSnapshot[0],
@@ -136,7 +140,7 @@ test("Hyperchrome modes update completion and missing levels without changing in
     Vehicle: 3000000,
   });
   expect(mixed.duplicatesValue).toBe(12000000);
-  const zero = exports.useInventoryBreakdownStats(
+  const zero = calculateStats(
     [{ ...backendSnapshot[0], duplicates_value: 0 }],
     [],
     inventory,
@@ -215,4 +219,96 @@ test("Hyperchrome modes update completion and missing levels without changing in
   );
   countLowerLevels = false;
   expect(stats().ogOwnedProgress).toEqual(multipleOgs.ogOwnedProgress);
+});
+
+test("confirmed legacy items stay visible outside collection and OG completion, whether owned or missing", () => {
+  let countLowerLevels = true;
+  const calculateStats = loadStats(() => countLowerLevels);
+  const legacy = [
+    { id: 176, name: "MCL36", type: "Vehicle" },
+    { id: 185, name: "Nascar", type: "Vehicle" },
+    { id: 187, name: "Nascar Free", type: "Vehicle" },
+    { id: 256, name: "Nascar", type: "Tire Sticker" },
+    { id: 357, name: "Live 2024", type: "Rim" },
+    { id: 708, name: "Nascar Hauler", type: "Texture" },
+    { id: 710, name: "MCL36", type: "Tire Sticker" },
+    { id: 711, name: "MCL36", type: "Rim" },
+    { id: 945, name: "Live 2026", type: "Rim" },
+  ];
+  const catalog = [
+    { id: 1, name: "Obtainable", type: "Vehicle" },
+    { id: 186, name: "Nascar 75th", type: "Vehicle" },
+    { id: 257, name: "Nascar 75th", type: "Tire Sticker" },
+    { id: 903, name: "Unverifiable", type: "Rim" },
+    ...legacy,
+  ];
+  type Args = Parameters<typeof useInventoryBreakdownStats>;
+  const inventory = {
+    data: [1, 176].map((item_id) => ({
+      item_id,
+      isOriginalOwner: true,
+      info: [],
+    })),
+    duplicates: [{ item_id: 711, categoryTitle: "Rim", info: [] }],
+  } as unknown as Args[2];
+  const snapshot = [
+    {
+      snapshot_time: 1,
+      inventory_count: 2,
+      duplicates_count: 1,
+      inventory_value: 900,
+      networth: 1000,
+      percentages: { Vehicle: 100 },
+    },
+  ];
+  const before = JSON.stringify(inventory);
+  const stats = () => calculateStats(snapshot, [], inventory, catalog);
+  expect(constants.UNOBTAINABLE_COLLECTION_ITEM_IDS).toEqual(
+    new Set(legacy.map((item) => item.id)),
+  );
+  for (const mode of [true, false]) {
+    countLowerLevels = mode;
+    const result = stats();
+    expect(result.overallProgress).toEqual({
+      total: 4,
+      owned: 2,
+      missingCount: 2,
+      percentage: 50,
+    });
+    expect(result.ogOwnedProgress.total).toBe(4);
+    expect(result.ogOwnedProgress.ogOwned).toBe(2);
+    expect(result.missingItemsAll.map((item) => item.id)).toEqual([186, 257]);
+    expect(result.ogMissingItemsAll.map((item) => item.id)).toEqual([186, 257]);
+    expect(result.unobtainableItemsAll).toHaveLength(9);
+    expect(new Set(result.unobtainableItemsAll.map((item) => item.id))).toEqual(
+      new Set(legacy.map((item) => item.id)),
+    );
+    expect(
+      result.typeProgress.reduce((sum, entry) => sum + entry.total, 0),
+    ).toBe(4);
+    expect(
+      result.collectionChartData.reduce((sum, entry) => sum + entry.value, 0),
+    ).toBe(2);
+    expect(result.unverifiableCount).toBe(1);
+    expect(result.inventoryValue).toBe(900);
+    expect(result.networth).toBe(1000);
+    expect(result.totalItems).toBe(3);
+  }
+  expect(JSON.stringify(inventory)).toBe(before);
+  inventory.data.push(
+    { ...inventory.data[0], item_id: 186 },
+    { ...inventory.data[0], item_id: 257 },
+  );
+  expect(stats().overallProgress.percentage).toBe(100);
+  expect(stats().ogOwnedProgress.percentage).toBe(100);
+  expect(stats().missingItemsAll).toEqual([]);
+  const legacyOnly = calculateStats([], [], inventory, legacy);
+  expect(legacyOnly.overallProgress).toEqual({
+    total: 0,
+    owned: 0,
+    missingCount: 0,
+    percentage: 0,
+  });
+  expect(legacyOnly.unobtainableItemsAll).toHaveLength(9);
+  expect(legacyOnly.unverifiableCount).toBe(0);
 });

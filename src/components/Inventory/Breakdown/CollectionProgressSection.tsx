@@ -20,6 +20,7 @@ interface CollectionProgressSectionProps {
   unverifiableCount: number;
   missingItemsAll: InventoryBreakdownStats["missingItemsAll"];
   unverifiableItemsAll: InventoryBreakdownStats["unverifiableItemsAll"];
+  unobtainableItemsAll: InventoryBreakdownStats["unobtainableItemsAll"];
   collectionChartConfig: InventoryBreakdownStats["collectionChartConfig"];
   collectionChartData: InventoryBreakdownStats["collectionChartData"];
   renderCharts: boolean;
@@ -36,6 +37,7 @@ export default function CollectionProgressSection({
   unverifiableCount,
   missingItemsAll,
   unverifiableItemsAll,
+  unobtainableItemsAll,
   collectionChartConfig,
   collectionChartData,
   renderCharts,
@@ -64,6 +66,13 @@ export default function CollectionProgressSection({
             Completion counts unique items using the Hyperchrome mode selected
             below.
           </p>
+
+          {unobtainableItemsAll.length > 0 && (
+            <p className="text-secondary-text mb-1 text-base leading-relaxed">
+              {formatInventoryCount(unobtainableItemsAll.length)} unobtainable /
+              legacy items excluded from completion.
+            </p>
+          )}
 
           {overallProgress.total === 0 ? (
             <div className="py-6 text-center">
@@ -380,6 +389,21 @@ export default function CollectionProgressSection({
               sectionId="unverifiable-items"
             />
           )}
+        </div>
+      )}
+      {unobtainableItemsAll.length > 0 && (
+        <div className="xl:col-span-12">
+          <SearchableInventoryListSection
+            title="Unobtainable / Legacy Items"
+            collapsible
+            description="These items can no longer be earned or traded. They don’t count toward completion, even if owned."
+            items={unobtainableItemsAll}
+            searchPlaceholder="Search legacy items..."
+            filterAriaLabel="Filter legacy items by type"
+            clearAriaLabel="Clear legacy item search"
+            emptyMessage="No legacy items found."
+            noResultsMessage="No legacy items match your search."
+          />
         </div>
       )}
     </div>

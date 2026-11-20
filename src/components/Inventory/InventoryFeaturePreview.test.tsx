@@ -82,6 +82,8 @@ test("preview uses breakdown collection rules and never shows loading data as ze
       { id: 2, name: "Duped vehicle", type: "Vehicle" },
       { id: 903, name: "Unverifiable item", type: "Rim" },
       { id: 4, name: "Missing rim", type: "Rim" },
+      { id: 176, name: "MCL36", type: "Vehicle" },
+      { id: 945, name: "Live 2026", type: "Rim" },
     ],
   );
   const html = render();

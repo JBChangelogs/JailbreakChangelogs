@@ -128,6 +128,7 @@ export default function InventoryBreakdown({
               unverifiableCount={stats.unverifiableCount}
               missingItemsAll={stats.missingItemsAll}
               unverifiableItemsAll={stats.unverifiableItemsAll}
+              unobtainableItemsAll={stats.unobtainableItemsAll}
               collectionChartConfig={stats.collectionChartConfig}
               collectionChartData={stats.collectionChartData}
               renderCharts={renderCharts}

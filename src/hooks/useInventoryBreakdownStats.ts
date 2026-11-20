@@ -8,6 +8,7 @@ import type { PartialItem } from "@/utils/api/api";
 import type { InventoryData } from "@/app/inventories/types";
 import {
   UNVERIFIABLE_COLLECTION_ITEM_IDS,
+  UNOBTAINABLE_COLLECTION_ITEM_IDS,
   VALUES_TYPE_ORDER_RANK,
 } from "@/components/Inventory/Breakdown/constants";
 
@@ -120,7 +121,31 @@ export const useInventoryBreakdownStats = (
     return ids;
   }, [inventoryData.data]);
 
-  const eligibleItems = catalogItems;
+  const eligibleItems = useMemo(
+    () =>
+      catalogItems.filter(
+        (item) => !UNOBTAINABLE_COLLECTION_ITEM_IDS.has(item.id),
+      ),
+    [catalogItems],
+  );
+  const unobtainableItemsAll = useMemo(
+    () =>
+      catalogItems
+        .filter((item) => UNOBTAINABLE_COLLECTION_ITEM_IDS.has(item.id))
+        .map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: item.type?.trim() || "Unknown",
+        }))
+        .sort(
+          (a, b) =>
+            (VALUES_TYPE_ORDER_RANK.get(a.type.toLowerCase()) ?? 999) -
+              (VALUES_TYPE_ORDER_RANK.get(b.type.toLowerCase()) ?? 999) ||
+            a.type.localeCompare(b.type) ||
+            a.name.localeCompare(b.name),
+        ),
+    [catalogItems],
+  );
 
   const unverifiableItemsAll = useMemo(() => {
     const unverifiable = eligibleItems
@@ -408,6 +433,7 @@ export const useInventoryBreakdownStats = (
     categoryChartConfig,
     duplicateCategoryValues,
     unverifiableItemsAll,
+    unobtainableItemsAll,
     unverifiableCount,
     typeProgress,
     overallProgress,
