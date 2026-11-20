@@ -33,9 +33,6 @@ function getIdentity(user: TrackerJoinUser, details?: UserData) {
     : null;
 
   return {
-    name: connectedToRoblox
-      ? (usable(details?.roblox_display_name) ?? robloxUsername ?? siteUsername)
-      : (usable(details?.global_name) ?? siteUsername),
     username: robloxUsername ?? siteUsername,
     avatarUrl: connectedToRoblox
       ? (usable(details?.roblox_avatar) ?? undefined)
@@ -73,12 +70,8 @@ export default function JoinedUsers({
 
   const identityFor = (user: TrackerJoinUser) =>
     getIdentity(user, userDetails?.[String(user.user_id)]);
-  const tooltipFor = (user: TrackerJoinUser) => {
-    const { name, username } = identityFor(user);
-    return name.toLowerCase() === username.toLowerCase()
-      ? `@${username}`
-      : `${name} (@${username})`;
-  };
+  const tooltipFor = (user: TrackerJoinUser) =>
+    `@${identityFor(user).username}`;
 
   return (
     <div
@@ -125,7 +118,7 @@ export default function JoinedUsers({
                   rel="noopener noreferrer"
                   className="text-link hover:text-link-hover no-underline hover:no-underline"
                 >
-                  {identityFor(users[0]).name}
+                  {identityFor(users[0]).username}
                 </Link>
               </TooltipTrigger>
             </UserProfilePopover>
@@ -184,10 +177,7 @@ export default function JoinedUsers({
                       className="group min-w-0 truncate no-underline hover:no-underline"
                     >
                       <span className="text-link group-hover:text-link-hover block truncate text-sm">
-                        {identityFor(user).name}
-                      </span>
-                      <span className="text-secondary-text block truncate text-xs">
-                        @{identityFor(user).username}
+                        {identityFor(user).username}
                       </span>
                     </Link>
                   </UserProfilePopover>
