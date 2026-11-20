@@ -33,6 +33,7 @@ interface UserStatsProps {
   showOnlyOriginal: boolean;
   showOnlyLimited: boolean;
   showOnlySeasonal: boolean;
+  excludeObtainables: boolean;
   scanWebSocket: UseScanWebSocketReturn;
   scanErrorBanner?: { title: string; subtitle?: string } | null;
   queuePosition?: { position: number; delay: number } | null;
@@ -53,6 +54,7 @@ export default function UserStats({
   showOnlyOriginal,
   showOnlyLimited,
   showOnlySeasonal,
+  excludeObtainables,
   scanWebSocket,
   scanErrorBanner,
   queuePosition,
@@ -100,7 +102,8 @@ export default function UserStats({
 
   const totalNetworth = latestNetworthData?.networth || 0;
   const totalCashValue = latestNetworthData?.inventory_value || 0;
-  const catalogFilterActive = showOnlyLimited || showOnlySeasonal;
+  const catalogFilterActive =
+    showOnlyLimited || showOnlySeasonal || excludeObtainables;
   const catalogValuesQuery = useCatalogValues(catalogFilterActive);
 
   const parseValue = (val: string | null): number => {
@@ -139,7 +142,8 @@ export default function UserStats({
     );
     const excludedByCatalog = (item: CatalogFlags | undefined) =>
       (showOnlyLimited && item?.is_limited !== 1) ||
-      (showOnlySeasonal && !isSeasonalItem(item));
+      (showOnlySeasonal && !isSeasonalItem(item)) ||
+      (excludeObtainables && item?.is_limited !== 1 && !isSeasonalItem(item));
 
     let inventoryValue = 0;
     let dupedValue = 0;
@@ -185,6 +189,7 @@ export default function UserStats({
     showOnlyNonOriginal,
     showOnlyLimited,
     showOnlySeasonal,
+    excludeObtainables,
     catalogFilterActive,
     catalogValuesQuery.data,
   ]);
@@ -195,12 +200,14 @@ export default function UserStats({
     if (showOnlyNonOriginal) parts.push("Non-OG");
     if (showOnlyLimited) parts.push("Limited");
     if (showOnlySeasonal) parts.push("Seasonal");
+    if (excludeObtainables) parts.push("Limited or Seasonal");
     return parts.join(" + ");
   }, [
     showOnlyOriginal,
     showOnlyNonOriginal,
     showOnlyLimited,
     showOnlySeasonal,
+    excludeObtainables,
   ]);
 
   // Since we are deriving values directly from props, they are always available (or 0)

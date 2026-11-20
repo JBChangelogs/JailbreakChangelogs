@@ -14,6 +14,8 @@ import { matchesTextSearch } from "@/utils/helpers/itemSearch";
 import { sortByValueSort } from "@/utils/trading/values";
 import { getTradeItemMarketDetails } from "@/utils/trading/marketDetails";
 import { usePartialItems, useCatalogValues } from "@/hooks/usePartialItems";
+import { parseCurrencyValue } from "@/utils/trading/currency";
+import { getSnapshotDupedValue } from "@/utils/trading/inventoryValues";
 import { useItemSortGroups } from "@/hooks/useItemSortGroups";
 
 interface InventoryItemsProps {
@@ -26,6 +28,7 @@ interface InventoryItemsProps {
   onShowOnlyNonOriginalChange?: (val: boolean) => void;
   onShowOnlyLimitedChange?: (val: boolean) => void;
   onShowOnlySeasonalChange?: (val: boolean) => void;
+  onExcludeObtainablesChange?: (val: boolean) => void;
 }
 
 const DATE_SORT_GROUP: InventorySortGroup = {
@@ -62,6 +65,7 @@ export default function InventoryItems({
   onShowOnlyNonOriginalChange,
   onShowOnlyLimitedChange,
   onShowOnlySeasonalChange,
+  onExcludeObtainablesChange,
 }: InventoryItemsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -72,6 +76,7 @@ export default function InventoryItems({
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
+  const [excludeObtainables, setExcludeObtainables] = useState(false);
   const [showOnlyTradable, setShowOnlyTradable] = useState(false);
   const [showOnlyUntradable, setShowOnlyUntradable] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -160,6 +165,8 @@ export default function InventoryItems({
       setShowMissingItems(false);
     } else {
       setHideDuplicates(false);
+      setExcludeObtainables(false);
+      onExcludeObtainablesChange?.(false);
       setShowOnlyLimited(false);
       setShowOnlySeasonal(false);
       setShowOnlyTradable(false);
@@ -179,6 +186,8 @@ export default function InventoryItems({
     setIsFiltering(true);
     if (checked) {
       setShowMissingItems(true);
+      setExcludeObtainables(false);
+      onExcludeObtainablesChange?.(false);
       setShowOnlyOriginal(false);
       setShowOnlyNonOriginal(false);
       setShowOnlySigned(false);
@@ -193,6 +202,10 @@ export default function InventoryItems({
 
   const handleLimitedFilterToggle = (checked: boolean) => {
     setIsFiltering(true);
+    if (checked) {
+      setExcludeObtainables(false);
+      onExcludeObtainablesChange?.(false);
+    }
     setShowOnlyLimited(checked);
     onShowOnlyLimitedChange?.(checked);
     setTimeout(() => {
@@ -202,11 +215,26 @@ export default function InventoryItems({
 
   const handleSeasonalFilterToggle = (checked: boolean) => {
     setIsFiltering(true);
+    if (checked) {
+      setExcludeObtainables(false);
+      onExcludeObtainablesChange?.(false);
+    }
     setShowOnlySeasonal(checked);
     onShowOnlySeasonalChange?.(checked);
     setTimeout(() => {
       setIsFiltering(false);
     }, 300);
+  };
+
+  const handleExcludeObtainablesToggle = (checked: boolean) => {
+    setExcludeObtainables(checked);
+    onExcludeObtainablesChange?.(checked);
+    if (checked) {
+      setShowOnlyLimited(false);
+      setShowOnlySeasonal(false);
+      onShowOnlyLimitedChange?.(false);
+      onShowOnlySeasonalChange?.(false);
+    }
   };
 
   const handleTradableFilterToggle = (checked: boolean) => {
@@ -240,6 +268,7 @@ export default function InventoryItems({
   const metadataFilterActive =
     (showOnlyLimited ||
       showOnlySeasonal ||
+      excludeObtainables ||
       showOnlyTradable ||
       showOnlyUntradable) &&
     !showMissingItems;
@@ -460,6 +489,12 @@ export default function InventoryItems({
 
       if (showOnlyLimited && itemData?.is_limited !== 1) return false;
       if (showOnlySeasonal && !isSeasonalItem(itemData)) return false;
+      if (
+        excludeObtainables &&
+        itemData?.is_limited !== 1 &&
+        !isSeasonalItem(itemData)
+      )
+        return false;
 
       // Filter by tradability
       if (showOnlyTradable) {
@@ -512,6 +547,7 @@ export default function InventoryItems({
     selectedCategories,
     showOnlyLimited,
     showOnlySeasonal,
+    excludeObtainables,
     showOnlyTradable,
     showOnlyUntradable,
     showOnlyOriginal,
@@ -520,6 +556,40 @@ export default function InventoryItems({
     hideDuplicates,
     sortOrder,
   ]);
+
+  const filterLabel = [
+    showOnlyOriginal && "OG",
+    showOnlyNonOriginal && "Non-OG",
+    showOnlyLimited && "Limited",
+    showOnlySeasonal && "Seasonal",
+    excludeObtainables && "Limited or Seasonal",
+  ]
+    .filter(Boolean)
+    .join(" + ");
+  const valueLabelPrefix = filterLabel ? `${filterLabel} ` : "";
+
+  const listedValues = useMemo(() => {
+    let clean = 0;
+    let duped = 0;
+    for (const entry of filteredAndSortedItems) {
+      const { item } = entry;
+      const catalog = catalogValuesById.get(item.item_id);
+      if ("isDupedItem" in entry && entry.isDupedItem) {
+        duped += parseCurrencyValue(getSnapshotDupedValue(item, catalog)) || 0;
+      } else {
+        clean +=
+          parseCurrencyValue(
+            snapshotValue(item, "Cash Value") ?? catalog?.cash_value,
+          ) || 0;
+      }
+    }
+    return { clean, duped };
+  }, [filteredAndSortedItems, catalogValuesById]);
+
+  const listedNetworth =
+    listedValues.clean +
+    listedValues.duped +
+    (!filterLabel || showOnlyNonOriginal ? Number(initialData.money) || 0 : 0);
 
   // Use the pre-calculated duplicate counts from full inventory
   const itemCounts = hideDuplicates ? filteredDuplicateCounts : duplicateCounts;
@@ -587,6 +657,7 @@ export default function InventoryItems({
         showMissingItems={showMissingItems}
         showOnlyLimited={showOnlyLimited}
         showOnlySeasonal={showOnlySeasonal}
+        excludeObtainables={excludeObtainables}
         showOnlyTradable={showOnlyTradable}
         showOnlyUntradable={showOnlyUntradable}
         availableCategories={availableCategories}
@@ -597,6 +668,7 @@ export default function InventoryItems({
         onShowMissingItemsToggle={handleShowMissingItemsToggle}
         onLimitedFilterToggle={handleLimitedFilterToggle}
         onSeasonalFilterToggle={handleSeasonalFilterToggle}
+        onExcludeObtainablesToggle={handleExcludeObtainablesToggle}
         onTradableFilterToggle={handleTradableFilterToggle}
         onUntradableFilterToggle={handleUntradableFilterToggle}
         sortOrder={sortOrder}
@@ -615,6 +687,7 @@ export default function InventoryItems({
           showMissingItems ||
           showOnlyLimited ||
           showOnlySeasonal ||
+          excludeObtainables ||
           showOnlyTradable ||
           showOnlyUntradable ||
           selectedCategories.length > 0
@@ -628,11 +701,31 @@ export default function InventoryItems({
                     : ""
               }${hideDuplicates ? " (Duplicates hidden)" : ""}${
                 showMissingItems ? " (Missing items)" : ""
-              }${showOnlySigned ? " (Autographed only)" : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
+              }${showOnlySigned ? " (Autographed only)" : ""}${showOnlyLimited ? " (Limited only)" : ""}${showOnlySeasonal ? " (Seasonal only)" : ""}${excludeObtainables ? " (Obtainables excluded)" : ""}${showOnlyTradable ? " (Tradable only)" : ""}${
                 showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}
         </p>
+        {!showMissingItems && (
+          <p className="text-primary-text mt-1 text-sm">
+            {catalogValuesQuery.isLoading ? (
+              "Loading listed values…"
+            ) : metadataFilterActive &&
+              catalogValuesQuery.isError &&
+              !catalogValuesQuery.data ? (
+              "Listed values unavailable"
+            ) : (
+              <>
+                {valueLabelPrefix}Clean Inventory Value: $
+                {listedValues.clean.toLocaleString("en-US")}
+                {` · ${filterLabel ? `${filterLabel} Networth` : "Total Networth"}: $${listedNetworth.toLocaleString("en-US")}`}
+                {initialData.duplicates?.length
+                  ? ` · ${valueLabelPrefix}Duped Value: $${listedValues.duped.toLocaleString("en-US")}`
+                  : ""}
+              </>
+            )}
+          </p>
+        )}
       </div>
 
       {/* Items Grid */}

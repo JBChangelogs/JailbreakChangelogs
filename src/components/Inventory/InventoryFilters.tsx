@@ -23,6 +23,7 @@ interface InventoryFiltersProps {
   showMissingItems: boolean;
   showOnlyLimited: boolean;
   showOnlySeasonal: boolean;
+  excludeObtainables: boolean;
   showOnlyTradable: boolean;
   showOnlyUntradable: boolean;
   availableCategories: string[];
@@ -33,6 +34,7 @@ interface InventoryFiltersProps {
   onShowMissingItemsToggle: (checked: boolean) => void;
   onLimitedFilterToggle: (checked: boolean) => void;
   onSeasonalFilterToggle: (checked: boolean) => void;
+  onExcludeObtainablesToggle: (checked: boolean) => void;
   onTradableFilterToggle: (checked: boolean) => void;
   onUntradableFilterToggle: (checked: boolean) => void;
   sortOrder: string;
@@ -52,6 +54,7 @@ export default function InventoryFilters({
   showMissingItems,
   showOnlyLimited,
   showOnlySeasonal,
+  excludeObtainables,
   showOnlyTradable,
   showOnlyUntradable,
   availableCategories,
@@ -62,6 +65,7 @@ export default function InventoryFilters({
   onShowMissingItemsToggle,
   onLimitedFilterToggle,
   onSeasonalFilterToggle,
+  onExcludeObtainablesToggle,
   onTradableFilterToggle,
   onUntradableFilterToggle,
   sortOrder,
@@ -171,6 +175,17 @@ export default function InventoryFilters({
         >
           <Icon icon="noto-v1:snowflake" className="h-4 w-4" inline={true} />
           Seasonal Only
+        </Button>
+        <Button
+          onClick={() => onExcludeObtainablesToggle(!excludeObtainables)}
+          disabled={showMissingItems}
+          size="sm"
+          variant={excludeObtainables ? "default" : "secondary"}
+          className="w-fit"
+          aria-pressed={excludeObtainables}
+        >
+          <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
+          Exclude Obtainables
         </Button>
       </div>
 

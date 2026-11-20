@@ -158,6 +158,7 @@ export default function InventoryCheckerClient({
   const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
+  const [excludeObtainables, setExcludeObtainables] = useState(false);
   const hasAutoFetchedQueueRef = useRef(false);
   const [scanErrorBanner, setScanErrorBanner] = useState<{
     title: string;
@@ -1034,6 +1035,7 @@ export default function InventoryCheckerClient({
                   showOnlyOriginal={showOnlyOriginal}
                   showOnlyLimited={showOnlyLimited}
                   showOnlySeasonal={showOnlySeasonal}
+                  excludeObtainables={excludeObtainables}
                   scanWebSocket={scanWebSocket}
                   scanErrorBanner={scanErrorBanner}
                   queuePosition={queuePosition}
@@ -1110,6 +1112,7 @@ export default function InventoryCheckerClient({
                         onShowOnlyNonOriginalChange={setShowOnlyNonOriginal}
                         onShowOnlyLimitedChange={setShowOnlyLimited}
                         onShowOnlySeasonalChange={setShowOnlySeasonal}
+                        onExcludeObtainablesChange={setExcludeObtainables}
                       />
                     </InventoryHistory>
                   </div>
