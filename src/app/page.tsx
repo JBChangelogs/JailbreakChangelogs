@@ -1,6 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { withDiscordEmbed } from "@/lib/discord-embed";
+import { SHARE_CODE } from "@/utils/ui/customTheme";
+import { generateMetadata as rootMetadata } from "./layout";
 import { getRandomBackgroundImage } from "@/utils/helpers/backgroundImages";
 import { fetchHomepageStats } from "@/utils/api/api";
 import { Icon } from "../components/ui/IconWrapper";
@@ -19,11 +22,19 @@ import { badimoTestimonial } from "@/components/Testimonials/badimoTestimonial";
 import { highlightBrandName } from "@/components/Testimonials/testimonialText";
 import { UserAvatar } from "@/utils/ui/avatar";
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "Home | Jailbreak Changelogs",
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ theme?: string | string[] }>;
+}): Promise<Metadata> {
+  const title = { absolute: "Home | Jailbreak Changelogs" };
+  const theme = (await searchParams).theme?.toString().toUpperCase();
+  if (!theme || !SHARE_CODE.test(theme)) return { title };
+  return withDiscordEmbed(
+    { ...(await rootMetadata()), title },
+    `/?theme=${theme}`,
+  );
+}
 
 const quickLinks = [
   {
