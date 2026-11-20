@@ -176,7 +176,7 @@ export const getItemImagePath = (
 export const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
   const img = e.currentTarget;
   // Only set placeholder if it's not already the placeholder
-  if (img.src !== IMAGE_PATHS.PLACEHOLDER) {
+  if (!img.src.endsWith(IMAGE_PATHS.PLACEHOLDER)) {
     img.src = IMAGE_PATHS.PLACEHOLDER;
     // Remove the error handler to prevent infinite loops
     img.onerror = null;
