@@ -20,7 +20,7 @@ import {
   CategoryIconBadge,
 } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { isSeasonalItem, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
@@ -85,7 +85,7 @@ export default function OGItemCard({
   const isDuplicate = duplicateCount > 1;
   const displayedSeason = itemData?.season ?? undefined;
   const displayedLevel = unlockLevel(itemData?.level);
-  const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
+  const isSeasonal = isSeasonalItem(itemData);
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,

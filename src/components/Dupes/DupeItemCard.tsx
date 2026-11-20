@@ -23,7 +23,7 @@ import {
   getCategoryColor,
   CategoryIconBadge,
 } from "@/utils/items/categoryIcons";
-import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { isSeasonalItem, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
@@ -75,7 +75,7 @@ export default function DupeItemCard({
     robloxId;
   const displayedSeason = itemData.season ?? undefined;
   const displayedLevel = unlockLevel(itemData.level);
-  const isSeasonal = itemData?.is_seasonal === 1 || hasSeason(itemData);
+  const isSeasonal = isSeasonalItem(itemData);
   const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
   const requirementsTooltipText = formatUnlockRequirementsTooltip(
     displayedSeason,

@@ -37,7 +37,7 @@ import {
   getCategoryColor,
   getCategoryIcon,
 } from "@/utils/items/categoryIcons";
-import { hasSeason, unlockLevel } from "@/utils/items/season";
+import { isSeasonalItem, unlockLevel } from "@/utils/items/season";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
@@ -276,12 +276,12 @@ function TradeItem({
           onError={handleImageError}
         />
         {catalogItem &&
-          (hasSeason(catalogItem) || catalogItem.is_limited === 1) && (
+          (isSeasonalItem(catalogItem) || catalogItem.is_limited === 1) && (
             <div className="absolute top-1 right-1 z-20">
               <CategoryIconBadge
                 type={item.category_title}
                 isLimited={catalogItem.is_limited === 1}
-                isSeasonal={hasSeason(catalogItem)}
+                isSeasonal={isSeasonalItem(catalogItem)}
                 className="h-4 w-4"
               />
             </div>

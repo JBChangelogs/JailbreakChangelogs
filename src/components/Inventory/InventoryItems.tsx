@@ -1,5 +1,7 @@
 "use client";
 
+import { isSeasonalItem } from "@/utils/items/season";
+
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { RobloxUser, Item, ValueSort } from "@/types";
@@ -457,7 +459,7 @@ export default function InventoryItems({
       if (showOnlySigned && !item.Sign?.some(Boolean)) return false;
 
       if (showOnlyLimited && itemData?.is_limited !== 1) return false;
-      if (showOnlySeasonal && itemData?.is_seasonal !== 1) return false;
+      if (showOnlySeasonal && !isSeasonalItem(itemData)) return false;
 
       // Filter by tradability
       if (showOnlyTradable) {

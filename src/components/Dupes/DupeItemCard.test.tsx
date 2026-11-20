@@ -57,7 +57,7 @@ test("card actions pass the original owner to the shared check and preserve hist
           };
         if (name === "@/app/fonts") return { bangers: { className: "" } };
         if (name === "@/utils/items/season")
-          return { hasSeason: () => false, unlockLevel: () => null };
+          return { isSeasonalItem: () => false, unlockLevel: () => null };
         if (name === "@/utils/items/itemUnlockPresentation")
           return {
             hasUnlockLevel: () => false,

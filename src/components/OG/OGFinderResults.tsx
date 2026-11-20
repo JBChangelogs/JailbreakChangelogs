@@ -1,5 +1,7 @@
 "use client";
 
+import { isSeasonalItem } from "@/utils/items/season";
+
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import { trackEvent } from "@/utils/analytics/rybbit";
@@ -200,7 +202,7 @@ export default function OGFinderResults({
 
       const catalogValues = catalogValuesById.get(item.item_id);
       if (showOnlyLimited && catalogValues?.is_limited !== 1) return false;
-      if (showOnlySeasonal && catalogValues?.is_seasonal !== 1) return false;
+      if (showOnlySeasonal && !isSeasonalItem(catalogValues)) return false;
 
       return matchesSearch && matchesCategory;
     });

@@ -1,5 +1,7 @@
 "use client";
 
+import { isSeasonalItem } from "@/utils/items/season";
+
 import { useCallback, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
 import { Season } from "@/types/seasons";
@@ -15,7 +17,8 @@ type CatalogFlags = {
   cash_value: string | null;
   duped_value: string | null;
   is_limited: number | null;
-  is_seasonal: number | null;
+  season: number | null;
+  level: number | string | null;
 };
 
 interface UserStatsProps {
@@ -136,7 +139,7 @@ export default function UserStats({
     );
     const excludedByCatalog = (item: CatalogFlags | undefined) =>
       (showOnlyLimited && item?.is_limited !== 1) ||
-      (showOnlySeasonal && item?.is_seasonal !== 1);
+      (showOnlySeasonal && !isSeasonalItem(item));
 
     let inventoryValue = 0;
     let dupedValue = 0;
