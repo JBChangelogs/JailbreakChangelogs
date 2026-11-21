@@ -249,6 +249,11 @@ export function useInventoryScan(
       const body = (await response.json().catch(() => null)) as {
         detail?: unknown;
       } | null;
+      const detail = body?.detail as { scan?: unknown } | undefined;
+      if (response.status === 409 && detail?.scan) {
+        update("scanning", "requested", "Scan already in progress", 10);
+        return;
+      }
       const { message: errorMessage, phase: errorPhase } = scanRequestError(
         response.status,
         body?.detail,
@@ -257,7 +262,7 @@ export function useInventoryScan(
     } catch {
       fail("Failed to reach the scan service. Please try again.");
     }
-  }, [fail]);
+  }, [fail, update]);
 
   const startScan = useCallback(() => {
     trackWebEvent("inventory_scan_requested");
