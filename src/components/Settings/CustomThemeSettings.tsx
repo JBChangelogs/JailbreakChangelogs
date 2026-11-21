@@ -1,7 +1,5 @@
 "use client";
 
-import { warmEmbed } from "@/lib/warmEmbed";
-
 import { FRONTEND_SETTINGS } from "@/config/settings";
 import Link from "next/link";
 
@@ -9,6 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";

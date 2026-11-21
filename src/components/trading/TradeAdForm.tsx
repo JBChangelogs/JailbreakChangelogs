@@ -1,4 +1,3 @@
-import { warmEmbed } from "@/lib/warmEmbed";
 import { parseValueString } from "@/components/Values/Calculator/calculatorUtils";
 import React, {
   useState,
@@ -10,6 +9,7 @@ import React, {
 import { useAuthContext } from "@/contexts/AuthContext";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { trackWebEvent } from "@/utils/analytics/web";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";

@@ -15,12 +15,15 @@ export async function generateMetadata({
   params: Promise<{ code: string }>;
 }): Promise<Metadata> {
   const code = (await params).code.toUpperCase();
+  // Share links expire, so keep them out of search results.
+  const robots = { index: false };
   if (!CALCULATOR_SHARE_CODE.test(code))
-    return withDiscordEmbed(pageMetadata, "/values/calculator");
+    return withDiscordEmbed({ ...pageMetadata, robots }, "/values/calculator");
   const path = `/values/calculator?share=${code}`;
   return withDiscordEmbed(
     {
       ...pageMetadata,
+      robots,
       openGraph: {
         ...pageMetadata.openGraph,
         url: `https://jailbreakchangelogs.com${path}`,

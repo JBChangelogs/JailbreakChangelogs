@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { SHARE_CODE } from "@/utils/ui/customTheme";
 import { generateMetadata as rootMetadata } from "../../layout";
+import { metadata as homeMetadata } from "../../page";
 
 // The proxy rewrites /?theme=CODE here so each shared theme gets its own OG
 // image while / stays static. The browser URL keeps ?theme= for the client.
@@ -15,10 +16,10 @@ export async function generateMetadata({
   params: Promise<{ code: string }>;
 }): Promise<Metadata> {
   const theme = (await params).code.toUpperCase();
-  const title = { absolute: "Home | Jailbreak Changelogs" };
-  if (!SHARE_CODE.test(theme)) return { title };
+  const robots = { index: false };
+  if (!SHARE_CODE.test(theme)) return { title: homeMetadata.title, robots };
   return withDiscordEmbed(
-    { ...(await rootMetadata()), title },
+    { ...(await rootMetadata()), title: homeMetadata.title, robots },
     `/?theme=${theme}`,
   );
 }

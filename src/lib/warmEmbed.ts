@@ -1,8 +1,4 @@
-import {
-  EMBED_ORIGIN,
-  embedImageUrl,
-  pregenerateUrl,
-} from "@/lib/discord-embed";
+import { EMBED_ORIGIN, embedImageUrl, pregenerateUrl } from "@/lib/embedImage";
 
 // A cold OG image takes embedgen 2-6s to render. Its /pregenerate endpoint
 // queues the render in the background so Discord's first fetch is instant.

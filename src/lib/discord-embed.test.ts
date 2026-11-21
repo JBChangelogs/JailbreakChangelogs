@@ -1,11 +1,7 @@
 import { expect, test } from "bun:test";
 import type { Metadata } from "next";
-import {
-  buildDiscordEmbed,
-  embedImageUrl,
-  pregenerateUrl,
-  withDiscordEmbed,
-} from "./discord-embed";
+import { buildDiscordEmbed, withDiscordEmbed } from "./discord-embed";
+import { embedImageUrl, pregenerateUrl } from "./embedImage";
 import { GET } from "@/app/embeds/discord.json/route";
 import { metadata as valuesMetadata } from "@/app/values/layout";
 import { metadata as supportMetadata } from "@/app/supporting/layout";

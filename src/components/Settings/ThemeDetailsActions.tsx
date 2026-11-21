@@ -1,13 +1,12 @@
 "use client";
 
-import { warmEmbed } from "@/lib/warmEmbed";
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";

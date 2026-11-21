@@ -1,8 +1,7 @@
 "use client";
 
-import { warmEmbed } from "@/lib/warmEmbed";
-
 import { trackWebEvent } from "@/utils/analytics/web";
+import { warmEmbed } from "@/lib/warmEmbed";
 
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
