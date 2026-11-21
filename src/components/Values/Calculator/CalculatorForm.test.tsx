@@ -260,6 +260,7 @@ test.each(["success", "expired", "cancelled"])(
                   notifications.push({ type: "error", message }),
               },
             };
+          if (name === "@/lib/warmEmbed") return { warmEmbed: () => {} };
           if (name === "./calculatorUtils")
             return {
               calculateCalculatorTotal: () => 0,

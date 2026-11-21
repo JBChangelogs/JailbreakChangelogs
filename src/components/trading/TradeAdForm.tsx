@@ -1,3 +1,4 @@
+import { warmEmbed } from "@/lib/warmEmbed";
 import { parseValueString } from "@/components/Values/Calculator/calculatorUtils";
 import React, {
   useState,
@@ -936,6 +937,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           ),
         );
       } else {
+        const createdId = (responseBody as { id?: unknown } | null)?.id;
+        if (typeof createdId === "number" || typeof createdId === "string")
+          warmEmbed(`/trading/ad/${createdId}`);
         toast.success("Trade ad created successfully!", {
           id: creatingToastId ?? undefined,
         });

@@ -1,5 +1,7 @@
 "use client";
 
+import { warmEmbed } from "@/lib/warmEmbed";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -155,6 +157,7 @@ export default function SharedThemeDialog() {
 
   const copyLink = async () => {
     if (!theme) return;
+    warmEmbed(`/?theme=${theme.share_code}`);
     try {
       await navigator.clipboard.writeText(shareUrl(theme.share_code));
       toast.success("Share link copied");
