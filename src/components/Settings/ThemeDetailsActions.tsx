@@ -1,5 +1,7 @@
 "use client";
 
+import { warmEmbed } from "@/lib/warmEmbed";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { appearanceProfileKey } from "@/hooks/useAccentColor";
 import { useEffect, useState } from "react";
@@ -78,6 +80,7 @@ export default function ThemeDetailsActions({
         <Button
           variant="secondary"
           onClick={async () => {
+            warmEmbed(`/themes/${theme.share_code}`);
             try {
               await navigator.clipboard.writeText(
                 `${window.location.origin}/themes/${theme.share_code}`,
