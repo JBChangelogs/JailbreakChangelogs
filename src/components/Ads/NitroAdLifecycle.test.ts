@@ -47,6 +47,9 @@ function mount(filename: string) {
       jsxs: () => null,
     },
     "@/components/Ads/AdLabel": { default: "ad-label" },
+    "@/lib/utils": {
+      cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
+    },
     "@/components/Ads/NitroLeftGutterAd": { default: "rail" },
     "@/utils/ui/desktopNavigation": {
       getDesktopNavigation: () => navigation,
@@ -153,15 +156,39 @@ function mount(filename: string) {
   };
 }
 
-test("robberies video initializes when auth finishes, without resetting on rerenders", () => {
-  const app = mount("./NitroRobberiesTopAd.tsx");
+for (const slotId of ["inline-test", "np-value-calc", "np-robberies-top"]) {
+  test(`${slotId} keeps small-screen video inline and floats on desktop`, () => {
+    const app = mount("./NitroInlineVideoPlayer.tsx");
+    const floats: string[] = [];
+    app.auth.isLoading = false;
+    app.browser.nitroAds = {
+      createAd: (id: string, config: { video: { float: string } }) => {
+        expect(id).toBe(slotId);
+        floats.push(config.video.float);
+        return Promise.resolve({});
+      },
+      removeAd() {},
+    };
+    app.render({ slotId });
+    expect(floats).toEqual(["never"]);
+    app.resize("wide");
+    app.render();
+    expect(floats).toEqual(["never", "auto"]);
+    app.resize("small");
+    app.render();
+    expect(floats).toEqual(["never", "auto", "never"]);
+  });
+}
+
+test("inline video initializes when auth finishes, without resetting on rerenders", () => {
+  const app = mount("./NitroInlineVideoPlayer.tsx");
   app.browser.nitroAds = {
     createAd: () => {
       app.calls.push("create");
       return Promise.resolve({});
     },
   };
-  app.render();
+  app.render({ slotId: "np-robberies-top" });
   expect(app.calls).toEqual([]);
   app.auth.isLoading = false;
   app.render();

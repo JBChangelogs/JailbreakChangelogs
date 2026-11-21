@@ -3,6 +3,7 @@
 import AdLabel from "@/components/Ads/AdLabel";
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { createLogger } from "@/services/logger";
@@ -12,6 +13,7 @@ const log = createLogger("UI");
 const CONFIG = {
   format: "video-nc",
   video: {
+    float: "auto",
     mobile: "compact",
     hidePlaylist: true,
   },
@@ -38,6 +40,7 @@ export default function NitroInlineVideoPlayer({
   variant = "default",
 }: Props) {
   const { user, isLoading } = useAuthContext();
+  const isDesktop = useMediaQuery("(min-width: 1025px)");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
@@ -69,7 +72,12 @@ export default function NitroInlineVideoPlayer({
     createdRef.current = true;
 
     try {
-      Promise.resolve(nitroAds.createAd(slotId, CONFIG)).catch((error) => {
+      Promise.resolve(
+        nitroAds.createAd(slotId, {
+          ...CONFIG,
+          video: { ...CONFIG.video, float: isDesktop ? "auto" : "never" },
+        }),
+      ).catch((error) => {
         log.warn(
           `[Nitro Ad] Failed to create ${slotId} video player ad:`,
           error,
@@ -89,7 +97,7 @@ export default function NitroInlineVideoPlayer({
       clearContainer();
       createdRef.current = false;
     };
-  }, [isLoading, isSupporter, slotId]);
+  }, [isLoading, isSupporter, slotId, isDesktop]);
 
   if (isLoading || isSupporter) {
     return null;
