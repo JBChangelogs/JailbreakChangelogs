@@ -186,8 +186,14 @@ export function withDiscordEmbed(
     SITE_URL,
   );
   const route = pageUrl.pathname.replace(/\/$/, "");
-  const theme = new URL(path, SITE_URL).searchParams.get("theme");
-  const imageUrl = `https://embeds.jailbreakchangelogs.com/og${route}.png${theme ? `?theme=${encodeURIComponent(theme)}` : ""}`;
+  const params = new URL(path, SITE_URL).searchParams;
+  const query = ["theme", "share"]
+    .flatMap((key) => {
+      const value = params.get(key);
+      return value ? [`${key}=${encodeURIComponent(value)}`] : [];
+    })
+    .join("&");
+  const imageUrl = `https://embeds.jailbreakchangelogs.com/og${route}.png${query ? `?${query}` : ""}`;
   const data: EmbedData = {
     ...profile,
     title: `${path === "/" && pageTitle === "Jailbreak Changelogs" ? "Home" : pageTitle.replace(/\s+[|–—-]\s+Jailbreak Changelogs$/, "")} | Jailbreak Changelogs`,
