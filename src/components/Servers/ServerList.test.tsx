@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { QueryClient } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
@@ -66,6 +67,11 @@ test("confirmed server deletion removes the card and updates pagination even if 
           );
         },
         require: (name: string) => {
+          if (
+            name === "@/utils/api/verificationRequired" ||
+            name === "./verificationRequired"
+          )
+            return verificationRequired;
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
           if (name === "react")
             return {

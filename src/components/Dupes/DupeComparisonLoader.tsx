@@ -1,5 +1,10 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import {
+  throwIfVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "@/utils/api/verificationRequired";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { trackDupeEvent } from "@/utils/analytics/dupes";
@@ -67,6 +72,7 @@ export default function DupeComparisonLoader({
           signal,
         },
       );
+      await throwIfVerificationRequired(response);
       if (response.status === 404) return null;
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -89,6 +95,14 @@ export default function DupeComparisonLoader({
   const itemIds = variants ? [variants.duplicate.item_id] : [];
   const itemQuery = useBatchItems(itemIds);
 
+  if (
+    (variantsQuery.error?.message === VERIFICATION_REQUIRED_MESSAGE &&
+      !variantsQuery.data) ||
+    (itemQuery.error?.message === VERIFICATION_REQUIRED_MESSAGE &&
+      !itemQuery.data?.length)
+  ) {
+    return <VerificationRequiredNotice />;
+  }
   if (variantsQuery.error && !variantsQuery.data) throw variantsQuery.error;
   if (itemQuery.error && !itemQuery.data) throw itemQuery.error;
 

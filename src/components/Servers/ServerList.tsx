@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { trackWebEvent } from "@/utils/analytics/web";
 
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
@@ -538,9 +540,13 @@ const ServerList: React.FC = () => {
       <div>
         {searchControls}
         {listHeader}
-        <div className="bg-button-danger/10 border-button-danger text-button-danger rounded-lg border p-4">
-          {error}
-        </div>
+        {error === VERIFICATION_REQUIRED_MESSAGE ? (
+          <VerificationRequiredNotice />
+        ) : (
+          <div className="bg-button-danger/10 border-button-danger text-button-danger rounded-lg border p-4">
+            {error}
+          </div>
+        )}
       </div>
     );
   }

@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { QueryClient } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
@@ -90,6 +91,11 @@ test("profile and changelog voters follow refreshed data while preserving open m
         exports,
         fetch: async () => Response.json(response()),
         require: (name: string) => {
+          if (
+            name === "@/utils/api/verificationRequired" ||
+            name === "./verificationRequired"
+          )
+            return verificationRequired;
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
           if (name === "react")
             return {

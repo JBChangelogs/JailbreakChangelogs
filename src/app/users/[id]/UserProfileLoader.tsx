@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserById, PUBLIC_API_URL } from "@/utils/api/api";
 import { fetchProfileData } from "@/services/profileDataService";
@@ -33,6 +35,9 @@ export default function UserProfileLoader({ userId }: { userId: string }) {
   if (profileQuery.isPending) return <UserProfileLoading />;
 
   const message = profileQuery.error?.message;
+  if (message === VERIFICATION_REQUIRED_MESSAGE && !profileQuery.data) {
+    return <VerificationRequiredNotice />;
+  }
   const code = message?.startsWith("NOT_FOUND:")
     ? 404
     : message?.startsWith("BANNED_USER:")

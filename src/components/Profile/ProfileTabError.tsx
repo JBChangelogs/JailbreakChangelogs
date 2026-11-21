@@ -1,3 +1,5 @@
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -17,6 +19,10 @@ export default function ProfileTabError({
   onRetry,
   children,
 }: ProfileTabErrorProps) {
+  if (message === VERIFICATION_REQUIRED_MESSAGE) {
+    return <VerificationRequiredNotice />;
+  }
+
   return (
     <div className="mx-auto max-w-lg px-4 py-8 text-center">
       <div className="mb-3 flex justify-center">

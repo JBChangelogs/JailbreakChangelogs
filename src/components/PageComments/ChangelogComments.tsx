@@ -1,5 +1,6 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
 import NumberFlow from "@number-flow/react";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -45,6 +46,7 @@ function CommentsLayout() {
     commentBan,
     reactionBan,
     isRefreshingComments,
+    verificationRequired,
     profileCommentsDisabled,
     filteredComments,
     currentComments,
@@ -175,6 +177,8 @@ function CommentsLayout() {
           {/* Comments List */}
           {isRefreshingComments ? (
             <CommentSkeletonList />
+          ) : verificationRequired && filteredComments.length === 0 ? (
+            <VerificationRequiredNotice />
           ) : filteredComments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center sm:py-10">
               <div className="relative mb-6">
@@ -281,7 +285,10 @@ function CommentsLayout() {
                       </Button>
                     </div>
                   ))}
-                {loadMoreError && (
+                {loadMoreError && verificationRequired && (
+                  <VerificationRequiredNotice />
+                )}
+                {loadMoreError && !verificationRequired && (
                   <div className="mt-3 flex flex-col items-center gap-3">
                     <p className="text-secondary-text text-sm">
                       Could not load more comments. Please try again.

@@ -1,3 +1,5 @@
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +16,10 @@ export function InventoryLoadErrorNotice({
   onUseValuesList,
   className = "",
 }: InventoryLoadErrorNoticeProps) {
+  if (message === VERIFICATION_REQUIRED_MESSAGE) {
+    return <VerificationRequiredNotice className={className} />;
+  }
+
   return (
     <div
       className={`border-border-card bg-secondary-bg rounded-lg border p-6 text-center ${className}`}

@@ -1,5 +1,10 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import {
+  throwIfVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "@/utils/api/verificationRequired";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -85,6 +90,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
           cache: "no-store",
         },
       );
+      await throwIfVerificationRequired(response);
       if (!response.ok) {
         if (response.status === 404) {
           return [];
@@ -135,6 +141,13 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   }
 
   // Error state
+  if (
+    dupesError?.message === VERIFICATION_REQUIRED_MESSAGE &&
+    !dupedUsersData
+  ) {
+    return <VerificationRequiredNotice />;
+  }
+
   if (dupesError && !dupedUsersData) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">

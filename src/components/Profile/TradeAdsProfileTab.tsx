@@ -1,5 +1,6 @@
 "use client";
 
+import { throwIfVerificationRequired } from "@/utils/api/verificationRequired";
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import Link from "next/link";
@@ -225,6 +226,7 @@ export default function TradeAdsProfileTab({
         signal,
         headers,
       });
+      await throwIfVerificationRequired(response);
       const data: unknown = await response.json().catch(() => null);
 
       if (

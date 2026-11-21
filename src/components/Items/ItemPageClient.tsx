@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { Suspense, useMemo } from "react";
 import { notFound } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,11 +20,16 @@ interface Props {
 
 export default function ItemPageClient({ type, name }: Props) {
   const queryClient = useQueryClient();
-  const { data: item, isPending } = useQuery({
+  const {
+    data: item,
+    isPending,
+    error,
+  } = useQuery({
     queryKey: ["item", type, name],
     queryFn: () =>
       fetchItemClient(decodeURIComponent(type), decodeURIComponent(name)),
-    throwOnError: (_error, query) => !query.state.data,
+    throwOnError: (error, query) =>
+      !query.state.data && error.message !== VERIFICATION_REQUIRED_MESSAGE,
   });
 
   // Promises consumed via use() must stay stable across renders.
@@ -43,6 +50,10 @@ export default function ItemPageClient({ type, name }: Props) {
 
   if (isPending) {
     return <Loading />;
+  }
+
+  if (error?.message === VERIFICATION_REQUIRED_MESSAGE && !item) {
+    return <VerificationRequiredNotice />;
   }
 
   if (!item || !historyPromise) {

@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
@@ -322,6 +324,9 @@ export default function CopyTreeView({
 
   if (query.isPending) {
     return <DupeComparisonLoading message="Loading dupe tree..." />;
+  }
+  if (query.error?.message === VERIFICATION_REQUIRED_MESSAGE) {
+    return <VerificationRequiredNotice />;
   }
   if (query.isError) {
     return (

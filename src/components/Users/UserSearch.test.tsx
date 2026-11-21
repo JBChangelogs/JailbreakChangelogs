@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -35,6 +36,11 @@ test("users search registers slash to focus and select, then cleans up", () => {
         },
       },
       require: (name: string) => {
+        if (
+          name === "@/utils/api/verificationRequired" ||
+          name === "./verificationRequired"
+        )
+          return verificationRequired;
         if (name === "react")
           return {
             useState: (value: unknown) => [value, () => {}],

@@ -1,5 +1,6 @@
 "use client";
 
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
@@ -432,13 +433,12 @@ export default function ValuesClient() {
   const isLoading = favoritesSelected
     ? Boolean(user?.id) && favoritesQuery.isPending
     : catalogQuery.isLoading;
-  const visibleError = favoritesSelected
-    ? favoritesQuery.data
+  const selectedQuery = favoritesSelected ? favoritesQuery : catalogQuery;
+  const visibleError =
+    selectedQuery.data &&
+    selectedQuery.error?.message !== VERIFICATION_REQUIRED_MESSAGE
       ? null
-      : favoritesQuery.error
-    : catalogQuery.data
-      ? null
-      : catalogQuery.error;
+      : selectedQuery.error;
   const refetch = favoritesSelected
     ? favoritesQuery.refetch
     : catalogQuery.refetch;
@@ -589,6 +589,7 @@ export default function ValuesClient() {
             items={isLoading ? EMPTY_ITEMS : items}
             isLoading={isLoading}
             searchErrorMessage={
+              visibleError?.message === VERIFICATION_REQUIRED_MESSAGE ||
               visibleError instanceof ItemSearchQueryTooShortError
                 ? visibleError.message
                 : visibleError

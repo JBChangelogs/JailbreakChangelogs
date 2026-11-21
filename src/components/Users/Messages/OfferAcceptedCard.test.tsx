@@ -598,6 +598,7 @@ test("batch offer details retain accepted and completed offers and preserve back
       fetch: async () => ({
         ok: responseStatus === 200,
         status: responseStatus,
+        headers: new Headers(),
         text: async () =>
           JSON.stringify(responseStatus === 200 ? records : errorBody),
       }),

@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { Fragment, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -40,7 +42,11 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
     retry: false,
   });
 
-  const { data: sortGroups = [], isPending: sortsPending } = useQuery({
+  const {
+    data: sortGroups = [],
+    isPending: sortsPending,
+    error: sortsError,
+  } = useQuery({
     queryKey: ["similar-item-sorts"],
     queryFn: fetchSimilarItemSorts,
     staleTime: Infinity,
@@ -48,7 +54,11 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
   });
   const sortBy = selectedSort ?? sortGroups[0]?.options[0]?.value ?? null;
 
-  const { data: similarItems, isPending: itemsPending } = useQuery({
+  const {
+    data: similarItems,
+    isPending: itemsPending,
+    error: itemsError,
+  } = useQuery({
     queryKey: ["similar-items", currentItem.id, sortBy],
     queryFn: () =>
       fetchSimilarItems(currentItem.id, sortBy, SIMILAR_ITEMS_LIMIT),
@@ -125,6 +135,10 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
             <ItemCardSkeleton key={i} />
           ))}
         </div>
+      ) : (itemsError?.message === VERIFICATION_REQUIRED_MESSAGE ||
+          sortsError?.message === VERIFICATION_REQUIRED_MESSAGE) &&
+        !similarItems?.length ? (
+        <VerificationRequiredNotice />
       ) : !similarItems || similarItems.length === 0 ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
           <div className="border-button-info/30 bg-icon-tile-bg mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">

@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  throwIfVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "@/utils/api/verificationRequired";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   infiniteQueryOptions,
@@ -79,6 +83,7 @@ async function fetchCommentsPage(
     headers,
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok) throw new Error("Failed to fetch comments");
   const data = await response.json();
   return {
@@ -1961,6 +1966,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
     setReportingCommentId,
     isSubmittingComment,
     isRefreshingComments,
+    verificationRequired:
+      (focusedThread ? threadQuery.error : commentsQuery.error)?.message ===
+      VERIFICATION_REQUIRED_MESSAGE,
     rateLimitUntil,
     rateLimitLabel,
     reactionRateLimitUntil,

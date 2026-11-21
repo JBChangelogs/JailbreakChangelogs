@@ -6,6 +6,10 @@ import {
 } from "@/utils/api/api";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 import {
+  isVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "./verificationRequired";
+import {
   inventoryNotFoundMessage,
   type InventoryNotFoundResponse,
 } from "./inventoryNotFound";
@@ -78,8 +82,18 @@ async function fetchUserInventory(
   }
 
   if (!response) throw new Error("Failed to load inventory (no response)");
-  const data: unknown = await response.json();
+  const data: unknown = await response.json().catch((error: unknown) => {
+    if (isVerificationRequired(response, null)) return null;
+    throw error;
+  });
   if (!response.ok) {
+    if (isVerificationRequired(response, data)) {
+      throw new InventoryRequestError(
+        VERIFICATION_REQUIRED_MESSAGE,
+        response.status,
+        "challenge_required",
+      );
+    }
     const code =
       data &&
       typeof data === "object" &&

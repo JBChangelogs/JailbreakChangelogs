@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -150,6 +152,10 @@ export function FollowList({ userId, kind }: { userId: string; kind: Kind }) {
     }
   };
 
+  if (userQuery.error?.message === VERIFICATION_REQUIRED_MESSAGE && !profile) {
+    return <VerificationRequiredNotice />;
+  }
+
   if (userQuery.isError || (userQuery.isSuccess && !profile)) {
     const message = userQuery.error?.message ?? "";
     return (
@@ -199,6 +205,8 @@ export function FollowList({ userId, kind }: { userId: string; kind: Kind }) {
               icon="heroicons:lock-closed"
               text={`This user has chosen to keep their ${kind} private.`}
             />
+          ) : listQuery.error?.message === VERIFICATION_REQUIRED_MESSAGE ? (
+            <VerificationRequiredNotice />
           ) : listQuery.isError ? (
             <div className="flex flex-col items-center gap-3 py-10 text-sm">
               <p className="text-status-error">Failed to load {kind}.</p>

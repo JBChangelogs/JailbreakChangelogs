@@ -1,3 +1,4 @@
+import { throwIfVerificationRequired } from "./verificationRequired";
 import { queryOptions } from "@tanstack/react-query";
 import type { FollowerData, FollowingData, UserSettingsV2 } from "@/types/auth";
 import { PUBLIC_API_URL } from "./api";
@@ -48,6 +49,7 @@ export function profileSocialQueryOptions<T extends keyof SocialLists>(
           timeoutMs: 10000,
         },
       );
+      await throwIfVerificationRequired(response);
       if (response.status === 404) return [];
       if (!response.ok) throw new Error(`Failed to load ${kind}`);
       const data = await response.json();

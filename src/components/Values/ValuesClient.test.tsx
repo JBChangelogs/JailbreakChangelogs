@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import {
   InfiniteQueryObserver,
@@ -71,6 +72,11 @@ function harness(startPage = 1) {
     {
       exports,
       require: (name: string) => {
+        if (
+          name === "@/utils/api/verificationRequired" ||
+          name === "./verificationRequired"
+        )
+          return verificationRequired;
         if (name === "react")
           return {
             useState: (initial: unknown) => {
@@ -222,6 +228,14 @@ test("values append pages, preserve cards on failure, retry, deduplicate and reu
     await observer.fetchNextPage();
     h.setResult(observer.getCurrentResult());
     expect(h.render().loadMoreError).toBe(true);
+    expect(h.render().items.map((item) => item.id)).toEqual([3, 4]);
+    h.setResult({
+      ...observer.getCurrentResult(),
+      error: new Error(verificationRequired.VERIFICATION_REQUIRED_MESSAGE),
+    });
+    expect(h.render().searchErrorMessage).toBe(
+      verificationRequired.VERIFICATION_REQUIRED_MESSAGE,
+    );
     expect(h.render().items.map((item) => item.id)).toEqual([3, 4]);
     h.setFailNext(false);
     h.render().onLoadMore();

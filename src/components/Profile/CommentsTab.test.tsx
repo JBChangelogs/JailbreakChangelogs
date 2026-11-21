@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { QueryClient, queryOptions } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
@@ -69,6 +70,11 @@ test("profile comments reuse one timeline request for over ten distinct changelo
         fetch,
         URLSearchParams,
         require: (name: string) => {
+          if (
+            name === "@/utils/api/verificationRequired" ||
+            name === "./verificationRequired"
+          )
+            return verificationRequired;
           if (name === "nuqs")
             return {
               parseAsInteger: {

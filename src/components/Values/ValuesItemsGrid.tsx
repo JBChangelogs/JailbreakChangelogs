@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { useMemo, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState, parseAsInteger } from "nuqs";
@@ -238,6 +240,9 @@ export default function ValuesItemsGrid({
           [...Array(pageSize)].map((_, index) => (
             <ItemCardSkeleton key={index} />
           ))
+        ) : searchErrorMessage === VERIFICATION_REQUIRED_MESSAGE &&
+          displayedItems.length === 0 ? (
+          <VerificationRequiredNotice className="col-span-full mb-4" />
         ) : displayedItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg col-span-full mb-4 rounded-lg border p-8 text-center">
             <h3 className="text-primary-text mb-1 font-semibold">
@@ -300,16 +305,21 @@ export default function ValuesItemsGrid({
       </div>
 
       <div className="mt-8 flex flex-col items-center gap-3" aria-live="polite">
-        {loadMoreError && (
-          <>
-            <p className="text-secondary-text">
-              Could not load more items. Please try again.
-            </p>
-            <Button onClick={onLoadMore} disabled={isFetching}>
-              {isFetching ? "Loading more…" : "Retry"}
-            </Button>
-          </>
-        )}
+        {loadMoreError &&
+          searchErrorMessage === VERIFICATION_REQUIRED_MESSAGE && (
+            <VerificationRequiredNotice />
+          )}
+        {loadMoreError &&
+          searchErrorMessage !== VERIFICATION_REQUIRED_MESSAGE && (
+            <>
+              <p className="text-secondary-text">
+                Could not load more items. Please try again.
+              </p>
+              <Button onClick={onLoadMore} disabled={isFetching}>
+                {isFetching ? "Loading more…" : "Retry"}
+              </Button>
+            </>
+          )}
         {!hasMore && displayedItems.length > 0 && (
           <p className="text-secondary-text text-sm">No more items.</p>
         )}

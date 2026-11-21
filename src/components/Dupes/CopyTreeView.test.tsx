@@ -6,6 +6,7 @@ import CopyTreeView, { CopyTree } from "./CopyTreeView";
 import DupeComparisonLoader from "./DupeComparisonLoader";
 import type { CopyTreeResponse, CopyTreeSegment } from "@/utils/api/copyTree";
 import { formatShortDateTime } from "@/utils/helpers/timestamp";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 
 const originalApiUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
 beforeEach(() => {
@@ -407,6 +408,53 @@ test("shows view tabs above the default simplified panel without mounting the co
       .find({ queryKey: ["duplicate-copy-tree", "game-instance-id"] }),
   ).toBeUndefined();
   client.clear();
+});
+
+test("blocked comparison and tree queries show verification instead of an error boundary or retry panel", async () => {
+  for (const queryName of [
+    "duplicate-variants",
+    "duplicate-copy-tree",
+    "items-batch",
+  ]) {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retryOnMount: false } },
+    });
+    try {
+      if (queryName === "items-batch") {
+        client.setQueryData(["duplicate-variants", "blocked-item"], {
+          duplicate: { item_id: 1 },
+        });
+      }
+      await client
+        .fetchQuery({
+          queryKey: [
+            queryName,
+            queryName === "items-batch" ? [1] : "blocked-item",
+          ],
+          queryFn: () => {
+            throw new Error(VERIFICATION_REQUIRED_MESSAGE);
+          },
+          retry: false,
+        })
+        .catch(() => {});
+      const markup = renderToStaticMarkup(
+        <QueryClientProvider client={client}>
+          <NuqsTestingAdapter>
+            {queryName !== "duplicate-copy-tree" ? (
+              <DupeComparisonLoader id="blocked-item" />
+            ) : (
+              <CopyTreeView id="blocked-item" empty={() => null} />
+            )}
+          </NuqsTestingAdapter>
+        </QueryClientProvider>,
+      );
+      expect(markup).toContain("Verification required");
+      expect(markup).toContain(VERIFICATION_REQUIRED_MESSAGE);
+      expect(markup).not.toContain("Try again");
+    } finally {
+      client.clear();
+    }
+  }
 });
 
 test("both history views use the same loading panel and spinner", () => {

@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { useEffect, useMemo, useState } from "react";
@@ -377,7 +379,11 @@ export default function ProfileInventoryTab({
         </div>
       )}
 
-      {status === "error" && (
+      {status === "error" && error === VERIFICATION_REQUIRED_MESSAGE && (
+        <VerificationRequiredNotice />
+      )}
+
+      {status === "error" && error !== VERIFICATION_REQUIRED_MESSAGE && (
         <ProfileTabError
           title={
             isNotFound ? "Inventory not found" : "Failed to load inventory"

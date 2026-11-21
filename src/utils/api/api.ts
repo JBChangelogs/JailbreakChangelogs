@@ -2,6 +2,11 @@ import {
   inventoryNotFoundMessage,
   type InventoryNotFoundResponse,
 } from "./inventoryNotFound";
+import {
+  isVerificationRequired,
+  throwIfVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "./verificationRequired";
 
 export interface Changelog {
   id: number;
@@ -112,7 +117,10 @@ function canonicalItemType(type: string): string {
 
 const USER_BANNED_FALLBACK_MESSAGE =
   "This user is banned from Jailbreak Changelogs.";
-const USER_ACCESS_ERROR_PREFIXES = ["BANNED_USER:"] as const;
+const USER_ACCESS_ERROR_PREFIXES = [
+  "BANNED_USER:",
+  VERIFICATION_REQUIRED_MESSAGE,
+] as const;
 
 function getErrorMessageFromResponse(data: unknown, fallback: string): string {
   if (typeof data === "string" && data.trim()) {
@@ -173,6 +181,9 @@ export async function getResponseErrorMessage(
     }
   }
 
+  if (isVerificationRequired(response, parsedBody))
+    return VERIFICATION_REQUIRED_MESSAGE;
+
   const errorMessage = getErrorMessageFromResponse(parsedBody, fallback);
 
   if (response.status === 429) {
@@ -203,7 +214,9 @@ function hasMessagePrefix(
   );
 }
 
-function throwUserAccessErrorFrom403(data: unknown): never {
+function throwUserAccessErrorFrom403(data: unknown, response: Response): never {
+  if (isVerificationRequired(response, data))
+    throw new Error(VERIFICATION_REQUIRED_MESSAGE);
   const errorMessage = getErrorMessageFromResponse(
     data,
     USER_BANNED_FALLBACK_MESSAGE,
@@ -244,6 +257,7 @@ export const fetchPaginatedUsers = async (
     cache: "no-store",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     log.error("fetchPaginatedUsers failed", { status: response.status, body });
@@ -273,6 +287,7 @@ export const searchUsers = async (
     cache: "no-store",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (response.status === 404) return { users: [] };
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
@@ -362,7 +377,7 @@ export async function fetchUserById(id: string, baseUrl = BASE_API_URL) {
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        throwUserAccessErrorFrom403(data);
+        throwUserAccessErrorFrom403(data, response);
       }
 
       // Handle 404 errors specifically. A non-numeric id (e.g. "sasa") fails
@@ -393,7 +408,7 @@ export async function fetchUserById(id: string, baseUrl = BASE_API_URL) {
       log.error("Error fetching user by ID", error);
     }
 
-    // Re-throw BANNED_USER and NOT_FOUND errors so calling code can handle them
+    // Preserve access and not-found errors for callers.
     if (
       error &&
       typeof error === "object" &&
@@ -441,7 +456,7 @@ export async function fetchUserByIdForMetadata(
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        throwUserAccessErrorFrom403(data);
+        throwUserAccessErrorFrom403(data, response);
       }
 
       // Handle 404 errors specifically. A non-numeric id (e.g. "sasa") fails
@@ -475,7 +490,7 @@ export async function fetchUserByIdForMetadata(
       log.error("Error fetching user by ID for metadata", error);
     }
 
-    // Re-throw BANNED_USER and NOT_FOUND errors so calling code can handle them
+    // Preserve access and not-found errors for callers.
     if (
       error &&
       typeof error === "object" &&
@@ -508,7 +523,7 @@ export async function fetchUserByRobloxId(
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        throwUserAccessErrorFrom403(data);
+        throwUserAccessErrorFrom403(data, response);
       }
 
       if (response.status !== 404) {
@@ -538,7 +553,7 @@ export async function fetchUserByRobloxId(
       log.error("Error fetching user by Roblox ID", error);
     }
 
-    // Re-throw BANNED_USER errors so calling code can handle them
+    // Preserve access errors for callers.
     if (
       error &&
       typeof error === "object" &&
@@ -571,6 +586,7 @@ export async function fetchItemsBatch(
     body: JSON.stringify(ids),
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok) {
     throw new Error(`Failed to fetch item metadata (${response.status})`);
   }
@@ -611,6 +627,7 @@ export async function fetchPartialItems<T extends { id: number }>(
     credentials: "include",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok)
     throw new Error(`Failed to fetch item list (${response.status})`);
   const data: unknown = await response.json();
@@ -659,6 +676,7 @@ export async function fetchItemFilterGroups(
     credentials: "include",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok)
     throw new Error(`Failed to fetch item filters (${response.status})`);
   return (await response.json()) as {
@@ -679,6 +697,7 @@ export async function fetchItemSortGroups(
     credentials: "include",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok)
     throw new Error(`Failed to fetch item sorts (${response.status})`);
   return (await response.json()) as {
@@ -701,6 +720,7 @@ export async function fetchItemsClientPage(
     credentials: "include",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok) {
     throw new Error(`Failed to fetch items page ${page} (${response.status})`);
   }
@@ -734,6 +754,7 @@ export async function searchItemsClientPage(
     credentials: "include",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (response.status === 404) {
     const error = await response.json().catch(() => null);
     if (error?.error === "items_not_found") {
@@ -780,6 +801,7 @@ export async function fetchLatestItem(signal?: AbortSignal): Promise<Item> {
     credentials: "include",
     signal,
   });
+  await throwIfVerificationRequired(response);
   if (!response.ok) {
     throw new Error(`Failed to fetch latest item (${response.status})`);
   }
@@ -894,6 +916,7 @@ export async function fetchItemClient(
   );
   const response = await fetch(url, { headers, credentials: "include" });
 
+  await throwIfVerificationRequired(response);
   if (response.status === 404) {
     return null;
   }
@@ -911,6 +934,7 @@ export async function fetchSimilarItemSorts(): Promise<SortGroup[]> {
     "/v2/items/similar-sorts",
   );
   const response = await fetch(url, { headers, credentials: "include" });
+  await throwIfVerificationRequired(response);
   if (!response.ok) {
     throw new Error(`Failed to fetch similar item sorts (${response.status})`);
   }
@@ -931,6 +955,7 @@ export async function fetchSimilarItems(
     `/v2/items/${id}/similar?${params}`,
   );
   const response = await fetch(url, { headers, credentials: "include" });
+  await throwIfVerificationRequired(response);
   if (!response.ok) {
     throw new Error(`Failed to fetch similar items (${response.status})`);
   }
@@ -996,6 +1021,8 @@ export async function fetchDupeFinderData(userId: string) {
     });
     if (!response.ok) {
       const body = await response.json().catch(() => null);
+      if (isVerificationRequired(response, body))
+        return { error: VERIFICATION_REQUIRED_MESSAGE };
       const usernameError = inventoryUsernameError(userId, body);
       if (usernameError) return { error: usernameError.message };
       if (response.status === 404) {
@@ -1243,6 +1270,7 @@ export async function fetchUserFavorites(userId: string, throwOnError = false) {
     );
     const response = await fetch(url, { headers, credentials: "include" });
 
+    await throwIfVerificationRequired(response);
     if (response.status === 404) {
       return null;
     }
@@ -1524,6 +1552,11 @@ export async function fetchInventoryData(user: string) {
             user_id?: string;
           } & Partial<InventoryNotFoundResponse>)
         | null;
+      if (isVerificationRequired(response, body))
+        return {
+          error: "challenge_required",
+          message: VERIFICATION_REQUIRED_MESSAGE,
+        };
       const usernameError = inventoryUsernameError(user, body);
       if (usernameError) return usernameError;
 
@@ -2191,6 +2224,11 @@ export async function fetchOGSearchData(
 
       if (!response.ok) {
         const body = await response.json().catch(() => null);
+        if (isVerificationRequired(response, body))
+          return {
+            error: "challenge_required",
+            message: VERIFICATION_REQUIRED_MESSAGE,
+          };
         const usernameError = inventoryUsernameError(robloxId, body);
         if (usernameError) return usernameError;
         log.error(

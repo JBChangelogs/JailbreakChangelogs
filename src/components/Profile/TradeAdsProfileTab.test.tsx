@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -34,6 +35,11 @@ test("profile trade ads preserve API messages and empty results with a fallback 
       process: { env: { NEXT_PUBLIC_API_URL: "https://api.example.com" } },
       fetch: async () => response,
       require: (name: string) => {
+        if (
+          name === "@/utils/api/verificationRequired" ||
+          name === "./verificationRequired"
+        )
+          return verificationRequired;
         if (name === "./ProfileTabError") {
           const shared = {};
           runInNewContext(
@@ -52,6 +58,8 @@ test("profile trade ads preserve API messages and empty results with a fallback 
             {
               exports: shared,
               require: (dependency: string) => {
+                if (dependency === "@/utils/api/verificationRequired")
+                  return verificationRequired;
                 if (dependency === "react/jsx-runtime") {
                   const jsx = (
                     type: unknown,

@@ -1,5 +1,6 @@
 "use client";
 
+import { throwIfVerificationRequired } from "@/utils/api/verificationRequired";
 import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserProfilePopover } from "@/components/Users/UserProfilePopover";
 import ProfileTabError from "./ProfileTabError";
@@ -161,6 +162,7 @@ export default function UserValueSuggestionsTab({
         headers,
         signal,
       });
+      await throwIfVerificationRequired(response);
       if (response.status === 404) {
         return { items: [], total: 0, page, total_pages: 1, size: 0 };
       }
@@ -190,6 +192,7 @@ export default function UserValueSuggestionsTab({
         headers,
         signal,
       });
+      await throwIfVerificationRequired(response);
       if (!response.ok)
         throw new Error(`Suggestion stats request failed (${response.status})`);
       const data = await response.json();

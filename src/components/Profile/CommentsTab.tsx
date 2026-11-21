@@ -1,5 +1,6 @@
 "use client";
 
+import { throwIfVerificationRequired } from "@/utils/api/verificationRequired";
 import ProfileTabError from "./ProfileTabError";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { createLogger } from "@/services/logger";
@@ -186,6 +187,7 @@ export default function CommentsTab({
         signal,
         headers,
       });
+      await throwIfVerificationRequired(response);
       if (response.status === 404) {
         return { comments: [], totalPages: 1, totalComments: 0 };
       }
@@ -271,6 +273,7 @@ export default function CommentsTab({
         headers,
         signal,
       });
+      await throwIfVerificationRequired(response);
       if (!response.ok)
         throw new Error("Failed to fetch profile comment owners");
       const users = parseJsonWithLargeIds(

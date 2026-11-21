@@ -1,3 +1,4 @@
+import { throwIfVerificationRequired } from "./verificationRequired";
 import {
   INVENTORY_API_SOURCE_HEADER,
   INVENTORY_API_URL,
@@ -38,6 +39,7 @@ export async function fetchCopyTree(
       signal,
     },
   );
+  await throwIfVerificationRequired(response);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error("Unable to load the dupe tree.");
   return response.json() as Promise<CopyTreeResponse>;

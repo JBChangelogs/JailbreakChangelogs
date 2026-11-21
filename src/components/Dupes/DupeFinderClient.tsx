@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { useEffect, useRef } from "react";
 import { trackWebEvent } from "@/utils/analytics/web";
@@ -169,26 +171,32 @@ export default function DupeFinderClient({
       )}
 
       {/* Error Display — user not found or server error */}
-      {error && !initialData && !isUserFound && (
-        <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-          <div className="text-center">
-            <div className="mb-4 flex justify-center">
-              <div className="bg-status-error/10 rounded-full p-3">
-                <Icon
-                  icon="heroicons:exclamation-triangle"
-                  className="text-status-error h-8 w-8"
-                />
-              </div>
-            </div>
-            <h3 className="text-status-error mb-2 text-lg font-semibold">
-              {error.includes("Server error")
-                ? "Server Error"
-                : "User Not Found"}
-            </h3>
-            <p className="text-secondary-text">{error}</p>
-          </div>
-        </div>
+      {!initialData && error === VERIFICATION_REQUIRED_MESSAGE && (
+        <VerificationRequiredNotice />
       )}
+      {error &&
+        !initialData &&
+        !isUserFound &&
+        error !== VERIFICATION_REQUIRED_MESSAGE && (
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="bg-status-error/10 rounded-full p-3">
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="text-status-error h-8 w-8"
+                  />
+                </div>
+              </div>
+              <h3 className="text-status-error mb-2 text-lg font-semibold">
+                {error.includes("Server error")
+                  ? "Server Error"
+                  : "User Not Found"}
+              </h3>
+              <p className="text-secondary-text">{error}</p>
+            </div>
+          </div>
+        )}
     </div>
   );
 }

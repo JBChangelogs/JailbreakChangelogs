@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { isSeasonalItem } from "@/utils/items/season";
 
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -409,7 +411,10 @@ export default function OGFinderResults({
       </div>
 
       {/* Error Display */}
-      {error && (
+      {error === VERIFICATION_REQUIRED_MESSAGE && (
+        <VerificationRequiredNotice />
+      )}
+      {error && error !== VERIFICATION_REQUIRED_MESSAGE && (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">

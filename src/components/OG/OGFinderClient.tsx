@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { useEffect, useRef, useState } from "react";
@@ -230,7 +232,10 @@ export default function OGFinderClient({
       )}
 
       {/* Error Display */}
-      {error && !initialData && (
+      {!initialData && error === VERIFICATION_REQUIRED_MESSAGE && (
+        <VerificationRequiredNotice />
+      )}
+      {error && !initialData && error !== VERIFICATION_REQUIRED_MESSAGE && (
         <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">

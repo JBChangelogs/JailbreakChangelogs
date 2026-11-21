@@ -1,5 +1,6 @@
 "use client";
 
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import type React from "react";
 import { useState } from "react";
 import Image from "next/image";
@@ -421,7 +422,9 @@ export function UserProfilePopover({
             )}
             {full.isError && (
               <p className="text-quaternary-text mt-3 text-xs">
-                Failed to load the full profile.
+                {full.error?.message === VERIFICATION_REQUIRED_MESSAGE
+                  ? VERIFICATION_REQUIRED_MESSAGE
+                  : "Failed to load the full profile."}
               </p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-1.5">

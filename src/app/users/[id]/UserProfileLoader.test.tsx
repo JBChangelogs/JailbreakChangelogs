@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { QueryClient } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
@@ -39,6 +40,11 @@ test("client loader defers requests to its query and preserves loading, data, an
     {
       exports,
       require: (name: string) => {
+        if (
+          name === "@/utils/api/verificationRequired" ||
+          name === "./verificationRequired"
+        )
+          return verificationRequired;
         if (name === "react/jsx-runtime")
           return {
             jsx: (type: string, props: unknown, key: string) => ({
@@ -81,6 +87,16 @@ test("client loader defers requests to its query and preserves loading, data, an
   const data = await queryOptions!.queryFn();
   expect(data).toEqual({ user, ...details });
   queryResult = { data, dataUpdatedAt: 1 };
+  expect(exports.default({ userId }).props.profileData).toEqual(data);
+
+  queryResult = {
+    isError: true,
+    error: new Error(verificationRequired.VERIFICATION_REQUIRED_MESSAGE),
+  };
+  expect(exports.default({ userId }).type).toBe(
+    "@/components/HumanVerification/VerificationRequiredNotice",
+  );
+  queryResult = { ...queryResult, data };
   expect(exports.default({ userId }).props.profileData).toEqual(data);
 
   for (const [message, code] of [

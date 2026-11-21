@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import {
   QueryClient,
@@ -99,6 +100,11 @@ test("trade queries preserve viewer boundaries, clamp My Ads, and cancel stale f
         removeEventListener: () => {},
       },
       require: (name: string) => {
+        if (
+          name === "@/utils/api/verificationRequired" ||
+          name === "./verificationRequired"
+        )
+          return verificationRequired;
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "react")
           return {

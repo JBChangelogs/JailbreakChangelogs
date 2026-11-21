@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
 import type { fetchCopyTree } from "./copyTree";
+import * as verificationRequired from "./verificationRequired";
 
 test("requests the game ID with source and cancellation, and separates missing history from failures", async () => {
   const tree = {
@@ -22,10 +23,13 @@ test("requests the game ID with source and cancellation, and separates missing h
     ).outputText,
     {
       exports,
-      require: () => ({
-        INVENTORY_API_URL: "https://inventory.example",
-        INVENTORY_API_SOURCE_HEADER: "test-source",
-      }),
+      require: (name: string) =>
+        name === "./verificationRequired"
+          ? verificationRequired
+          : {
+              INVENTORY_API_URL: "https://inventory.example",
+              INVENTORY_API_SOURCE_HEADER: "test-source",
+            },
       fetch: async (url: string, options: RequestInit) => {
         requests.push({ url, options });
         return response;
@@ -47,5 +51,12 @@ test("requests the game ID with source and cancellation, and separates missing h
   response = new Response(null, { status: 503 });
   await expect(exports.fetchCopyTree("game-id")).rejects.toThrow(
     "Unable to load",
+  );
+  response = Response.json(
+    { detail: { error: "challenge_required" } },
+    { status: 403 },
+  );
+  await expect(exports.fetchCopyTree("game-id")).rejects.toThrow(
+    verificationRequired.VERIFICATION_REQUIRED_MESSAGE,
   );
 });

@@ -1,5 +1,10 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import {
+  VERIFICATION_REQUIRED_MESSAGE,
+  throwIfVerificationRequired,
+} from "@/utils/api/verificationRequired";
 import React, {
   useState,
   useEffect,
@@ -654,6 +659,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
         headers: recentTradesHeaders,
       });
 
+      await throwIfVerificationRequired(response);
       if (response.status === 429) {
         const retryAfter = parseInt(
           response.headers.get("retry-after") ?? "60",
@@ -810,7 +816,9 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
     (tradeAdsError.status === 401 || tradeAdsError.status === 403);
   const error =
     tradeAdsError && !isListRateLimited && !isRecentTradesUnauthorized
-      ? "Failed to refresh trade ads"
+      ? tradeAdsError.message === VERIFICATION_REQUIRED_MESSAGE
+        ? VERIFICATION_REQUIRED_MESSAGE
+        : "Failed to refresh trade ads"
       : null;
 
   const userTradeAds = userTradeAdsQuery.data?.items ?? [];
@@ -819,7 +827,9 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
   const isUserTradeAdsLoading =
     userTradeAdsQuery.isLoading || userTradeAdsQuery.isPlaceholderData;
   const userTradeAdsError = userTradeAdsQuery.isError
-    ? "Failed to load your trade ads"
+    ? userTradeAdsQuery.error?.message === VERIFICATION_REQUIRED_MESSAGE
+      ? VERIFICATION_REQUIRED_MESSAGE
+      : "Failed to load your trade ads"
     : null;
 
   useEffect(() => {
@@ -962,6 +972,9 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
       />
     );
   }
+
+  if (error === VERIFICATION_REQUIRED_MESSAGE)
+    return <VerificationRequiredNotice />;
 
   if (error) {
     return (
@@ -1701,6 +1714,8 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
             </div>
             {isUserTradeAdsLoading ? (
               <TradeAdSkeleton />
+            ) : userTradeAdsError === VERIFICATION_REQUIRED_MESSAGE ? (
+              <VerificationRequiredNotice className="mb-8" />
             ) : userTradeAdsError ? (
               <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
                 <h3 className="text-secondary-text mb-4 text-lg font-medium">

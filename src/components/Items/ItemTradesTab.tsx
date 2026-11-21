@@ -1,5 +1,10 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import {
+  throwIfVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "@/utils/api/verificationRequired";
 import { useMemo, useState } from "react";
 import {
   TradeDetail,
@@ -143,7 +148,7 @@ export default function ItemTradesTab({
   itemName,
   itemCategory,
 }: ItemTradesTabProps) {
-  const { data, isFetching, isError, refetch } = useQuery({
+  const { data, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["item-trades", itemId],
     gcTime: 30 * 60 * 1000,
     refetchOnMount: "always",
@@ -160,6 +165,7 @@ export default function ItemTradesTab({
           cache: "no-store",
         },
       );
+      await throwIfVerificationRequired(response);
       if (response.status === 404) return { completed: [], pending: [] };
       if (!response.ok) {
         log.error("Failed to fetch catalog item trades", {
@@ -258,6 +264,8 @@ export default function ItemTradesTab({
             <Skeleton key={index} className="h-24 w-full" />
           ))}
         </div>
+      ) : error?.message === VERIFICATION_REQUIRED_MESSAGE && !data ? (
+        <VerificationRequiredNotice />
       ) : isError && !data ? (
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
           <p className="text-primary-text font-semibold">

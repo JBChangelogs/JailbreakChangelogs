@@ -1,5 +1,6 @@
 "use client";
 
+import { throwIfVerificationRequired } from "@/utils/api/verificationRequired";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ function badgeIcon(id: string, category: string) {
 async function getJson<T>(path: string, signal: AbortSignal): Promise<T> {
   const { url, headers } = buildApiFetchRequest(PUBLIC_API_URL, path);
   const response = await fetch(url, { headers, signal });
+  await throwIfVerificationRequired(response);
   if (!response.ok)
     throw new Error(`Failed to load badges (${response.status})`);
   return response.json();

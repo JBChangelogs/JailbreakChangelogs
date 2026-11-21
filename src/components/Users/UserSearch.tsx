@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -248,6 +250,9 @@ export default function UserSearch() {
               <UserCardSkeleton key={index} />
             ))}
           </>
+        ) : usersQuery.error?.message === VERIFICATION_REQUIRED_MESSAGE &&
+          !usersQuery.data ? (
+          <VerificationRequiredNotice className="col-span-full" />
         ) : usersQuery.isError && !usersQuery.data ? (
           <div className="text-status-error col-span-full py-8 text-center">
             Could not load users. Please try again.

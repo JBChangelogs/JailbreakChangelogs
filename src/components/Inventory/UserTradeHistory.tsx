@@ -1,5 +1,10 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import {
+  isVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "@/utils/api/verificationRequired";
 import { useCallback, useMemo, useState } from "react";
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -188,6 +193,8 @@ const formatTradeDay = (day: string) =>
 
 const getErrorMessage = async (response: Response, fallback: string) => {
   const body = await response.json().catch(() => null);
+  if (isVerificationRequired(response, body))
+    return VERIFICATION_REQUIRED_MESSAGE;
   if (typeof body === "string" && body.trim()) return body;
   if (body && typeof body === "object") {
     const candidate = body as { error?: unknown; message?: unknown };
@@ -677,6 +684,14 @@ export default function UserTradeHistory({
         </div>
       </div>
     );
+  }
+
+  if (
+    listState === "error" &&
+    listError === VERIFICATION_REQUIRED_MESSAGE &&
+    allTrades.length === 0
+  ) {
+    return <VerificationRequiredNotice />;
   }
 
   if (listState === "error" && allTrades.length === 0) {

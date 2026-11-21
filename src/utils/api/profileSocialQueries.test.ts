@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { afterEach, expect, spyOn, test } from "bun:test";
 import { QueryClient, queryOptions } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
@@ -35,6 +36,11 @@ test("profile counts, follow status, and modals share complete lists without dup
       {
         exports,
         require: (name: string) => {
+          if (
+            name === "@/utils/api/verificationRequired" ||
+            name === "./verificationRequired"
+          )
+            return verificationRequired;
           if (name === "@tanstack/react-query") return { queryOptions };
           if (name === "./api" || name === "@/utils/api/api")
             return { PUBLIC_API_URL: "https://public-api.example.com" };

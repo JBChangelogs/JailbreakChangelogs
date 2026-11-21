@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { QueryClient, queryOptions } from "@tanstack/react-query";
 import { readFileSync } from "node:fs";
@@ -30,6 +31,11 @@ test("favorites queries retain cached items on API failures while 404 remains em
           return Response.json(body, { status });
         },
         require: (name: string) => {
+          if (
+            name === "./verificationRequired" ||
+            name === "@/utils/api/verificationRequired"
+          )
+            return verificationRequired;
           if (name === "@tanstack/react-query") return { queryOptions };
           if (name === "@/utils/api/api") return api;
           if (name === "@/utils/api/apiDevToken")

@@ -1,5 +1,10 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import {
+  throwIfVerificationRequired,
+  VERIFICATION_REQUIRED_MESSAGE,
+} from "@/utils/api/verificationRequired";
 import NotFoundIllustration from "@/components/ui/NotFoundIllustration";
 import { getUserAvatar } from "@/utils/ui/images";
 import { useRef, useMemo, useState } from "react";
@@ -98,6 +103,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           },
         },
       );
+      await throwIfVerificationRequired(response);
       if (!response.ok) {
         if (response.status === 404) {
           return [];
@@ -154,6 +160,13 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
 
   if (isLoadingHoarders) {
     return <HoardersTabSkeleton />;
+  }
+
+  if (
+    hoardersError?.message === VERIFICATION_REQUIRED_MESSAGE &&
+    !hoardersData
+  ) {
+    return <VerificationRequiredNotice />;
   }
 
   if (hoardersError && !hoardersData) {

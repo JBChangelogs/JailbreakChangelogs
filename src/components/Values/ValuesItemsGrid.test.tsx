@@ -1,3 +1,4 @@
+import * as verificationRequired from "@/utils/api/verificationRequired";
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -44,6 +45,11 @@ test("scroll loading pauses during fetches and errors, retries manually, and res
         }
       },
       require: (name: string) => {
+        if (
+          name === "./verificationRequired" ||
+          name === "@/utils/api/verificationRequired"
+        )
+          return verificationRequired;
         if (name === "react")
           return {
             default: { Fragment: "fragment" },

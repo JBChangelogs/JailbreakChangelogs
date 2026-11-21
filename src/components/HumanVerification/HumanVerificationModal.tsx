@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Spinner } from "@/components/ui/Spinner";
 import TurnstileWidget, {
   useTurnstileReset,
 } from "@/components/Turnstile/TurnstileWidget";
@@ -93,13 +92,6 @@ export default function HumanVerificationModal({
                 size="normal"
                 turnstileRef={turnstileRef}
               />
-            </div>
-          )}
-
-          {isSubmitting && (
-            <div className="text-secondary-text mt-4 flex items-center justify-center gap-2 text-sm">
-              <Spinner className="h-4 w-4" />
-              <span>Verifying...</span>
             </div>
           )}
 

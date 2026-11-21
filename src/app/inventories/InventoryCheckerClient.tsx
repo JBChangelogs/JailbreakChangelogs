@@ -1,5 +1,7 @@
 "use client";
 
+import VerificationRequiredNotice from "@/components/HumanVerification/VerificationRequiredNotice";
+import { VERIFICATION_REQUIRED_MESSAGE } from "@/utils/api/verificationRequired";
 import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
 import {
   Activity,
@@ -1013,9 +1015,13 @@ export default function InventoryCheckerClient({
               <InventoryFAQ />
             </>
           )}
+          {!initialData && error === VERIFICATION_REQUIRED_MESSAGE && (
+            <VerificationRequiredNotice />
+          )}
           {error &&
             !initialData &&
-            (!isInventoryNotFoundError || !robloxId) && (
+            (!isInventoryNotFoundError || !robloxId) &&
+            error !== VERIFICATION_REQUIRED_MESSAGE && (
               <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
                 <div className="mb-4 flex justify-center">
                   <div className="bg-status-error/10 rounded-full p-3">
