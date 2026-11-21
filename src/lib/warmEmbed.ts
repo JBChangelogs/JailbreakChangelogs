@@ -14,8 +14,9 @@ export function warmEmbedImageUrl(url: string | null | undefined) {
     return;
   if (warmed.has(url) || nav.webdriver || nav.connection?.saveData) return;
   warmed.add(url);
-  fetch(pregenerateUrl(url), { mode: "no-cors", keepalive: true }).catch(
-    () => {},
+  // A network failure frees the URL so a later share can retry it.
+  fetch(pregenerateUrl(url), { mode: "no-cors", keepalive: true }).catch(() =>
+    warmed.delete(url),
   );
 }
 
