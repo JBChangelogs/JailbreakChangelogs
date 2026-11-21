@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDevToken } from "@/utils/api/apiDevToken";
 import { getHumanVerificationHeaders } from "@/utils/api/verificationHeaders";
+import { CALCULATOR_SHARE_CODE } from "@/components/Values/Calculator/calculatorShareCode";
+import { SHARE_CODE } from "@/utils/ui/customTheme";
 
 interface UserFlag {
   flag?: string | null;
@@ -181,6 +183,29 @@ async function getLegacyItemRedirectResponse(
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  // Shared calculator links get a per-share OG image; a path param keeps the
+  // calculator ISR (reading searchParams in generateMetadata would not).
+  const share = request.nextUrl.searchParams.get("share")?.toUpperCase();
+  if (
+    pathname === "/values/calculator" &&
+    share &&
+    CALCULATOR_SHARE_CODE.test(share)
+  ) {
+    return clearStaleBrowserCache(
+      request,
+      NextResponse.rewrite(
+        new URL(`/values/calculator/share/${share}`, request.url),
+      ),
+    );
+  }
+  // Same trick for shared themes on the homepage, so / stays static.
+  const theme = request.nextUrl.searchParams.get("theme")?.toUpperCase();
+  if (pathname === "/" && theme && SHARE_CODE.test(theme)) {
+    return clearStaleBrowserCache(
+      request,
+      NextResponse.rewrite(new URL(`/theme/${theme}`, request.url)),
+    );
+  }
   if (pathname === "/experiments" || pathname.startsWith("/experiments/")) {
     const token = getSessionToken(request);
     const user = token ? await fetchCurrentUser(token, request) : null;

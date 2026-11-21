@@ -16,6 +16,7 @@ import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import LatestReleaseDialog from "@/components/Changelogs/LatestReleaseDialog";
 import SharedThemeDialog from "@/components/Settings/SharedThemeDialog";
+import EmbedWarmer from "@/components/Layout/EmbedWarmer";
 import ThemeEditorHost from "@/components/Settings/ThemeEditorHost";
 import CompetitionBanner from "@/components/Themes/CompetitionBanner";
 import { Toaster } from "@/components/ui/sonner";
@@ -230,6 +231,7 @@ export default async function RootLayout({
                     <RybbitIdentity />
                     <Suspense fallback={null}>
                       <SharedThemeDialog />
+                      <EmbedWarmer />
                       <ThemeEditorHost />
                     </Suspense>
                     <AdErrorBoundary>
@@ -385,6 +387,7 @@ export default async function RootLayout({
                 <RybbitIdentity />
                 <Suspense fallback={null}>
                   <SharedThemeDialog />
+                  <EmbedWarmer />
                   <ThemeEditorHost />
                 </Suspense>
                 <NitroBottomAnchor />

@@ -1,5 +1,7 @@
 "use client";
 
+import { warmEmbed } from "@/lib/warmEmbed";
+
 import { FRONTEND_SETTINGS } from "@/config/settings";
 import Link from "next/link";
 
@@ -145,6 +147,7 @@ export function useCustomThemes() {
   };
 
   const copyLink = async (code: string) => {
+    warmEmbed(`/?theme=${code}`);
     try {
       await navigator.clipboard.writeText(shareUrl(code));
       toast.success("Share link copied", { description: code });

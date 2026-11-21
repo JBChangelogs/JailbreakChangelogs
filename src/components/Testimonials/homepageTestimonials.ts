@@ -57,7 +57,7 @@ export async function getHomepageTestimonials(): Promise<
         ...headers,
         "User-Agent": "JailbreakChangelogs-Testimonials/1.0",
       },
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!response.ok) return [badimoTestimonial];
 
