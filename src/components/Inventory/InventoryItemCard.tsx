@@ -6,6 +6,7 @@ import Image from "next/image";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 
 import Link from "next/link";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useState } from "react";
 import { InventoryItem } from "@/app/inventories/types";
 import { CategoryIconBadge } from "@/utils/items/categoryIcons";
@@ -180,6 +181,26 @@ export default function InventoryItemCard({
               </Link>
             )}
           </div>
+          {isDupedItem && (
+            <Link
+              href={getDupeComparisonUrl(item, "copy-tree")}
+              aria-label="May be duped, view dupe tree"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-status-warning/50 bg-status-warning/30 text-primary-text hover:bg-status-warning/40 inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-semibold transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Icon
+                icon="heroicons:exclamation-triangle"
+                className="h-3.5 w-3.5"
+              />
+              Dupe tree
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="h-3 w-3"
+              />
+            </Link>
+          )}
         </div>
         <div className="mt-auto flex items-center justify-between gap-3">
           <p className="text-secondary-text min-w-0 text-sm">
@@ -195,22 +216,6 @@ export default function InventoryItemCard({
           </Button>
         </div>
       </div>
-
-      {isDupedItem && (
-        <div className="mt-3 flex flex-col items-center gap-1 text-center text-xs">
-          <span className="text-secondary-text">This item may be duped.</span>
-          <Link
-            href={getDupeComparisonUrl(item)}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="View variant ownership histories in a new tab"
-            className="text-link hover:text-link-hover font-bold hover:underline"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Comparison
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
