@@ -14,9 +14,13 @@ export function warmEmbedImageUrl(url: string | null | undefined) {
     return;
   if (warmed.has(url) || nav.webdriver || nav.connection?.saveData) return;
   warmed.add(url);
-  // A network failure frees the URL so a later share can retry it.
-  fetch(pregenerateUrl(url), { mode: "no-cors", keepalive: true }).catch(() =>
-    warmed.delete(url),
+  // Embedgen allows CORS, so the status is readable: a full queue (503) or a
+  // network failure frees the URL so a later share can retry it.
+  fetch(pregenerateUrl(url), { keepalive: true }).then(
+    (response) => {
+      if (!response.ok) warmed.delete(url);
+    },
+    () => warmed.delete(url),
   );
 }
 
