@@ -15,10 +15,17 @@ export async function generateMetadata({
   params: Promise<{ code: string }>;
 }): Promise<Metadata> {
   const code = (await params).code.toUpperCase();
+  if (!CALCULATOR_SHARE_CODE.test(code))
+    return withDiscordEmbed(pageMetadata, "/values/calculator");
+  const path = `/values/calculator?share=${code}`;
   return withDiscordEmbed(
-    pageMetadata,
-    CALCULATOR_SHARE_CODE.test(code)
-      ? `/values/calculator?share=${code}`
-      : "/values/calculator",
+    {
+      ...pageMetadata,
+      openGraph: {
+        ...pageMetadata.openGraph,
+        url: `https://jailbreakchangelogs.com${path}`,
+      },
+    },
+    path,
   );
 }
