@@ -1,6 +1,7 @@
 "use client";
 
 import { trackWebEvent } from "@/utils/analytics/web";
+import { warmEmbed } from "@/lib/warmEmbed";
 
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -163,6 +164,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       const code = await createCalculatorShare(offeringItems, requestingItems);
       const link = new URL("/values/calculator", window.location.origin);
       link.searchParams.set("share", code);
+      warmEmbed(`/values/calculator?share=${code}`);
       await navigator.clipboard.writeText(link.toString());
       toast.success("Share link copied! It expires in 6 hours.");
     } catch (error) {

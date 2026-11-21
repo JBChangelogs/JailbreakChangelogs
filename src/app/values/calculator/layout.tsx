@@ -1,7 +1,7 @@
 import { withDiscordEmbed } from "@/lib/discord-embed";
 import { Metadata } from "next";
 
-const pageMetadata: Metadata = {
+export const pageMetadata: Metadata = {
   title: "Value Calculator",
   description: "Calculate the value of your Roblox Jailbreak items and trades",
   metadataBase: new URL("https://jailbreakchangelogs.com"),

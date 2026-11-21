@@ -128,6 +128,7 @@ function settings({ published = false, own = true, fail = false } = {}) {
           return new Proxy({}, { get: (_target, key) => String(key) });
         if (name.startsWith("@/utils/") || name === "@/config/settings")
           return {};
+        if (name === "@/lib/warmEmbed") return { warmEmbed: () => {} };
         throw new Error(`Unexpected import: ${name}`);
       },
       URLSearchParams,

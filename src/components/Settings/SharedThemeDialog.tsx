@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -155,6 +156,7 @@ export default function SharedThemeDialog() {
 
   const copyLink = async () => {
     if (!theme) return;
+    warmEmbed(`/?theme=${theme.share_code}`);
     try {
       await navigator.clipboard.writeText(shareUrl(theme.share_code));
       toast.success("Share link copied");

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { embedImageUrl } from "@/lib/embedImage";
 
 const SITE_URL = "https://jailbreakchangelogs.com";
 const COMMUNITY_URL = "https://discord.jailbreakchangelogs.com";
@@ -185,9 +186,9 @@ export function withDiscordEmbed(
       : path,
     SITE_URL,
   );
-  const route = pageUrl.pathname.replace(/\/$/, "");
-  const theme = new URL(path, SITE_URL).searchParams.get("theme");
-  const imageUrl = `https://embeds.jailbreakchangelogs.com/og${route}.png${theme ? `?theme=${encodeURIComponent(theme)}` : ""}`;
+  const imageUrl = embedImageUrl(
+    pageUrl.pathname + new URL(path, SITE_URL).search,
+  );
   const data: EmbedData = {
     ...profile,
     title: `${path === "/" && pageTitle === "Jailbreak Changelogs" ? "Home" : pageTitle.replace(/\s+[|–—-]\s+Jailbreak Changelogs$/, "")} | Jailbreak Changelogs`,

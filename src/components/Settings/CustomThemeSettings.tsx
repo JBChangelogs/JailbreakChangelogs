@@ -7,6 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -145,6 +146,7 @@ export function useCustomThemes() {
   };
 
   const copyLink = async (code: string) => {
+    warmEmbed(`/?theme=${code}`);
     try {
       await navigator.clipboard.writeText(shareUrl(code));
       toast.success("Share link copied", { description: code });

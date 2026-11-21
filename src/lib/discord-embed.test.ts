@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { Metadata } from "next";
 import { buildDiscordEmbed, withDiscordEmbed } from "./discord-embed";
+import { embedImageUrl, pregenerateUrl } from "./embedImage";
 import { GET } from "@/app/embeds/discord.json/route";
 import { metadata as valuesMetadata } from "@/app/values/layout";
 import { metadata as supportMetadata } from "@/app/supporting/layout";
@@ -30,6 +31,10 @@ test("social and Discord images follow the route without query strings or traili
     ["/values/calculator/", "/og/values/calculator.png"],
     ["/item/Vehicle/Proto%208?tab=history", "/og/item/Vehicle/Proto%208.png"],
     ["/?theme=4DVB9KBE&x=1", "/og.png?theme=4DVB9KBE"],
+    [
+      "/values/calculator?share=FSC6XWG4&x=1",
+      "/og/values/calculator.png?share=FSC6XWG4",
+    ],
   ]) {
     const image = `https://embeds.jailbreakchangelogs.com${imagePath}`;
     const metadata = withDiscordEmbed({ title: "Preview" }, path);
@@ -403,4 +408,15 @@ test("the public endpoint rejects malformed inputs and unsafe page URLs", () => 
     url.searchParams.set("data", raw);
     expect(GET(new Request(url)).status).toBe(400);
   }
+});
+
+test("pregenerate URLs only prefix the og path", () => {
+  expect(
+    pregenerateUrl(embedImageUrl("/values/calculator?share=FSC6XWG4")),
+  ).toBe(
+    "https://embeds.jailbreakchangelogs.com/pregenerate/og/values/calculator.png?share=FSC6XWG4",
+  );
+  expect(pregenerateUrl(embedImageUrl("/?theme=4DVB9KBE"))).toBe(
+    "https://embeds.jailbreakchangelogs.com/pregenerate/og.png?theme=4DVB9KBE",
+  );
 });

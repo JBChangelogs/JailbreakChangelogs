@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -78,6 +79,7 @@ export default function ThemeDetailsActions({
         <Button
           variant="secondary"
           onClick={async () => {
+            warmEmbed(`/themes/${theme.share_code}`);
             try {
               await navigator.clipboard.writeText(
                 `${window.location.origin}/themes/${theme.share_code}`,

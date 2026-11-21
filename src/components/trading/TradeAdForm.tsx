@@ -9,6 +9,7 @@ import React, {
 import { useAuthContext } from "@/contexts/AuthContext";
 import { trackEvent } from "@/utils/analytics/rybbit";
 import { trackWebEvent } from "@/utils/analytics/web";
+import { warmEmbed } from "@/lib/warmEmbed";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
@@ -936,6 +937,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           ),
         );
       } else {
+        const createdId = (responseBody as { id?: unknown } | null)?.id;
+        if (typeof createdId === "number" || typeof createdId === "string")
+          warmEmbed(`/trading/ad/${createdId}`);
         toast.success("Trade ad created successfully!", {
           id: creatingToastId ?? undefined,
         });
