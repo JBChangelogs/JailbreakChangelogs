@@ -12,7 +12,7 @@ import {
   useMemo,
 } from "react";
 import { parseAsString, useQueryStates } from "nuqs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
@@ -49,23 +49,12 @@ import InventoryDataScopeNotice from "@/components/Inventory/InventoryDataScopeN
 import DuplicatesTab from "@/components/Inventory/MultipleCopiesTab";
 import DupedItemsTab from "@/components/Inventory/DupedItemsTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
-import { useScanWebSocket } from "@/hooks/useScanWebSocket";
+import { useInventoryScanContext } from "@/contexts/InventoryScanContext";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
-import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
-import {
-  showScanLoadingToast,
-  updateScanLoadingToast,
-  dismissScanLoadingToast,
-  showScanSuccessToast,
-  showScanErrorToast,
-} from "@/utils/notifications/scanToasts";
 import { Spinner } from "@/components/ui/Spinner";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  formatScanProgressMessage,
-  getScanActiveButtonLabel,
-} from "@/utils/notifications/scanProgressMessage";
+import { getScanActiveButtonLabel } from "@/utils/notifications/scanProgressMessage";
 import dynamic from "next/dynamic";
 import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
@@ -160,9 +149,7 @@ export default function InventoryCheckerClient({
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [itemSnapshot, setItemSnapshot] = useState({ userId: "", date: "" });
-  const forceShowErrorHandledRef = useRef<boolean>(false);
   const lastShownErrorRef = useRef<string | null>(null);
-  const lastShownSuccessRef = useRef<string | null>(null);
 
   const networthData = initialNetworthData;
   const moneyHistoryData = initialMoneyHistoryData;
@@ -188,9 +175,7 @@ export default function InventoryCheckerClient({
 
   // Auth context and scan functionality
   const { user, isAuthenticated } = useAuthContext();
-  const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
-  const [showScanModal, setShowScanModal] = useState(false);
 
   const latestSeasonQuery = useLatestSeason(
     Boolean(initialData) && !externalIsLoading,
@@ -216,12 +201,11 @@ export default function InventoryCheckerClient({
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
+  const scanWebSocket = useInventoryScanContext();
   const linkedProfile =
     userConnectionData?.id && userConnectionData.roblox_id === robloxId
       ? userConnectionData
       : null;
-  const shouldBypassTurnstile =
-    Boolean(user?.flags?.some((f) => f.flag === "is_owner")) || false;
   const isInventoryNotFoundError = errorCode === "inventory_not_found";
   const reportedResult = useRef<string | null>(null);
   const resultCount = initialData?.data.length ?? 0;
@@ -264,22 +248,6 @@ export default function InventoryCheckerClient({
   useEffect(() => {
     setSearchId(originalSearchTerm || robloxId || "");
   }, [originalSearchTerm, robloxId]);
-
-  // Backend notifies once a scan is saved; reload in place if we're looking at that inventory.
-  const queryClient = useQueryClient();
-  useEffect(() => {
-    if (!isOwnInventory || !robloxId) return;
-    const onNotification = (e: Event) => {
-      const { path } = (e as CustomEvent<{ path?: string }>).detail;
-      if (path === `/inventories/${robloxId}`)
-        void queryClient.invalidateQueries({
-          queryKey: ["inventory"],
-        });
-    };
-    window.addEventListener("realtimeNotification", onNotification);
-    return () =>
-      window.removeEventListener("realtimeNotification", onNotification);
-  }, [isOwnInventory, robloxId, queryClient]);
 
   // Extract all user IDs from inventory data for batch fetching
   const allUserIds = useMemo(() => {
@@ -444,13 +412,8 @@ export default function InventoryCheckerClient({
   const {
     status: scanStatus,
     phase: scanPhase,
-    message: scanMessage,
     error: scanError,
-    progress: scanProgress,
-    expiresAt: scanExpiresAt,
     queuePosition: wsQueuePosition,
-    forceShowError: scanForceShowError,
-    resetForceShowError: scanResetForceShowError,
   } = scanWebSocket;
 
   const queueQuery = useQuery({
@@ -523,37 +486,15 @@ export default function InventoryCheckerClient({
 
     if (scanStatus === "connecting") {
       lastShownErrorRef.current = null;
-      lastShownSuccessRef.current = null;
       setScanErrorBanner(null);
-      showScanLoadingToast("Connecting to scan service...");
-    }
-
-    if (scanStatus === "scanning") {
-      updateScanLoadingToast(
-        formatScanProgressMessage(scanPhase, scanMessage, scanProgress),
-      );
     }
 
     if (scanStatus === "completed") {
-      const successKey = `${scanStatus}:${scanMessage ?? "success"}`;
-      if (lastShownSuccessRef.current !== successKey) {
-        lastShownSuccessRef.current = successKey;
-        lastShownErrorRef.current = null;
-        dismissScanLoadingToast();
-
-        const successMessage =
-          scanMessage || "Scan request submitted successfully.";
-
-        showScanSuccessToast(successMessage);
-      }
-
       setScanErrorBanner(null);
       fetchQueuePosition();
     }
 
     if (scanStatus === "error") {
-      dismissScanLoadingToast();
-
       // Prevent showing the same error multiple times
       const currentError = scanError || "";
       if (lastShownErrorRef.current === currentError) {
@@ -577,7 +518,7 @@ export default function InventoryCheckerClient({
           title: "Server Full",
           subtitle: "The trade server is full. Please try again in a moment.",
         });
-      } else if (scanError && scanError.includes("high enough supporter")) {
+      } else if (scanPhase === "supporter_required") {
         setScanErrorBanner({
           title: "Supporter III required",
           subtitle: "You need to be Supporter III to use this feature.",
@@ -597,57 +538,18 @@ export default function InventoryCheckerClient({
           requiredLimit: tierNames[3],
         });
       } else if (scanError && scanError.includes("recent scan")) {
-        let message =
-          "You have a recent scan. Please wait before requesting another scan.";
-
-        if (scanExpiresAt) {
-          const now = Math.floor(Date.now() / 1000);
-          const remainingSeconds = scanExpiresAt - now;
-
-          if (remainingSeconds > 0) {
-            let timeText;
-            if (remainingSeconds < 60) {
-              timeText = `${remainingSeconds} seconds`;
-            } else if (remainingSeconds < 3600) {
-              const minutes = Math.ceil(remainingSeconds / 60);
-              timeText = `${minutes} minute${minutes !== 1 ? "s" : ""}`;
-            } else {
-              const hours = Math.floor(remainingSeconds / 3600);
-              const minutes = Math.ceil((remainingSeconds % 3600) / 60);
-              timeText = `${hours}h ${minutes}m`;
-            }
-            message = `You have a recent scan. Please wait ${timeText} before requesting another scan.`;
-          }
-        }
         setScanErrorBanner({
           title: "Recent scan cooldown",
-          subtitle: message,
+          subtitle: scanError,
         });
       } else if (scanError) {
         setScanErrorBanner({ title: "Scan Error", subtitle: scanError });
       }
     }
-
-    // Handle forceShowError flag for disabled WebSocket scanning
-    if (scanForceShowError && scanError && !forceShowErrorHandledRef.current) {
-      showScanErrorToast(scanError);
-      scanResetForceShowError(); // Reset the flag
-      forceShowErrorHandledRef.current = true; // Mark as handled
-    }
-
-    // Reset the handled flag when forceShowError becomes false
-    if (!scanForceShowError) {
-      forceShowErrorHandledRef.current = false;
-    }
   }, [
     scanStatus,
     scanPhase,
-    scanMessage,
     scanError,
-    scanProgress,
-    scanExpiresAt,
-    scanForceShowError,
-    scanResetForceShowError,
     isOwnInventory,
     error,
     initialData,
@@ -861,13 +763,12 @@ export default function InventoryCheckerClient({
                     <Button
                       onClick={() => {
                         trackEvent("Request Scan");
-                        // Show Turnstile modal before scan
                         if (
                           ENABLE_WS_SCAN &&
                           scanWebSocket.status !== "scanning" &&
                           scanWebSocket.status !== "connecting"
                         ) {
-                          setShowScanModal(true);
+                          scanWebSocket.startScan();
                         }
                       }}
                       disabled={
@@ -896,6 +797,7 @@ export default function InventoryCheckerClient({
                             {getScanActiveButtonLabel(
                               scanWebSocket.phase,
                               scanWebSocket.message,
+                              scanWebSocket.queuePosition,
                             )}
                           </span>
                         </>
@@ -1284,28 +1186,6 @@ export default function InventoryCheckerClient({
             requiredTier={modalState.requiredTier || 3}
             currentLimit={modalState.currentLimit}
             requiredLimit={modalState.requiredLimit}
-          />
-
-          {/* Scan Inventory Modal with Turnstile */}
-          <ScanInventoryModal
-            isOpen={showScanModal}
-            onClose={() => {
-              if (
-                scanWebSocket.status !== "scanning" &&
-                scanWebSocket.status !== "connecting"
-              ) {
-                setShowScanModal(false);
-              }
-            }}
-            onSuccess={(turnstileToken) => {
-              scanWebSocket.startScan(turnstileToken);
-              setShowScanModal(false);
-            }}
-            isScanning={
-              scanWebSocket.status === "scanning" ||
-              scanWebSocket.status === "connecting"
-            }
-            bypassTurnstile={shouldBypassTurnstile}
           />
         </>
       )}

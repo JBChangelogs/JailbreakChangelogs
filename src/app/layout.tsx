@@ -30,6 +30,7 @@ import {
 } from "@/utils/ui/themeOptions";
 import ThemeCursor from "@/components/Settings/ThemeCursor";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { InventoryScanProvider } from "@/contexts/InventoryScanContext";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
 import NitroVideoCloseSupporterModal from "@/components/Ads/NitroVideoCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
@@ -226,55 +227,57 @@ export default async function RootLayout({
                 </Suspense>
 
                 <AuthProvider>
-                  <SiteBanGate>
-                    <RybbitIdentity />
-                    <Suspense fallback={null}>
-                      <SharedThemeDialog />
-                      <ThemeEditorHost />
-                    </Suspense>
-                    <AdErrorBoundary>
-                      <NitroBottomAnchor />
-                      <NitroVideoPlayer />
-                      <NitroAdNavigation />
-                      <NitroAnchorCloseSupporterModal />
-                      <NitroVideoCloseSupporterModal />
-                    </AdErrorBoundary>
-                    <div
-                      id="main-layout"
-                      className="site-layout flex min-h-screen flex-col"
-                    >
-                      <ExperimentOverridesIndicator />
-                      <Suspense
-                        fallback={
-                          <div
-                            data-desktop-sidebar-pending
-                            className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
-                          />
-                        }
+                  <InventoryScanProvider>
+                    <SiteBanGate>
+                      <RybbitIdentity />
+                      <Suspense fallback={null}>
+                        <SharedThemeDialog />
+                        <ThemeEditorHost />
+                      </Suspense>
+                      <AdErrorBoundary>
+                        <NitroBottomAnchor />
+                        <NitroVideoPlayer />
+                        <NitroAdNavigation />
+                        <NitroAnchorCloseSupporterModal />
+                        <NitroVideoCloseSupporterModal />
+                      </AdErrorBoundary>
+                      <div
+                        id="main-layout"
+                        className="site-layout flex min-h-screen flex-col"
                       >
-                        <Header
-                          releaseAnnouncement={
-                            <Suspense fallback={null}>
-                              <LatestReleaseDialog />
+                        <ExperimentOverridesIndicator />
+                        <Suspense
+                          fallback={
+                            <div
+                              data-desktop-sidebar-pending
+                              className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
+                            />
+                          }
+                        >
+                          <Header
+                            releaseAnnouncement={
+                              <Suspense fallback={null}>
+                                <LatestReleaseDialog />
+                              </Suspense>
+                            }
+                          />
+                        </Suspense>
+                        <main className="min-h-screen flex-1">
+                          <NuqsAdapter>
+                            <Suspense>{children}</Suspense>
+                          </NuqsAdapter>
+                        </main>
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={
+                            <Suspense fallback={<VersionInfoSkeleton />}>
+                              <VersionInfoWrapper />
                             </Suspense>
                           }
                         />
-                      </Suspense>
-                      <main className="min-h-screen flex-1">
-                        <NuqsAdapter>
-                          <Suspense>{children}</Suspense>
-                        </NuqsAdapter>
-                      </main>
-                      <Footer
-                        githubUrl={githubUrl}
-                        versionInfo={
-                          <Suspense fallback={<VersionInfoSkeleton />}>
-                            <VersionInfoWrapper />
-                          </Suspense>
-                        }
-                      />
-                    </div>
-                  </SiteBanGate>
+                      </div>
+                    </SiteBanGate>
+                  </InventoryScanProvider>
                 </AuthProvider>
               </MaintenanceBypass>
             </QueryProvider>
@@ -381,51 +384,53 @@ export default async function RootLayout({
             </Suspense>
 
             <AuthProvider>
-              <SiteBanGate>
-                <RybbitIdentity />
-                <Suspense fallback={null}>
-                  <SharedThemeDialog />
-                  <ThemeEditorHost />
-                </Suspense>
-                <NitroBottomAnchor />
-                <NitroVideoPlayer />
-                <NitroAdNavigation />
-                <NitroAnchorCloseSupporterModal />
-                <NitroVideoCloseSupporterModal />
-                <div className="site-layout flex min-h-screen flex-col">
-                  <ExperimentOverridesIndicator />
-                  <Suspense
-                    fallback={
-                      <div
-                        data-desktop-sidebar-pending
-                        className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
+              <InventoryScanProvider>
+                <SiteBanGate>
+                  <RybbitIdentity />
+                  <Suspense fallback={null}>
+                    <SharedThemeDialog />
+                    <ThemeEditorHost />
+                  </Suspense>
+                  <NitroBottomAnchor />
+                  <NitroVideoPlayer />
+                  <NitroAdNavigation />
+                  <NitroAnchorCloseSupporterModal />
+                  <NitroVideoCloseSupporterModal />
+                  <div className="site-layout flex min-h-screen flex-col">
+                    <ExperimentOverridesIndicator />
+                    <Suspense
+                      fallback={
+                        <div
+                          data-desktop-sidebar-pending
+                          className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg"
+                        />
+                      }
+                    >
+                      <Header
+                        banner={<CompetitionBanner />}
+                        releaseAnnouncement={
+                          <Suspense fallback={null}>
+                            <LatestReleaseDialog />
+                          </Suspense>
+                        }
                       />
-                    }
-                  >
-                    <Header
-                      banner={<CompetitionBanner />}
-                      releaseAnnouncement={
-                        <Suspense fallback={null}>
-                          <LatestReleaseDialog />
+                    </Suspense>
+                    <main className="min-h-screen flex-1">
+                      <NuqsAdapter>
+                        <Suspense>{children}</Suspense>
+                      </NuqsAdapter>
+                    </main>
+                    <Footer
+                      githubUrl={githubUrl}
+                      versionInfo={
+                        <Suspense fallback={<VersionInfoSkeleton />}>
+                          <VersionInfoWrapper />
                         </Suspense>
                       }
                     />
-                  </Suspense>
-                  <main className="min-h-screen flex-1">
-                    <NuqsAdapter>
-                      <Suspense>{children}</Suspense>
-                    </NuqsAdapter>
-                  </main>
-                  <Footer
-                    githubUrl={githubUrl}
-                    versionInfo={
-                      <Suspense fallback={<VersionInfoSkeleton />}>
-                        <VersionInfoWrapper />
-                      </Suspense>
-                    }
-                  />
-                </div>
-              </SiteBanGate>
+                  </div>
+                </SiteBanGate>
+              </InventoryScanProvider>
             </AuthProvider>
           </QueryProvider>
         </CustomThemeProvider>

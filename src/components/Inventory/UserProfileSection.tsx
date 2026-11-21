@@ -10,8 +10,7 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
-import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
+import type { UseInventoryScanReturn } from "@/hooks/useInventoryScan";
 import { ENABLE_WS_SCAN } from "@/utils/api/api";
 import { getScanActiveButtonLabel } from "@/utils/notifications/scanProgressMessage";
 import { Button } from "../ui/button";
@@ -33,7 +32,7 @@ interface UserProfileSectionProps {
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge: (userId: string) => boolean;
   currentData: InventoryData;
-  scanWebSocket: UseScanWebSocketReturn;
+  scanWebSocket: UseInventoryScanReturn;
   scanErrorBanner?: { title: string; subtitle?: string } | null;
   queuePosition?: { position: number; delay: number } | null;
   isLoadingQueuePosition?: boolean;
@@ -58,14 +57,11 @@ export default function UserProfileSection({
 }: UserProfileSectionProps) {
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
 
-  const [showScanModal, setShowScanModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory =
     isAuthenticated && user?.roblox_id === currentData?.user_id;
-  const shouldBypassTurnstile =
-    Boolean(user?.flags?.some((f) => f.flag === "is_owner")) || false;
 
   const handleScanClick = () => {
     if (
@@ -75,21 +71,7 @@ export default function UserProfileSection({
     ) {
       return;
     }
-    setShowScanModal(true);
-  };
-
-  const handleScanWithToken = (turnstileToken: string) => {
-    scanWebSocket.startScan(turnstileToken);
-    setShowScanModal(false);
-  };
-
-  const handleCloseScanModal = () => {
-    if (
-      scanWebSocket.status !== "scanning" &&
-      scanWebSocket.status !== "connecting"
-    ) {
-      setShowScanModal(false);
-    }
+    scanWebSocket.startScan();
   };
 
   return (
@@ -235,6 +217,7 @@ export default function UserProfileSection({
                     {getScanActiveButtonLabel(
                       scanWebSocket.phase,
                       scanWebSocket.message,
+                      scanWebSocket.queuePosition,
                     )}
                   </span>
                 </>
@@ -421,18 +404,6 @@ export default function UserProfileSection({
           </div>
         </div>
       )}
-
-      {/* Scan Inventory Modal with Turnstile */}
-      <ScanInventoryModal
-        isOpen={showScanModal}
-        onClose={handleCloseScanModal}
-        onSuccess={handleScanWithToken}
-        isScanning={
-          scanWebSocket.status === "scanning" ||
-          scanWebSocket.status === "connecting"
-        }
-        bypassTurnstile={shouldBypassTurnstile}
-      />
     </div>
   );
 }

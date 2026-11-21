@@ -296,7 +296,7 @@ test("inventory outcomes distinguish queued from completed and report only once"
   ]) {
     const app = setupScope({ status, phase, scanStartedAtRef: { current: 0 } });
     const effect = loadCallback(
-      "hooks/useScanWebSocket.ts",
+      "hooks/useInventoryScan.ts",
       "effect",
       app.scope,
     );
@@ -328,11 +328,10 @@ test("inventory requests report disabled scanning and missing users", () => {
       setStatus: () => {},
       setPhase: () => {},
       setForceShowError: () => {},
-      setTurnstileToken: () => {},
       scanStartedAtRef: { current: null },
-      connect: () => connections++,
+      requestScan: () => connections++,
     });
-    loadCallback("hooks/useScanWebSocket.ts", "startScan", app.scope)();
+    loadCallback("hooks/useInventoryScan.ts", "startScan", app.scope)();
     expect(app.events[0]).toEqual({
       name: "inventory_scan_requested",
       props: undefined,

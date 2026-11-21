@@ -1,1 +1,1 @@
-export type TurnstileAction = "inventory_scan" | "human_verification";
+export type TurnstileAction = "human_verification";

@@ -9,6 +9,7 @@ export type ScanPhase =
   | "completed"
   | "failed_not_in_server"
   | "server_full"
+  | "supporter_required"
   | "error";
 
 function formatQueueMessage(message: string): string {
@@ -89,7 +90,12 @@ export function formatScanProgressMessage(
 export function getScanActiveButtonLabel(
   phase: ScanPhase | undefined,
   message?: string,
+  queuePosition?: number,
 ): string {
+  if (phase === "queued" && queuePosition !== undefined) {
+    return `Processing... (#${queuePosition.toLocaleString()} in queue)`;
+  }
+
   if (phase === "bot_joined") {
     return "Scanning...";
   }

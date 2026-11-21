@@ -3,7 +3,11 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api/api";
+import {
+  ENABLE_REALTIME_NOTIFICATIONS_WS,
+  fetchRobloxUsersBatch,
+  WS_URL,
+} from "@/utils/api/api";
 import {
   getNotificationActionLabel,
   parseNotificationUrl,
@@ -1181,6 +1185,67 @@ export function useRealtimeNotificationsWebSocket(
                   },
                 }),
               );
+              return;
+            }
+
+            if (
+              payload.action?.startsWith("scan_") ||
+              payload.action === "inventory_scanned"
+            ) {
+              window.dispatchEvent(
+                new CustomEvent("realtimeScan", {
+                  detail: { action: payload.action, data: payload.data },
+                }),
+              );
+              return;
+            }
+
+            if (payload.action === "duplicate_found") {
+              const dupe = (payload.data ?? {}) as {
+                item_id?: string;
+                title?: string;
+                category_title?: string;
+              };
+              const name = [dupe.title, dupe.category_title]
+                .filter(Boolean)
+                .join(" ");
+              toast.warning("Duplicate found", {
+                id: `duplicate_found:${dupe.item_id}`,
+                description: `${name || "An item"} in your inventory was flagged as duped.`,
+              });
+              return;
+            }
+
+            if (payload.action === "trade_completed") {
+              const trade = (payload.data ?? {}) as {
+                user_id?: string;
+                counterparty_user_id?: string;
+                trade_id?: string;
+              };
+              const notify = (name?: string) =>
+                toast.success(
+                  name ? `Trade completed with ${name}` : "Trade completed",
+                  {
+                    id: `trade_completed:${trade.trade_id}`,
+                    description: "See what each side gave in Trade History.",
+                    action: trade.user_id
+                      ? {
+                          label: "View trade",
+                          onClick: () =>
+                            window.location.assign(
+                              `/inventories/${trade.user_id}?tab=trades`,
+                            ),
+                        }
+                      : undefined,
+                  },
+                );
+              const counterpartyId = String(trade.counterparty_user_id ?? "");
+              fetchRobloxUsersBatch([counterpartyId])
+                .then((users) => {
+                  const user = users?.[counterpartyId];
+                  notify(user?.displayName || user?.name || undefined);
+                })
+                .catch(() => notify());
               return;
             }
 

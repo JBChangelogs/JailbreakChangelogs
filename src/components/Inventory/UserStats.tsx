@@ -6,7 +6,7 @@ import { useCallback, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
 import { Season } from "@/types/seasons";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
-import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
+import type { UseInventoryScanReturn } from "@/hooks/useInventoryScan";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 import { UserNetworthData } from "@/utils/api/api";
@@ -34,7 +34,7 @@ interface UserStatsProps {
   showOnlyLimited: boolean;
   showOnlySeasonal: boolean;
   excludeObtainables: boolean;
-  scanWebSocket: UseScanWebSocketReturn;
+  scanWebSocket: UseInventoryScanReturn;
   scanErrorBanner?: { title: string; subtitle?: string } | null;
   queuePosition?: { position: number; delay: number } | null;
   isLoadingQueuePosition?: boolean;
