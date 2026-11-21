@@ -30,6 +30,10 @@ test("social and Discord images follow the route without query strings or traili
     ["/values/calculator/", "/og/values/calculator.png"],
     ["/item/Vehicle/Proto%208?tab=history", "/og/item/Vehicle/Proto%208.png"],
     ["/?theme=4DVB9KBE&x=1", "/og.png?theme=4DVB9KBE"],
+    [
+      "/values/calculator?share=FSC6XWG4&x=1",
+      "/og/values/calculator.png?share=FSC6XWG4",
+    ],
   ]) {
     const image = `https://embeds.jailbreakchangelogs.com${imagePath}`;
     const metadata = withDiscordEmbed({ title: "Preview" }, path);
