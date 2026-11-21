@@ -40,6 +40,9 @@ test("inventory v2 callers pass usernames directly and preserve errors and batch
             await fn(input);
             assert.equal(calls.length, before + 1);
             assert.equal(calls.at(-1).url, base + path + suffix);
+            assert.equal(calls.at(-1).options.headers.Authorization, "local-test-session");
+            assert.equal(calls.at(-1).options.credentials, "include");
+            assert.ok(calls.at(-1).options.headers["X-Source"]);
           }
           await client.fetchQuery(userInventoryQueryOptions(input));
           assert.equal(calls.at(-1).url, base + path + "/inventory?nocache=false");
@@ -113,6 +116,9 @@ test("inventory v2 callers pass usernames directly and preserve errors and batch
     env: {
       ...process.env,
       NEXT_PUBLIC_INVENTORY_API_URL: "https://inventory.example",
+      NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER: "test-source",
+      NEXT_PUBLIC_RAILWAY_ENVIRONMENT_NAME: "development",
+      NEXT_PUBLIC_DEV_TOKEN: "local-test-session",
     },
     stdout: "pipe",
     stderr: "pipe",

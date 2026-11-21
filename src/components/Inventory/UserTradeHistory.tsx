@@ -424,6 +424,10 @@ export default function UserTradeHistory({
 }: UserTradeHistoryProps) {
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const handleSelectDay = useCallback((day: string | null) => {
+    setSelectedDay(day);
+    setExpandedTradeId(null);
+  }, []);
   const tradesQuery = useInfiniteQuery({
     queryKey: ["user-trade-history", userId, PAGE_SIZE],
     enabled: isActive && !!INVENTORY_API_URL,
@@ -747,10 +751,7 @@ export default function UserTradeHistory({
       <TradeActivityChart
         userId={userId}
         selectedDay={selectedDay}
-        onSelectDay={(day) => {
-          setSelectedDay(day);
-          setExpandedTradeId(null);
-        }}
+        onSelectDay={handleSelectDay}
       />
 
       {selectedDay &&

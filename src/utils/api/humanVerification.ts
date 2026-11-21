@@ -1,5 +1,5 @@
 import { INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest, getDevToken } from "@/utils/api/apiDevToken";
 import { observeSiteBanResponse } from "@/utils/api/siteBanInterceptor";
 
 const BAN_REFERENCE_HEADER = "Ban-Reference";
@@ -52,10 +52,20 @@ function fetchInventoryApi(
   input: RequestInfo | URL,
   init?: RequestInit,
 ) {
-  const withCookies =
+  let withCookies =
     input instanceof Request
       ? init
       : { credentials: "include" as const, ...init };
+  const { isDevEnv, injectedToken } = getDevToken();
+  if (isDevEnv && injectedToken) {
+    const headers = new Headers(
+      init?.headers ?? (input instanceof Request ? input.headers : undefined),
+    );
+    if (!headers.has("Authorization")) {
+      headers.set("Authorization", injectedToken);
+      withCookies = { ...withCookies, headers };
+    }
+  }
   return originalFetch
     .call(window, input, withCookies)
     .then(async (response) => {

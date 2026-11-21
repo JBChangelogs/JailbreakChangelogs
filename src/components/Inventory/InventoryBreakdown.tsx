@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Activity, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import type { UserNetworthData } from "@/utils/api/api";
 import type { Item } from "@/types";
@@ -115,22 +115,26 @@ export default function InventoryBreakdown({
             hidden={progressTab !== "collection"}
             className="mt-6"
           >
-            <CollectionProgressSection
-              countLowerLevels={stats.countLowerLevels}
-              creditedHyperchromeLevels={stats.creditedHyperchromeLevels}
-              onCountLowerLevelsChange={stats.setCountLowerLevels}
-              overallProgress={stats.overallProgress}
-              typeProgress={stats.typeProgress}
-              unverifiableCount={stats.unverifiableCount}
-              missingItemsAll={stats.missingItemsAll}
-              unverifiableItemsAll={stats.unverifiableItemsAll}
-              unobtainableItemsAll={stats.unobtainableItemsAll}
-              collectionChartConfig={stats.collectionChartConfig}
-              collectionChartData={stats.collectionChartData}
-              renderCharts={renderCharts && progressTab === "collection"}
-              unverifiableSectionRef={unverifiableSectionRef}
-              onViewUnverifiable={scrollToUnverifiableSection}
-            />
+            <Activity
+              mode={progressTab === "collection" ? "visible" : "hidden"}
+            >
+              <CollectionProgressSection
+                countLowerLevels={stats.countLowerLevels}
+                creditedHyperchromeLevels={stats.creditedHyperchromeLevels}
+                onCountLowerLevelsChange={stats.setCountLowerLevels}
+                overallProgress={stats.overallProgress}
+                typeProgress={stats.typeProgress}
+                unverifiableCount={stats.unverifiableCount}
+                missingItemsAll={stats.missingItemsAll}
+                unverifiableItemsAll={stats.unverifiableItemsAll}
+                unobtainableItemsAll={stats.unobtainableItemsAll}
+                collectionChartConfig={stats.collectionChartConfig}
+                collectionChartData={stats.collectionChartData}
+                renderCharts={renderCharts && progressTab === "collection"}
+                unverifiableSectionRef={unverifiableSectionRef}
+                onViewUnverifiable={scrollToUnverifiableSection}
+              />
+            </Activity>
           </TabsContent>
           <TabsContent
             value="og-owned"
@@ -138,16 +142,18 @@ export default function InventoryBreakdown({
             hidden={progressTab !== "og-owned"}
             className="mt-6"
           >
-            <OgOwnedSection
-              ogOwnedProgress={stats.ogOwnedProgress}
-              typeProgress={stats.typeProgress}
-              ogMissingItemsAll={stats.ogMissingItemsAll}
-              unverifiableCount={stats.unverifiableCount}
-              ogChartConfig={stats.ogChartConfig}
-              ogChartData={stats.ogChartData}
-              renderCharts={renderCharts && progressTab === "og-owned"}
-              onViewUnverifiable={scrollToUnverifiableSection}
-            />
+            <Activity mode={progressTab === "og-owned" ? "visible" : "hidden"}>
+              <OgOwnedSection
+                ogOwnedProgress={stats.ogOwnedProgress}
+                typeProgress={stats.typeProgress}
+                ogMissingItemsAll={stats.ogMissingItemsAll}
+                unverifiableCount={stats.unverifiableCount}
+                ogChartConfig={stats.ogChartConfig}
+                ogChartData={stats.ogChartData}
+                renderCharts={renderCharts && progressTab === "og-owned"}
+                onViewUnverifiable={scrollToUnverifiableSection}
+              />
+            </Activity>
           </TabsContent>
         </Tabs>
       )}

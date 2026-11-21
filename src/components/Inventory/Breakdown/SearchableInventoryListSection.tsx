@@ -5,11 +5,13 @@ import {
   memo,
   useDeferredValue,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { matchesTextSearch } from "@/utils/helpers/itemSearch";
+import { Pagination } from "@/components/ui/Pagination";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   DropdownMenu,
@@ -57,6 +59,8 @@ const SearchableInventoryListSection = memo(
     sectionId,
     collapsible = false,
   }: SearchableInventoryListSectionProps) {
+    const [page, setPage] = useState(1);
+    const listRef = useRef<HTMLDivElement>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState<string>("all");
     const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -91,6 +95,11 @@ const SearchableInventoryListSection = memo(
       );
     }, [deferredSearchTerm, items, typeFilter]);
 
+    const totalPages = Math.ceil(filteredItems.length / 50);
+    const currentPage = Math.min(page, Math.max(1, totalPages));
+    const pageOffset = (currentPage - 1) * 50;
+    const displayedItems = filteredItems.slice(pageOffset, pageOffset + 50);
+
     const heading = (
       <span className="text-primary-text mb-2 block text-lg font-semibold">
         {title} ({formatInventoryCount(items.length)})
@@ -120,7 +129,10 @@ const SearchableInventoryListSection = memo(
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
                 maxLength={80}
                 className={secondaryFilterInputClassName}
               />
@@ -131,7 +143,10 @@ const SearchableInventoryListSection = memo(
               {searchTerm ? (
                 <button
                   type="button"
-                  onClick={() => setSearchTerm("")}
+                  onClick={() => {
+                    setSearchTerm("");
+                    setPage(1);
+                  }}
                   className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
                   aria-label={clearAriaLabel}
                 >
@@ -163,7 +178,10 @@ const SearchableInventoryListSection = memo(
                 >
                   <DropdownMenuRadioGroup
                     value={typeFilter}
-                    onValueChange={(value) => setTypeFilter(value)}
+                    onValueChange={(value) => {
+                      setTypeFilter(value);
+                      setPage(1);
+                    }}
                   >
                     <DropdownMenuRadioItem
                       value="all"
@@ -197,16 +215,22 @@ const SearchableInventoryListSection = memo(
         ) : filteredItems.length === 0 ? (
           <p className="text-secondary-text text-base">{noResultsMessage}</p>
         ) : (
-          <div className="max-h-65 scrollbar-thin overflow-auto pr-1 text-base">
-            <ol className="divide-border-card/60 space-y-0 divide-y">
-              {filteredItems.map((item, idx) => (
+          <div
+            ref={listRef}
+            className="max-h-65 scrollbar-thin overflow-auto pr-1 text-base"
+          >
+            <ol
+              start={pageOffset + 1}
+              className="divide-border-card/60 space-y-0 divide-y"
+            >
+              {displayedItems.map((item, idx) => (
                 <li
                   key={item.id}
                   className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-sm font-medium tabular-nums">
-                      {idx + 1}.
+                      {pageOffset + idx + 1}.
                     </span>
                     <Link
                       href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
@@ -240,6 +264,26 @@ const SearchableInventoryListSection = memo(
                 </li>
               ))}
             </ol>
+          </div>
+        )}
+        {totalPages > 1 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-secondary-text text-sm">
+              Showing {formatInventoryCount(pageOffset + 1)}–
+              {formatInventoryCount(
+                Math.min(pageOffset + 50, filteredItems.length),
+              )}{" "}
+              of {formatInventoryCount(filteredItems.length)}
+            </p>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              siblingCount={0}
+              onChange={(_, nextPage) => {
+                setPage(nextPage);
+                listRef.current?.scrollTo({ top: 0 });
+              }}
+            />
           </div>
         )}
       </>

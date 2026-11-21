@@ -1,7 +1,14 @@
 "use client";
 
 import InventoryItemsSkeleton from "@/components/Inventory/InventoryItemsSkeleton";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import {
+  Activity,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -52,6 +59,7 @@ import {
   showScanErrorToast,
 } from "@/utils/notifications/scanToasts";
 import { Spinner } from "@/components/ui/Spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   formatScanProgressMessage,
   getScanActiveButtonLabel,
@@ -66,8 +74,24 @@ const InventoryHistoryChart = dynamic(
   () => import("@/components/Inventory/InventoryHistoryChart"),
   {
     loading: () => (
-      <div className="h-100" role="status" aria-label="Loading history chart">
-        <Spinner />
+      <div
+        className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-4"
+        role="status"
+        aria-label="Loading history chart"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-56 max-w-full" />
+          </div>
+          <Skeleton className="h-9 w-28 shrink-0" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <Skeleton key={index} className="h-28" />
+          ))}
+        </div>
+        <Skeleton className="h-64 w-full" />
       </div>
     ),
   },
@@ -1065,7 +1089,9 @@ export default function InventoryCheckerClient({
 
                 {/* Tab Content */}
                 <div className="mt-4">
-                  <div className={effectiveActiveTab === 0 ? "" : "hidden"}>
+                  <Activity
+                    mode={effectiveActiveTab === 0 ? "visible" : "hidden"}
+                  >
                     <InventoryHistory
                       key={currentData.user_id}
                       userId={currentData.user_id}
@@ -1074,7 +1100,6 @@ export default function InventoryCheckerClient({
                         setItemSnapshot({ userId: currentData.user_id, date })
                       }
                       preview={
-                        effectiveActiveTab === 0 &&
                         robloxId && (
                           <InventoryFeaturePreview
                             networthData={networthData}
@@ -1110,14 +1135,16 @@ export default function InventoryCheckerClient({
                         onExcludeObtainablesChange={setExcludeObtainables}
                       />
                     </InventoryHistory>
-                  </div>
+                  </Activity>
 
                   {tabIndex.trades !== null &&
                     mountedTabs.has(tabIndex.trades) &&
                     robloxId && (
-                      <div
-                        className={
-                          effectiveActiveTab === tabIndex.trades ? "" : "hidden"
+                      <Activity
+                        mode={
+                          effectiveActiveTab === tabIndex.trades
+                            ? "visible"
+                            : "hidden"
                         }
                       >
                         <UserTradeHistory
@@ -1127,14 +1154,16 @@ export default function InventoryCheckerClient({
                           isActive={effectiveActiveTab === tabIndex.trades}
                           itemsData={itemsData}
                         />
-                      </div>
+                      </Activity>
                     )}
 
                   {tabIndex.copies !== null &&
                     mountedTabs.has(tabIndex.copies) && (
-                      <div
-                        className={
-                          effectiveActiveTab === tabIndex.copies ? "" : "hidden"
+                      <Activity
+                        mode={
+                          effectiveActiveTab === tabIndex.copies
+                            ? "visible"
+                            : "hidden"
                         }
                       >
                         {duplicatesTabData && (
@@ -1146,15 +1175,17 @@ export default function InventoryCheckerClient({
                             isActive={effectiveActiveTab === tabIndex.copies}
                           />
                         )}
-                      </div>
+                      </Activity>
                     )}
 
                   {tabIndex.dupes !== null &&
                     mountedTabs.has(tabIndex.dupes) &&
                     currentData.duplicates && (
-                      <div
-                        className={
-                          effectiveActiveTab === tabIndex.dupes ? "" : "hidden"
+                      <Activity
+                        mode={
+                          effectiveActiveTab === tabIndex.dupes
+                            ? "visible"
+                            : "hidden"
                         }
                       >
                         <MemoDupedItemsTab
@@ -1164,15 +1195,17 @@ export default function InventoryCheckerClient({
                           itemsData={itemsData}
                           userId={currentData.user_id}
                         />
-                      </div>
+                      </Activity>
                     )}
 
                   {tabIndex.graphs !== null &&
                     mountedTabs.has(tabIndex.graphs) &&
                     robloxId && (
-                      <div
-                        className={
-                          effectiveActiveTab === tabIndex.graphs ? "" : "hidden"
+                      <Activity
+                        mode={
+                          effectiveActiveTab === tabIndex.graphs
+                            ? "visible"
+                            : "hidden"
                         }
                       >
                         <MemoInventoryHistoryChart
@@ -1180,16 +1213,16 @@ export default function InventoryCheckerClient({
                           moneyData={moneyHistoryData}
                           isActive={effectiveActiveTab === tabIndex.graphs}
                         />
-                      </div>
+                      </Activity>
                     )}
 
                   {tabIndex.breakdown !== null &&
                     mountedTabs.has(tabIndex.breakdown) &&
                     robloxId && (
-                      <div
-                        className={
+                      <Activity
+                        mode={
                           effectiveActiveTab === tabIndex.breakdown
-                            ? ""
+                            ? "visible"
                             : "hidden"
                         }
                       >
@@ -1200,7 +1233,7 @@ export default function InventoryCheckerClient({
                           inventoryData={currentData}
                           isActive={effectiveActiveTab === tabIndex.breakdown}
                         />
-                      </div>
+                      </Activity>
                     )}
 
                   {tabIndex.comments !== null &&

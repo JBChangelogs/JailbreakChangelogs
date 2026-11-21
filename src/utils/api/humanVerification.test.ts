@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { ModuleKind, transpileModule } from "typescript";
 
-function setup(responseUrl = "https://api.example.com/v2/users/me") {
+function setup(
+  responseUrl = "https://api.example.com/v2/users/me",
+  isDevEnv = false,
+) {
   const response = new Response(null, {
     headers: { "Ban-Reference": "reference" },
   });
@@ -27,6 +30,7 @@ function setup(responseUrl = "https://api.example.com/v2/users/me") {
       exports,
       URL,
       Request,
+      Headers,
       window,
       require: (name: string) => {
         if (name === "@/utils/api/api")
@@ -34,7 +38,10 @@ function setup(responseUrl = "https://api.example.com/v2/users/me") {
             PUBLIC_API_URL: "https://api.example.com",
             INVENTORY_API_URL: "https://inventory.example.com",
           };
-        if (name === "@/utils/api/apiDevToken") return {};
+        if (name === "@/utils/api/apiDevToken")
+          return {
+            getDevToken: () => ({ isDevEnv, injectedToken: "local-session" }),
+          };
         if (name === "@/utils/api/siteBanInterceptor")
           return { observeSiteBanResponse };
         throw new Error(`Unexpected import ${name}`);
@@ -56,7 +63,7 @@ function setup(responseUrl = "https://api.example.com/v2/users/me") {
 }
 
 test("third-party requests preserve the original promise and skip observers", async () => {
-  const context = setup();
+  const context = setup(undefined, true);
   const error = new TypeError("Failed to fetch");
   const rejected = Promise.reject<Response>(error);
   context.originalFetch.mockReturnValue(rejected);
@@ -70,6 +77,42 @@ test("third-party requests preserve the original promise and skip observers", as
   expect(context.listener).not.toHaveBeenCalled();
   context.uninstall();
   expect(Object.is(context.window.fetch, context.originalFetch)).toBe(true);
+});
+
+test("local inventory requests attach the dev token without replacing explicit authorization", async () => {
+  const url = "https://inventory.example.com/v2/users/1";
+  for (const input of [
+    url,
+    new URL(url),
+    new Request(url, {
+      headers: { "X-Source": "request-source" },
+      credentials: "omit",
+    }),
+  ]) {
+    const context = setup(undefined, true);
+    await context.window.fetch(input);
+    const init = context.originalFetch.mock.calls[0][1];
+    expect(new Headers(init?.headers).get("Authorization")).toBe(
+      "local-session",
+    );
+    if (input instanceof Request) {
+      expect(new Headers(init?.headers).get("X-Source")).toBe("request-source");
+      expect(init?.credentials).toBeUndefined();
+    } else expect(init?.credentials).toBe("include");
+    context.uninstall();
+  }
+  const context = setup(undefined, true);
+  const controller = new AbortController();
+  const init = {
+    method: "POST",
+    body: "payload",
+    signal: controller.signal,
+    credentials: "omit" as const,
+    headers: { Authorization: "explicit-session", "X-Source": "source" },
+  };
+  await context.window.fetch(url, init);
+  expect(context.originalFetch.mock.calls[0][1]).toEqual(init);
+  context.uninstall();
 });
 
 test("API strings, URLs, Requests and relative paths retain ban observation", async () => {

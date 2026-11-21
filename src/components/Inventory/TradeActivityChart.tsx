@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Tooltip,
@@ -25,6 +25,7 @@ interface Cell {
   count: number;
   level: number;
   future: boolean;
+  label: string;
 }
 
 interface TradeActivity {
@@ -33,15 +34,6 @@ interface TradeActivity {
 }
 
 const dayKey = (time: number) => new Date(time).toISOString().slice(0, 10);
-
-const formatDay = (day: string) =>
-  new Date(`${day}T00:00:00Z`).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 
 function levelThresholds(counts: number[]) {
   const busy = counts.filter((count) => count > 0).sort((a, b) => a - b);
@@ -52,6 +44,13 @@ function levelThresholds(counts: number[]) {
 }
 
 function buildWeeks(days: Record<string, number>) {
+  const dayFormat = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
   const today = Date.parse(`${dayKey(Date.now())}T00:00:00Z`);
   const first = today - 364 * DAY_MS;
   const start = first - new Date(first).getUTCDay() * DAY_MS;
@@ -66,7 +65,13 @@ function buildWeeks(days: Record<string, number>) {
     const count = days[day] ?? 0;
     const level =
       count <= 0 ? 0 : count <= q1 ? 1 : count <= q2 ? 2 : count <= q3 ? 3 : 4;
-    weeks[weeks.length - 1].push({ day, count, level, future: time > today });
+    weeks[weeks.length - 1].push({
+      day,
+      count,
+      level,
+      future: time > today,
+      label: `${count === 0 ? "No" : count.toLocaleString()} ${count === 1 ? "trade" : "trades"} on ${dayFormat.format(date)} (UTC)`,
+    });
     if (date.getUTCDate() === 1 && time >= first) {
       months.push({
         column: weeks.length - 1,
@@ -80,7 +85,7 @@ function buildWeeks(days: Record<string, number>) {
   return { weeks, months };
 }
 
-export default function TradeActivityChart({
+const TradeActivityChart = memo(function TradeActivityChart({
   userId,
   selectedDay,
   onSelectDay,
@@ -122,16 +127,24 @@ export default function TradeActivityChart({
     [activity],
   );
 
+  const lastWeeksRef = useRef<typeof weeks | null>(null);
   useLayoutEffect(() => {
     const scroller = scrollRef.current;
     if (!scroller) return;
-    scroller.scrollLeft = scroller.scrollWidth;
-    const update = () =>
-      setFade({
-        start: scroller.scrollLeft > 1,
-        end:
-          scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1,
-      });
+    if (lastWeeksRef.current !== weeks) {
+      scroller.scrollLeft = scroller.scrollWidth;
+      lastWeeksRef.current = weeks;
+    }
+    const update = () => {
+      const start = scroller.scrollLeft > 1;
+      const end =
+        scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1;
+      setFade((previous) =>
+        previous.start === start && previous.end === end
+          ? previous
+          : { start, end },
+      );
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(scroller);
@@ -210,7 +223,7 @@ export default function TradeActivityChart({
                         />
                       );
                     const selected = cell.day === selectedDay;
-                    const label = `${cell.count === 0 ? "No" : cell.count.toLocaleString()} ${cell.count === 1 ? "trade" : "trades"} on ${formatDay(cell.day)} (UTC)`;
+                    const label = cell.label;
                     if (!activity)
                       return (
                         <span
@@ -247,4 +260,6 @@ export default function TradeActivityChart({
       )}
     </section>
   );
-}
+});
+
+export default TradeActivityChart;

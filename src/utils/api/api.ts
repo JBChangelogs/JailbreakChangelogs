@@ -983,10 +983,14 @@ export async function fetchChangelog(
 
 export async function fetchDupeFinderData(userId: string) {
   try {
-    const url = `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(userId)}/duplicates`;
+    const { url, headers } = buildApiFetchRequest(
+      INVENTORY_API_URL,
+      `/v2/users/${inventoryUserPath(userId)}/duplicates`,
+    );
     const response = await fetch(url, {
       credentials: "include",
       headers: {
+        ...headers,
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
     });
@@ -1501,15 +1505,17 @@ function inventoryUsernameError(
 
 export async function fetchInventoryData(user: string) {
   try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}`,
-      {
-        credentials: "include",
-        headers: {
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
+    const { url, headers } = buildApiFetchRequest(
+      INVENTORY_API_URL,
+      `/v2/users/${inventoryUserPath(user)}`,
     );
+    const response = await fetch(url, {
+      credentials: "include",
+      headers: {
+        ...headers,
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+    });
 
     if (!response.ok) {
       const body = (await response.json().catch(() => null)) as
@@ -1826,15 +1832,17 @@ export async function fetchUserNetworth(
   user: string,
 ): Promise<UserNetworthData[]> {
   try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}/networth/history`,
-      {
-        credentials: "include",
-        headers: {
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
+    const { url, headers } = buildApiFetchRequest(
+      INVENTORY_API_URL,
+      `/v2/users/${inventoryUserPath(user)}/networth/history`,
     );
+    const response = await fetch(url, {
+      credentials: "include",
+      headers: {
+        ...headers,
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -1862,15 +1870,17 @@ export async function fetchUserMoneyHistory(
   user: string,
 ): Promise<MoneyHistory[]> {
   try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}/money/history`,
-      {
-        credentials: "include",
-        headers: {
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
+    const { url, headers } = buildApiFetchRequest(
+      INVENTORY_API_URL,
+      `/v2/users/${inventoryUserPath(user)}/money/history`,
     );
+    const response = await fetch(url, {
+      credentials: "include",
+      headers: {
+        ...headers,
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+    });
 
     if (!response.ok) {
       throw new Error("Failed to fetch money history");
@@ -2098,10 +2108,14 @@ export async function fetchRobloxUserProfile(
   user: string,
 ): Promise<RobloxUser | null> {
   try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(user)}/profile`,
-      { headers: { "X-Source": INVENTORY_API_SOURCE_HEADER } },
+    const { url, headers } = buildApiFetchRequest(
+      INVENTORY_API_URL,
+      `/v2/users/${inventoryUserPath(user)}/profile`,
     );
+    const response = await fetch(url, {
+      credentials: "include",
+      headers: { ...headers, "X-Source": INVENTORY_API_SOURCE_HEADER },
+    });
     if (!response.ok) return null;
     const data = await response.json();
     if (!data || typeof data.id !== "number" || typeof data.name !== "string")
@@ -2160,16 +2174,18 @@ export async function fetchOGSearchData(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      const response = await fetch(
-        `${INVENTORY_API_URL}/v2/users/${inventoryUserPath(robloxId)}/original-items`,
-        {
-          credentials: "include",
-          headers: {
-            "X-Source": INVENTORY_API_SOURCE_HEADER,
-          },
-          signal: controller.signal,
-        },
+      const { url, headers } = buildApiFetchRequest(
+        INVENTORY_API_URL,
+        `/v2/users/${inventoryUserPath(robloxId)}/original-items`,
       );
+      const response = await fetch(url, {
+        credentials: "include",
+        headers: {
+          ...headers,
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+        signal: controller.signal,
+      });
 
       clearTimeout(timeoutId);
 
