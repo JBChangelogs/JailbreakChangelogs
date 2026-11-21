@@ -40,7 +40,7 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
 import NitroRailAd from "@/components/Ads/NitroRailAd";
-import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 import TotalRobberiesLoggedPolling from "@/components/RobberyTracker/TotalRobberiesLoggedPolling";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Spinner } from "@/components/ui/Spinner";
@@ -1261,7 +1261,10 @@ function RobberyTrackerContent() {
                   </div>
                 </div>
               </div>
-              <NitroRobberiesTopAd className="w-full self-center xl:self-start" />
+              <NitroInlineVideoPlayer
+                slotId="np-robberies-top"
+                className="w-full self-center xl:self-start"
+              />
             </div>
           </div>
 

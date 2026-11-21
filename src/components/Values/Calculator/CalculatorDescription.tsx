@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
+import NitroInlineVideoPlayer from "@/components/Ads/NitroInlineVideoPlayer";
 
 const CalculatorDescription = () => {
   return (
@@ -21,7 +21,10 @@ const CalculatorDescription = () => {
           </Button>
         </div>
       </div>
-      <NitroCalculatorAd className="lg:mx-0 lg:shrink-0" />
+      <NitroInlineVideoPlayer
+        slotId="np-value-calc"
+        className="lg:mx-0 lg:shrink-0"
+      />
     </div>
   );
 };
