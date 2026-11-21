@@ -28,7 +28,7 @@ interface ScanEventData {
   user_id?: string;
 }
 
-const SCAN_TIMEOUT_MS = 180_000;
+const SCAN_CHECK_MS = 20_000;
 
 function scanRequestError(
   status: number,
@@ -126,20 +126,23 @@ export function useInventoryScan(
     [],
   );
 
-  // No event for a while (socket down, bot hung): stop spinning. Once queued,
-  // saving can legitimately take a while, so wait for inventory_scanned.
+  // Socket events sent while it was reconnecting (e.g. during a reload) are
+  // lost, so when the scan goes quiet ask the API whether it's still running.
   useEffect(() => {
-    if (status !== "connecting" && status !== "scanning") return;
-    if (phase === "queued") return;
-    const timeout = setTimeout(
-      () =>
-        fail(
-          "This scan took too long to complete. Please try again in a moment.",
-        ),
-      SCAN_TIMEOUT_MS,
-    );
-    return () => clearTimeout(timeout);
-  }, [status, phase, message, fail]);
+    const token = getJbclToken();
+    if (status !== "scanning" || !token || !INVENTORY_API_URL) return;
+    const interval = setInterval(async () => {
+      const response = await fetch(
+        `${INVENTORY_API_URL}/v2/me/scan?token=${encodeURIComponent(token)}`,
+      ).catch(() => null);
+      if (response?.status === 404) {
+        void queryClient.invalidateQueries({ queryKey: ["inventory"] });
+        setQueuePosition(undefined);
+        update("completed", "completed", "Scan finished", 100);
+      }
+    }, SCAN_CHECK_MS);
+    return () => clearInterval(interval);
+  }, [status, phase, message, queryClient, update]);
 
   useEffect(() => {
     if (!enabled || !userId) return;
