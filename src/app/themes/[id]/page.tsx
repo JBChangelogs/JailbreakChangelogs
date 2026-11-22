@@ -38,9 +38,14 @@ const getTheme = cache(async (id: string) => {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const theme = await getTheme((await params).id);
   const title = `${theme.label} Community Theme`;
+  const descriptionText = Array.from(
+    theme.description?.replace(/\s+/g, " ").trim() ||
+      `Preview and use ${theme.label} on Jailbreak Changelogs.`,
+  );
   const description =
-    theme.description ||
-    `Preview and use ${theme.label} on Jailbreak Changelogs.`;
+    descriptionText.length > 160
+      ? `${descriptionText.slice(0, 159).join("").trimEnd()}…`
+      : descriptionText.join("");
   const path = `/themes/${theme.share_code}`;
   const image =
     theme.previews?.[0]?.url ??

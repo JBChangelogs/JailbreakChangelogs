@@ -170,6 +170,37 @@ test("themes without a description still offer the color preview when screenshot
   expect(markup).toContain("Explore the colors");
 });
 
+test("theme metadata collapses whitespace and caps descriptions without changing page content", async () => {
+  const description = `Soft colors\n\n${"Photo credits ".repeat(30)}`;
+  const view = page({ theme: { ...theme, description } });
+  const summary = `${description.replace(/\s+/g, " ").trim().slice(0, 159).trimEnd()}…`;
+  expect(summary.length).toBeLessThanOrEqual(160);
+  expect(await view.metadata()).toMatchObject({
+    description: summary,
+    openGraph: { description: summary },
+    twitter: { description: summary },
+  });
+  expect(await view.render()).toContain(description);
+});
+
+test("theme metadata preserves short descriptions and uses a fallback for blank ones", async () => {
+  for (const [description, expected] of [
+    ["  Soft\n\tcolors  ", "Soft colors"],
+    ["x".repeat(160), "x".repeat(160)],
+    [" ", "Preview and use Midnight on Jailbreak Changelogs."],
+    [undefined, "Preview and use Midnight on Jailbreak Changelogs."],
+    ["😀".repeat(161), `${"😀".repeat(159)}…`],
+  ]) {
+    expect(
+      await page({ theme: { ...theme, description } }).metadata(),
+    ).toMatchObject({
+      description: expected,
+      openGraph: { description: expected },
+      twitter: { description: expected },
+    });
+  }
+});
+
 test("theme discussions use the shared comments component and the theme share code", async () => {
   const markup = await page().render();
   expect(markup).toContain('data-comments-id="8V8RN337"');
