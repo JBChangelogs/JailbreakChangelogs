@@ -13,7 +13,31 @@ export interface BanReferenceDetails {
   created_at: number | null;
 }
 
-type BanReferenceListener = (banRef: string | null, message?: string) => void;
+export type CaptchaType = "turnstile" | "jbcl" | "both";
+
+export function getCaptchaType(value: unknown): CaptchaType {
+  return value === "jbcl" || value === "both" ? value : "turnstile";
+}
+
+export interface VerificationTokens {
+  token?: string;
+  jbcl_token?: string;
+}
+
+export class CaptchaVerificationError extends Error {
+  constructor(
+    message: string,
+    public captchaType: CaptchaType,
+  ) {
+    super(message);
+  }
+}
+
+type BanReferenceListener = (
+  banRef: string | null,
+  message?: string,
+  captchaType?: CaptchaType,
+) => void;
 
 let banReferenceListener: BanReferenceListener | null = null;
 let isInterceptorInstalled = false;
@@ -28,8 +52,12 @@ export function subscribeBanReference(listener: BanReferenceListener) {
   };
 }
 
-function notifyBanReference(banRef: string | null, message?: string) {
-  banReferenceListener?.(banRef, message);
+function notifyBanReference(
+  banRef: string | null,
+  message?: string,
+  captchaType: CaptchaType = "turnstile",
+) {
+  banReferenceListener?.(banRef, message, captchaType);
 }
 
 function isApiUrl(apiUrl: string | undefined, url: string | URL): boolean {
@@ -75,13 +103,18 @@ function fetchInventoryApi(
         .clone()
         .json()
         .catch(() => null)) as {
-        detail?: { error?: unknown; message?: unknown };
+        error?: unknown;
+        message?: unknown;
+        captcha_type?: unknown;
+        detail?: { error?: unknown; message?: unknown; captcha_type?: unknown };
       } | null;
-      const message = body?.detail?.message;
-      if (banRef || body?.detail?.error === CHALLENGE_REQUIRED)
+      const detail = body?.detail ?? body;
+      const message = detail?.message;
+      if (banRef || detail?.error === CHALLENGE_REQUIRED)
         notifyBanReference(
           banRef,
           typeof message === "string" ? message : undefined,
+          getCaptchaType(detail?.captcha_type),
         );
       return response;
     });
@@ -140,7 +173,9 @@ export async function fetchBanReferenceDetails(
   return (await response.json()) as BanReferenceDetails;
 }
 
-export async function submitHumanVerification(token: string): Promise<void> {
+export async function submitHumanVerification(
+  tokens: VerificationTokens,
+): Promise<void> {
   const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL,
     "/v2/human-verification",
@@ -151,19 +186,28 @@ export async function submitHumanVerification(token: string): Promise<void> {
       ...headers,
       "content-type": "application/json",
     },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify(tokens),
     credentials: "include",
   });
 
   if (response.ok) return;
 
   let message = "Verification failed. Please try again.";
+  let captchaType: CaptchaType | undefined;
   try {
-    const body = (await response.json()) as { message?: unknown };
+    const body = (await response.json()) as {
+      message?: unknown;
+      error?: unknown;
+      captcha_type?: unknown;
+    };
+    if (response.status === 400 && body.error === "captcha_failed") {
+      captchaType = getCaptchaType(body.captcha_type);
+    }
     if (typeof body.message === "string" && body.message) {
       message = body.message;
     }
   } catch {}
 
+  if (captchaType) throw new CaptchaVerificationError(message, captchaType);
   throw new Error(message);
 }

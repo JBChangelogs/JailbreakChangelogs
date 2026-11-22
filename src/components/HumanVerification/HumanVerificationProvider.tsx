@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import HumanVerificationModal from "@/components/HumanVerification/HumanVerificationModal";
 import {
+  type CaptchaType,
   fetchBanReferenceDetails,
   installBanReferenceInterceptor,
   subscribeBanReference,
@@ -15,6 +16,7 @@ const FALLBACK_REASON =
 
 interface HumanVerificationState {
   isOpen: boolean;
+  captchaType: CaptchaType;
   banRef: string | null;
   reasonMessage: string;
   isLoadingReason: boolean;
@@ -22,6 +24,7 @@ interface HumanVerificationState {
 
 const INITIAL_STATE: HumanVerificationState = {
   isOpen: false,
+  captchaType: "turnstile",
   banRef: null,
   reasonMessage: FALLBACK_REASON,
   isLoadingReason: false,
@@ -34,37 +37,40 @@ export default function HumanVerificationProvider() {
   const activeBanRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = subscribeBanReference((banRef, message) => {
-      if (isActive.current) return;
+    const unsubscribe = subscribeBanReference(
+      (banRef, message, captchaType = "turnstile") => {
+        if (isActive.current) return;
 
-      isActive.current = true;
-      activeBanRef.current = banRef;
-      setState({
-        isOpen: true,
-        banRef,
-        reasonMessage: banRef ? FALLBACK_REASON : (message ?? CAPTCHA_REASON),
-        isLoadingReason: Boolean(banRef),
-      });
-      if (!banRef) return;
-
-      void fetchBanReferenceDetails(banRef)
-        .then((details) => {
-          if (activeBanRef.current !== banRef) return;
-          setState((current) => ({
-            ...current,
-            reasonMessage: details?.message || FALLBACK_REASON,
-            isLoadingReason: false,
-          }));
-        })
-        .catch(() => {
-          if (activeBanRef.current !== banRef) return;
-          setState((current) => ({
-            ...current,
-            reasonMessage: FALLBACK_REASON,
-            isLoadingReason: false,
-          }));
+        isActive.current = true;
+        activeBanRef.current = banRef;
+        setState({
+          isOpen: true,
+          captchaType,
+          banRef,
+          reasonMessage: banRef ? FALLBACK_REASON : (message ?? CAPTCHA_REASON),
+          isLoadingReason: Boolean(banRef),
         });
-    });
+        if (!banRef) return;
+
+        void fetchBanReferenceDetails(banRef)
+          .then((details) => {
+            if (activeBanRef.current !== banRef) return;
+            setState((current) => ({
+              ...current,
+              reasonMessage: details?.message || FALLBACK_REASON,
+              isLoadingReason: false,
+            }));
+          })
+          .catch(() => {
+            if (activeBanRef.current !== banRef) return;
+            setState((current) => ({
+              ...current,
+              reasonMessage: FALLBACK_REASON,
+              isLoadingReason: false,
+            }));
+          });
+      },
+    );
     const uninstall = installBanReferenceInterceptor();
 
     return () => {
@@ -83,6 +89,7 @@ export default function HumanVerificationProvider() {
   return state.isOpen ? (
     <HumanVerificationModal
       isOpen={state.isOpen}
+      captchaType={state.captchaType}
       reasonMessage={state.reasonMessage}
       isLoadingReason={state.isLoadingReason}
       onVerified={handleVerified}

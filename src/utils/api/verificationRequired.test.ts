@@ -8,6 +8,7 @@ import {
 test("only challenge 403s require verification, including non-JSON ban responses", async () => {
   for (const [status, body, headers, expected] of [
     [403, { detail: { error: "challenge_required" } }, {}, true],
+    [403, { error: "challenge_required", captcha_type: "both" }, {}, true],
     [403, null, { "Ban-Reference": "ref" }, true],
     [403, { detail: { error: "forbidden" } }, {}, false],
     [403, { detail: "challenge_required" }, {}, false],

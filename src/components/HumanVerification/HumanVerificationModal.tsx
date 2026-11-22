@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import TurnstileWidget, {
-  useTurnstileReset,
-} from "@/components/Turnstile/TurnstileWidget";
+import { useRef, useState } from "react";
+import TurnstileWidget from "@/components/Turnstile/TurnstileWidget";
+import JbclCaptcha from "./JbclCaptcha";
 import {
   Dialog,
   DialogContent,
@@ -11,10 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { submitHumanVerification } from "@/utils/api/humanVerification";
+import {
+  CaptchaVerificationError,
+  type CaptchaType,
+  type VerificationTokens,
+  submitHumanVerification,
+} from "@/utils/api/humanVerification";
 
 interface HumanVerificationModalProps {
   isOpen: boolean;
+  captchaType: CaptchaType;
   reasonMessage: string;
   isLoadingReason: boolean;
   onVerified: () => void;
@@ -22,23 +27,37 @@ interface HumanVerificationModalProps {
 
 export default function HumanVerificationModal({
   isOpen,
+  captchaType: initialCaptchaType,
   reasonMessage,
   isLoadingReason,
   onVerified,
 }: HumanVerificationModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaType, setCaptchaType] = useState(initialCaptchaType);
+  const [attempt, setAttempt] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { turnstileRef, reset } = useTurnstileReset();
+  const tokens = useRef<VerificationTokens>({});
+  const submitting = useRef(false);
+  const generation = useRef(0);
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const needsTurnstile = captchaType !== "jbcl";
+  const needsJbcl = captchaType !== "turnstile";
 
-  const handleTurnstileSuccess = async (token: string) => {
-    if (isSubmitting) return;
+  const resetWidgets = () => {
+    tokens.current = {};
+    generation.current += 1;
+    setAttempt(generation.current);
+  };
 
-    setIsSubmitting(true);
+  const handleToken = async (kind: keyof VerificationTokens, token: string) => {
+    if (submitting.current || generation.current !== attempt) return;
+    tokens.current[kind] = token;
+    if (needsTurnstile && !tokens.current.token) return;
+    if (needsJbcl && !tokens.current.jbcl_token) return;
+
+    submitting.current = true;
     setErrorMessage(null);
-
     try {
-      await submitHumanVerification(token);
+      await submitHumanVerification({ ...tokens.current });
       onVerified();
     } catch (error) {
       setErrorMessage(
@@ -46,10 +65,17 @@ export default function HumanVerificationModal({
           ? error.message
           : "Verification failed. Please try again.",
       );
-      reset();
+      if (error instanceof CaptchaVerificationError) {
+        setCaptchaType(error.captchaType);
+      }
+      resetWidgets();
     } finally {
-      setIsSubmitting(false);
+      submitting.current = false;
     }
+  };
+
+  const handleExpiry = () => {
+    if (!submitting.current && generation.current === attempt) resetWidgets();
   };
 
   return (
@@ -78,22 +104,29 @@ export default function HumanVerificationModal({
             immediately.
           </p>
 
-          {!siteKey ? (
-            <p className="text-sm text-red-400">
-              Turnstile is not configured. Please contact support.
-            </p>
-          ) : (
-            <div className="flex justify-center">
-              <TurnstileWidget
-                siteKey={siteKey}
-                onSuccess={handleTurnstileSuccess}
-                action="human_verification"
-                theme="auto"
-                size="normal"
-                turnstileRef={turnstileRef}
+          <div key={attempt} className="flex flex-col items-center gap-4">
+            {needsTurnstile &&
+              (!siteKey ? (
+                <p className="text-sm text-red-400">
+                  Turnstile is not configured. Please contact support.
+                </p>
+              ) : (
+                <TurnstileWidget
+                  siteKey={siteKey}
+                  onSuccess={(token) => void handleToken("token", token)}
+                  onExpire={handleExpiry}
+                  action="human_verification"
+                  theme="auto"
+                  size="normal"
+                />
+              ))}
+            {needsJbcl && (
+              <JbclCaptcha
+                onToken={(token) => void handleToken("jbcl_token", token)}
+                onExpire={handleExpiry}
               />
-            </div>
-          )}
+            )}
+          </div>
 
           {errorMessage && (
             <p className="mt-4 text-center text-sm text-red-400" role="alert">

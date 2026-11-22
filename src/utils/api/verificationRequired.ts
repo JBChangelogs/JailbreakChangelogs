@@ -10,11 +10,12 @@ export function isVerificationRequired(
   return Boolean(
     body &&
     typeof body === "object" &&
-    "detail" in body &&
-    body.detail &&
-    typeof body.detail === "object" &&
-    "error" in body.detail &&
-    body.detail.error === "challenge_required",
+    (("error" in body && body.error === "challenge_required") ||
+      ("detail" in body &&
+        body.detail &&
+        typeof body.detail === "object" &&
+        "error" in body.detail &&
+        body.detail.error === "challenge_required")),
   );
 }
 

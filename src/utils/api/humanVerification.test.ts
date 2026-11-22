@@ -1,7 +1,7 @@
 import { expect, mock, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import { ModuleKind, transpileModule } from "typescript";
+import { ModuleKind, ScriptTarget, transpileModule } from "typescript";
 
 function setup(
   responseUrl = "https://api.example.com/v2/users/me",
@@ -24,7 +24,12 @@ function setup(
   runInNewContext(
     transpileModule(
       readFileSync(new URL("./humanVerification.ts", import.meta.url), "utf8"),
-      { compilerOptions: { module: ModuleKind.CommonJS } },
+      {
+        compilerOptions: {
+          module: ModuleKind.CommonJS,
+          target: ScriptTarget.ES2020,
+        },
+      },
     ).outputText,
     {
       exports,
@@ -32,6 +37,7 @@ function setup(
       Request,
       Headers,
       window,
+      fetch: originalFetch,
       require: (name: string) => {
         if (name === "@/utils/api/api")
           return {
@@ -41,6 +47,10 @@ function setup(
         if (name === "@/utils/api/apiDevToken")
           return {
             getDevToken: () => ({ isDevEnv, injectedToken: "local-session" }),
+            buildApiFetchRequest: (base: string, path: string) => ({
+              url: base + path,
+              headers: {},
+            }),
           };
         if (name === "@/utils/api/siteBanInterceptor")
           return { observeSiteBanResponse };
@@ -52,6 +62,7 @@ function setup(
   exports.subscribeBanReference(listener);
   const uninstall = exports.installBanReferenceInterceptor();
   return {
+    api: exports,
     window,
     originalFetch,
     promise,
@@ -127,7 +138,11 @@ test("API strings, URLs, Requests and relative paths retain ban observation", as
     expect(context.observeSiteBanResponse).toHaveBeenCalledWith(
       context.response,
     );
-    expect(context.listener).toHaveBeenCalledWith("reference", undefined);
+    expect(context.listener).toHaveBeenCalledWith(
+      "reference",
+      undefined,
+      "turnstile",
+    );
   }
 });
 
@@ -166,7 +181,91 @@ test("inventory API requests send cookies and a captcha 403 opens verification",
       expect(context.listener).toHaveBeenCalledWith(
         null,
         "Please complete human verification to continue.",
+        "turnstile",
       );
     else expect(context.listener).not.toHaveBeenCalled();
+  }
+});
+
+test("inventory challenges carry the required captcha, including flat responses", async () => {
+  for (const captchaType of ["turnstile", "jbcl", "both"] as const) {
+    for (const nested of [true, false]) {
+      const context = setup();
+      const detail = { error: "challenge_required", captcha_type: captchaType };
+      context.originalFetch.mockReturnValue(
+        Promise.resolve(
+          new Response(JSON.stringify(nested ? { detail } : detail), {
+            status: 403,
+          }),
+        ),
+      );
+      await context.window.fetch("https://inventory.example.com/user?id=1");
+      expect(context.listener).toHaveBeenCalledWith(
+        null,
+        undefined,
+        captchaType,
+      );
+      context.uninstall();
+    }
+  }
+});
+
+test("verification sends exactly the collected tokens together with cookies", async () => {
+  for (const tokens of [
+    { token: "t" },
+    { jbcl_token: "j" },
+    { token: "t", jbcl_token: "j" },
+  ]) {
+    const context = setup();
+    context.originalFetch.mockReturnValue(Promise.resolve(new Response("{}")));
+    await context.api.submitHumanVerification(tokens);
+    expect(context.originalFetch.mock.calls[0]).toEqual([
+      "https://api.example.com/v2/human-verification",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(tokens),
+        credentials: "include",
+      },
+    ]);
+  }
+});
+
+test("captcha failures expose the new requirement and default missing types to Turnstile", async () => {
+  for (const captchaType of [
+    "turnstile",
+    "jbcl",
+    "both",
+    undefined,
+    "invalid",
+  ]) {
+    const context = setup();
+    context.originalFetch.mockReturnValue(
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            error: "captcha_failed",
+            captcha_type: captchaType,
+            message: "Try again",
+          }),
+          { status: 400 },
+        ),
+      ),
+    );
+    try {
+      await context.api.submitHumanVerification({ token: "used" });
+      throw new Error("Expected rejection");
+    } catch (error) {
+      expect(error).toBeInstanceOf(context.api.CaptchaVerificationError);
+      expect(
+        (error as import("./humanVerification").CaptchaVerificationError)
+          .captchaType,
+      ).toBe(
+        captchaType === "both" || captchaType === "jbcl"
+          ? captchaType
+          : "turnstile",
+      );
+      expect((error as Error).message).toBe("Try again");
+    }
   }
 });
