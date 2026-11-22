@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Icon } from "@/components/ui/IconWrapper";
 import TurnstileWidget from "@/components/Turnstile/TurnstileWidget";
 import JbclCaptcha from "./JbclCaptcha";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -81,29 +82,31 @@ export default function HumanVerificationModal({
   return (
     <Dialog open={isOpen} onOpenChange={() => undefined}>
       <DialogContent
-        className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+        className="bg-tertiary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
         showClose={false}
-        aria-describedby={undefined}
         onEscapeKeyDown={(event) => event.preventDefault()}
         onPointerDownOutside={(event) => event.preventDefault()}
       >
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle className="text-primary-text text-xl font-semibold">
-            Verify You&apos;re Human
+        <DialogHeader className="items-center px-6 pt-8 pb-0 text-center sm:text-center">
+          <Icon
+            icon="heroicons-outline:shield-check"
+            className="text-link mb-3 size-16"
+            aria-hidden="true"
+          />
+          <DialogTitle className="text-primary-text text-2xl font-semibold">
+            Wait! Are you human?
           </DialogTitle>
-        </DialogHeader>
-
-        <div className="px-6 pt-4 pb-6">
-          <p className="text-secondary-text mb-2 text-sm">
+          <DialogDescription className="text-secondary-text text-sm leading-relaxed">
             {isLoadingReason
               ? "Checking why access was limited..."
-              : reasonMessage}
-          </p>
-          <p className="text-secondary-text mb-6 text-sm">
-            Complete the security check below to restore normal access
-            immediately.
-          </p>
+              : reasonMessage ===
+                  "Please complete human verification to continue."
+                ? "Complete the security check to continue."
+                : reasonMessage}
+          </DialogDescription>
+        </DialogHeader>
 
+        <div className="px-6 pt-6 pb-6">
           <div key={attempt} className="flex flex-col items-center gap-4">
             {needsTurnstile &&
               (!siteKey ? (
@@ -133,12 +136,6 @@ export default function HumanVerificationModal({
               {errorMessage}
             </p>
           )}
-
-          <DialogFooter className="mt-4 pt-2 sm:justify-center">
-            <p className="text-secondary-text text-center text-xs">
-              This window will close after verification succeeds.
-            </p>
-          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

@@ -69,12 +69,13 @@ function setup(captchaType: CaptchaType, siteKey = "site-key") {
           };
         if (name.includes("TurnstileWidget")) return { default: "Turnstile" };
         if (name === "./JbclCaptcha") return { default: "JBCL" };
+        if (name.includes("ui/IconWrapper")) return { Icon: "Icon" };
         if (name.includes("ui/dialog"))
           return Object.fromEntries(
             [
               "Dialog",
               "DialogContent",
-              "DialogFooter",
+              "DialogDescription",
               "DialogHeader",
               "DialogTitle",
             ].map((name) => [name, name]),
