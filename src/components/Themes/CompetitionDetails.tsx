@@ -377,13 +377,13 @@ function EnterPicker({ competition }: { competition: Competition }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Enter competition</h2>
-          <p className="text-secondary-text text-sm">
+          <p className="text-primary-text text-sm">
             Choose a published theme that follows this competition&apos;s style.
             Publishing to the marketplace does not automatically enter it.
           </p>
         </div>
         {isAuthenticated && (
-          <span className="bg-button-info/15 text-button-info rounded-md px-2.5 py-1 text-sm font-medium tabular-nums">
+          <span className="bg-button-info/15 text-primary-text rounded-md px-2.5 py-1 text-sm font-medium tabular-nums">
             {mine.length} / {limit} submitted
           </span>
         )}
@@ -951,7 +951,7 @@ export default function CompetitionDetails({
             </p>
           )}
         </header>
-        <aside className="border-border-card bg-secondary-bg rounded-xl border p-4 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        <aside className="border-border-card bg-secondary-bg rounded-xl border p-4 lg:sticky lg:top-[calc(var(--header-height,0px)+1.5rem)] lg:col-start-2 lg:row-span-2 lg:row-start-1">
           {status !== "ended" && (
             <Countdown
               key={status}
