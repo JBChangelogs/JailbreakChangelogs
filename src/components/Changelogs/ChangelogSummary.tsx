@@ -19,41 +19,54 @@ interface ChangelogSummaryProps {
 
 const markdownComponents: Components = {
   h2: ({ children }) => (
-    <h2 className="text-primary-text mt-4 mb-2 text-base font-semibold first:mt-0">
+    <h2 className="text-primary-text mt-4 mb-1.5 text-sm font-semibold text-balance first:mt-0">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="text-primary-text mt-3 mb-1 text-sm font-semibold first:mt-0">
+    <h3 className="text-primary-text mt-4 mb-1.5 text-sm font-semibold text-balance first:mt-0">
       {children}
     </h3>
   ),
   p: ({ children }) => (
-    <p className="text-secondary-text mb-2 text-sm">{children}</p>
+    <p className="text-secondary-text text-pretty [&:not(:last-child)]:mb-3">
+      {children}
+    </p>
   ),
   strong: ({ children }) => (
     <strong className="text-primary-text font-semibold">{children}</strong>
   ),
   ul: ({ children }) => (
-    <ul className="text-secondary-text space-y-1">{children}</ul>
+    <ul className="text-secondary-text marker:text-link my-2 list-disc space-y-1.5 pl-5 last:mb-0">
+      {children}
+    </ul>
   ),
-  li: ({ children }) => (
-    <li className="mt-0.5 flex items-start gap-2 text-sm">
-      <Icon
-        icon="heroicons-outline:arrow-right"
-        aria-hidden="true"
-        className="text-secondary-text mt-1 h-4 w-4"
-      />
-      <span>{children}</span>
-    </li>
+  ol: ({ children }) => (
+    <ol className="text-secondary-text my-2 list-decimal space-y-1.5 pl-5 last:mb-0">
+      {children}
+    </ol>
+  ),
+  li: ({ children }) => <li className="pl-1 text-pretty">{children}</li>,
+  a: ({ children, href }) => (
+    <a
+      href={href}
+      className="text-link [overflow-wrap:anywhere] underline underline-offset-2"
+    >
+      {children}
+    </a>
   ),
 };
 
 function MarkdownBody({ children }: { children: string }) {
   return (
-    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-      {children}
-    </ReactMarkdown>
+    <div className="max-w-[70ch] text-sm leading-7 break-words">
+      <ReactMarkdown
+        components={markdownComponents}
+        remarkPlugins={[remarkGfm]}
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 }
 
@@ -164,14 +177,17 @@ export default function ChangelogSummary({
 
   if (content.length <= 300) {
     return (
-      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg mb-6 rounded-xl border px-4 py-3">
         <div className="flex items-center gap-2">
-          <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
+          <Icon
+            icon="solar:magic-stick-3-bold"
+            aria-hidden="true"
+            className="text-link h-4 w-4 shrink-0"
+          />
           <span className="text-primary-text font-medium">AI Summary</span>
         </div>
-        <p className="text-primary-text mt-2 text-sm">
-          AI summaries are not available for short changelogs. This changelog is
-          too brief to generate a meaningful summary.
+        <p className="text-secondary-text mt-1 text-sm leading-6">
+          This changelog is already brief enough to read at a glance.
         </p>
       </div>
     );
@@ -179,29 +195,31 @@ export default function ChangelogSummary({
 
   if (loading) {
     return (
-      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-        <div className="mb-2 flex items-center gap-2">
+      <div
+        className="border-border-card bg-secondary-bg mb-6 rounded-xl border px-4 py-3"
+        aria-busy="true"
+      >
+        <div className="flex items-start gap-2.5" role="status">
           <Icon
             icon="solar:magic-stick-3-bold"
-            className="text-link h-5 w-5 animate-pulse"
+            aria-hidden="true"
+            className="text-link mt-1 h-4 w-4 shrink-0 motion-safe:animate-pulse"
           />
-          <span className="text-primary-text font-medium">
-            Generating AI Summary
-          </span>
-        </div>
-        {streamedText ? (
-          <div
-            className="max-h-80 overflow-y-auto pr-2"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "var(--color-border-primary) transparent",
-            }}
-          >
-            <MarkdownBody>{streamedText}</MarkdownBody>
+          <div className="min-w-0">
+            <span className="text-primary-text text-sm font-medium">
+              Generating summary…
+            </span>
+            {!streamedText && (
+              <p className="text-secondary-text mt-0.5 text-xs leading-5">
+                Pulling together the key changes.
+              </p>
+            )}
           </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Spinner className="h-4 w-4" />
+          <Spinner className="text-link ml-auto h-4 w-4 shrink-0 self-center" />
+        </div>
+        {streamedText && (
+          <div className="mt-4">
+            <MarkdownBody>{streamedText}</MarkdownBody>
           </div>
         )}
       </div>
@@ -210,60 +228,93 @@ export default function ChangelogSummary({
 
   if (error) {
     return (
-      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-        <div className="mb-2 flex items-center justify-between">
+      <div
+        className="border-border-card bg-secondary-bg mb-6 rounded-xl border p-4"
+        role="alert"
+      >
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Icon
               icon="solar:danger-triangle-bold"
-              className="h-5 w-5 text-red-500"
+              aria-hidden="true"
+              className="text-status-error h-4 w-4 shrink-0"
             />
             <span className="text-primary-text font-medium">
-              AI Summary Error
+              Couldn’t generate summary
             </span>
           </div>
-          <Button size="sm" onClick={generateSummary}>
+          <Button variant="secondary" onClick={generateSummary}>
             Retry
           </Button>
         </div>
-        <p className="text-primary-text text-sm">{error}</p>
+        <p className="text-secondary-text text-sm leading-6">
+          Please try again in a moment.
+        </p>
       </div>
     );
   }
 
   if (hasGenerated && streamedText) {
     return (
-      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-        <div className="mb-3 flex items-center gap-2">
-          <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
-          <span className="text-primary-text font-medium">AI Summary</span>
-        </div>
-        <div
-          className="max-h-80 overflow-y-auto pr-2"
-          style={{
-            scrollbarWidth: "thin",
-            scrollbarColor: "var(--color-border-primary) transparent",
-          }}
-        >
+      <details
+        key={changelogId}
+        open
+        className="group border-border-card bg-secondary-bg mb-6 rounded-xl border px-4 sm:px-5"
+      >
+        <summary className="focus-visible:ring-border-focus flex min-h-14 cursor-pointer list-none flex-wrap items-center justify-between gap-2 rounded-lg py-3 focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+          <span className="flex items-center gap-2">
+            <Icon
+              icon="solar:magic-stick-3-bold"
+              aria-hidden="true"
+              className="text-link h-4 w-4 shrink-0"
+            />
+            <span className="text-primary-text font-medium">AI Summary</span>
+          </span>
+          <span className="text-secondary-text flex items-center gap-1 text-xs">
+            <span className="group-open:hidden">Expand</span>
+            <span className="hidden group-open:inline">Collapse</span>
+            <Icon
+              icon="heroicons:chevron-down"
+              aria-hidden="true"
+              className="h-4 w-4 group-open:rotate-180"
+            />
+          </span>
+        </summary>
+        <div className="border-border-card border-t pt-4 pb-5">
           <MarkdownBody>{streamedText}</MarkdownBody>
+          <p className="text-secondary-text mt-4 text-xs leading-5">
+            AI-generated summary · May miss details
+          </p>
         </div>
-      </div>
+      </details>
     );
   }
 
   return (
-    <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
-          <span className="text-primary-text font-medium">AI Summary</span>
+    <div className="border-border-card bg-secondary-bg @container mb-6 rounded-xl border px-4 py-3">
+      <div className="flex flex-col gap-3 @sm:flex-row @sm:items-center @sm:justify-between">
+        <div className="flex min-w-0 items-start gap-2.5">
+          <Icon
+            icon="solar:magic-stick-3-bold"
+            aria-hidden="true"
+            className="text-link mt-1 h-4 w-4 shrink-0"
+          />
+          <div className="min-w-0">
+            <span className="text-primary-text text-sm font-medium">
+              AI Summary
+            </span>
+            <p className="text-secondary-text mt-0.5 text-xs leading-5">
+              Get the key changes at a glance.
+            </p>
+          </div>
         </div>
         <Button
           onClick={generateSummary}
           disabled={!!rateLimitUntil}
-          className="w-full sm:w-auto"
+          variant="secondary"
+          className="w-full @sm:w-auto pointer-coarse:min-h-11"
         >
-          <Icon icon="solar:magic-stick-3-bold" className="h-4 w-4" />
-          Generate Summary
+          Summarize
         </Button>
       </div>
       <RateLimitBanner
