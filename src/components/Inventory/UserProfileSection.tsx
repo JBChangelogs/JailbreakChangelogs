@@ -392,7 +392,7 @@ export default function UserProfileSection({
                 ) : (
                   <Button
                     onClick={() => {
-                      setLoginModal({ open: true, tab: "roblox" });
+                      setLoginModal({ open: true });
                     }}
                     size="sm"
                   >

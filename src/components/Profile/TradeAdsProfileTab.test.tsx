@@ -136,7 +136,7 @@ test("profile trade ads preserve API messages and empty results with a fallback 
   );
   expect(signInButton).toBeDefined();
   (signInButton!.onClick as () => void)();
-  expect(loginConfig).toEqual({ open: true, tab: "discord" });
+  expect(loginConfig).toEqual({ open: true });
   const retryButton = renderedProps.find(
     (props) => props.children === "Try again",
   );

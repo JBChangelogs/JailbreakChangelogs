@@ -54,13 +54,7 @@ const SUPPORTER_BADGE_BASE_URL =
 interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  loginModalTab: "discord" | "roblox";
-  setLoginModal: (config: {
-    open: boolean;
-    tab?: "discord" | "roblox";
-    onlyRoblox?: boolean;
-  }) => void;
-  loginModalOnlyRoblox: boolean;
+  setLoginModal: (config: { open: boolean }) => void;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   bans: Record<string, BanInfo>;
@@ -104,10 +98,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const authStateRef = useRef(authState);
   authStateRef.current = authState;
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [loginModalTab, setLoginModalTab] = useState<"discord" | "roblox">(
-    "discord",
-  );
-  const [loginModalOnlyRoblox, setLoginModalOnlyRoblox] = useState(false);
   const [bans, setBansMap] = useState<Record<string, BanInfo>>({});
   const [siteBan, setSiteBanState] = useState<BanInfo | null>(null);
   const siteBanRef = useRef<BanInfo | null>(null);
@@ -565,32 +555,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [router, setSiteBan]);
 
-  const setLoginModal = useCallback(
-    ({
-      open,
-      tab,
-      onlyRoblox,
-    }: {
-      open: boolean;
-      tab?: "discord" | "roblox";
-      onlyRoblox?: boolean;
-    }) => {
-      if (tab) {
-        setLoginModalTab(tab);
-      }
-      setLoginModalOnlyRoblox(onlyRoblox ?? false);
-      setShowLoginModal(open);
-    },
-    [],
-  );
+  const setLoginModal = useCallback(({ open }: { open: boolean }) => {
+    setShowLoginModal(open);
+  }, []);
 
   const contextValue = useMemo<AuthContextType>(
     () => ({
       ...authState,
       logout: handleLogout,
       refreshUser: initializeAuth,
-      loginModalTab,
-      loginModalOnlyRoblox,
       setLoginModal,
       showLoginModal,
       setShowLoginModal,
@@ -604,8 +577,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       authState,
       handleLogout,
       initializeAuth,
-      loginModalTab,
-      loginModalOnlyRoblox,
       setLoginModal,
       showLoginModal,
       bans,

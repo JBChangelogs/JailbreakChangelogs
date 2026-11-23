@@ -830,14 +830,7 @@ export function MakeOfferDialog({
                     </p>
                     {!isAuthLoading && (
                       <div className="mt-4 flex justify-center">
-                        <Button
-                          onClick={() =>
-                            setLoginModal({
-                              open: true,
-                              tab: isAuthenticated ? "roblox" : "discord",
-                            })
-                          }
-                        >
+                        <Button onClick={() => setLoginModal({ open: true })}>
                           {isAuthenticated ? "Connect Roblox" : "Log In"}
                         </Button>
                       </div>

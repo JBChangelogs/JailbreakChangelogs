@@ -1088,9 +1088,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                   <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
                     <Button
                       type="button"
-                      onClick={() =>
-                        setLoginModal({ open: true, tab: "roblox" })
-                      }
+                      onClick={() => setLoginModal({ open: true })}
                     >
                       Connect Roblox
                     </Button>

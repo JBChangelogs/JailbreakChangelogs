@@ -13,8 +13,9 @@ function elements(value: unknown): Element[] {
   return [element, ...elements(element.props.children)];
 }
 
-test("login tabs follow authentication and Roblox linking state rather than leftover cookies", () => {
+test("login provider follows auth state and linked accounts do not open the modal", () => {
   let auth: Record<string, unknown> = {};
+  const effects: (() => void)[] = [];
   const controllerModule = {} as {
     useLoginModalController: () => LoginModalController;
   };
@@ -43,27 +44,21 @@ test("login tabs follow authentication and Roblox linking state rather than left
             return {
               useState: () => [false, () => {}],
               useCallback: (fn: unknown) => fn,
+              useEffect: (effect: () => void) => effects.push(effect),
             };
           if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
           if (name === "@/contexts/AuthContext")
             return { useAuthContext: () => auth };
-          if (name === "@/contexts/ThemeContext")
-            return { useTheme: () => ({ resolvedTheme: "dark" }) };
           if (name === "@/utils/api/api")
             return { PUBLIC_API_URL: "https://api.example.com" };
           if (name === "@/utils/api/apiDevToken" || name === "sonner")
             return {};
-          if (name === "next/image") return { default: "Image" };
           return Object.fromEntries(
             [
               "Dialog",
               "DialogContent",
               "DialogTitle",
               "DialogDescription",
-              "Tabs",
-              "TabsList",
-              "TabsTrigger",
-              "TabsContent",
               "Button",
               "Checkbox",
               "Icon",
@@ -73,43 +68,66 @@ test("login tabs follow authentication and Roblox linking state rather than left
       },
     );
   }
-  for (const [isAuthenticated, user, onlyRoblox, expectedTabs, activeTab] of [
-    [false, null, false, ["discord"], "discord"],
-    [false, { roblox_id: "" }, true, ["discord"], "discord"],
-    [true, null, false, ["discord"], "discord"],
-    [true, { roblox_id: "" }, false, ["discord", "roblox"], "roblox"],
-    [true, { roblox_id: "123" }, true, ["discord"], "discord"],
-    [true, { roblox_id: "" }, true, ["roblox"], "roblox"],
+  for (const [isAuthenticated, user, open, expectedProvider] of [
+    [false, null, true, "Discord"],
+    [false, { roblox_id: "123" }, true, "Discord"],
+    [true, null, false, "Discord"],
+    [true, { roblox_id: "" }, true, "Roblox"],
+    [true, { roblox_id: null }, true, "Roblox"],
+    [true, { roblox_id: "123" }, false, "Discord"],
   ] as const) {
     const changes: unknown[] = [];
     auth = {
       isAuthenticated,
       user,
       showLoginModal: true,
-      loginModalTab: onlyRoblox ? "discord" : "roblox",
-      loginModalOnlyRoblox: onlyRoblox,
       setLoginModal: (value: unknown) => changes.push(value),
     };
     const controller = controllerModule.useLoginModalController();
-    const tree = elements(view.default(controller));
-    expect(
-      tree
-        .filter((node) => node.type === "TabsTrigger")
-        .map((node) => node.props.value),
-    ).toEqual([...expectedTabs]);
-    expect(
-      tree
-        .filter((node) => node.type === "TabsContent")
-        .map((node) => node.props.value),
-    ).toEqual([...expectedTabs]);
-    expect(tree.find((node) => node.type === "Tabs")!.props.value).toBe(
-      activeTab,
+    const tree = elements(
+      view.default({
+        ...controller,
+        onClose: controller.handleClose,
+        onJoinDiscordChange: controller.setJoinDiscord,
+        onDiscordLogin: controller.handleDiscordLogin,
+        onRobloxLogin: controller.handleRobloxLogin,
+      }),
     );
-    controller.handleTabChange({} as never, 1);
-    expect(changes).toHaveLength(
-      expectedTabs.some((tab) => tab === "roblox") ? 1 : 0,
+    expect(tree.find((node) => node.type === "Dialog")!.props.open).toBe(open);
+    const buttons = tree.filter((node) => node.type === "Button");
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0].props["data-rybbit-event"]).toBe(
+      `Login with ${expectedProvider}`,
     );
+    expect(buttons[0].props.onClick).toBe(
+      expectedProvider === "Roblox"
+        ? controller.handleRobloxLogin
+        : controller.handleDiscordLogin,
+    );
+    expect(tree.some((node) => node.type === "Checkbox")).toBe(
+      expectedProvider === "Discord",
+    );
+    controller.handleClose();
+    expect(changes).toEqual([{ open: false }]);
   }
+
+  auth = {
+    isAuthenticated: true,
+    user: { roblox_id: "123" },
+    showLoginModal: true,
+    setLoginModal: ({ open }: { open: boolean }) => {
+      auth.showLoginModal = open;
+    },
+  };
+  effects.length = 0;
+  expect(controllerModule.useLoginModalController().showLoginModal).toBe(false);
+  effects.forEach((effect) => effect());
+  expect(auth.showLoginModal).toBe(false);
+  auth.user = { roblox_id: null };
+  expect(controllerModule.useLoginModalController().showLoginModal).toBe(false);
+  auth.showLoginModal = true;
+  expect(controllerModule.useLoginModalController().canLinkRoblox).toBe(true);
+  expect(controllerModule.useLoginModalController().showLoginModal).toBe(true);
 });
 
 function setupDiscordLogin(response: Response | { status: number } | Error) {
@@ -149,6 +167,7 @@ function setupDiscordLogin(response: Response | { status: number } | Error) {
             return {
               Suspense: "Suspense",
               useCallback: (fn: unknown) => fn,
+              useEffect: () => {},
               useState: (initial: unknown) => {
                 const index = cursor++;
                 if (!(index in slots)) slots[index] = initial;

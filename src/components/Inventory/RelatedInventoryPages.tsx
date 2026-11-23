@@ -54,10 +54,7 @@ export default function RelatedInventoryPages({
         </div>
       )}
       {current === "inventories" && isAuthenticated && !user?.roblox_id && (
-        <Button
-          type="button"
-          onClick={() => setLoginModal({ open: true, tab: "roblox" })}
-        >
+        <Button type="button" onClick={() => setLoginModal({ open: true })}>
           Connect Roblox Account
         </Button>
       )}

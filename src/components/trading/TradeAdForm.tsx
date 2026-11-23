@@ -869,7 +869,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             id: creatingToastId ?? undefined,
           },
         );
-        setLoginModal({ open: true, tab: "roblox" });
+        setLoginModal({ open: true });
         return;
       }
 
@@ -1489,14 +1489,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 </p>
                 {!isAuthLoading && (
                   <div className="mt-4 flex justify-center">
-                    <UiButton
-                      onClick={() =>
-                        setLoginModal({
-                          open: true,
-                          tab: isAuthenticated ? "roblox" : "discord",
-                        })
-                      }
-                    >
+                    <UiButton onClick={() => setLoginModal({ open: true })}>
                       {isAuthenticated ? "Connect Roblox" : "Log In"}
                     </UiButton>
                   </div>

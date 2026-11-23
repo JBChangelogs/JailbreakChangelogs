@@ -129,10 +129,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
               Disconnect Roblox
             </Button>
           ) : (
-            <Button
-              onClick={() => setLoginModal({ open: true, tab: "roblox" })}
-              size="md"
-            >
+            <Button onClick={() => setLoginModal({ open: true })} size="md">
               <Icon icon="heroicons:link" aria-hidden="true" />
               Connect Roblox
             </Button>

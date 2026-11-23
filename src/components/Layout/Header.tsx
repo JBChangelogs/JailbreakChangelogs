@@ -249,7 +249,7 @@ const MobileDrawer = memo(function MobileDrawer({
                 type="button"
                 onClick={() => {
                   onClose();
-                  setLoginModal({ open: true, tab: "roblox" });
+                  setLoginModal({ open: true });
                 }}
                 className="hover:bg-quaternary-bg focus-visible:bg-quaternary-bg focus-visible:ring-link flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >

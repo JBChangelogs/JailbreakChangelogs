@@ -172,7 +172,7 @@ export default function ValueSuggestionsPage() {
       return;
     }
     if (user && !user.roblox_id) {
-      setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+      setLoginModal({ open: true });
       return;
     }
     void doOpenForm();
@@ -354,7 +354,7 @@ export default function ValueSuggestionsPage() {
           toast.info(
             "You need to connect your Roblox account to submit item suggestions.",
           );
-          setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+          setLoginModal({ open: true });
           throw { response: { status: res.status, data } };
         }
         throw new AccountAgeError(
@@ -397,7 +397,7 @@ export default function ValueSuggestionsPage() {
       toast.info(
         "You need to connect your Roblox account to submit item suggestions.",
       );
-      setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+      setLoginModal({ open: true });
       return;
     }
     doOpenForm();
@@ -603,13 +603,7 @@ export default function ValueSuggestionsPage() {
             votingTypes={votingTypes}
             voteRateLimits={voteRateLimits}
             onLogin={() => setLoginModal({ open: true })}
-            onConnectRoblox={() =>
-              setLoginModal({
-                open: true,
-                tab: "roblox",
-                onlyRoblox: true,
-              })
-            }
+            onConnectRoblox={() => setLoginModal({ open: true })}
             onOpenForm={openForm}
             onRetry={() => fetchSuggestions(page)}
             onClearAllFilters={handleClearAllFilters}

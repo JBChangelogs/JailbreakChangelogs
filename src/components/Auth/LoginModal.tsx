@@ -23,12 +23,8 @@ function LoginModalInner() {
   return (
     <LoginModalView
       showLoginModal={controller.showLoginModal}
-      tabValue={controller.tabValue}
       canLinkRoblox={controller.canLinkRoblox}
-      onlyRoblox={controller.onlyRoblox}
-      resolvedTheme={controller.resolvedTheme}
       joinDiscord={controller.joinDiscord}
-      onTabChange={controller.handleTabChange}
       onClose={controller.handleClose}
       onJoinDiscordChange={controller.setJoinDiscord}
       onDiscordLogin={controller.handleDiscordLogin}

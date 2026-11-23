@@ -540,9 +540,7 @@ export const NavbarModern = ({
                 <DropdownMenuSeparator />
                 {!userData.roblox_id && (
                   <DropdownMenuItem
-                    onSelect={() =>
-                      setLoginModal({ open: true, tab: "roblox" })
-                    }
+                    onSelect={() => setLoginModal({ open: true })}
                     className="gap-3 rounded-md px-3 py-2.5"
                   >
                     <RobloxIcon className="text-secondary-text h-4 w-4" />

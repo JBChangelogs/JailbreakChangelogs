@@ -1005,11 +1005,7 @@ export default function TradeAds({ initialItems = [] }: TradeAdsProps) {
       ? "Connect your Roblox account to view and create trade ads."
       : "Please sign in to view and create trade ads.";
 
-    const openLogin = () =>
-      setLoginModal({
-        open: true,
-        tab: isAuthenticated ? "roblox" : "discord",
-      });
+    const openLogin = () => setLoginModal({ open: true });
 
     const UnauthorizedCard = () => (
       <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">

@@ -511,10 +511,7 @@ export default function OGNotificationSheet({
                 <Button
                   onClick={() => {
                     onClose();
-                    setLoginModal({
-                      open: true,
-                      tab: isAuthenticated ? "roblox" : "discord",
-                    });
+                    setLoginModal({ open: true });
                   }}
                   size="lg"
                   className="w-full"

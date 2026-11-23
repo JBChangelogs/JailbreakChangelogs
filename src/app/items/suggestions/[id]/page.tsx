@@ -765,7 +765,7 @@ export default function ValueSuggestionDetailPage() {
             toast.info(
               "You need to connect your Roblox account to vote on item suggestions.",
             );
-            setLoginModal({ open: true, tab: "roblox", onlyRoblox: true });
+            setLoginModal({ open: true });
           } else {
             toast.error(
               data?.message ?? data?.error ?? "Failed to register vote.",

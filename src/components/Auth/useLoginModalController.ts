@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useCallback, type SyntheticEvent } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { buildApiLinkUrl, getDevToken } from "@/utils/api/apiDevToken";
 import {
   getCaptchaType,
@@ -12,11 +11,8 @@ import {
 } from "@/utils/api/humanVerification";
 
 export interface LoginModalController {
-  tabValue: number;
   joinDiscord: boolean;
   canLinkRoblox: boolean;
-  onlyRoblox: boolean;
-  resolvedTheme: string | undefined;
   showLoginModal: boolean;
   verification: {
     url: string;
@@ -25,7 +21,6 @@ export interface LoginModalController {
   } | null;
   handleVerified: () => void;
   setJoinDiscord: (checked: boolean) => void;
-  handleTabChange: (_event: SyntheticEvent, newValue: number) => void;
   handleClose: () => void;
   handleDiscordLogin: () => void;
   handleRobloxLogin: () => void;
@@ -35,31 +30,15 @@ export function useLoginModalController(): LoginModalController {
   const [joinDiscord, setJoinDiscord] = useState(false);
   const [verification, setVerification] =
     useState<LoginModalController["verification"]>(null);
-  const {
-    isAuthenticated,
-    user,
-    showLoginModal,
-    loginModalTab,
-    loginModalOnlyRoblox,
-    setLoginModal,
-  } = useAuthContext();
-  const { resolvedTheme } = useTheme();
+  const { isAuthenticated, user, showLoginModal, setLoginModal } =
+    useAuthContext();
   const canLinkRoblox = isAuthenticated && Boolean(user) && !user?.roblox_id;
-  const tabValue =
-    canLinkRoblox && (loginModalOnlyRoblox || loginModalTab === "roblox")
-      ? 1
-      : 0;
 
-  const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
-    if (!canLinkRoblox) {
-      return;
+  useEffect(() => {
+    if (showLoginModal && isAuthenticated && user?.roblox_id) {
+      setLoginModal({ open: false });
     }
-
-    setLoginModal({
-      open: showLoginModal,
-      tab: newValue === 1 ? "roblox" : "discord",
-    });
-  };
+  }, [showLoginModal, isAuthenticated, user?.roblox_id, setLoginModal]);
 
   const handleClose = useCallback(() => {
     setLoginModal({ open: false });
@@ -126,16 +105,12 @@ export function useLoginModalController(): LoginModalController {
   }, [canLinkRoblox]);
 
   return {
-    tabValue,
     joinDiscord,
     canLinkRoblox,
-    onlyRoblox: canLinkRoblox && loginModalOnlyRoblox,
-    resolvedTheme,
-    showLoginModal,
+    showLoginModal: showLoginModal && (!isAuthenticated || canLinkRoblox),
     verification,
     handleVerified,
     setJoinDiscord,
-    handleTabChange,
     handleClose,
     handleDiscordLogin,
     handleRobloxLogin,

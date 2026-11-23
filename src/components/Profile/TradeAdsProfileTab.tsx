@@ -338,9 +338,7 @@ export default function TradeAdsProfileTab({
           onRetry={() => void adsQuery.refetch()}
         >
           {isSignInRequired && (
-            <Button
-              onClick={() => setLoginModal({ open: true, tab: "discord" })}
-            >
+            <Button onClick={() => setLoginModal({ open: true })}>
               Sign in
             </Button>
           )}

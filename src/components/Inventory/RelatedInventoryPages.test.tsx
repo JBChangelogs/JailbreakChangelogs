@@ -99,7 +99,7 @@ test("personal actions stay prominent, respect account state, and avoid self-lin
   const tree = exports.default({ current: "inventories" });
   const children = (tree.props as { children: ReactElement[] }).children;
   (children[1].props as { onClick: () => void }).onClick();
-  expect(loginConfig).toEqual({ open: true, tab: "roblox" });
+  expect(loginConfig).toEqual({ open: true });
   expect(render("og")).not.toContain("Connect Roblox Account");
   isAuthenticated = false;
   expect(render()).not.toContain("Connect Roblox Account");
