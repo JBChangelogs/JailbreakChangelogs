@@ -153,6 +153,30 @@ test("API redirects to another origin do not trigger ban observers", async () =>
   expect(context.listener).not.toHaveBeenCalled();
 });
 
+test("public API blocks pass the Captcha-Type header with a Turnstile fallback", async () => {
+  for (const captchaType of ["turnstile", "jbcl", "both", "invalid", null]) {
+    const context = setup();
+    const response = new Response("Too many suspicious requests", {
+      status: 403,
+      headers: {
+        "Ban-Reference": "reference",
+        ...(captchaType === null ? {} : { "Captcha-Type": captchaType }),
+      },
+    });
+    Object.defineProperty(response, "url", { value: context.response.url });
+    context.originalFetch.mockReturnValue(Promise.resolve(response));
+    expect(await context.window.fetch(response.url)).toBe(response);
+    expect(context.listener).toHaveBeenCalledWith(
+      "reference",
+      undefined,
+      captchaType === "jbcl" || captchaType === "both"
+        ? captchaType
+        : "turnstile",
+    );
+    context.uninstall();
+  }
+});
+
 test("inventory API requests send cookies and a captcha 403 opens verification", async () => {
   const challenge = {
     detail: {

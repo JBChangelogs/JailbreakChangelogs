@@ -14,8 +14,9 @@ type Node = {
     onSuccess: (token: string) => void;
     onToken: (token: string) => void;
     onExpire: () => void;
+    onError: () => void;
   };
-  children: Node[];
+  children: (Node | string)[];
 };
 
 function setup(captchaType: CaptchaType, siteKey = "site-key") {
@@ -97,7 +98,7 @@ function setup(captchaType: CaptchaType, siteKey = "site-key") {
       onVerified: verified,
     }) as unknown as Node;
   };
-  const find = (type: string, node = tree): Node | undefined => {
+  const find = (type: string, node: Node | string = tree): Node | undefined => {
     if (!node || typeof node !== "object") return;
     if (type === "attempt" ? node.props.key !== undefined : node.type === type)
       return node;
@@ -186,4 +187,30 @@ test("expiry and network failure remount widgets without reusing collected token
   expect(context.find("attempt")?.props.key).toBe(2);
   context.find("JBCL")!.props.onToken("retry-j");
   expect(context.submit).toHaveBeenCalledTimes(1);
+});
+
+test("Turnstile errors show a retry message and reset both widgets without reusing tokens", async () => {
+  const context = setup("both");
+  const oldTurnstile = context.find("Turnstile")!;
+  const oldJbcl = context.find("JBCL")!;
+  oldJbcl.props.onToken("used-j");
+  oldTurnstile.props.onError();
+  context.render();
+  expect(context.find("p")?.children).toEqual([
+    "Security check failed to load, retrying…",
+  ]);
+  expect(context.find("attempt")?.props.key).toBe(1);
+  oldTurnstile.props.onError();
+  oldTurnstile.props.onSuccess("stale-t");
+  oldJbcl.props.onToken("stale-j");
+  context.render();
+  expect(context.find("attempt")?.props.key).toBe(1);
+  context.find("Turnstile")!.props.onSuccess("fresh-t");
+  expect(context.submit).not.toHaveBeenCalled();
+  context.find("JBCL")!.props.onToken("fresh-j");
+  await flush();
+  expect(context.submit.mock.calls).toEqual([
+    [{ token: "fresh-t", jbcl_token: "fresh-j" }],
+  ]);
+  expect(context.verified).toHaveBeenCalledTimes(1);
 });

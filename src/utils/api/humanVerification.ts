@@ -138,7 +138,12 @@ export function installBanReferenceInterceptor(): () => void {
       if (isPublicApiUrl(response.url)) {
         observeSiteBanResponse(response);
         const banRef = response.headers.get(BAN_REFERENCE_HEADER);
-        if (banRef) notifyBanReference(banRef);
+        if (banRef)
+          notifyBanReference(
+            banRef,
+            undefined,
+            getCaptchaType(response.headers.get("Captcha-Type")),
+          );
       }
 
       return response;

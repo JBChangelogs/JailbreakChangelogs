@@ -79,6 +79,12 @@ export default function HumanVerificationModal({
     if (!submitting.current && generation.current === attempt) resetWidgets();
   };
 
+  const handleError = () => {
+    if (submitting.current || generation.current !== attempt) return;
+    setErrorMessage("Security check failed to load, retrying…");
+    resetWidgets();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => undefined}>
       <DialogContent
@@ -118,6 +124,7 @@ export default function HumanVerificationModal({
                   siteKey={siteKey}
                   onSuccess={(token) => void handleToken("token", token)}
                   onExpire={handleExpiry}
+                  onError={handleError}
                   action="human_verification"
                   theme="auto"
                   size="normal"
