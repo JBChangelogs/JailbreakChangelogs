@@ -840,22 +840,13 @@ export default function UserStatsSection({
           </div>
         );
 
-        if (hasGamepasses) {
+        if (hasGamepasses || TradeNoteBlock) {
           return (
             <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-start">
               <div className="space-y-4">
                 {GamepassesBlock}
                 {TradeNoteBlock}
               </div>
-              {ScanMetadataBlock}
-            </div>
-          );
-        }
-
-        if (TradeNoteBlock) {
-          return (
-            <div className="mt-4 space-y-4">
-              {TradeNoteBlock}
               {ScanMetadataBlock}
             </div>
           );
