@@ -6,6 +6,10 @@ import { PUBLIC_API_URL } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { buildApiLinkUrl, getDevToken } from "@/utils/api/apiDevToken";
+import {
+  getCaptchaType,
+  type CaptchaType,
+} from "@/utils/api/humanVerification";
 
 export interface LoginModalController {
   tabValue: number;
@@ -14,6 +18,12 @@ export interface LoginModalController {
   onlyRoblox: boolean;
   resolvedTheme: string | undefined;
   showLoginModal: boolean;
+  verification: {
+    url: string;
+    captchaType: CaptchaType;
+    message: string;
+  } | null;
+  handleVerified: () => void;
   setJoinDiscord: (checked: boolean) => void;
   handleTabChange: (_event: SyntheticEvent, newValue: number) => void;
   handleClose: () => void;
@@ -23,6 +33,8 @@ export interface LoginModalController {
 
 export function useLoginModalController(): LoginModalController {
   const [joinDiscord, setJoinDiscord] = useState(false);
+  const [verification, setVerification] =
+    useState<LoginModalController["verification"]>(null);
   const {
     isAuthenticated,
     user,
@@ -53,16 +65,40 @@ export function useLoginModalController(): LoginModalController {
     setLoginModal({ open: false });
   }, [setLoginModal]);
 
-  const handleDiscordLogin = useCallback(() => {
+  const handleDiscordLogin = useCallback(async () => {
     const currentURL = window.location.href;
     const oauthRedirect = `${PUBLIC_API_URL}/oauth?redirect=${encodeURIComponent(currentURL)}${joinDiscord ? "&join_discord=true" : ""}`;
 
-    toast.loading("Redirecting to Discord...", {
-      duration: 2000,
-    });
+    try {
+      const response = await fetch(oauthRedirect, {
+        credentials: "include",
+        redirect: "manual",
+      });
+      if (response.status === 403) {
+        const body = await response.json().catch(() => null);
+        if (body?.error === "challenge_required") {
+          setVerification({
+            url: oauthRedirect,
+            captchaType: getCaptchaType(body.captcha_type),
+            message:
+              typeof body.message === "string"
+                ? body.message
+                : "Please complete human verification to continue.",
+          });
+          return;
+        }
+      }
 
-    window.location.href = oauthRedirect;
+      toast.loading("Redirecting to Discord...", { duration: 2000 });
+      window.location.href = oauthRedirect;
+    } catch {
+      toast.error("Unable to start Discord login. Please try again.");
+    }
   }, [joinDiscord]);
+
+  const handleVerified = () => {
+    if (verification) window.location.href = verification.url;
+  };
 
   const handleRobloxLogin = useCallback(() => {
     const tokenMatch = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
@@ -96,6 +132,8 @@ export function useLoginModalController(): LoginModalController {
     onlyRoblox: canLinkRoblox && loginModalOnlyRoblox,
     resolvedTheme,
     showLoginModal,
+    verification,
+    handleVerified,
     setJoinDiscord,
     handleTabChange,
     handleClose,
