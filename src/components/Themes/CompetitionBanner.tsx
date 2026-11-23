@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import {
   competitionStatus,
   fetchCurrentCompetition,
@@ -66,52 +67,54 @@ export default function CompetitionBanner() {
   const href = `/themes/competitions/${competition.id}`;
 
   return (
-    <div className="bg-secondary-bg/70 border-button-info/30 text-primary-text relative border-b px-12 py-2 text-center text-sm">
-      <p className="min-w-0">
-        <Icon
-          icon="heroicons:trophy"
-          className="text-button-info mr-1.5 inline size-4 align-[-3px]"
-          aria-hidden="true"
-        />
-        {status === "upcoming" ? (
-          <>
-            <Link href={href} className="font-semibold hover:underline">
-              {competition.title}
-            </Link>
-            <span className="hidden sm:inline"> theme competition</span> starts{" "}
-            {formatDate(competition.starts_at)}.
-          </>
-        ) : (
-          <>
-            <span className="font-semibold">{competition.title}</span>
-            <span className="hidden sm:inline">
-              {" "}
-              theme competition is live until {formatDate(competition.ends_at)}.
-            </span>{" "}
-            <Link
-              href={`${href}#submit`}
-              className="text-link hover:text-link-hover font-medium hover:underline"
+    <div className="bg-secondary-bg/70 border-border-card text-primary-text @container relative border-b px-10 py-1 text-xs">
+      <div className="flex min-h-7 min-w-0 items-center justify-center gap-4 pointer-coarse:min-h-9">
+        <div className="flex min-w-0 items-center gap-2">
+          <Icon
+            icon="heroicons:trophy"
+            className="text-link size-3.5 shrink-0"
+            aria-hidden="true"
+          />
+          <Link
+            href={href}
+            className="relative inline-flex min-h-7 items-center font-medium hover:underline pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2"
+            aria-label={competition.title}
+          >
+            <span className="@lg:hidden">Theme competition</span>
+            <span className="hidden @lg:inline">{competition.title}</span>
+          </Link>
+          <span className="text-secondary-text hidden @2xl:inline">
+            {status === "upcoming"
+              ? `Starts ${formatDate(competition.starts_at)}`
+              : `Entries close ${formatDate(competition.ends_at)}`}
+          </span>
+        </div>
+        {status === "running" && (
+          <div className="flex shrink-0 items-center gap-4">
+            <Button
+              asChild
+              size="xs"
+              className="relative pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2.5"
             >
-              Enter<span className="hidden sm:inline"> competition</span>
-            </Link>
-            <span className="sm:hidden"> · </span>
-            <span className="hidden sm:inline"> or </span>
+              <Link href={`${href}#submit`}>
+                Enter<span className="hidden @lg:inline"> competition</span>
+                <Icon icon="heroicons:arrow-right" aria-hidden="true" />
+              </Link>
+            </Button>
             <Link
               href={`${href}#standings`}
-              className="text-link hover:text-link-hover font-medium hover:underline"
+              className="text-secondary-text hover:text-primary-text relative hidden min-h-7 items-center underline-offset-4 hover:underline @2xl:inline-flex pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-2"
             >
-              <span className="sm:hidden">Standings</span>
-              <span className="hidden sm:inline">view the standings</span>
+              View standings
             </Link>
-            <span className="hidden sm:inline">.</span>
-          </>
+          </div>
         )}
-      </p>
+      </div>
       <button
         type="button"
         aria-label="Hide theme competition banner"
         title="Hide banner. Turn it back on in Settings or global search."
-        className="text-secondary-text hover:text-primary-text hover:bg-button-info/10 focus-visible:ring-button-info absolute top-1/2 right-2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className="text-secondary-text hover:text-primary-text hover:bg-button-info/10 focus-visible:ring-button-info absolute top-1/2 right-2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none pointer-coarse:right-0.5 pointer-coarse:size-11"
         onClick={() => {
           setThemeCompetitionBannerEnabled(false);
           toast.success("Competition banner hidden", {
