@@ -31,10 +31,7 @@ export default function LoginModalView({
 }: LoginModalViewProps) {
   return (
     <Dialog open={showLoginModal} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        className="max-[480px]:top-0 max-[480px]:h-screen max-[480px]:max-w-full max-[480px]:translate-y-0 max-[480px]:rounded-none"
-        showClose
-      >
+      <DialogContent showClose>
         <DialogTitle className="text-primary-text mb-2 pr-6 text-lg font-semibold">
           {canLinkRoblox
             ? "Link your Roblox account"
