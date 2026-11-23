@@ -114,7 +114,7 @@ export default function CompetitionBanner() {
         type="button"
         aria-label="Hide theme competition banner"
         title="Hide banner. Turn it back on in Settings or global search."
-        className="text-secondary-text hover:text-primary-text hover:bg-button-info/10 focus-visible:ring-button-info absolute top-1/2 right-2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none pointer-coarse:right-0.5 pointer-coarse:size-11"
+        className="text-primary-text hover:bg-tertiary-bg focus-visible:ring-border-focus absolute top-1/2 right-4 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none pointer-coarse:right-2.5 pointer-coarse:size-11"
         onClick={() => {
           setThemeCompetitionBannerEnabled(false);
           toast.success("Competition banner hidden", {

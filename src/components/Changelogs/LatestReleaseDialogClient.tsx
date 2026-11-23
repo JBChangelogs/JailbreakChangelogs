@@ -165,6 +165,7 @@ export default function LatestReleaseDialogClient({
     >
       <div
         data-whats-new-banner
+        suppressHydrationWarning
         aria-hidden={!visible}
         inert={!visible}
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out motion-reduce:transition-none ${visible ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
