@@ -36,9 +36,7 @@ import { trackWebEvent } from "@/utils/analytics/web";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Season } from "@/types/seasons";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { SeasonRateLimitError, useLatestSeason } from "@/hooks/useLatestSeason";
 
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -113,7 +111,6 @@ interface InventoryCheckerClientProps {
   originalSearchTerm?: string;
   robloxUsers?: Record<string, RobloxUser>;
   userConnectionData?: UserConnectionData | null;
-  currentSeason?: Season | null;
   error?: string;
   errorCode?: string;
   initialQueue?: { position: number | null; delay: number | null };
@@ -132,7 +129,6 @@ export default function InventoryCheckerClient({
   originalSearchTerm,
   robloxUsers: initialRobloxUsers,
   userConnectionData,
-  currentSeason = null,
   error,
   errorCode,
   initialQueue,
@@ -176,28 +172,6 @@ export default function InventoryCheckerClient({
   // Auth context and scan functionality
   const { user, isAuthenticated } = useAuthContext();
   const { modalState, openModal, closeModal } = useSupporterModal();
-
-  const latestSeasonQuery = useLatestSeason(
-    Boolean(initialData) && !externalIsLoading,
-  );
-  // Past seasons' xp_data is often missing from the API, so only show
-  // the bar for scans from the currently active season.
-  const activeSeason = latestSeasonQuery.data
-    ? initialData?.updated_at &&
-      initialData.updated_at >= latestSeasonQuery.data.start_date
-      ? latestSeasonQuery.data
-      : null
-    : currentSeason;
-  const rateLimitError =
-    latestSeasonQuery.error instanceof SeasonRateLimitError
-      ? latestSeasonQuery.error
-      : null;
-  const seconds = rateLimitError?.retryAfter;
-  const seasonRateLimitMessage = rateLimitError
-    ? seconds
-      ? `Season XP unavailable — try again in ${seconds >= 60 ? `${Math.floor(seconds / 60)}m ${seconds % 60}s` : `${seconds}s`}`
-      : "Season XP unavailable — try again later"
-    : undefined;
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -955,8 +929,6 @@ export default function InventoryCheckerClient({
                   robloxUsers={initialRobloxUsers ?? {}}
                   userConnectionData={userConnectionData || null}
                   itemsData={itemsData}
-                  currentSeason={activeSeason}
-                  seasonRateLimitMessage={seasonRateLimitMessage}
                   initialNetworthData={networthData}
                   showOnlyNonOriginal={showOnlyNonOriginal}
                   showOnlyOriginal={showOnlyOriginal}

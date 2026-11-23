@@ -108,7 +108,6 @@ test("inventory stats initially match across timezones and number locales", () =
       created_at: 1791686596,
       updated_at: 1791686596,
     },
-    currentSeason: null,
     totalCashValue: 0,
     totalNetworth: 0,
     totalDupedValue: 0,

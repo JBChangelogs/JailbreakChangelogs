@@ -3,13 +3,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useInventoryScanHistory } from "@/hooks/useInventoryScanHistory";
-import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { INVENTORY_API_URL } from "@/utils/api/api";
-import XpProgressBar from "./XpProgressBar";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
@@ -73,8 +71,6 @@ const gamepassData = {
 
 interface UserStatsSectionProps {
   currentData: InventoryData | null;
-  currentSeason: Season | null;
-  seasonRateLimitMessage?: string;
   totalCashValue: number;
   totalNetworth: number;
   totalDupedValue: number;
@@ -149,8 +145,6 @@ const formatDate = (timestamp: number) => {
 
 export default function UserStatsSection({
   currentData,
-  currentSeason,
-  seasonRateLimitMessage,
   totalCashValue,
   totalNetworth,
   totalDupedValue,
@@ -389,15 +383,6 @@ export default function UserStatsSection({
           </Tooltip>
         </div>
       </div>
-
-      {/* XP Progress Bar */}
-      <XpProgressBar
-        currentLevel={currentData.level}
-        currentXp={currentData.xp}
-        season={currentSeason}
-        bgStyle="tertiary"
-        seasonRateLimitMessage={seasonRateLimitMessage}
-      />
 
       {/* Total Values */}
       <div

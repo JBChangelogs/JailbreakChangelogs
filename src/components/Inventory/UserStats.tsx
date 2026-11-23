@@ -4,7 +4,6 @@ import { isSeasonalItem } from "@/utils/items/season";
 
 import { useCallback, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
-import { Season } from "@/types/seasons";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
 import type { UseInventoryScanReturn } from "@/hooks/useInventoryScan";
 import UserProfileSection from "./UserProfileSection";
@@ -25,8 +24,6 @@ interface UserStatsProps {
   initialData: InventoryData;
   robloxUsers: Record<string, RobloxUser>;
   userConnectionData: UserConnectionData | null;
-  currentSeason: Season | null;
-  seasonRateLimitMessage?: string;
   itemsData: Item[];
   initialNetworthData?: UserNetworthData[];
   showOnlyNonOriginal: boolean;
@@ -46,8 +43,6 @@ export default function UserStats({
   initialData,
   robloxUsers,
   userConnectionData,
-  currentSeason,
-  seasonRateLimitMessage,
   itemsData = [],
   initialNetworthData = [],
   showOnlyNonOriginal,
@@ -244,8 +239,6 @@ export default function UserStats({
       {/* User Stats Section */}
       <UserStatsSection
         currentData={initialData}
-        currentSeason={currentSeason}
-        seasonRateLimitMessage={seasonRateLimitMessage}
         totalCashValue={totalCashValue}
         totalNetworth={totalNetworth}
         totalDupedValue={totalDupedValue}
