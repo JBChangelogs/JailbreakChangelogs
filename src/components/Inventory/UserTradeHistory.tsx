@@ -931,7 +931,7 @@ export default function UserTradeHistory({
               <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-right sm:text-sm">
                 {status === "pending" && (
                   <span
-                    className="bg-status-warning/15 text-primary-text rounded px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs"
+                    className="bg-status-warning/15 text-primary-text rounded-lg px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs"
                     title="Only one side's items have been scanned so far. The other side's items are still pending."
                   >
                     Pending
@@ -946,7 +946,7 @@ export default function UserTradeHistory({
                 )}
                 {trade.confidence === "partial" && (
                   <span
-                    className="bg-quaternary-bg text-primary-text rounded px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
+                    className="bg-quaternary-bg text-primary-text rounded-lg px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
                     title="Some trade details were recovered from a fallback data source."
                   >
                     Recovered
