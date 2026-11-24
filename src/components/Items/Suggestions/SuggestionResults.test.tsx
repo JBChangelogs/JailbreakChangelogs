@@ -54,15 +54,14 @@ test("empty results name both the selected field and sort", () => {
   );
   expect(
     tree.filter((node) => node.type === "p").map((node) => node.props.children),
-  ).toContain("No suggestions for Duped Demand.");
+  ).toContain("No suggestions for Duped Demand in Most Downvotes.");
   expect(
     tree.some(
       (node) =>
-        node.type === "p" &&
-        Array.isArray(node.props.children) &&
-        node.props.children.includes("Most Downvotes"),
+        typeof node.props.children === "string" &&
+        node.props.children.startsWith("Sorted by"),
     ),
-  ).toBe(true);
+  ).toBe(false);
   expect(tree.some((node) => node.props.children === "Clear filters")).toBe(
     true,
   );
@@ -81,7 +80,9 @@ test("empty results include search, item type and every selected field", () => {
   );
   expect(
     tree.filter((node) => node.type === "p").map((node) => node.props.children),
-  ).toContain("No Vehicle suggestions for Demand or Trend matching “Torpedo”.");
+  ).toContain(
+    "No Vehicle suggestions for Demand or Trend matching “Torpedo” in Newest First.",
+  );
 });
 
 test("unfiltered empty feed keeps the first-suggestion message", () => {
@@ -95,4 +96,19 @@ test("unfiltered empty feed keeps the first-suggestion message", () => {
         node.props.children === "Be the first to suggest a value change.",
     ),
   ).toBe(true);
+});
+
+test("a sort that empties the list offers another sort, not filters", () => {
+  const tree = nodes(
+    SuggestionResults({
+      ...base,
+      hasActiveFilters: true,
+      activeSortLabel: "Value Team Suggestions",
+    }),
+  );
+  const text = tree.map((node) => node.props.children);
+  expect(text).toContain("No matching suggestions");
+  expect(text).toContain("Try another sort to see more suggestions.");
+  expect(text).toContain("Show all suggestions");
+  expect(text).not.toContain("No suggestions in Value Team Suggestions.");
 });
