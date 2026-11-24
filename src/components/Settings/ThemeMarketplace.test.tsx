@@ -9,6 +9,7 @@ import {
   type MarketplaceThemesPage,
 } from "@/utils/api/userThemes";
 import * as marketplaceRealtime from "@/utils/ui/marketplaceRealtime";
+import * as sortGroups from "@/utils/api/sortGroups";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 
 interface Node {
@@ -131,6 +132,7 @@ function marketplace({
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "react")
           return {
+            Fragment: "Fragment",
             useRef: () => (refCursor++ === 0 ? searchRef : marketplaceRef),
             useEffect: (
               effect: () => (() => void) | undefined,
@@ -166,6 +168,27 @@ function marketplace({
             useQuery: (options: { queryKey: unknown[] }) => {
               if (options.queryKey[0] === "my-themes")
                 return { data: undefined, isPending: true, error: null };
+              if (options.queryKey[0] === "theme-marketplace-sorts")
+                return {
+                  data: [
+                    {
+                      label: "Date",
+                      options: [
+                        { value: "newest", label: "Newest" },
+                        { value: "oldest", label: "Oldest" },
+                      ],
+                    },
+                  ],
+                };
+              if (options.queryKey[0] === "theme-marketplace-filters")
+                return {
+                  data: [
+                    {
+                      label: "Scheme",
+                      options: [{ value: "dark", label: "Dark" }],
+                    },
+                  ],
+                };
               queryKey = options.queryKey;
               const nextKey = JSON.stringify(queryKey);
               if (cacheKey !== nextKey) {
@@ -221,6 +244,7 @@ function marketplace({
         if (name === "@/utils/ui/avatar") return { UserAvatar: "UserAvatar" };
         if (name === "@/components/Users/UserProfilePopover")
           return { UserProfilePopover: "UserProfilePopover" };
+        if (name === "@/utils/api/sortGroups") return sortGroups;
         if (name === "@/utils/ui/marketplaceRealtime")
           return marketplaceRealtime;
         if (name === "@/hooks/useDebounce")
@@ -319,7 +343,14 @@ test("search and sort reset pagination, and use theme applies and remembers the 
     view.render().find((node) => node.type === "Pagination")!.props;
   (paginate().onChange as (event: unknown, page: number) => void)(null, 2);
   view.render();
-  expect(view.key()).toEqual(["theme-marketplace", "", 2, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "",
+    2,
+    "newest",
+    [],
+    undefined,
+  ]);
   const input = view.render().find((node) => node.type === "input")!;
   (input.props.onChange as (event: unknown) => void)({
     target: { value: "  id:ABCDEFGH  " },
@@ -327,14 +358,43 @@ test("search and sort reset pagination, and use theme applies and remembers the 
   const form = view.render().find((node) => node.type === "form")!;
   (form.props.onSubmit as (event: unknown) => void)({ preventDefault() {} });
   view.render();
-  expect(view.key()).toEqual(["theme-marketplace", "id:ABCDEFGH", 1, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "id:ABCDEFGH",
+    1,
+    "newest",
+    [],
+    undefined,
+  ]);
   (paginate().onChange as (event: unknown, page: number) => void)(null, 2);
   const sort = view
     .render()
     .find((node) => node.type === "DropdownMenuRadioGroup")!;
   (sort.props.onValueChange as (value: string) => void)("oldest");
   view.render();
-  expect(view.key()).toEqual(["theme-marketplace", "id:ABCDEFGH", 1, "oldest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "id:ABCDEFGH",
+    1,
+    "oldest",
+    [],
+    undefined,
+  ]);
+  (paginate().onChange as (event: unknown, page: number) => void)(null, 2);
+  const dark = view
+    .render()
+    .find((node) => node.type === "Button" && node.props.children === "Dark")!;
+  expect(dark.props.variant).toBe("secondary");
+  (dark.props.onClick as () => void)();
+  view.render();
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "id:ABCDEFGH",
+    1,
+    "oldest",
+    ["dark"],
+    undefined,
+  ]);
   view.click("Use theme");
   expect(view.applied[0].share_code).toBe("ABCDEFGH");
   expect(view.recent).toEqual(["ABCDEFGH"]);
@@ -393,7 +453,14 @@ test("new themes show the shared update pill when scrolled down or viewing anoth
     expect(pill.props.children).toContain("1 new theme");
     (pill.props.onClick as () => void)();
     view.render();
-    expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
+    expect(view.key()).toEqual([
+      "theme-marketplace",
+      "",
+      1,
+      "newest",
+      [],
+      undefined,
+    ]);
     expect(view.scrolls()).toBe(1);
     expect(view.render().some((node) => node.type === "UpdatePill")).toBe(
       false,
@@ -453,7 +520,14 @@ test("oldest sort queues new publications and the pill returns to newest sort", 
       .onClick as () => void
   )();
   view.render();
-  expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "",
+    1,
+    "newest",
+    [],
+    undefined,
+  ]);
 });
 
 test("live publications match descriptions and queue edits can stop matching the search", async () => {
@@ -502,11 +576,25 @@ test("typing searches after the debounce, resets pagination, and shows a waiting
     target: { value: "  Moon  " },
   });
   const waiting = view.render();
-  expect(view.key()).toEqual(["theme-marketplace", "", 2, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "",
+    2,
+    "newest",
+    [],
+    undefined,
+  ]);
   expect(waiting.some((node) => node.type === "Spinner")).toBe(true);
   expect(view.debounceDelay()).toBe(400);
   const searched = view.flushDebounce();
-  expect(view.key()).toEqual(["theme-marketplace", "Moon", 1, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "Moon",
+    1,
+    "newest",
+    [],
+    undefined,
+  ]);
   expect(searched.some((node) => node.type === "Spinner")).toBe(false);
 });
 
@@ -635,7 +723,14 @@ test("search and clear actions live inside the field, and clearing resets result
   expect(view.render().find((node) => node.type === "input")!.props.value).toBe(
     "",
   );
-  expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "",
+    1,
+    "newest",
+    [],
+    undefined,
+  ]);
   expect(focused).toBe(true);
 });
 
@@ -657,12 +752,16 @@ test("empty marketplace explains publishing and links to theme settings", () => 
   );
 });
 
-test("theme count matches the values page label and text size", () => {
+test("theme count reads like the suggestions count and follows search and sort", () => {
   for (const total of [1, 2]) {
     const view = marketplace({ total });
     const label = view
       .render()
-      .find((node) => node.props.children === `Total Themes: ${total}`)!;
+      .find(
+        (node) =>
+          node.props.children ===
+          `${total} Recent ${total === 1 ? "Theme" : "Themes"}`,
+      )!;
     expect(label.type).toBe("p");
     expect(label.props.className).toBe("text-secondary-text");
     (
@@ -681,10 +780,28 @@ test("theme count matches the values page label and text size", () => {
         .some(
           (node) =>
             node.props.children ===
-            `Found ${total} ${total === 1 ? "theme" : "themes"} matching "Moon"`,
+            `${total} ${total === 1 ? "Search Result" : "Search Results"}`,
         ),
     ).toBe(true);
   }
+  const view = marketplace({ total: 2 });
+  (
+    view.render().find((node) => node.type === "DropdownMenuRadioGroup")!.props
+      .onValueChange as (value: string) => void
+  )("oldest");
+  (
+    view
+      .render()
+      .find((node) => node.type === "Button" && node.props.children === "Dark")!
+      .props.onClick as () => void
+  )();
+  expect(
+    view
+      .render()
+      .some(
+        (node) => node.props.children === "2 Dark Themes, sorted by Oldest",
+      ),
+  ).toBe(true);
 });
 
 test("slash focuses marketplace search, respects editable targets, and unregisters on unmount", () => {
@@ -732,11 +849,11 @@ test("pending themes show six skeleton cards with an accessible loading status",
       (node) => node.type === "div" && node.props["aria-hidden"] === "true",
     ),
   ).toHaveLength(6);
-  expect(rendered.filter((node) => node.type === "Skeleton")).toHaveLength(31);
+  expect(rendered.filter((node) => node.type === "Skeleton")).toHaveLength(30);
   expect(
     rendered.find((node) => node.props.children === "Loading themes…")?.props
       .className,
-  ).toBe("sr-only");
+  ).toBe("text-secondary-text");
   expect(
     rendered.some((node) => node.props.children === "No themes published yet"),
   ).toBe(false);
@@ -760,7 +877,14 @@ test("empty search offers a reset that restores the marketplace", () => {
   expect(view.render().find((node) => node.type === "input")!.props.value).toBe(
     "",
   );
-  expect(view.key()).toEqual(["theme-marketplace", "", 1, "newest"]);
+  expect(view.key()).toEqual([
+    "theme-marketplace",
+    "",
+    1,
+    "newest",
+    [],
+    undefined,
+  ]);
   expect(
     view
       .render()

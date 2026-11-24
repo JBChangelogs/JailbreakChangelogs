@@ -158,7 +158,8 @@ export function SuggestionsToolbar({
                   ? "Suggestion"
                   : "Suggestions",
             ]
-              .filter(Boolean)
+              // Not filter(Boolean): that would drop a total of 0.
+              .filter((part) => part !== "")
               .join(" ") +
             (typeFilter !== "All" ? ` in ${typeFilter}` : "") +
             (sort ? `, sorted by ${getSortLabel(sortGroups, sort)}` : "")}

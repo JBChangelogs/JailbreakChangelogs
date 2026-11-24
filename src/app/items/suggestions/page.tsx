@@ -274,7 +274,13 @@ export default function ValueSuggestionsPage() {
   const handleClearAllFilters = () => {
     if (searchInputRef.current) searchInputRef.current.value = "";
     setHasSearchText(false);
-    void setParams({ query: null, page: null, type: null, field: null });
+    void setParams({
+      query: null,
+      page: null,
+      type: null,
+      field: null,
+      sort: null,
+    });
   };
 
   // Keep input in sync when URL changes externally (back/forward navigation)
@@ -575,10 +581,12 @@ export default function ValueSuggestionsPage() {
             )}
           </div>
 
-          <p className="bg-button-info/10 border-button-info text-primary-text mb-4 rounded-lg border p-4 text-sm shadow-sm">
-            Please note that a high upvote count does not guarantee a suggestion
-            will be accepted.
-          </p>
+          {(loadingSuggestions || suggestions.length > 0) && (
+            <p className="bg-button-info/10 border-button-info text-primary-text mb-4 rounded-lg border p-4 text-sm shadow-sm">
+              Please note that a high upvote count does not guarantee a
+              suggestion will be accepted.
+            </p>
+          )}
 
           <SuggestionResults
             loadingSuggestions={loadingSuggestions}
@@ -593,8 +601,12 @@ export default function ValueSuggestionsPage() {
             activeSortLabel={activeSortLabel}
             typeFilter={typeFilter}
             fieldFilter={fieldFilter}
+            // A sort like Value Team Suggestions narrows the list too.
             hasActiveFilters={Boolean(
-              urlQuery || typeFilter !== "All" || fieldFilter.length > 0,
+              urlQuery ||
+              typeFilter !== "All" ||
+              fieldFilter.length > 0 ||
+              activeSortLabel,
             )}
             totalPages={totalPages}
             page={page}

@@ -1,4 +1,5 @@
 import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
+import { parseSortGroups } from "@/utils/api/sortGroups";
 import type { UserData } from "@/types/auth";
 import { marketThemeVars } from "@/utils/ui/marketThemeVars";
 import {
@@ -81,6 +82,8 @@ export type CustomThemeInput = Pick<
 > & { published?: boolean; pack?: ThemePack };
 
 export interface MarketplaceTheme extends CustomTheme {
+  /** Unfinished competitions it's entered in; only realtime events carry it. */
+  competitions?: number[];
   user:
     | (Pick<UserData, "id" | "username"> &
         Partial<
@@ -106,7 +109,20 @@ export interface MarketplaceThemesPage {
   size: number;
 }
 
-export type MarketplaceSort = "newest" | "oldest";
+export type MarketplaceSort = string;
+
+export const fetchMarketplaceSorts = async () =>
+  parseSortGroups(await request("/v2/themes/marketplace/sorts"));
+
+/** Same shape as /sorts, with `filters` in place of `sorts`. */
+export const fetchMarketplaceFilters = async () => {
+  const data = await request<unknown>("/v2/themes/marketplace/filters");
+  return parseSortGroups(
+    Array.isArray(data)
+      ? data.map((entry) => ({ group: entry?.group, sorts: entry?.filters }))
+      : [],
+  );
+};
 
 /** An error from the themes API, with its code such as "supporter_required". */
 export class ThemeApiError extends Error {
@@ -336,15 +352,26 @@ export const fetchSharedTheme = async (code: string, baseUrl?: string) =>
 export const fetchSiteThemes = async () =>
   sanitizeThemes(await request<SiteTheme[]>("/v2/themes"));
 
-export async function fetchMarketplaceThemes(
+export async function fetchMarketplaceThemes({
   page = 1,
-  sort: MarketplaceSort = "newest",
+  sort = "newest",
   query = "",
-  signal?: AbortSignal,
-) {
+  filters = [],
+  creator,
+  signal,
+}: {
+  page?: number;
+  sort?: MarketplaceSort;
+  query?: string;
+  filters?: string[];
+  creator?: string;
+  signal?: AbortSignal;
+} = {}) {
   const params = new URLSearchParams({ page: String(page), sort });
   const search = query.trim();
   if (search) params.set("query", search);
+  if (filters.length) params.set("filter", filters.join(","));
+  if (creator) params.set("creator", creator);
   const data = await request<MarketplaceThemesPage>(
     `/v2/themes/marketplace${search ? "/search" : ""}?${params}`,
     { signal },

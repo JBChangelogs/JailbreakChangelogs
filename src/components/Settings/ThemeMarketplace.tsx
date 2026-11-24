@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -15,8 +15,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CustomThemePreview from "@/components/Settings/CustomThemePreview";
@@ -28,6 +30,8 @@ import { DEFAULT_THEME_ICON } from "@/components/Settings/ThemeIconPicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
+  fetchMarketplaceFilters,
+  fetchMarketplaceSorts,
   fetchMarketplaceThemes,
   listMyThemes,
   updateMyTheme,
@@ -40,14 +44,16 @@ import { rememberSharedTheme } from "@/utils/ui/recentThemes";
 import { offerThemePack } from "@/components/Settings/ThemeDetailsActions";
 import { isItemSearchShortcut } from "@/utils/ui/searchShortcut";
 import { UserAvatar } from "@/utils/ui/avatar";
+import { getSortLabel } from "@/utils/api/sortGroups";
 import {
   applyMarketplaceEvent,
   parseMarketplaceEvent,
   marketplaceMatchesSearch,
-  ownMarketplacePage,
 } from "@/utils/ui/marketplaceRealtime";
 
-export default function ThemeMarketplace() {
+export default function ThemeMarketplace({
+  creator,
+}: { creator?: string } = {}) {
   const queryClient = useQueryClient();
   const { user, isAuthenticated } = useAuthContext();
   const { customTheme } = useTheme();
@@ -60,6 +66,7 @@ export default function ThemeMarketplace() {
   const [pendingNew, setPendingNew] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
   const marketplaceRef = useRef<HTMLDivElement>(null);
+  const [filters, setFilters] = useState<string[]>([]);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isItemSearchShortcut(event) && searchInputRef.current) {
@@ -75,32 +82,68 @@ export default function ThemeMarketplace() {
     setQuery(debouncedInput);
     setPage(1);
   }, [debouncedInput]);
+  const mineTab = tab === "mine" && isAuthenticated && !!user;
+  const scopeCreator = mineTab ? user.id : creator;
+  const sortOptions = useQuery({
+    queryKey: ["theme-marketplace-sorts"],
+    queryFn: fetchMarketplaceSorts,
+    staleTime: 60_000,
+  });
+  const filterOptions = useQuery({
+    queryKey: ["theme-marketplace-filters"],
+    queryFn: fetchMarketplaceFilters,
+    staleTime: 60_000,
+  });
+  const sortLabel = getSortLabel(sortOptions.data ?? [], sort);
+  const filterLabel = (filterOptions.data ?? [])
+    .flatMap((group) => group.options)
+    .filter((option) => filters.includes(option.value))
+    .map((option) => option.label)
+    .join(", ");
+  const toggleFilter = (value: string) => {
+    setFilters((current) =>
+      current.includes(value)
+        ? current.filter((key) => key !== value)
+        : [...current, value],
+    );
+    setPage(1);
+  };
   const { data, isPending, isFetching, error, refetch } = useQuery({
-    queryKey: ["theme-marketplace", query, page, sort],
-    queryFn: ({ signal }) => fetchMarketplaceThemes(page, sort, query, signal),
+    queryKey: ["theme-marketplace", query, page, sort, filters, scopeCreator],
+    queryFn: ({ signal }) =>
+      fetchMarketplaceThemes({
+        page,
+        sort,
+        query,
+        filters,
+        creator: scopeCreator,
+        signal,
+      }),
     retry: false,
   });
-  const mineTab = tab === "mine" && isAuthenticated && !!user;
+  // Only for counting drafts; the published ones come from the marketplace.
   const mine = useQuery({
     queryKey: ["my-themes", user?.id],
     queryFn: listMyThemes,
     enabled: mineTab,
   });
-  const shown = mineTab
-    ? mine.data && user
-      ? ownMarketplacePage(mine.data.themes, user, query, sort, page)
-      : undefined
-    : data;
   const drafts = mineTab
     ? (mine.data?.themes.filter((t) => t.published_at == null).length ?? 0)
     : 0;
-  const shownPending = mineTab ? mine.isPending : isPending;
-  const shownError = mineTab ? mine.error : error;
-  const shownRefetch = mineTab ? mine.refetch : refetch;
-  const searching =
-    (mineTab ? mine.isFetching : isFetching) || input.trim() !== query;
+  const narrowed = !!query || filters.length > 0;
+  const searching = isFetching || input.trim() !== query;
+  const creatorName =
+    creator && !mineTab
+      ? data?.items[0]?.user?.global_name &&
+        data.items[0].user.global_name !== "None"
+        ? data.items[0].user.global_name
+        : (data?.items[0]?.user?.username ?? "this creator")
+      : null;
 
-  useEffect(() => setPendingNew(new Set()), [query, sort, isAuthenticated]);
+  useEffect(
+    () => setPendingNew(new Set()),
+    [query, sort, filters, scopeCreator, isAuthenticated],
+  );
   useEffect(() => {
     if (!data) return;
     setPendingNew((previous) => {
@@ -115,7 +158,15 @@ export default function ThemeMarketplace() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const queryKey = ["theme-marketplace", query, page, sort];
+    const queryKey = [
+      "theme-marketplace",
+      query,
+      page,
+      sort,
+      filters,
+      scopeCreator,
+    ];
+    const scope = { filters, creator: scopeCreator };
     const handleUpdate = async (event: Event) => {
       const update = parseMarketplaceEvent(
         (event as CustomEvent<unknown>).detail,
@@ -126,7 +177,7 @@ export default function ThemeMarketplace() {
         (marketplaceRef.current?.getBoundingClientRect().top ?? 0) >= 0;
       const matches =
         update.action !== "marketplace_theme_removed" &&
-        marketplaceMatchesSearch(update.data, query);
+        marketplaceMatchesSearch(update.data, query, scope);
       if (update.action === "marketplace_theme_removed" || !matches) {
         setPendingNew((previous) => {
           if (!previous.has(update.data.share_code)) return previous;
@@ -163,7 +214,7 @@ export default function ThemeMarketplace() {
       const previous =
         queryClient.getQueryData<MarketplaceThemesPage>(queryKey);
       queryClient.setQueryData<MarketplaceThemesPage>(queryKey, (current) =>
-        applyMarketplaceEvent(current, update, query, sort),
+        applyMarketplaceEvent(current, update, query, sort, scope),
       );
       await queryClient.invalidateQueries({
         queryKey,
@@ -180,12 +231,12 @@ export default function ThemeMarketplace() {
     window.addEventListener("realtimeThemeMarketplace", handleUpdate);
     return () =>
       window.removeEventListener("realtimeThemeMarketplace", handleUpdate);
-  }, [queryClient, query, page, sort, isAuthenticated]);
+  }, [queryClient, query, page, sort, filters, scopeCreator, isAuthenticated]);
 
   useEffect(() => {
-    if (shown && page > Math.max(1, shown.total_pages))
-      setPage(Math.max(1, shown.total_pages));
-  }, [shown, page]);
+    if (data && page > Math.max(1, data.total_pages))
+      setPage(Math.max(1, data.total_pages));
+  }, [data, page]);
 
   const unpublishTheme = async (theme: MarketplaceTheme) => {
     if (!isAuthenticated || !user || theme.user?.id !== user.id || unpublishing)
@@ -338,8 +389,9 @@ export default function ThemeMarketplace() {
                 aria-label="Sort themes"
                 className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-w-44 cursor-pointer items-center justify-between gap-3 rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
               >
-                <span className="truncate">
-                  {sort === "newest" ? "Newest first" : "Oldest first"}
+                <span className="min-w-0 flex-1 truncate text-left">
+                  <span className="text-secondary-text">Sort: </span>
+                  <span className="font-medium">{sortLabel}</span>
                 </span>
                 <Icon
                   icon="heroicons:chevron-down"
@@ -359,18 +411,25 @@ export default function ThemeMarketplace() {
                   setPage(1);
                 }}
               >
-                <DropdownMenuRadioItem
-                  value="newest"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 pr-8 text-sm"
-                >
-                  Newest first
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem
-                  value="oldest"
-                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 pr-8 text-sm"
-                >
-                  Oldest first
-                </DropdownMenuRadioItem>
+                {sortOptions.data?.map(({ label, options }, index) => (
+                  <Fragment key={label}>
+                    {index > 0 && (
+                      <DropdownMenuSeparator className="bg-border-primary/60" />
+                    )}
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                      {label}
+                    </DropdownMenuLabel>
+                    {options.map((option) => (
+                      <DropdownMenuRadioItem
+                        key={option.value}
+                        value={option.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 pr-8 text-sm"
+                      >
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </Fragment>
+                ))}
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -391,68 +450,127 @@ export default function ThemeMarketplace() {
           </kbd>{" "}
           to quickly focus the search.
         </div>
+        {!!filterOptions.data?.length && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+            {filterOptions.data.map(({ label, options }) => (
+              <div
+                key={label}
+                role="group"
+                aria-label={label}
+                className="flex flex-wrap items-center gap-2"
+              >
+                <span className="text-secondary-text text-xs font-medium">
+                  {label}
+                </span>
+                {options.map((option) => (
+                  <Button
+                    key={option.value}
+                    type="button"
+                    size="sm"
+                    variant={
+                      filters.includes(option.value) ? "default" : "secondary"
+                    }
+                    aria-pressed={filters.includes(option.value)}
+                    onClick={() => toggleFilter(option.value)}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+        {creatorName && (
+          <p className="text-secondary-text mt-3 flex flex-wrap items-center gap-2 text-sm">
+            Showing themes by {creatorName}.
+            <Link href="/themes" className="text-link hover:text-link-hover">
+              Show all themes
+            </Link>
+          </p>
+        )}
       </div>
 
-      {shownPending ? (
-        <div role="status">
-          <span className="sr-only">Loading themes…</span>
-          <Skeleton aria-hidden="true" className="h-6 w-36" />
-        </div>
+      {isPending ? (
+        <p role="status" className="text-secondary-text">
+          Loading themes…
+        </p>
       ) : (
-        !shownError &&
-        !!shown?.total && (
+        !error &&
+        !!data?.total && (
           <p role="status" className="text-secondary-text">
-            {query
-              ? `Found ${shown.total} ${shown.total === 1 ? "theme" : "themes"} matching "${query}"`
-              : `Total Themes: ${shown.total}`}
+            {[
+              data.total,
+              filterLabel || (query || sort !== "newest" ? "" : "Recent"),
+              query
+                ? data.total === 1
+                  ? "Search Result"
+                  : "Search Results"
+                : data.total === 1
+                  ? "Theme"
+                  : "Themes",
+            ]
+              .filter((part) => part !== "")
+              .join(" ") +
+              (sort !== "newest" ? `, sorted by ${sortLabel}` : "")}
           </p>
         )
       )}
-      {shownError && (
+      {error && (
         <div role="alert" className="space-y-3">
-          <p>{shownError.message}</p>
-          <Button variant="secondary" onClick={() => void shownRefetch()}>
+          <p>{error.message}</p>
+          <Button variant="secondary" onClick={() => void refetch()}>
             Try again
           </Button>
         </div>
       )}
-      {!shownError && !shownPending && shown?.items.length === 0 && (
+      {!error && !isPending && data?.items.length === 0 && (
         <div
           role="status"
           className="border-border-card bg-secondary-bg rounded-lg border px-6 py-12 text-center"
         >
           <Icon
-            icon={query ? "lucide:search" : "lucide:palette"}
+            icon={narrowed ? "lucide:search" : "lucide:palette"}
             aria-hidden="true"
             className="text-secondary-text mx-auto mb-4 size-12 opacity-50"
           />
           <h2 className="text-primary-text mb-2 text-xl font-semibold">
-            {query
+            {narrowed
               ? "No matching themes"
               : mineTab
                 ? "You haven't published any themes"
-                : "No themes published yet"}
+                : creator
+                  ? "No themes by this creator"
+                  : "No themes published yet"}
           </h2>
           <p className="text-secondary-text mx-auto max-w-md text-sm">
-            {query
-              ? `No themes match “${query}”. Try another name, description, author, or share code.`
+            {narrowed
+              ? query
+                ? `No themes match “${query}”. Try another name, description, author, or share code.`
+                : "No themes match these filters. Try turning some off."
               : mineTab
                 ? drafts
                   ? `You have ${drafts} ${drafts === 1 ? "theme that isn't" : "themes that aren't"} published yet. Publish one from your theme settings and it will show here.`
                   : "Publish one of your custom themes from your theme settings and it will show here."
-                : "Community themes will appear here once published. You can share a custom theme from your theme settings."}
+                : creator
+                  ? "They haven't published any themes yet."
+                  : "Community themes will appear here once published. You can share a custom theme from your theme settings."}
           </p>
-          {query ? (
+          {narrowed ? (
             <Button
               variant="secondary"
               className="mt-6"
               onClick={() => {
                 setInput("");
                 setQuery("");
+                setFilters([]);
                 setPage(1);
               }}
             >
-              Clear search
+              {query ? "Clear search" : "Clear filters"}
+            </Button>
+          ) : creator && !mineTab ? (
+            <Button asChild variant="secondary" className="mt-6">
+              <Link href="/themes">Show all themes</Link>
             </Button>
           ) : (
             <Button asChild className="mt-6">
@@ -464,10 +582,10 @@ export default function ThemeMarketplace() {
         </div>
       )}
       <div
-        aria-busy={shownPending}
+        aria-busy={isPending}
         className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
       >
-        {shownPending
+        {isPending
           ? Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
@@ -485,7 +603,7 @@ export default function ThemeMarketplace() {
                 <Skeleton className="h-8 w-28" />
               </div>
             ))
-          : shown?.items.map((theme) => {
+          : data?.items.map((theme) => {
               const author =
                 theme.user?.global_name && theme.user.global_name !== "None"
                   ? theme.user.global_name
@@ -611,10 +729,10 @@ export default function ThemeMarketplace() {
               );
             })}
       </div>
-      {shown && shown.total_pages > 1 && (
+      {data && data.total_pages > 1 && (
         <Pagination
-          count={shown.total_pages}
-          page={shown.page}
+          count={data.total_pages}
+          page={data.page}
           onChange={(_event, value) => setPage(value)}
         />
       )}

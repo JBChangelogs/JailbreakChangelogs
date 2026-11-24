@@ -429,12 +429,15 @@ const ServerList: React.FC = () => {
               className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-9 min-w-36 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Sort servers"
             >
-              <span className="truncate">
-                {sort
-                  ? (sortLabels[sort] ?? getSortLabel(sort))
-                  : sortTypes[0]
-                    ? (sortLabels[sortTypes[0]] ?? getSortLabel(sortTypes[0]))
-                    : "Sort"}
+              <span className="min-w-0 flex-1 truncate text-left">
+                <span className="text-secondary-text">Sort: </span>
+                <span className="font-medium">
+                  {sort
+                    ? (sortLabels[sort] ?? getSortLabel(sort))
+                    : sortTypes[0]
+                      ? (sortLabels[sortTypes[0]] ?? getSortLabel(sortTypes[0]))
+                      : "Sort"}
+                </span>
               </span>
               <Icon
                 icon="heroicons:chevron-down"

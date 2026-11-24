@@ -82,7 +82,12 @@ export function SuggestionResults({
   const fields = new Intl.ListFormat("en", { type: "disjunction" }).format(
     fieldFilter.map(fieldLabel),
   );
-  const emptyDescription = `No ${typeFilter === "All" ? "" : `${typeFilter} `}suggestions${fields ? ` for ${fields}` : ""}${urlQuery ? ` matching “${urlQuery}”` : ""}.`;
+  const sortOnly =
+    !!activeSortLabel &&
+    !urlQuery &&
+    typeFilter === "All" &&
+    fieldFilter.length === 0;
+  const emptyDescription = `No ${typeFilter === "All" ? "" : `${typeFilter} `}suggestions${fields ? ` for ${fields}` : ""}${urlQuery ? ` matching “${urlQuery}”` : ""}${activeSortLabel ? ` in ${activeSortLabel}` : ""}.`;
 
   return (
     <>
@@ -129,29 +134,26 @@ export function SuggestionResults({
               ? "No matching suggestions"
               : "No suggestions yet"}
           </h3>
-          {hasActiveFilters && (
+          {hasActiveFilters && !sortOnly && (
             <p className="text-secondary-text mb-2 text-sm">
               {emptyDescription}
             </p>
           )}
-          {activeSortLabel && (
-            <p className="text-secondary-text mb-4 text-xs">
-              Sorted by {activeSortLabel}.
-            </p>
-          )}
           <p className="text-secondary-text mb-6 text-sm">
-            {hasActiveFilters
-              ? "Try different filters or clear them to see more suggestions."
-              : !isAuthenticated
-                ? "Log in to be the first to submit an item suggestion."
-                : !userHasRoblox
-                  ? "You need to connect your Roblox account before you can submit a suggestion."
-                  : "Be the first to suggest a value change."}
+            {sortOnly
+              ? "Try another sort to see more suggestions."
+              : hasActiveFilters
+                ? "Try different filters or clear them to see more suggestions."
+                : !isAuthenticated
+                  ? "Log in to be the first to submit an item suggestion."
+                  : !userHasRoblox
+                    ? "You need to connect your Roblox account before you can submit a suggestion."
+                    : "Be the first to suggest a value change."}
           </p>
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
             {hasActiveFilters ? (
               <Button onClick={onClearAllFilters} variant="secondary">
-                Clear filters
+                {sortOnly ? "Show all suggestions" : "Clear filters"}
               </Button>
             ) : !isAuthenticated ? (
               <Button onClick={onLogin}>
