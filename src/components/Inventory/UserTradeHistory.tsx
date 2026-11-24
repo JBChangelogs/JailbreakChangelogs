@@ -26,12 +26,18 @@ import {
 } from "@/components/ui/tooltip";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import TradeActivityChart from "@/components/Inventory/TradeActivityChart";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TradeSideIcon } from "@/components/Values/Calculator/TradeSideHeading";
 import { PendingTradeItemsPlaceholder } from "@/components/Inventory/PendingTradeItemsPlaceholder";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { DupedBadge } from "@/components/trading/DupedBadge";
 import { OgBadge } from "@/components/trading/OgBadge";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { usePartialItemFields } from "@/hooks/usePartialItems";
+import {
+  type CatalogValues,
+  useCatalogValues,
+  usePartialItems,
+} from "@/hooks/usePartialItems";
 import { createLogger } from "@/services/logger";
 import { Item } from "@/types";
 import { TradeItem as CatalogTradeItem } from "@/types/trading";
@@ -64,39 +70,7 @@ const log = createLogger("INVENTORY");
 const PAGE_SIZE = 25;
 const REQUEST_TIMEOUT_MS = 15_000;
 
-type TradeCatalogRow = Pick<
-  Item,
-  | "id"
-  | "name"
-  | "type"
-  | "cash_value"
-  | "duped_value"
-  | "is_limited"
-  | "is_seasonal"
-  | "season"
-  | "level"
-  | "tradable"
-  | "trend"
-  | "trends"
-  | "demand"
-  | "duped_demand"
->;
-const TRADE_CATALOG_FIELDS = [
-  "name",
-  "type",
-  "cash_value",
-  "duped_value",
-  "is_limited",
-  "is_seasonal",
-  "season",
-  "level",
-  "tradable",
-  "trend",
-  "trends",
-  "demand",
-  "duped_demand",
-] as const;
-
+type TradeCatalogRow = CatalogValues & Pick<Item, "name" | "type">;
 interface CatalogValue {
   cashValue: string | null;
   dupedValue: string | null;
@@ -134,18 +108,14 @@ const summarizeValues = (
 
 function ValueDifferenceBadge({
   value,
-  isPartial = false,
-  prominent = false,
   className = "",
 }: {
   value: number | null;
-  isPartial?: boolean;
-  prominent?: boolean;
   className?: string;
 }) {
   return (
     <span
-      className={`${className} max-w-full items-center justify-center rounded-lg border text-center leading-tight font-bold tabular-nums shadow-sm ${prominent ? "px-3 py-1.5 text-sm" : "px-2.5 py-1 text-[13px]"} ${
+      className={`${className} max-w-full items-center justify-center rounded-lg border px-2 py-1 text-center text-[10px] font-bold tabular-nums shadow-sm sm:text-xs ${
         value === null
           ? "border-border-card bg-quaternary-bg text-secondary-text"
           : value > 0
@@ -154,16 +124,9 @@ function ValueDifferenceBadge({
               ? "border-status-error bg-status-error text-button-danger-text"
               : "border-border-card bg-quaternary-bg text-primary-text"
       }`}
-      title={
-        value === null
-          ? "One or more items have no current catalog value"
-          : isPartial
-            ? "Difference using known item values; N/A items are excluded"
-            : "Difference using current item values"
-      }
     >
       {value === null
-        ? "Value comparison unavailable"
+        ? "No values"
         : value > 0
           ? `Getting ${formatTradeValue(value)} more`
           : value < 0
@@ -245,8 +208,7 @@ function TradeItem({
   const season = catalogItem?.season;
   const level = unlockLevel(catalogItem?.level);
   const hasLevel = hasUnlockLevel(level);
-  const cardClassName =
-    "border-border-card bg-tertiary-bg hover:border-button-info/40 flex w-full min-w-0 self-start overflow-hidden rounded-lg border transition-colors min-[400px]:block min-[400px]:w-40 sm:w-48 xl:w-40";
+  const cardClassName = TRADE_ITEM_CARD_CLASS;
   const requirementBadges =
     season != null || hasLevel ? (
       <Tooltip>
@@ -371,6 +333,7 @@ function TradeItem({
         </TooltipTrigger>
         <TradeItemHoverTooltip
           item={{ ...catalogItem, isDuped: item.is_duplicate }}
+          className="bg-tertiary-bg/55 [&_svg>path:first-child]:fill-tertiary-bg"
         />
       </Tooltip>
       {content}
@@ -378,7 +341,82 @@ function TradeItem({
   );
 }
 
+const TRADE_ITEM_CARD_CLASS =
+  "border-border-card bg-tertiary-bg hover:border-button-info/40 flex w-full min-w-0 self-start overflow-hidden rounded-lg border transition-colors min-[400px]:block min-[400px]:w-40 sm:w-48 xl:w-40";
+
+function TradeItemSkeleton() {
+  return (
+    <div className={TRADE_ITEM_CARD_CLASS}>
+      <Skeleton className="aspect-square w-24 shrink-0 rounded-none min-[360px]:w-28 min-[400px]:aspect-video min-[400px]:w-full" />
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 p-2.5">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-5 w-20 sm:h-6" />
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-3 w-10" />
+          <Skeleton className="h-5 w-12 sm:h-6" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TradeValuesSkeleton() {
+  return (
+    <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
+      <Skeleton className="mb-3 h-3 w-24" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-14" />
+          <Skeleton className="h-6 w-20" />
+        </div>
+        <Skeleton className="hidden h-7 w-32 rounded-lg lg:block" />
+        <div className="flex flex-col items-end space-y-1.5">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-6 w-20" />
+        </div>
+      </div>
+      <Skeleton className="mt-3 h-1.5 w-full rounded-full" />
+    </div>
+  );
+}
+
+function TradeDetailsSkeleton({
+  gaveCount,
+  receivedCount,
+  showValues,
+}: {
+  gaveCount: number;
+  receivedCount: number;
+  showValues: boolean;
+}) {
+  return (
+    <div role="status" aria-label="Loading trade details">
+      {showValues && <TradeValuesSkeleton />}
+      <div className="grid gap-5 xl:grid-cols-2">
+        {[gaveCount, receivedCount].map((count, side) => (
+          <div key={side} className="min-w-0">
+            <div className="mb-2 flex items-center gap-2">
+              <Skeleton className="h-7 w-7 rounded-full" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {count === 0 ? (
+                <PendingTradeItemsPlaceholder className="w-full min-[400px]:w-40 sm:w-48 xl:w-40" />
+              ) : (
+                Array.from({ length: count }, (_, i) => (
+                  <TradeItemSkeleton key={i} />
+                ))
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TradeSide({
+  side,
   label,
   items,
   isPending,
@@ -386,6 +424,7 @@ function TradeSide({
   getItemValue,
   getCatalogItem,
 }: {
+  side: "offering" | "requesting";
   label: string;
   items: TradeItemDetail[];
   isPending: boolean;
@@ -395,8 +434,11 @@ function TradeSide({
 }) {
   return (
     <div className="min-w-0">
-      <h4 className="text-primary-text mb-2 text-sm font-semibold">
-        {`${label} ${isPending && items.length === 0 ? "?" : items.length} ${items.length === 1 ? "item" : "items"}`}
+      <h4 className="text-primary-text mb-2 flex items-center gap-2 text-sm font-semibold">
+        <TradeSideIcon side={side} />
+        {isPending && items.length === 0
+          ? label
+          : `${label} ${items.length} ${items.length === 1 ? "item" : "items"}`}
       </h4>
       <div className="flex flex-wrap gap-2">
         {items.map((item, index) => (
@@ -607,10 +649,23 @@ export default function UserTradeHistory({
   const { robloxUsers } = useBatchUserData(counterpartyIds, {
     enabled: isActive && counterpartyIds.length > 0,
   });
-  const catalogQuery = usePartialItemFields<TradeCatalogRow>(
-    TRADE_CATALOG_FIELDS,
-    isActive && expandedTradeId !== null,
-  );
+  // Trade items only carry name + type, so join cached values (by id) with names.
+  const valuesQuery = useCatalogValues(isActive);
+  const namesQuery = usePartialItems(isActive);
+  const catalogRows = useMemo((): TradeCatalogRow[] | undefined => {
+    if (!valuesQuery.data || !namesQuery.data) return undefined;
+    const names = new Map(namesQuery.data.map((item) => [item.id, item]));
+    return valuesQuery.data.flatMap((item) => {
+      const named = names.get(item.id);
+      return named ? [{ ...item, name: named.name, type: named.type }] : [];
+    });
+  }, [valuesQuery.data, namesQuery.data]);
+  const catalogQuery = {
+    data: catalogRows,
+    isPending: valuesQuery.isPending || namesQuery.isPending,
+    isError: valuesQuery.isError || namesQuery.isError,
+    refetch: () => Promise.all([valuesQuery.refetch(), namesQuery.refetch()]),
+  };
 
   const catalogValues = useMemo(() => {
     const values = new Map<string, CatalogValue>();
@@ -816,28 +871,29 @@ export default function UserTradeHistory({
               : "idle",
           error: detailQuery.error?.message,
         };
-        const ownerGave =
-          detail?.user_a === userId
+        const ownerGave = !detail
+          ? trade.items_given
+          : detail.user_a === userId
             ? detail.items_a_to_b
-            : detail?.items_b_to_a || [];
-        const ownerReceived =
-          detail?.user_a === userId
+            : detail.items_b_to_a;
+        const ownerReceived = !detail
+          ? trade.items_received
+          : detail.user_a === userId
             ? detail.items_b_to_a
-            : detail?.items_a_to_b || [];
-        const givenCount = detail ? ownerGave.length : trade.items_given.length;
-        const receivedCount = detail
-          ? ownerReceived.length
-          : trade.items_received.length;
+            : detail.items_a_to_b;
+        const givenCount = ownerGave.length;
+        const receivedCount = ownerReceived.length;
         const valueState: "loading" | "error" | "ready" =
           isExpanded && detail && catalogQuery.isPending
             ? "loading"
             : isExpanded && detail && catalogQuery.isError && !catalogQuery.data
               ? "error"
               : "ready";
-        const ownerGaveValues = detail
+        const hasValues = Boolean(detail || catalogQuery.data);
+        const ownerGaveValues = hasValues
           ? summarizeValues(ownerGave, getTradeItemValue)
           : null;
-        const ownerReceivedValues = detail
+        const ownerReceivedValues = hasValues
           ? summarizeValues(ownerReceived, getTradeItemValue)
           : null;
         const missingValueCount =
@@ -858,6 +914,28 @@ export default function UserTradeHistory({
           combinedValue > 0 && ownerGaveValues
             ? (ownerGaveValues.total / combinedValue) * 100
             : 50;
+        const knownSide =
+          status === "pending"
+            ? givenCount > 0
+              ? { label: "Gave", values: ownerGaveValues, count: givenCount }
+              : {
+                  label: "Received",
+                  values: ownerReceivedValues,
+                  count: receivedCount,
+                }
+            : null;
+        const pluralItems = (count: number) =>
+          `${count} ${count === 1 ? "item" : "items"}`;
+        const countsLabel = [
+          givenCount > 0 || status === "completed"
+            ? `${pluralItems(givenCount)} given`
+            : null,
+          receivedCount > 0 || status === "completed"
+            ? `${pluralItems(receivedCount)} received`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
         const counterpartyName = getCounterpartyName(
           trade.counterparty_user_id,
         );
@@ -874,84 +952,77 @@ export default function UserTradeHistory({
               type="button"
               onClick={() => toggleTrade(trade.trade_id)}
               aria-expanded={isExpanded}
-              className="hover:bg-quaternary-bg/40 flex w-full cursor-pointer flex-col gap-3 p-3 text-left transition-colors sm:flex-row sm:items-center"
+              className="hover:bg-quaternary-bg/40 flex w-full cursor-pointer flex-col gap-2 p-3 text-left transition-colors sm:flex-row sm:items-center sm:gap-3"
             >
-              <div className="flex min-w-0 flex-1 flex-col items-center gap-2 sm:flex-row sm:flex-wrap">
-                <div className="flex min-w-0 items-center gap-2">
-                  <TradeAvatar userId={userId} name={userDisplayName} />
-                  <div className="min-w-0">
-                    <p className="text-link truncate font-medium">
-                      {userDisplayName}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-secondary-text flex flex-col items-center gap-1.5 sm:flex-row sm:px-1">
-                  <div className="flex items-center gap-1.5">
-                    <Icon
-                      icon="heroicons:arrows-right-left"
-                      className="h-4 w-4"
-                    />
-                    <span className="text-xs whitespace-nowrap">
-                      {status === "pending" && givenCount === 0
-                        ? "?"
-                        : givenCount}{" "}
-                      given ·{" "}
-                      {status === "pending" && receivedCount === 0
-                        ? "?"
-                        : receivedCount}{" "}
-                      received
+              <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <TradeAvatar
+                  userId={trade.counterparty_user_id}
+                  name={counterpartyName}
+                />
+                <div className="min-w-0 sm:flex sm:items-center sm:gap-3">
+                  <p className="text-link flex min-w-0 items-center gap-1 font-medium">
+                    <span className="truncate">{counterpartyName}</span>
+                    {counterpartyIsVerified && (
+                      <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
+                    )}
+                  </p>
+                  <p className="text-secondary-text truncate text-xs">
+                    {countsLabel}
+                    <span className="sm:hidden">
+                      {" · "}
+                      {formatShortDateTime(trade.last_time)}
                     </span>
-                  </div>
-                  {!isExpanded && detail && status === "completed" && (
-                    <ValueDifferenceBadge
-                      value={valueDifference}
-                      isPartial={missingValueCount > 0}
-                      className="inline-flex sm:hidden"
-                    />
-                  )}
+                  </p>
                 </div>
-
-                <div className="flex min-w-0 items-center gap-2">
-                  <TradeAvatar
-                    userId={trade.counterparty_user_id}
-                    name={counterpartyName}
-                  />
-                  <div className="min-w-0">
-                    <p className="text-link flex items-center gap-1 truncate font-medium">
-                      <span className="truncate">{counterpartyName}</span>
-                      {counterpartyIsVerified && (
-                        <VerifiedBadgeIcon className="h-3.5 w-3.5 shrink-0" />
-                      )}
-                    </p>
-                  </div>
-                </div>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className={`text-secondary-text ml-auto h-4 w-4 shrink-0 transition-transform sm:hidden ${isExpanded ? "rotate-180" : ""}`}
+                />
               </div>
 
-              <div className="text-secondary-text flex w-full items-center justify-center gap-2 text-xs sm:w-auto sm:shrink-0 sm:justify-end sm:text-right sm:text-sm">
+              <div className="flex flex-wrap items-center gap-2 empty:hidden sm:shrink-0 sm:flex-nowrap sm:justify-end">
                 {status === "pending" && (
-                  <span
-                    className="bg-status-warning/15 text-primary-text rounded-lg px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs"
-                    title="Only one side's items have been scanned so far. The other side's items are still pending."
-                  >
-                    Pending
-                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="bg-status-warning/15 text-primary-text rounded-lg px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs">
+                        Partial scan
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Only one side&apos;s items have been scanned so far.
+                    </TooltipContent>
+                  </Tooltip>
                 )}
-                {!isExpanded && detail && status === "completed" && (
-                  <ValueDifferenceBadge
-                    value={valueDifference}
-                    isPartial={missingValueCount > 0}
-                    className="hidden sm:inline-flex"
-                  />
-                )}
+                {knownSide?.values &&
+                  knownSide.values.missingCount < knownSide.count && (
+                    <span className="border-border-card bg-quaternary-bg text-primary-text rounded-lg border px-2 py-1 text-[10px] font-bold whitespace-nowrap tabular-nums sm:text-xs">
+                      {`${knownSide.label} ${formatTradeValue(knownSide.values.total)}${knownSide.values.missingCount > 0 ? "+" : ""}`}
+                    </span>
+                  )}
+                {!(isExpanded && detail) &&
+                  catalogQuery.data &&
+                  status === "completed" && (
+                    <ValueDifferenceBadge
+                      value={valueDifference}
+                      className="inline-flex"
+                    />
+                  )}
                 {trade.confidence === "partial" && (
-                  <span
-                    className="bg-quaternary-bg text-primary-text rounded-lg px-1.5 py-0.5 text-[10px] font-medium sm:text-xs"
-                    title="Some trade details were recovered from a fallback data source."
-                  >
-                    Recovered
-                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="bg-quaternary-bg text-primary-text rounded-lg px-2 py-1 text-[10px] font-semibold whitespace-nowrap sm:text-xs">
+                        Recovered
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Some trade details were recovered from a fallback data
+                      source.
+                    </TooltipContent>
+                  </Tooltip>
                 )}
+              </div>
+
+              <span className="text-secondary-text hidden shrink-0 items-center gap-2 text-sm sm:flex">
                 <time
                   dateTime={new Date(trade.last_time * 1000).toISOString()}
                   title={formatMessageDate(trade.last_time)}
@@ -963,16 +1034,17 @@ export default function UserTradeHistory({
                   icon="heroicons:chevron-down"
                   className={`h-4 w-4 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                 />
-              </div>
+              </span>
             </button>
 
             {isExpanded && (
               <div className="border-border-card bg-secondary-bg border-t p-4">
                 {detailState?.state === "loading" ? (
-                  <div className="text-secondary-text flex min-h-28 items-center justify-center gap-2 text-sm">
-                    <Spinner className="h-4 w-4" />
-                    <span>Loading trade details...</span>
-                  </div>
+                  <TradeDetailsSkeleton
+                    gaveCount={givenCount}
+                    receivedCount={receivedCount}
+                    showValues={status === "completed"}
+                  />
                 ) : detailState?.state === "error" ? (
                   <div className="py-4 text-center">
                     <p className="text-secondary-text text-sm">
@@ -992,16 +1064,11 @@ export default function UserTradeHistory({
                     {detail.status === "pending" && (
                       <p className="text-secondary-text mb-4 text-sm">
                         Only one side&apos;s items have been scanned so far. The
-                        other side&apos;s items are still pending.
+                        other side&apos;s items haven&apos;t been scanned yet.
                       </p>
                     )}
                     {detail.status === "completed" &&
-                      valueState === "loading" && (
-                        <div className="border-border-card bg-tertiary-bg text-secondary-text mb-4 flex min-h-28 items-center justify-center gap-2 rounded-lg border p-3 text-sm">
-                          <Spinner className="h-4 w-4" />
-                          <span>Loading current values...</span>
-                        </div>
-                      )}
+                      valueState === "loading" && <TradeValuesSkeleton />}
                     {valueState === "error" && (
                       <div className="border-border-card bg-tertiary-bg text-secondary-text mb-4 rounded-lg border p-3 text-sm">
                         Couldn&apos;t load current item values.{" "}
@@ -1016,6 +1083,15 @@ export default function UserTradeHistory({
                     )}
                     {detail.status === "completed" &&
                       valueState === "ready" &&
+                      knownValueCount === 0 && (
+                        <p className="text-secondary-text mb-4 text-sm">
+                          None of these items have a current value, so this
+                          trade can&apos;t be compared.
+                        </p>
+                      )}
+                    {detail.status === "completed" &&
+                      valueState === "ready" &&
+                      knownValueCount > 0 &&
                       ownerGaveValues &&
                       ownerReceivedValues && (
                         <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
@@ -1027,8 +1103,6 @@ export default function UserTradeHistory({
                           <div className="mb-3 flex justify-center lg:hidden">
                             <ValueDifferenceBadge
                               value={valueDifference}
-                              isPartial={missingValueCount > 0}
-                              prominent
                               className="inline-flex"
                             />
                           </div>
@@ -1052,8 +1126,6 @@ export default function UserTradeHistory({
                               />
                               <ValueDifferenceBadge
                                 value={valueDifference}
-                                isPartial={missingValueCount > 0}
-                                prominent
                                 className="inline-flex"
                               />
                             </div>
@@ -1097,6 +1169,7 @@ export default function UserTradeHistory({
                       )}
                     <div className="grid gap-5 xl:grid-cols-2">
                       <TradeSide
+                        side="offering"
                         label={`${userDisplayName} gave`}
                         items={ownerGave}
                         isPending={detail.status === "pending"}
@@ -1105,6 +1178,7 @@ export default function UserTradeHistory({
                         getCatalogItem={getCatalogItem}
                       />
                       <TradeSide
+                        side="requesting"
                         label={`${userDisplayName} received`}
                         items={ownerReceived}
                         isPending={detail.status === "pending"}

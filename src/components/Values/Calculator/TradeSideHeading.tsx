@@ -1,5 +1,20 @@
 import { Icon } from "@/components/ui/IconWrapper";
 
+export function TradeSideIcon({ side }: { side: "offering" | "requesting" }) {
+  const isGiving = side === "offering";
+  return (
+    <span
+      className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isGiving ? "bg-button-info text-form-button-text" : "bg-button-secondary text-primary-text"}`}
+      aria-hidden="true"
+    >
+      <Icon
+        icon="material-symbols:arrow-forward-rounded"
+        className={`h-5 w-5 ${isGiving ? "-rotate-45" : "rotate-135"}`}
+      />
+    </span>
+  );
+}
+
 export function TradeSideHeading({
   side,
   count,
@@ -12,15 +27,7 @@ export function TradeSideHeading({
   const isGiving = side === "offering";
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-      <span
-        className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isGiving ? "bg-button-info text-form-button-text" : "bg-button-secondary text-primary-text"}`}
-        aria-hidden="true"
-      >
-        <Icon
-          icon="material-symbols:arrow-forward-rounded"
-          className={`h-5 w-5 ${isGiving ? "-rotate-45" : "rotate-135"}`}
-        />
-      </span>
+      <TradeSideIcon side={side} />
       <h3 className="text-primary-text text-xs font-semibold tracking-wide uppercase">
         {isGiving ? "You give" : "You receive"}
       </h3>
