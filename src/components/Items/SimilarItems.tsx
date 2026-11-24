@@ -88,8 +88,11 @@ const SimilarItems = ({ currentItem }: SimilarItemsProps) => {
                 className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Sort similar items"
               >
-                <span className="truncate">
-                  Sort by {getSortLabel(sortGroups, sortBy)}
+                <span className="min-w-0 flex-1 truncate text-left">
+                  <span className="text-secondary-text">Sort: </span>
+                  <span className="font-medium">
+                    {getSortLabel(sortGroups, sortBy)}
+                  </span>
                 </span>
                 <Icon
                   icon="heroicons:chevron-down"

@@ -232,10 +232,10 @@ function CommentSort() {
           aria-label="Sort comments"
           className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-9 w-full cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-all duration-300 focus:ring-1 focus:outline-none sm:w-auto"
         >
-          <span className="text-secondary-text sm:@max-xl:hidden">
-            Sort by:
+          <span className="text-secondary-text sm:@max-xl:hidden">Sort:</span>
+          <span className="font-medium">
+            {getSortLabel(sortGroups, sortOrder)}
           </span>
-          <span>{getSortLabel(sortGroups, sortOrder)}</span>
           <Icon
             icon="heroicons:chevron-down"
             className="text-secondary-text ml-auto h-4 w-4 shrink-0"
