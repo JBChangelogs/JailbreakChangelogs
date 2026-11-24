@@ -1022,7 +1022,9 @@ export default function MyReports() {
               Try again
             </button>
           </div>
-        ) : reports.length === 0 ? (
+        ) : reports.length === 0 && typeFilter === "all" ? (
+          // The API filters by report_type, so an empty list with a type
+          // picked only means none of that type.
           <div className="border-border-card bg-secondary-bg rounded-2xl border p-10 text-center shadow-sm">
             <Icon
               icon="heroicons:flag"
