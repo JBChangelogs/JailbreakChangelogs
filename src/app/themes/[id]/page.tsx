@@ -159,6 +159,12 @@ export default async function ThemeDetailsPage({ params }: Props) {
                     </Link>
                   )}
                 </p>
+                <Link
+                  href={`/themes?creator=${encodeURIComponent(theme.user_id)}`}
+                  className="text-link hover:text-link-hover shrink-0"
+                >
+                  More by this creator
+                </Link>
               </div>
             </div>
             <ThemeDetailsActions

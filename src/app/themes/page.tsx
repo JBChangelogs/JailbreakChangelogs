@@ -4,7 +4,12 @@ import CompetitionCard from "@/components/Themes/CompetitionCard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function ThemeMarketplacePage() {
+export default async function ThemeMarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ creator?: string | string[] }>;
+}) {
+  const { creator } = await searchParams;
   return (
     <main className="text-primary-text min-h-screen">
       <div className="container mx-auto mb-8 px-4">
@@ -34,7 +39,9 @@ export default function ThemeMarketplacePage() {
             customization pack on your profile.
           </p>
         </div>
-        <ThemeMarketplace />
+        <ThemeMarketplace
+          creator={typeof creator === "string" ? creator : undefined}
+        />
       </div>
     </main>
   );

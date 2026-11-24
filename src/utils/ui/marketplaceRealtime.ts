@@ -4,7 +4,6 @@ import {
   type MarketplaceThemesPage,
   type MarketplaceSort,
   type ThemeCompetition,
-  type CustomTheme,
 } from "@/utils/api/userThemes";
 import { SHARE_CODE } from "@/utils/ui/customTheme";
 
@@ -136,10 +135,32 @@ export function parseCompetitionEvent(value: unknown): CompetitionEvent | null {
     : null;
 }
 
+export interface MarketplaceScope {
+  filters?: string[];
+  creator?: string;
+}
+
+/** Mirrors the API's filters, so live events land only on pages they belong to. */
+function marketplaceMatchesScope(
+  theme: MarketplaceTheme,
+  { filters = [], creator }: MarketplaceScope,
+) {
+  const schemes = filters.filter((key) => key === "dark" || key === "light");
+  return (
+    (!creator || theme.user?.id === creator) &&
+    (!schemes.length || schemes.includes(theme.scheme)) &&
+    (!filters.includes("customized") ||
+      Object.keys(theme.pack ?? {}).length > 0) &&
+    (!filters.includes("competition") || !!theme.competitions?.length)
+  );
+}
+
 export function marketplaceMatchesSearch(
   theme: MarketplaceTheme,
   query: string,
+  scope: MarketplaceScope = {},
 ) {
+  if (!marketplaceMatchesScope(theme, scope)) return false;
   const search = query.trim().toLowerCase();
   if (search.startsWith("id:"))
     return theme.share_code.toLowerCase() === search.slice(3).trim();
@@ -156,6 +177,7 @@ export function applyMarketplaceEvent(
   event: MarketplaceEvent,
   query: string,
   sort: MarketplaceSort,
+  scope: MarketplaceScope = {},
 ): MarketplaceThemesPage | undefined {
   if (!previous) return previous;
   const index = previous.items.findIndex(
@@ -165,7 +187,7 @@ export function applyMarketplaceEvent(
   let total = previous.total;
   if (
     event.action === "marketplace_theme_removed" ||
-    !marketplaceMatchesSearch(event.data, query)
+    !marketplaceMatchesSearch(event.data, query, scope)
   ) {
     if (index < 0) return previous;
     items = items.filter((theme) => theme.share_code !== event.data.share_code);
@@ -189,34 +211,5 @@ export function applyMarketplaceEvent(
     items,
     total,
     total_pages: Math.ceil(total / previous.size),
-  };
-}
-
-// Pages locally: a user has at most their theme limit (25).
-export function ownMarketplacePage(
-  themes: CustomTheme[],
-  user: MarketplaceTheme["user"],
-  query: string,
-  sort: MarketplaceSort,
-  page: number,
-  size = 24,
-): MarketplaceThemesPage {
-  const items = themes
-    .filter((theme) => theme.published_at != null)
-    .map((theme) => ({ ...theme, user }))
-    .filter((theme) => marketplaceMatchesSearch(theme, query))
-    .sort((a, b) =>
-      sort === "newest"
-        ? b.published_at! - a.published_at!
-        : a.published_at! - b.published_at!,
-    );
-  const totalPages = Math.ceil(items.length / size);
-  const current = Math.min(Math.max(page, 1), Math.max(totalPages, 1));
-  return {
-    items: items.slice((current - 1) * size, current * size),
-    total: items.length,
-    page: current,
-    total_pages: totalPages,
-    size,
   };
 }

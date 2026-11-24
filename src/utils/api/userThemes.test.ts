@@ -126,20 +126,31 @@ test("marketplace requests paginate, sort, search safely, and sanitize previews"
       size: 24,
     });
   }) as unknown as typeof fetch;
-  const result = await fetchMarketplaceThemes(2, "oldest");
+  const result = await fetchMarketplaceThemes({ page: 2, sort: "oldest" });
   expect(urls[0].pathname).toBe("/v2/themes/marketplace");
   expect(urls[0].searchParams.get("page")).toBe("2");
   expect(urls[0].searchParams.get("sort")).toBe("oldest");
   expect(result.items[0].vars).toEqual(theme.vars);
   expect(result.items[0].published_at).toBe(123);
   expect(result.total_pages).toBe(2);
-  await fetchMarketplaceThemes(1, "newest", "  Moon & stars  ");
+  await fetchMarketplaceThemes({ query: "  Moon & stars  " });
   expect(urls[1].pathname).toBe("/v2/themes/marketplace/search");
   expect(urls[1].searchParams.get("query")).toBe("Moon & stars");
-  await fetchMarketplaceThemes(1, "newest", "   ");
+  await fetchMarketplaceThemes({ query: "   " });
   expect(urls[2].pathname).toBe("/v2/themes/marketplace");
-  await fetchMarketplaceThemes(1, "newest", "id:ABCDEFGH");
+  expect(urls[2].searchParams.has("filter")).toBe(false);
+  expect(urls[2].searchParams.has("creator")).toBe(false);
+  await fetchMarketplaceThemes({
+    query: "id:ABCDEFGH",
+    sort: "popular",
+    filters: ["dark", "customized"],
+    creator: "123",
+  });
+  expect(urls[3].pathname).toBe("/v2/themes/marketplace/search");
   expect(urls[3].searchParams.get("query")).toBe("id:ABCDEFGH");
+  expect(urls[3].searchParams.get("sort")).toBe("popular");
+  expect(urls[3].searchParams.get("filter")).toBe("dark,customized");
+  expect(urls[3].searchParams.get("creator")).toBe("123");
 });
 
 test("publishing and unpublishing send the flag without replacing colors", async () => {
@@ -318,7 +329,7 @@ test("marketplace fetches pass cancellation signals through to the API", async (
       size: 24,
     });
   }) as unknown as typeof fetch;
-  await fetchMarketplaceThemes(1, "newest", "", signal);
+  await fetchMarketplaceThemes({ signal });
 });
 
 test("copies get the first free #n name", () => {
