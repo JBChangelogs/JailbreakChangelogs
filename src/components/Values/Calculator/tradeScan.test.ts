@@ -105,7 +105,7 @@ test("trade scan parser", () => {
   assert.throws(
     () =>
       parseTradeScan(
-        Array.from({ length: 51 }, (_, i) => det("a | b", 0, i * 10)),
+        Array.from({ length: 151 }, (_, i) => det("a | b", 0, i * 10)),
         1000,
         catalog,
       ),

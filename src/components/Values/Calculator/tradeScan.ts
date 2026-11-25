@@ -8,7 +8,7 @@
 export const SCAN_TUNING = {
   maxWidth: 4000,
   maxHeight: 3000,
-  maxDetections: 100,
+  maxDetections: 300,
   anchorWords: ["accept", "decline", "exit", "ready"],
   anchorMinConf: 0.5,
   // Only shown in the trade menu (not the inventory); auto scan requires one of them.
