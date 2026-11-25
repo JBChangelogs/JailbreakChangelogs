@@ -397,7 +397,7 @@ export default function TradeItemPickerV2({
       ? valueSort
       : "cash-desc";
 
-    const sorted = useRemoteCatalog
+    return useRemoteCatalog
       ? filteredByValue
       : sortByValueSort(filteredByValue, selectedSort, {
           getCashValue: (item) => item.cash_value ?? "N/A",
@@ -406,13 +406,6 @@ export default function TradeItemPickerV2({
           getTrend: (item) => item.trend,
           fallbackSortForDemandTrend: "none",
         });
-
-    if (!favoriteIds?.length) return sorted;
-    const favSet = new Set(favoriteIds);
-    return [
-      ...sorted.filter((item) => favSet.has(item.id)),
-      ...sorted.filter((item) => !favSet.has(item.id)),
-    ];
   }, [
     visibleItems,
     searchQuery,
