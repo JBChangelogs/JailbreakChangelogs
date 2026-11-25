@@ -49,6 +49,7 @@ import { itemTrends } from "@/utils/items/itemValue";
 import { SuggestionValue } from "@/components/Items/TrendChips";
 import { UserAvatar } from "@/utils/ui/avatar";
 import type { Item } from "@/types/index";
+import { HYPERSHIFT_BUNDLE_IDS } from "@/utils/trading/tradeItems";
 
 interface SuggestionFormUser {
   id: string;
@@ -151,7 +152,9 @@ export function SuggestionForm({
       : suggestedValue.trim() !== "";
 
   const filteredItems = (catalog.data?.items ?? [])
-    .filter((item) => item.tradable === 1 || item.id === 587 || item.id === 713)
+    .filter(
+      (item) => item.tradable === 1 || HYPERSHIFT_BUNDLE_IDS.includes(item.id),
+    )
     .map((item) => ({
       item,
       rank: itemSearch

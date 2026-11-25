@@ -1057,6 +1057,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               favoriteIds={favoriteIds}
               onToggleFavorite={handleToggleFavorite}
               multiSelectFilters
+              allowHyperShiftBundles
             />
           ) : (
             <div>

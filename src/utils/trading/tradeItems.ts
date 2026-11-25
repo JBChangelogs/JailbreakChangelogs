@@ -14,6 +14,9 @@ type CategoryFilterableItem = {
   is_seasonal?: number | null;
 };
 
+// HyperShift / HyperShift Level 4: untradable, valued as a set of HyperChromes.
+export const HYPERSHIFT_BUNDLE_IDS: readonly number[] = [587, 713];
+
 const TRADE_ICON_BASE_URL =
   "https://assets.jailbreakchangelogs.com/assets/items/trade_icons";
 

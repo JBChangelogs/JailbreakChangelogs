@@ -31,6 +31,7 @@ import { sortByValueSort } from "@/utils/trading/values";
 import {
   getTradeItemImagePath,
   matchesCategoryFilterSort,
+  HYPERSHIFT_BUNDLE_IDS,
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 import { usePartialItemFields } from "@/hooks/usePartialItems";
@@ -43,6 +44,7 @@ interface QuickAddPopoverProps {
   children: React.ReactNode;
   useCatalogApi?: boolean;
   allowOg?: boolean;
+  allowHyperShiftBundles?: boolean;
 }
 
 type ItemCondition = "clean" | "duped" | "og";
@@ -79,6 +81,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
   children,
   useCatalogApi = false,
   allowOg = false,
+  allowHyperShiftBundles = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -105,7 +108,11 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
     "All Items";
 
   const results = useMemo(() => {
-    const tradable = visibleItems.filter((item) => item.tradable === 1);
+    const tradable = visibleItems.filter(
+      (item) =>
+        item.tradable === 1 ||
+        (allowHyperShiftBundles && HYPERSHIFT_BUNDLE_IDS.includes(item.id)),
+    );
     const matched = tradable.filter(
       (item) =>
         matchesTextSearch([item.name, item.type], searchQuery) &&
@@ -116,7 +123,7 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
       getDupedValue: (item) => item.duped_value ?? "N/A",
       getDemand: (item) => item.demand,
     });
-  }, [visibleItems, searchQuery, filterSort]);
+  }, [visibleItems, searchQuery, filterSort, allowHyperShiftBundles]);
 
   useSearchTracking(
     "trade_picker",

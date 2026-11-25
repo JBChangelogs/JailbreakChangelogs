@@ -267,6 +267,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             items={catalogItems ?? []}
             useCatalogApi={useCatalogApi}
             allowOg
+            allowHyperShiftBundles
             onSelect={(item) => onDuplicate?.(item)}
           >
             <button

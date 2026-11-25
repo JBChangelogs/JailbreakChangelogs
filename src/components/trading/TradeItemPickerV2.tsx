@@ -4,7 +4,14 @@ import { parseValueString } from "@/components/Values/Calculator/calculatorUtils
 import { ItemUnlockBadges } from "@/components/Items/ItemUnlockBadges";
 
 import { isSeasonalItem } from "@/utils/items/season";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
 import Link from "next/link";
@@ -50,6 +57,7 @@ import {
   getTradeItemImagePath,
   isCustomTradeItem,
   getTradeItemIdentifier,
+  HYPERSHIFT_BUNDLE_IDS,
 } from "@/utils/trading/tradeItems";
 import { handleImageError } from "@/utils/ui/images";
 import {
@@ -103,6 +111,7 @@ interface TradeItemPickerV2Props {
   multiSelectFilters?: boolean;
   useCatalogApi?: boolean;
   showAddToasts?: boolean;
+  allowHyperShiftBundles?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -164,7 +173,14 @@ export default function TradeItemPickerV2({
   multiSelectFilters = false,
   useCatalogApi = false,
   showAddToasts = true,
+  allowHyperShiftBundles = false,
 }: TradeItemPickerV2Props) {
+  const isPickable = useCallback(
+    (item: TradeItem) =>
+      item.tradable === 1 ||
+      (allowHyperShiftBundles && HYPERSHIFT_BUNDLE_IDS.includes(item.id)),
+    [allowHyperShiftBundles],
+  );
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -350,7 +366,7 @@ export default function TradeItemPickerV2({
   }, [selectedItems]);
 
   const filteredItems = useMemo(() => {
-    const tradeableItems = visibleItems.filter((item) => item.tradable === 1);
+    const tradeableItems = visibleItems.filter(isPickable);
     const base = tradeableItems.filter((item) => {
       if (
         !useRemoteCatalog &&
@@ -410,6 +426,7 @@ export default function TradeItemPickerV2({
     valueSort,
     validValueSorts,
     favoriteIds,
+    isPickable,
   ]);
 
   useSearchTracking(
@@ -1136,7 +1153,7 @@ export default function TradeItemPickerV2({
                       />
                     </div>
                   </div>
-                  {item.tradable === 1 && (
+                  {isPickable(item) && (
                     <div className="text-secondary-text space-y-1 text-xs">
                       {condition !== "duped" ? (
                         <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
