@@ -27,16 +27,22 @@ export function TradeSideActions({
       className="flex flex-wrap items-center justify-center gap-2"
     >
       {onShare && (
-        <Button
-          type="button"
-          size="sm"
-          onClick={onShare}
-          disabled={!hasItems || isSharing}
-          title="Copy a share link that expires in 6 hours"
-        >
-          <Icon icon="heroicons:share-solid" />
-          {isSharing ? "Sharing..." : "Share"}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size="sm"
+              onClick={onShare}
+              disabled={!hasItems || isSharing}
+            >
+              <Icon icon="heroicons:share-solid" />
+              {isSharing ? "Sharing..." : "Share"}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Copy a share link that expires in 6 hours</p>
+          </TooltipContent>
+        </Tooltip>
       )}
       <Tooltip>
         <TooltipTrigger asChild>
