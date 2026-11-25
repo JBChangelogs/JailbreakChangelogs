@@ -3,6 +3,7 @@
 import React, { Fragment, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { IMAGE_PLACEHOLDER } from "@/utils/ui/imagePlaceholder";
+import { CategoryIconBadge } from "@/utils/items/categoryIcons";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { TradeItem } from "@/types/trading";
 import { FilterSort } from "@/types";
@@ -333,9 +334,16 @@ export const QuickAddPopover: React.FC<QuickAddPopoverProps> = ({
                           onError={handleImageError}
                         />
                       </span>
-                      <span className="text-primary-text min-w-0 flex-1 truncate text-sm font-medium">
+                      <span className="text-primary-text min-w-0 truncate text-sm font-medium">
                         {item.name}
                       </span>
+                      <CategoryIconBadge
+                        type={item.type}
+                        isLimited={false}
+                        isSeasonal={false}
+                        withContainer={false}
+                        className="h-4 w-4 shrink-0"
+                      />
                     </button>
                     <Tabs
                       radio
