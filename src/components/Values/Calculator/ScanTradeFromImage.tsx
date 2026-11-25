@@ -1,7 +1,7 @@
 "use client";
 
 import { createLogger } from "@/services/logger";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 const log = createLogger("UI");
 import { useDropzone } from "react-dropzone";
@@ -59,16 +59,6 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [lastFileName, setLastFileName] = useState<string | null>(null);
   const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
-
-  const helpText = useMemo(
-    () =>
-      "Upload a Jailbreak trading UI screenshot. We'll detect Offering/Requesting items and prefill the calculator.",
-    [],
-  );
-  const acceptedTypesText = useMemo(
-    () => "Accepted formats: PNG, JPG/JPEG.",
-    [],
-  );
 
   const scanFile = useCallback(
     async (file: File, source: "drag" | "paste" | "picker") => {
@@ -265,7 +255,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
             <p className="text-primary-text text-base font-semibold">
               <span>Scan a trade screenshot</span>
               <span className="text-secondary-text ml-2 text-sm font-normal">
-                — {helpText}
+                Fills in both sides from an in-game trade
               </span>
             </p>
           )}
@@ -282,9 +272,9 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
                   Tap to choose a screenshot
                 </span>
                 <span className="hidden [@media(min-width:768px)_and_(hover:hover)_and_(pointer:fine)]:inline">
-                  Click, drop, or paste (Ctrl+V / ⌘V)
+                  Click, drop, or paste
                 </span>
-                <span>{` · ${acceptedTypesText}`}</span>
+                <span> · PNG or JPG</span>
               </>
             )}
           </p>
