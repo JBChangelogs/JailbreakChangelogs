@@ -262,35 +262,31 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
               </div>
             );
           })}
-          <QuickAddPopover
-            key="quick-add"
-            items={catalogItems ?? []}
-            useCatalogApi={useCatalogApi}
-            allowOg
-            allowHyperShiftBundles
-            onSelect={(item) => onDuplicate?.(item)}
-          >
-            <button
-              type="button"
-              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex min-h-54 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-3 text-center transition-colors ${items.length === 0 ? "col-span-2 md:col-span-3" : ""} ${borderColor}`}
-              aria-label={items.length === 0 ? "Add item" : "Add another item"}
-            >
-              <Icon
-                icon="heroicons:plus"
-                className="text-primary-text h-5 w-5"
-              />
-              <span className="text-primary-text text-xs font-medium">
-                {items.length === 0 ? "No items selected" : "Add item"}
-              </span>
-              {items.length === 0 && (
-                <span className="text-secondary-text text-xs">
-                  Search for an item to add it
-                </span>
-              )}
-            </button>
-          </QuickAddPopover>
         </div>
       </div>
+      <QuickAddPopover
+        items={catalogItems ?? []}
+        useCatalogApi={useCatalogApi}
+        allowOg
+        allowHyperShiftBundles
+        onSelect={(item) => onDuplicate?.(item)}
+      >
+        <button
+          type="button"
+          className={`border-border-card bg-tertiary-bg hover:border-border-focus flex w-full cursor-pointer items-center justify-center gap-1 rounded-xl border-2 border-dashed p-3 text-center transition-colors ${items.length === 0 ? "min-h-54 flex-col" : "mt-3 min-h-11"} ${borderColor}`}
+          aria-label={items.length === 0 ? "Add item" : "Add another item"}
+        >
+          <Icon icon="heroicons:plus" className="text-primary-text h-5 w-5" />
+          <span className="text-primary-text text-xs font-medium">
+            {items.length === 0 ? "No items selected" : "Add item"}
+          </span>
+          {items.length === 0 && (
+            <span className="text-secondary-text text-xs">
+              Search for an item to add it
+            </span>
+          )}
+        </button>
+      </QuickAddPopover>
     </div>
   );
 };
