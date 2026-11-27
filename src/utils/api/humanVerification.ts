@@ -52,7 +52,7 @@ export function subscribeBanReference(listener: BanReferenceListener) {
   };
 }
 
-function notifyBanReference(
+export function notifyBanReference(
   banRef: string | null,
   message?: string,
   captchaType: CaptchaType = "turnstile",

@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api/api";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
+import {
+  getCaptchaType,
+  notifyBanReference,
+} from "@/utils/api/humanVerification";
 import { createLogger } from "@/services/logger";
 import { shareTrackerSnapshot } from "./trackerSnapshot";
 import {
@@ -148,11 +152,31 @@ export function useTrackerWebSocket<TData = unknown>({
           try {
             const msg = JSON.parse(event.data as string) as {
               action: string;
-              data?: TData[];
+              data?:
+                | TData[]
+                | {
+                    captcha_required?: unknown;
+                    captcha_type_required?: unknown;
+                  };
               servers?: TrackerJoinHistory;
               users?: TrackerJoinUser[];
             };
-            if (msg.action === messageAction && msg.data) {
+            if (msg.action === "captcha_required") {
+              if (
+                msg.data &&
+                !Array.isArray(msg.data) &&
+                msg.data.captcha_required === true
+              ) {
+                notifyBanReference(
+                  null,
+                  undefined,
+                  getCaptchaType(msg.data.captcha_type_required),
+                );
+              }
+            } else if (
+              msg.action === messageAction &&
+              Array.isArray(msg.data)
+            ) {
               const incoming = msg.data;
               setData((previous) =>
                 shareTrackerSnapshot(previous, incoming, getItemKey),
