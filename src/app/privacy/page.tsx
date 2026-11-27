@@ -8,6 +8,7 @@ import LegalLayout, {
 import CCPAHandler from "@/components/Home/CCPAHandler";
 
 const TOC = [
+  { id: "desktop-app", label: "Desktop app" },
   { id: "discord", label: "1. Discord Data" },
   { id: "roblox", label: "2. Roblox Data" },
   { id: "messaging", label: "3. Messaging & Reports" },
@@ -25,7 +26,7 @@ export default function PrivacyPage() {
     <LegalLayout
       title="Privacy Policy"
       icon="heroicons-outline:shield-check"
-      lastUpdated="November 5th, 2026"
+      lastUpdated="November 27th, 2026"
       toc={TOC}
       intro={
         <p>
@@ -62,6 +63,15 @@ export default function PrivacyPage() {
           . Full details are in the sections below.
         </p>
       </LegalCallout>
+
+      <LegalSection id="desktop-app" title="Desktop app">
+        <p>
+          The Jailbreak Changelogs desktop app connects to Jailbreak Changelogs
+          servers to load item data and check for updates, and to Discord when
+          Rich Presence is enabled. It does not send personal information
+          anywhere else unless you ask it to.
+        </p>
+      </LegalSection>
 
       <LegalSection
         id="discord"

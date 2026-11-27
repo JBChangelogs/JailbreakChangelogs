@@ -633,6 +633,77 @@ export default function AppClient({
         </ul>
       </section>
       {changes.length > 0 && <AppReleaseNotes changes={changes} />}
+      <section
+        aria-labelledby="code-signing-policy"
+        className="border-border-card mx-auto mt-16 max-w-6xl border-t pt-8"
+      >
+        <h2
+          id="code-signing-policy"
+          className="text-primary-text text-2xl font-semibold tracking-tight"
+        >
+          Code signing policy
+        </h2>
+        <div className="text-secondary-text mt-4 space-y-3 text-sm leading-relaxed">
+          <p>
+            Free code signing provided by{" "}
+            <a
+              href="https://about.signpath.io"
+              className="text-link hover:text-link-hover hover:underline"
+            >
+              SignPath.io
+            </a>
+            , certificate by{" "}
+            <a
+              href="https://signpath.org"
+              className="text-link hover:text-link-hover hover:underline"
+            >
+              SignPath Foundation
+            </a>
+            .
+          </p>
+          <p>
+            Only releases built from the source code in our{" "}
+            <a
+              href="https://github.com/JBChangelogs/JailbreakChangelogsApp"
+              className="text-link hover:text-link-hover hover:underline"
+            >
+              GitHub repository
+            </a>{" "}
+            by GitHub Actions are signed. Each signed release is approved by
+            hand before it is published.
+          </p>
+          <ul className="list-inside list-disc space-y-1.5">
+            <li>
+              Committers and reviewers:{" "}
+              <a
+                href="https://github.com/Jakobiis"
+                className="text-link hover:text-link-hover hover:underline"
+              >
+                Jakobiis
+              </a>
+            </li>
+            <li>
+              Approvers:{" "}
+              <a
+                href="https://github.com/Jakobiis"
+                className="text-link hover:text-link-hover hover:underline"
+              >
+                Jakobiis
+              </a>
+            </li>
+          </ul>
+          <p>
+            See our{" "}
+            <a
+              href="https://jailbreakchangelogs.com/privacy#desktop-app"
+              className="text-link hover:text-link-hover hover:underline"
+            >
+              privacy policy
+            </a>{" "}
+            for what the app sends and where.
+          </p>
+        </div>
+      </section>
     </main>
   );
 }
