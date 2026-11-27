@@ -11,6 +11,9 @@ import { useDropzone } from "react-dropzone";
 import type CropperInstance from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { waitForImage } from "@/utils/images/waitForImage";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +50,7 @@ import SupporterModal from "../Modals/SupporterModal";
 const Cropper = lazy(() => import("react-easy-crop"));
 
 const log = createLogger("UI");
-type UploadPhase = "processing" | "uploading" | null;
+type UploadPhase = "processing" | "uploading" | "publishing" | null;
 const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -127,6 +130,9 @@ const ImageUploadDialog = ({
   upload,
   target,
 }: ImageUploadDialogProps) => {
+  const { refreshUser, user } = useAuthContext();
+  const queryClient = useQueryClient();
+  const publicationRef = useRef<AbortController | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cropperRef = useRef<CropperInstance | null>(null);
   const selectedFileRef = useRef<File | null>(null);
@@ -178,6 +184,7 @@ const ImageUploadDialog = ({
 
   useEffect(
     () => () => {
+      publicationRef.current?.abort();
       if (selectedSourceRef.current) {
         URL.revokeObjectURL(selectedSourceRef.current);
       }
@@ -347,6 +354,24 @@ const ImageUploadDialog = ({
         return;
       }
       const newImageUrl = await config.upload(croppedFile);
+      setUploadPhase("publishing");
+      const publication = new AbortController();
+      publicationRef.current = publication;
+      const loaded = await waitForImage(newImageUrl, publication.signal);
+      if (publication.signal.aborted) return;
+      if (!loaded) {
+        await Promise.all([
+          refreshUser(),
+          queryClient.refetchQueries({
+            queryKey: ["custom-background", user?.id],
+          }),
+        ]);
+        clearSelectedSource();
+        toast.info("Profile refreshed", {
+          description: `Your ${label} hasn't been published. Check your notifications for review updates.`,
+        });
+        return;
+      }
       let displayEnabled = userData.settings?.[settingName] === true;
 
       if (activateAfterUpload && !displayEnabled) {
@@ -612,7 +637,9 @@ const ImageUploadDialog = ({
                   : "Processing image..."
                 : uploadPhase === "uploading"
                   ? "Uploading..."
-                  : `Upload ${title}`}
+                  : uploadPhase === "publishing"
+                    ? "Waiting for image..."
+                    : `Upload ${title}`}
             </Button>
           </DialogFooter>
         </DialogContent>

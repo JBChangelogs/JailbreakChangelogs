@@ -23,6 +23,9 @@ test("image uploads validate files, preview crops, and retain images after revie
   let refIndex = 0;
   const refs: { current: unknown }[] = [];
   let uploadFailure: string | null = null;
+  let imageLoads = true;
+  let refreshes = 0;
+  let backgroundRefreshes = 0;
   const uploads: File[] = [];
   const uploaded: string[] = [];
   const descriptions: string[] = [];
@@ -49,6 +52,7 @@ test("image uploads validate files, preview crops, and retain images after revie
     {
       exports,
       Error,
+      AbortController,
       URL: {
         createObjectURL: () => {
           sources++;
@@ -57,6 +61,35 @@ test("image uploads validate files, preview crops, and retain images after revie
         revokeObjectURL: (source: string) => revoked.push(source),
       },
       require: (name: string) => {
+        if (name === "@/contexts/AuthContext")
+          return {
+            useAuthContext: () => ({
+              user: { id: "123" },
+              refreshUser: async () => {
+                refreshes++;
+              },
+            }),
+          };
+        if (name === "@tanstack/react-query")
+          return {
+            useQueryClient: () => ({
+              refetchQueries: async (options: unknown) => {
+                expect(options).toEqual({
+                  queryKey: ["custom-background", "123"],
+                });
+                backgroundRefreshes++;
+              },
+            }),
+          };
+        if (name === "@/utils/images/waitForImage")
+          return {
+            waitForImage: async () => {
+              expect(updates.get(0)).toBe("publishing");
+              expect(updates.get(2)).toBe(true);
+              expect(updates.get(3)).toBe("blob:image");
+              return imageLoads;
+            },
+          };
         if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
         if (name === "react-easy-crop")
           throw new Error("Cropper must not load before an image is selected");
@@ -146,6 +179,7 @@ test("image uploads validate files, preview crops, and retain images after revie
                 if (options.description) descriptions.push(options.description);
               },
               success: () => {},
+              info: () => {},
             },
           };
         return {};
@@ -411,11 +445,24 @@ test("image uploads validate files, preview crops, and retain images after revie
       expect(updates.get(8)).toEqual(area);
     }
     uploadFailure = null;
+    imageLoads = false;
+    const previousUploaded = uploaded.length;
+    await upload();
+    expect(uploaded.length).toBe(previousUploaded);
+    expect(refreshes).toBe(backgroundRefreshes);
+    expect(refreshes).toBeGreaterThan(0);
+    expect(updates.get(2)).toBe(false);
+    drop!([image]);
+    (
+      render().find((node) => node.type === "lazy-cropper")!.props
+        .onCropComplete as (area: unknown, pixels: unknown) => void
+    )(area, area);
+    imageLoads = true;
     await upload();
     expect(uploads.at(-1)).toBe(image);
     expect(uploaded.at(-1)).toBe("https://example.com/profile.png");
     expect(updates.get(2)).toBe(false);
     expect(updates.get(3)).toBeNull();
   }
-  expect(sources).toBe(6);
+  expect(sources).toBe(9);
 });
