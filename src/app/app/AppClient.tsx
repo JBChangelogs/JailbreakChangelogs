@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -694,12 +695,12 @@ export default function AppClient({
           </ul>
           <p>
             See our{" "}
-            <a
-              href="https://jailbreakchangelogs.com/privacy#desktop-app"
+            <Link
+              href="/privacy#desktop-app"
               className="text-link hover:text-link-hover hover:underline"
             >
               privacy policy
-            </a>{" "}
+            </Link>{" "}
             for what the app sends and where.
           </p>
         </div>
