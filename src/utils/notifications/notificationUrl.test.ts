@@ -14,8 +14,7 @@ describe("notification links", () => {
       relativePath: "/values?item=torpedo#history",
     });
 
-    const exportLink =
-      "https://inventories.jailbreakchangelogs.com/user/export/123";
+    const exportLink = "https://data.jailbreakchangelogs.com/user/export/123";
     expect(parseNotificationUrl(exportLink)).toEqual({
       isWhitelisted: true,
       isJailbreakChangelogs: false,
